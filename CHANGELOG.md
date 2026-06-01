@@ -3,6 +3,33 @@
 All notable changes to the source matrix and skill are recorded here. Each refresh sweep appends a
 dated entry with per-domain added/removed/changed tools.
 
+## [0.6.0] — 2026-06-01
+
+Toward the full closed loop — implementing the EVOLUTION.md stages in dependency order. This ships
+**Stage A (core)** + **Stage B**.
+
+**Stage A — make the gate a fact-gate (mechanize P2-violated clauses):**
+- `verify_matrix.py` now enforces **C7** (a shard with >40% of lines changed = rewrite, not
+  incremental → BLOCK, route to human) and **C4** (removing a source row requires a death-code
+  D-404/D-STALE/D-PRICE/D-TOS/D-SUPERSEDED in the CHANGELOG or an Avoid(dead) line → else BLOCK).
+  These were previously enforced only by LLM intention; now they are mechanism. Verified: a deletion
+  without a death-code is blocked; clean state passes.
+
+**Stage B — close the measurement loop (add the sensor):**
+- `tools/emit_metrics.py` (deterministic, no LLM/network) appends a per-refresh quality snapshot to
+  `metrics/history.jsonl` — per-domain source counts, free/④ route share, last_verified.
+- `tools/check_drift.py` reads the series and flags **slow degradation** via cross-period operators
+  (source-count crash, ≥3-period stagnation, monotonic decline, free-route erosion over the horizon)
+  — the rot a single run always looks fine for.
+- `SKILL.md` Step 5: at the end of a real research run, append live-run verdicts (source
+  verified/dead/price_mismatch/fallback + user corrections) to `metrics/live-runs.jsonl`. The refresh
+  reads these to prioritise re-verification and auto-nominate repeatedly-dead sources for C4 deletion.
+- Refresh script wired to emit metrics + run drift check (surfaced in the Discord digest) each run.
+
+Remaining (per EVOLUTION.md): Stage A root fix (machine-readable mirror block for full BLOCK-level
+repo existence + cross-model audit gate) · Stage C (CI required-check + tiered auto-merge) · Stage D
+(self-improving meta-loop). Order preserved: sense and trust the gate before removing the human.
+
 ## [0.5.1] — 2026-06-01
 
 Evaluation of the update algorithm (5-subagent: control-theory / feedback / meta-loop / red-team /
