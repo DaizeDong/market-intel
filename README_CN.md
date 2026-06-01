@@ -1,0 +1,110 @@
+# market-intel
+
+一个用于商业/市场调研的**瘦编排 skill**。它负责给课题分诊、找到对的专业数据源（并帮你装上），然后把繁重的检索·验证·合成**委托**给你已有的调研引擎——而不是重造一遍。
+
+[![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-orange?style=flat)](https://docs.anthropic.com/en/docs/claude-code)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Domains](https://img.shields.io/badge/%E6%BA%90%E7%9F%A9%E9%98%B5-12%20%E4%B8%AA%E6%96%B9%E5%90%91-green?style=flat)](skills/market-intel/reference/sources-index.md)
+[![Roadmap](https://img.shields.io/badge/Roadmap-v0.1.0%20alpha-purple?style=flat)](ROADMAP.md)
+
+[English](README.md) | [中文版](README_CN.md)
+
+---
+
+## 它是什么（不是什么）
+
+Claude Code 已经内置了 `deep-research`（fan-out → 抓取 → 验证 → 合成）和 `research-lit`。这两个擅长**通用网页**和**学术**调研。但一旦课题需要**有信息壁垒的专业商业数据源**——真实的 X/推特数据、亚马逊历史价、链上数据、SEO 指标、社媒舆情、B2B 潜客——它们就够不着了。
+
+`market-intel` 就是补这个缺口的**瘦层**。它**只做三件别人不做的事**，其余全部委托出去：
+
+1. **分诊** —— 把商业课题映射到 12 个数据方向中的 1~N 个。
+2. **检测 + 引导安装** —— 用 `claude mcp list`（不是靠工具名瞎猜）查哪些专业 MCP 真的连上了；关键源缺失时，直接给你那条 `claude mcp add` 命令。
+3. **质量护栏** —— 引用回验、源等级、多源印证、强制反方检索、显式缺口。
+
+真正的 fan-out、抓取、对抗式验证、带引用合成，**委托**给 `deep-research` / `research-lit`。不重造引擎，不抢触发。
+
+---
+
+## 安装
+
+```
+/plugin install github:DaizeDong/market-intel
+```
+
+或手动克隆：
+
+```bash
+git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market-intel
+```
+
+遇到 `市场调研`、`竞品分析`、`调研这个市场`、`找套利机会`、`X/推特舆情`、`SEO 情报`、`产品趋势` 等会自动触发。单点查询或纯网页报告它会主动让位（用普通搜索 / `deep-research`）；学术文献则交给 `research-lit`。
+
+---
+
+## 60 秒演示
+
+你说：
+
+```
+调研一下 <产品> 的竞争格局和 X 舆情，再看看有没有套利空间
+```
+
+会发生：
+
+1. **分诊** → 映射到 `x-twitter`、`trends-discovery`、`ecommerce-arbitrage`；选定深度档位并绑死上限（fan-out 不会失控）。
+2. **检测** → 跑 `claude mcp list`，发现 X/电商相关 MCP 一个都没连，记下来。
+3. **引导安装**（不阻塞）→ "这依赖真实 X 数据。装 twitterapi.io：`claude mcp add -s user ...` —— 注意需重连会话才生效。本轮先用网页兜底并标注缺口。"
+4. **委托** → fan-out 子任务 / 调 `deep-research`，每个返回**结构化证据单元**（`论断·来源·原文引用·等级·日期·置信度`），而非原始网页堆。
+5. **护栏** → 独立 verifier 重新 fetch 每条引用 URL；决策级结论需 ≥2 个独立源；专门的反向检索子任务去挖风险/失败案例。
+6. **报告** → 带数据快照日期、源等级标注、分歧矩阵、强制的**风险与反方证据**章节，以及显式的**"配了 X 源可更深"**缺口清单。
+
+---
+
+## 源矩阵（12 个方向）
+
+核心知识资产。每个方向分片标明首选工具、**信息壁垒路线**、如何检测、装什么。薄索引 → 只加载你需要的方向。
+
+| 方向 | 首选（壁垒路线） |
+|---|---|
+| [x-twitter](skills/market-intel/reference/domains/x-twitter.md) | twitterapi.io ② 转售 |
+| [reddit-community](skills/market-intel/reference/domains/reddit-community.md) | HN MCP ① 免费 · Reddit API ① |
+| [web-scraping](skills/market-intel/reference/domains/web-scraping.md) | Tavily/Exa + Firecrawl + Bright Data |
+| [ecommerce-arbitrage](skills/market-intel/reference/domains/ecommerce-arbitrage.md) | Keepa ① 官方 |
+| [finance-markets](skills/market-intel/reference/domains/finance-markets.md) | SEC EDGAR + FRED ① 免费 |
+| [crypto-defi](skills/market-intel/reference/domains/crypto-defi.md) | CoinGecko ① + ccxt |
+| [seo-keywords](skills/market-intel/reference/domains/seo-keywords.md) | GSC ① 免费 + DataForSEO ② |
+| [social-publishing](skills/market-intel/reference/domains/social-publishing.md) | Buffer ① · Postiz 开源 |
+| [content-cms](skills/market-intel/reference/domains/content-cms.md) | Sanity/WordPress MCP ① |
+| [leadgen-crm](skills/market-intel/reference/domains/leadgen-crm.md) | Apollo.io ① + Hunter ① |
+| [trends-discovery](skills/market-intel/reference/domains/trends-discovery.md) | GDELT + Product Hunt MCP ① 免费 |
+| [ready-skills](skills/market-intel/reference/domains/ready-skills.md) | coreyhaines31/marketingskills |
+
+**壁垒路线：** ① 官方 API（合规、多为付费）· ② 转售 API（服务商承担壁垒、便宜、灰区）· ③ 自托管抓取（免费、自备账号+代理、有封号风险）· ④ 无头浏览器（用你的会话、最脆弱）。
+
+精确安装命令和价格在 [`pricing-install.md`](skills/market-intel/reference/volatile/pricing-install.md)，每行带 `last_verified` 时间戳——引用前请到官网二次核实。
+
+---
+
+## 质量护栏
+
+合成阶段强制执行的硬规则（见 [SKILL.md](skills/market-intel/SKILL.md)）：
+
+- **引用回验闸门** —— 独立 verifier 重新 fetch 每条引用 URL，确认页面确含该数值（逐字引文）。死链丢弃；无引文的数字降级为"未证实"。
+- **决策级结论需 ≥2 个独立源**；每条标置信度高/中/低。
+- **源等级** L1 一手 → L5 兜底/推断；厂商自述不得作为唯一支撑。
+- **拒绝静默降级** —— 从壁垒源回落到网页，必须在对应章节标注。
+- **时效数据打双日期** —— 每个价格/政策带抓取日 + 发布日。
+- **强制反方检索** —— 反向检索子任务挖骗局/失败/风险；套利类强制列执行摩擦。
+- **亮出冲突而非抹平**；**失败转为显式覆盖缺口**。
+
+---
+
+## 保持更新
+
+矩阵会过时——API 转付费、工具被收购、价格变动。[刷新协议](skills/market-intel/reference/refresh-protocol.md) 会对每个方向重新扫一遍（每方向一个子任务 → 结构化 diff → 增量改分片 → `CHANGELOG.md` + 升版本）。默认每季度；快变方向（x-twitter、web-scraping、social-publishing、crypto-defi）每月。手动触发说 `刷新工具库`，或接一个定时 headless 运行（见 [ROADMAP](ROADMAP.md)）。
+
+---
+
+## 设计说明
+
+本 skill 是一次 12-子任务工具调研 + 5-子任务对抗式设计评审的产物。评审推翻了最初"再造一个全栈 deep-research"的方案（那会是带触发冲突的克隆），证实了 `claude mcp add` 需重连会话才生效，并强制加入了引用回验闸门、源等级、强制反方检索。后续计划见 [ROADMAP.md](ROADMAP.md)。
