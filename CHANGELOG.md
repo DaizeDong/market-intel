@@ -3,6 +3,24 @@
 All notable changes to the source matrix and skill are recorded here. Each refresh sweep appends a
 dated entry with per-domain added/removed/changed tools.
 
+## [0.5.1] — 2026-06-01
+
+Evaluation of the update algorithm (5-subagent: control-theory / feedback / meta-loop / red-team /
+CI) + the closed-loop evolution design, plus a verified integrity fix.
+
+- **Verified & fixed a real gate gap:** the repo-existence check was nearly hollow on real data
+  (0 `github.com/` URLs in shards → existence only verified for star-annotated repos; unstarred real
+  repos like `erithwik/mcp-hn` were invisible). Added an interim WARN-tier net that gh-api-checks
+  slug-like tokens in table rows (skipping prose / npm-scopes), and **fail-closed retry** so a
+  transient network blip no longer discards a good refresh (only a real 404 hard-blocks).
+- **`EVOLUTION.md`**: honest diagnosis (today = half-closed, open-loop: no sensor + human-relay
+  actuator), the verdict that full-auto is **not yet safe** (the gate is a *format* gate not a *fact*
+  gate; P4 "editor ≠ verifier" is currently violated), the red-team precondition checklist, and the
+  staged path to a full closed loop — A: fact-gate + cross-model audit · B: feedback sensor
+  (live-run telemetry + drift metrics) · C: CI-as-required-check + tiered auto-merge + safety nets ·
+  D: self-improving meta-loop with an immutable core. Names the v0.5.1 slug-net as an interim patch;
+  the framing fix (machine-readable mirror block) is Stage A.
+
 ## [0.5.0] — 2026-06-01
 
 **Horizon scan** — the refresh now evolves the matrix's *scope*, not just its *content*. Beyond
