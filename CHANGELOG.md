@@ -3,6 +3,27 @@
 All notable changes to the source matrix and skill are recorded here. Each refresh sweep appends a
 dated entry with per-domain added/removed/changed tools.
 
+## [0.3.0] — 2026-06-01
+
+Self-evolution / anti-regression machinery — designed by a 5-subagent co-design pass, ensuring
+automated refreshes **monotonically improve** (never silently degrade). "LLM proposes, a
+deterministic gate disposes; bad updates never reach main."
+
+- **`CONSTITUTION.md`**: 10 immutable clauses (C1–C10) injected as hard constraints into every
+  headless run — API-verified facts, free/④ route preference, deletion-needs-evidence, incremental
+  edits, time-monotonic, bad-updates-never-reach-main. Automation may not edit it.
+- **`tools/verify_matrix.py`**: deterministic anti-regression gate (pure stdlib + `gh`/`git`).
+  Checks STRUCT (index↔shards), REPO (every github repo exists via `gh api`, fail-closed), STAR
+  (annotation within 25% of real), FRESH (no future/backward `last_verified`), METH (methodology
+  markers intact), COVER (no >10% global / >30% per-shard source-row drop vs main), CONST
+  (constitution unmodified). Verified: blocks hallucinated repos + star lies; current matrix passes
+  (28 repos checked). Final veto over landing — an LLM can only make it more conservative.
+- **`tools/deploy_skill.sh`**: syncs repo→live skill only after a merged, gate-green main.
+- **Refresh script rewired to branch + gate + PR** (no direct main push): works on `refresh/<date>`,
+  injects the constitution, scope-guards against out-of-bounds edits, runs the gate, opens a PR on
+  pass / discards on fail, and notifies via Discord either way.
+- **`refresh-protocol.md`**: added the 防退化协议 (mandatory) section codifying the above.
+
 ## [0.2.0] — 2026-06-01
 
 Elevated the **browser-automation / act-like-human route (④)** from last-resort footnote to a
