@@ -37,6 +37,10 @@
 - [ ] **Quarterly meta-loop** — reuse `meta-optimize`: review run history + CHANGELOG to improve
       `refresh-protocol.md` *itself*, PR-only, never auto-merge (immutable-core guarded).
 - [ ] **CHANGELOG/version automation** from the structured diff.
+- [ ] **Gate: distinguish transient fail-closed from real 404.** `verify_matrix.py` correctly fails
+      closed (can't verify → BLOCK), but a transient GitHub API rate-limit/network blip then discards
+      an otherwise-good refresh. Retry the gate once on non-404 network errors before blocking; only a
+      true 404 (hallucinated/dead repo) is an immediate hard block. (Observed during the v0.4.0 run.)
 - [ ] **Per-domain `last_verified` surfacing.** Show staleness in the report ("seo-keywords matrix
       last verified 2026-05, may be outdated").
 - [ ] **Install-state cache.** Optional snapshot of `claude mcp list` so triage can warn about
