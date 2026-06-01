@@ -8,19 +8,22 @@ months). Re-run this protocol periodically to keep `domains/`, `volatile/pricing
 ## Cadence
 
 - **Default: quarterly** (every ~3 months) full sweep.
-- **Faster (monthly)** for volatile domains: x-twitter, web-scraping, social-publishing, crypto-defi
-  (frequent API-policy and pricing changes).
+- **Faster (monthly)** for volatile domains: x-twitter, web-scraping, social-publishing, crypto-defi,
+  browser-automation (fast-moving OSS repos + frequent API-policy and pricing changes).
 - Also refresh opportunistically whenever you hit a dead/changed tool during a real research run —
   fix that one shard immediately.
 
 ## Procedure (full sweep)
 
-1. **Fan out one subagent per domain** (12 total — see `sources-index.md`). Each subagent's task:
-   "Search for NEW or CHANGED tools/MCP servers/skills in <domain> since <last_verified date>.
-   Check the MCP registries (smithery.ai, glama.ai, mcp.so, pulsemcp.com,
-   registry.modelcontextprotocol.io, mcp.apify.com) and GitHub. Report: (a) NEW entries worth
-   adding, (b) tools that died / were acquired / changed pricing, (c) any barrier-route shift
-   (e.g. an API that went paid-only). Return a structured diff, not prose."
+1. **Fan out one subagent per domain** (13 total — see `sources-index.md`, incl. browser-automation).
+   Each subagent's task: "Search for NEW or CHANGED tools/MCP servers/skills in <domain> since
+   <last_verified date>. Check the MCP registries (smithery.ai, glama.ai, mcp.so, pulsemcp.com,
+   registry.modelcontextprotocol.io, mcp.apify.com) AND GitHub for free open-source browser-
+   automation / act-like-human repos (verify each repo really exists + its star count + last-push
+   date via the GitHub API — do NOT fabricate repo names). Report: (a) NEW entries worth adding
+   (especially free route-④ repos that could replace a paid API), (b) tools/repos that died /
+   were archived / 404'd / changed pricing, (c) any barrier-route shift (e.g. an API that went
+   paid-only, or a new OSS repo that makes a paid source unnecessary). Return a structured diff."
 2. **Apply the same quality guardrails** as a normal run (verify each claimed tool exists and the
    price against its official site — do not trust a subagent's recalled pricing).
 3. **Incremental edit, don't rewrite**: for each domain, update only changed rows in
