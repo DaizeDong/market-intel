@@ -15,6 +15,10 @@
 - [x] **Deterministic gate** (`tools/verify_matrix.py`) — API-verified repo existence + star
       tolerance + structure + freshness + methodology + anti-mass-deletion + constitution lock.
 - [x] **Branch + PR isolation** — bad updates never reach main; Discord notify on pass/fail.
+- [x] **Horizon scan (v0.5.0)** — refresh discovers NEW territories / tool-categories / research
+      angles beyond the existing domains (not just better tools within them), with a fold/new-domain/
+      new-skill decision gate, an anti-bloat watchlist (must recur across ≥2 scans), and human review
+      for any structural addition. Scope evolves with the field, decay-guarded.
 
 ## Next — deferred pieces of the 5-subagent design
 
