@@ -1,11 +1,15 @@
 # CONSTITUTION — immutable rules for every automated update
 
-These are the accumulated lessons that **every automated refresh MUST honor**. They are injected as
-hard constraints into each headless run. An automated run may NOT edit this file — it is changed
-only by a human, in its own PR. The verify gate refuses any run that fails a constitution clause.
+This file is the **embodiment of [PHILOSOPHY.md](PHILOSOPHY.md) principle P2 — "mechanisms, not
+intentions."** Rather than *hoping* each refresh does the right thing, the right thing is encoded
+here as hard constraints, injected into every headless run and enforced by a fail-closed gate. These
+are the accumulated lessons that **every automated refresh MUST honor.** An automated run may NOT
+edit this file — it is changed only by a human, in its own PR. The verify gate refuses any run that
+fails a clause.
 
-The point: the source matrix must **monotonically improve** — each update may make it better or keep
-it equal, never worse. Guardrails only accumulate; they are never relaxed by automation.
+The point (PHILOSOPHY.md P3): the source matrix must **monotonically improve** — each update may make
+it better or keep it equal, never worse. Guardrails only accumulate; they are never relaxed by
+automation.
 
 ## C1 — GitHub facts are API-verified, never recalled
 Any repo/MCP entered or modified must be confirmed via the GitHub API (`gh api repos/<owner>/<repo>`):

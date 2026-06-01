@@ -20,6 +20,12 @@ research quality guardrails. The heavy lifting — fan-out search, fetching, adv
 verification, citation synthesis — is **delegated** to the existing `deep-research` harness or
 `research-lit` skill. Do not re-implement those.
 
+> **Design philosophy (governs all changes): root-cause design, not incremental patching** — change
+> the assumption underneath a problem, not the symptom on top. This thin-delegation shape, the
+> first-class browser route, and the monotonic anti-regression refresh all follow from it. Full
+> statement in the repo's `PHILOSOPHY.md`; every change must pass "does it fix the framing, or just
+> patch a symptom?"
+
 ## When to stop and delegate immediately
 
 Before doing anything, decide if this skill even applies:

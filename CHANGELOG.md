@@ -3,6 +3,19 @@
 All notable changes to the source matrix and skill are recorded here. Each refresh sweep appends a
 dated entry with per-domain added/removed/changed tools.
 
+## [0.4.0] — 2026-06-01
+
+Crystallized the **design philosophy** as the project's organizing principle, made concrete and
+prominent — *root-cause design, not incremental patching.*
+
+- **`PHILOSOPHY.md`** (bilingual): 6 principles — fix-the-framing-not-the-symptom · mechanisms-not-
+  intentions · monotonic-evolution-against-decay · facts-over-recall · delegate-depth-own-the-seam ·
+  honest-boundaries. Each stated as patch-vs-root with the real decision in this repo it produced,
+  plus a generative test every future change must pass ("does it fix the framing, or just patch a
+  symptom?"). The philosophy explicitly outranks any individual feature.
+- Surfaced it prominently at the **top of both READMEs** (before Install), reframed `CONSTITUTION.md`
+  as the embodiment of principle P2, and added a governing one-liner to `SKILL.md`.
+
 ## [0.3.0] — 2026-06-01
 
 Self-evolution / anti-regression machinery — designed by a 5-subagent co-design pass, ensuring
