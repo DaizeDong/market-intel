@@ -21,6 +21,8 @@ months). Re-run this protocol periodically to keep `domains/`, `volatile/pricing
 > 发现阶段的完整规则见下方 **「Discovery phase（前沿发现 + 质量筛选）」** 一节。它产出一个
 > 「候选池（candidate pool）」，核实/差分阶段只处理通过准入门槛的候选 + 旧条目复检。
 
+0. **跑 Horizon scan**（全量扫必跑）：按下方 Horizon scan 规则做跨域趋势扫描，找**已有 13 域之外**的新
+   territory / 新工具品类 / 新调研角度，产出新角度提案清单（FOLD 项并入下一步；NEW-DOMAIN/NEW-SKILL 进 PR）。
 1. **跑发现阶段**：按下方 Discovery phase 规则，对每个域并行盲扫多个发现源，产出候选池
    （每个候选附带：来源、score、对现有首选的「新增/替换/不收录」裁决 + 理由）。
 2. **Apply the same quality guardrails** as a normal run (verify each claimed tool exists and the
@@ -162,6 +164,49 @@ top pick 并在 CHANGELOG 写明「why replaced」。WATCH/SKIP 不动 shard，�
   verdict: ADD|REPLACE|WATCH|SKIP,
   vs_current_top_pick: "对比理由（REPLACE 必填能力对比证据）" }
 ```
+
+## Horizon scan（发现新角度 / 新域 —— 与时俱进，不只完善已有）
+
+Discovery phase 在**已知 13 个域内**找更好的工具。但工具世界会长出**全新的域和调研角度**——新平台崛起、
+新一类工具出现、新的调研方法论成形、API 政策剧变打开/关闭一整条路线。只完善已有 = 框架被冻结在过去。
+Horizon scan 是 PHILOSOPHY.md **P1（改框架，不只改症状）应用到本 skill 自己的范围上**：定期问"地图本身
+是不是该长大了？"，并在适当时**新增子域 / 子 skill**。
+
+**何时跑：** 每次全量扫（Jan/Apr/Jul/Oct）必跑；月度轻量扫做一个 10 分钟的"当月脉搏"快照即可。
+
+### H1. 扫什么（跨域、看趋势，而非看单个工具）
+- **当月发生了什么**：本月该领域的大事件——平台 API 政策变动、重大收购、某类工具突然爆发、某条壁垒
+  路线被打开或封死。来源：HN/Reddit 月度热帖、各大框架的 release/blog、MCP 注册中心的**新类目**。
+- **新平台 / 新数据territory**：出现了现有 13 域装不下的新数据源吗？（如一个新社交平台成气候、一种新的
+  另类数据市场、一个新的内容形态）。
+- **新一类工具**：出现了**全新品类**的工具/MCP 吗？（不是"又一个 X 抓取器"，而是"一种以前不存在的能力"，
+  如某种新的 agent 记忆服务、实时多模态采集、新的反检测范式）。
+- **新调研角度 / 方法论**：有没有**更新颖的"做调研"的方式**本身？（如一种新的交叉验证手段、一种新的
+  信号源、一种把多个域串起来的新工作流）——这是用户明确要的"比较新颖的调研角度"。
+
+### H2. 决策：折叠 / 新增子域 / 新增子 skill（默认最小，门槛递增）
+对每个发现的新角度，三选一，**必须给理由**：
+- **【折叠 FOLD】（默认）**：作为新行/新路线并入某个现有域。绝大多数新工具属于这一类。
+- **【新增子域 NEW-DOMAIN】**：仅当它是一块**与现有 13 域都不同的独立数据territory**、且**有 ≥3 个真实
+  可用源**、且**有反复出现的相关性**（不是一次性热点）。落地 = 新建 `domains/<x>.md` + 加 `sources-index.md`
+  一行（保持 index↔shard 一致，否则闸门 STRUCT 拦截）+ CHANGELOG 写明"为何它值一个新域"。
+- **【新增子 skill NEW-SKILL】（最高门槛，需人类拍板）**：仅当该角度需要自己的**触发词 + 工作流 + 分诊
+  逻辑**，已超出"源矩阵一行"能承载的范畴（如它本身就是一套独立的多步流程）。自动运行**不得**自建新 skill，
+  只能写入提案交人审。
+
+### H3. 防膨胀门槛（用 P3 约束 P1 —— 范围增长不等于腐化）
+"与时俱进"绝不等于"什么新东西都加一个域"。膨胀本身就是一种退化。所以：
+- **新 ≠ 需要一个新域**：新角度先进 `volatile/discovery-state.md` 的 **new-angle watchlist**（带发现日期），
+  **至少跨 2 次扫仍持续相关**才可提名升级为新域——一次性炒作会自然过期。
+- **必须过生成式检验**（PHILOSOPHY.md）："这是在改框架（真的有一块没被覆盖的territory），还是只在打补丁
+  （其实塞进现有域更对）？" 倾向折叠；提名新域/新 skill 的举证责任在提名方。
+- **结构性变更永远走人审**：新增域/子 skill 是高权限结构变更，自动运行只产出**提案**（写入 watchlist +
+  CHANGELOG 草案 + PR 描述），由人类批准才落地；绝不自动新建并直接合并。
+
+### H4. 产出
+Horizon scan 产出一个 **新角度提案清单**（每条：发现的角度 + 来源证据 URL + FOLD/NEW-DOMAIN/NEW-SKILL
+裁决 + 理由 + 是否已在 watchlist 复现）。FOLD 项交给正常的核实/差分阶段；NEW-DOMAIN/NEW-SKILL 项进 PR 等
+人审。无新角度时显式写"本月无新territory，已扫 H1 四类"——不留白、不假装。
 
 ## Budget
 
