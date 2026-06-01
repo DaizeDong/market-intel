@@ -11,6 +11,21 @@ A thin orchestration skill for commercial/market research. It triages your topic
 
 ---
 
+## ⭐ Read this first: the design philosophy
+
+market-intel is built on one principle — **root-cause design, not incremental patching.** When
+something is wrong, we change the assumption underneath it, not the symptom on top. That single idea
+produced every decision here: browser-automation was promoted from footnote to a first-class route
+(not "add a few free tools"); this is a thin delegation layer (not "another deep-research"); updates
+run through a deterministic gate that can only let the matrix improve (not "set a reminder to
+refresh"). **The philosophy outranks any individual feature** — every future change must pass one
+test: *does it fix the framing, or just patch a symptom?*
+
+📜 **[Read the full design philosophy → PHILOSOPHY.md](PHILOSOPHY.md)** (6 principles, each with the
+patch-vs-root contrast and the real decision in this repo that it produced).
+
+---
+
 ## What it is (and isn't)
 
 Claude Code already has a `deep-research` harness (fan-out → fetch → verify → synthesize) and a `research-lit` skill. Those are great for **general web** and **academic** research. They fall short the moment your question needs a **specialized commercial source** behind an information barrier — real X/Twitter data, Amazon price history, on-chain feeds, SEO metrics, social sentiment, B2B lead data.
