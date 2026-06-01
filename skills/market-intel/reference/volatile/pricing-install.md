@@ -8,7 +8,7 @@
 > themselves. Keys land in plaintext in `~/.claude.json` — warn them not to commit/screenshot it.
 > Prefer `-s user` scope for reusable sources. Prefer HTTP-transport sources on Windows.
 
-## x-twitter `last_verified: 2026-05`
+## x-twitter `last_verified: 2026-06`
 - twitterapi.io: pay-per-use $0.15/1k tweets, $0.18/1k profiles, $0.1 free credit, .edu discount.
   Get key at twitterapi.io → then add its MCP (see glama.ai/mcp kaitoInfra/twitterapi-io-mcp-server).
 - Apify tweet actors: pay-per-result ~$0.1–0.25/1k. Apify MCP: `https://mcp.apify.com` (HTTP).
@@ -41,7 +41,11 @@
 
 ## crypto-defi
 - CoinGecko: `npx mcp-remote https://mcp.api.coingecko.com/mcp` (public, no key).
-- Etherscan: `https://mcp.etherscan.io/mcp` (free key as bearer).
+- Etherscan: `https://mcp.etherscan.io/mcp` (free key as bearer). NOTE 2026-06: free-tier chain
+  coverage cut ~10% (verified-contract/ABI endpoints stay free all chains); "Lite" plan = 25% of
+  prior lowest tier (info.etherscan.com/whats-changing-in-the-free-api-tier-coverage-and-why).
+- Blockscout MCP (free, 3000+ chains, no key for dev; read-only on-chain): repo blockscout/mcp-server
+  (39★, official) — install/endpoint per docs.blockscout.com/devs/mcp-server. Pro key (free) for prod throughput.
 - Hummingbot: `claude mcp add --transport stdio hummingbot -- docker run --rm -i -e HUMMINGBOT_API_URL=http://host.docker.internal:8000 -v hummingbot_mcp:/root/.hummingbot_mcp hummingbot/hummingbot-mcp:latest`
 - ccxt: `pip install ccxt` (lib, not MCP). funding-rates-mcp: Kukapay repo.
 
