@@ -3,6 +3,44 @@
 All notable changes to the source matrix and skill are recorded here. Each refresh sweep appends a
 dated entry with per-domain added/removed/changed tools.
 
+## [0.7.1] — 2026-06-01
+
+**Monthly volatile refresh** (June → volatile domains only: x-twitter, web-scraping,
+social-publishing, crypto-defi, browser-automation + light this-month Horizon pulse). Discovery phase
+ran 4 blind-scan agents; every repo/star/price below was independently API-verified (`gh api`) or
+fetched from the official page — never from recall (C1). The deterministic gate passes clean.
+
+- **Re-verification (no changes needed):** all 33 star-annotated volatile-domain repos re-checked via
+  GitHub API — every one is alive (no 404/archived) and every star annotation is accurate within the
+  gate's tolerance. **No deletions, no star corrections.** This is the honest, common outcome for a
+  matrix verified the same day; recorded so the clean result is visible, not silently skipped (C9).
+- **crypto-defi — added:** **Blockscout MCP** (`blockscout/mcp-server`, 39★, official, MIT) — free
+  read-only on-chain data across 3000+ chains, no key for dev. Added as the free multi-chain fallback.
+- **crypto-defi — changed:** Etherscan row flags the verified free-tier change — official page
+  confirms ~10% free chain-coverage cut (verified-contract + ABI endpoints stay free on all networks;
+  "Lite" plan at 25% of prior lowest tier; info.etherscan.com, updated 2026-05-31). Detail in
+  `pricing-install.md`. The specific dropped chains / record-cap reported only by secondary sources
+  are **not** asserted (C5/C6).
+- **social-publishing — changed:** Buffer row — public API + hosted MCP officially launched
+  2026-05-27 (buffer.com/resources/buffer-api-is-here), on every plan incl. Free.
+- **pricing-install — changed:** added Blockscout MCP install line + Etherscan free-tier note;
+  advanced `x-twitter` section `last_verified` 2026-05 → 2026-06 (twitterapi.io pricing re-verified
+  stable at the official site; twikit repo re-verified via API) (C8).
+- **discovery-state — new file:** created `volatile/discovery-state.md`, the watchlist + reject log +
+  new-angle watchlist that `refresh-protocol.md` references but that did not previously exist. Seeded
+  with 12 API-verified WATCH candidates (Scweet 1514★, CloakBrowser 22965★, Patchright 3351★,
+  Lightpanda 30717★, CRW 126★, Base MCP, GOAT 993★, deBridge/Tatum/Philidor/CoinStats MCPs), 6
+  reject-log entries, and 6 Horizon new-angle items — all stars real `gh api` values.
+- **Horizon pulse (May 2026):** no new data territory; scanned H1 1–4. Proposals held for human
+  review (not auto-created): agent-memory hardening (mem0 57251★ / zep 4626★) = NEW-SKILL flag but
+  it's **agent infrastructure, not a queryable commercial-data source** → not a domain; MCP
+  tunnels/sandboxes = deployment plumbing (FOLD → ready-skills); emerging platforms (Divine/Vine,
+  Threads 300M, Lemon8) lack verifiable access routes (watch, not NEW-DOMAIN); X API Apr-2026 re-tier
+  = FOLD → x-twitter but **unverified at source** (devcommunity.x.com auth-walled) → matrix numbers
+  left unchanged, logged to watchlist for next scan.
+- **No structural changes:** no domains/skills auto-created; all candidates either landed as
+  verified incremental rows or were held in discovery-state per C7/C9 + Horizon H3 anti-bloat.
+
 ## [0.7.0] — 2026-06-01
 
 **Stage C (part 1) — CI authority + liveness** (auto-merge intentionally still OFF):
