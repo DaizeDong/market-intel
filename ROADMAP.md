@@ -8,13 +8,35 @@
   degradation, dated volatile data, disconfirmation mandate, conflict surfacing, explicit gaps).
 - Refresh protocol for keeping the matrix current.
 
-## Next
+## Done (v0.3.0) — self-evolution / anti-regression core
 
-- [ ] **Scheduled auto-refresh.** Wire an external cron / Windows Task that launches a headless
-      `claude -p "follow reference/refresh-protocol.md"` run on a cadence (quarterly full / monthly
-      for volatile domains), commits the diff, and pushes. Needs a token budget cap per run.
-- [ ] **CHANGELOG automation.** Have the refresh protocol write structured diffs to `CHANGELOG.md`
-      and bump `plugin.json` version automatically.
+- [x] **Scheduled auto-refresh** — Windows Task `RefreshMarketIntel`, monthly, branch + gate + PR.
+- [x] **Constitution** (`CONSTITUTION.md`, C1–C10) injected as hard constraints each run.
+- [x] **Deterministic gate** (`tools/verify_matrix.py`) — API-verified repo existence + star
+      tolerance + structure + freshness + methodology + anti-mass-deletion + constitution lock.
+- [x] **Branch + PR isolation** — bad updates never reach main; Discord notify on pass/fail.
+
+## Next — deferred pieces of the 5-subagent design
+
+- [ ] **Machine-readable mirror block** per shard (YAML of {repo, stars, route, evidence_id}) so the
+      gate parses structured data instead of regex — closes the v1 gap where a bare repo slug with
+      no github URL / no star annotation evades existence-check.
+- [ ] **Quality-drift time series** (`metrics/history.jsonl`) — per-domain source counts,
+      last_verified freshness, dead-link rate, free/④ route share, added:removed ratio; cross-period
+      alerts to catch *slow* degradation (e.g. a domain stagnant ≥6 months, freshness monotonically
+      worsening) — the failure mode a single run looks fine but half a year rots.
+- [ ] **Evidence ledger** (`evidence/run-<date>.json`) — archive the gh-api responses each run cited,
+      so "where did this star count come from" is auditable; + `rationale-log.jsonl` append-only
+      deletion justifications (C4 evidence codes).
+- [ ] **Independent cross-model audit gate** — reuse the `citation-audit` / `experiment-audit`
+      pattern (fresh zero-context reviewer verifies new entries against official sources), so the
+      editor isn't the only verifier. Optionally invoke `auto-review-loop` for the diff.
+- [ ] **Tiered automation** — auto-land trivial changes (dead-link cleanup, star refresh) but route
+      new tools / top-pick replacements / major price changes to PR/HOLD (currently everything goes
+      to one PR).
+- [ ] **Quarterly meta-loop** — reuse `meta-optimize`: review run history + CHANGELOG to improve
+      `refresh-protocol.md` *itself*, PR-only, never auto-merge (immutable-core guarded).
+- [ ] **CHANGELOG/version automation** from the structured diff.
 - [ ] **Per-domain `last_verified` surfacing.** Show staleness in the report ("seo-keywords matrix
       last verified 2026-05, may be outdated").
 - [ ] **Install-state cache.** Optional snapshot of `claude mcp list` so triage can warn about
