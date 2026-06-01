@@ -19,8 +19,19 @@
 ZeroBounce. Outreach → Smartlead. CRM → your CRM's official MCP. Min combo: Apollo → Hunter/ZeroBounce
 → Smartlead → CRM MCP.
 
-**Compliance red line:** LinkedIn cookie-scraping (PhantomBuster) = 25–35% ban rate — use Bright Data
-instead (採集 off your account, legally defended). Any personal-data workflow needs GDPR/CCPA
-delete-request handling.
+## ④ Browser/OSS route (free, self-host)
+| repo | route | note |
+|---|---|---|
+| **gosom/google-maps-scraper** (4.2k★) | ④ self-host | local B2B leads: name/phone/site/**email**, **far lower risk than LinkedIn** |
+| omkarcloud/google-maps-scraper (2.7k★) | ④ | 50+ fields incl email/socials + enrichment |
+| joeyism/linkedin_scraper (4.2k★) | ④ | Selenium + your login session; ⚠ highest ban risk, small batch only |
+| cullenwatson/StaffSpy (254★) | ④ | scrape company staff lists; ⚠ ToS/ban risk |
+
+**Default (free route):** for local-business B2B leads use **gosom/google-maps-scraper** (emails +
+phones, low legal risk). Avoid LinkedIn scraping when possible — if unavoidable use a throwaway acct.
+
+**Compliance red line:** LinkedIn cookie-scraping (PhantomBuster / joeyism) = 25–35% ban rate — use
+Bright Data instead (採集 off your account, legally defended) or pivot to Google Maps leads. Any
+personal-data workflow needs GDPR/CCPA delete-request handling.
 
 **Install guidance:** `reference/volatile/pricing-install.md` → leadgen-crm.

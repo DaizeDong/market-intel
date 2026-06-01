@@ -14,6 +14,10 @@
 **Default pick:** mcp-hn (free, zero auth) for HN; GridfireAI/reddit-mcp (official, read-only) for
 Reddit. Cross-platform keyword monitoring → Syften (paid, MCP) or free F5Bot.
 
+**④ Browser/OSS route:** Reddit official API (PRAW, praw-dev/praw 4.1k★) is still free enough — no
+real need to browser-scrape. For 中文社区 (微博/抖音/B站/知乎/贴吧) use **NanmiCoder/MediaCrawler**
+(50k★, Playwright, login session). For YouTube/media use **yt-dlp** (167k★). See `browser-automation.md`.
+
 **Watch:** Reddit API tightening — GummySearch shuts down 2026-11. Prefer official-API routes over
 unauthorized scrapers. Discord/Quora scraping = ToS gray zone.
 

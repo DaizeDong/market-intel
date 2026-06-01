@@ -22,4 +22,22 @@ OSS self-host → Postiz. Front-load free platforms (Bluesky/Mastodon/Threads).
 
 **Cost trap:** X link-posts $0.20 each — budget before bulk posting links.
 
+## ④ Browser/OSS "act like a human" alternatives (free, per platform)
+Often better than paid post APIs — real logged-in session, no per-post fee. All violate platform
+ToS → use throwaway accounts; write/post is far more ban-prone than read. Verified 2026-06-01.
+
+| platform | repo | route | note |
+|---|---|---|---|
+| X | d60/twikit (4.4k★) + adhikasp/mcp-twikit | ③/④ | read+write+DM, ready MCP, free |
+| Instagram | subzeroid/instagrapi (6.3k★) | ③ | post图文/Reels/comment/DM, most active |
+| LinkedIn | stickerdaniel/linkedin-mcp-server (2.1k★) | ④ | ready MCP; ⚠ highest ban risk, small acct |
+| TikTok | davidteather/TikTok-Api (6.4k★) | ④ | Playwright-signed, scrape+search |
+| 小红书 | **xpzouying/xiaohongshu-mcp (14k★)** | ④ | browser + ready MCP, **can post notes** |
+| 中文多平台 | NanmiCoder/MediaCrawler (50k★) | ④ | Playwright, 小红书/抖音/B站/微博/快手/知乎/贴吧 |
+| Bluesky | MarshalX/atproto (653★) | ① | official, free, no ban — just use it |
+| Mastodon | halcy/Mastodon.py (961★) | ① | official, free, no ban |
+
+**Default (free route):** post via OSS repo for the platform (X→twikit MCP, 小红书→xiaohongshu-mcp,
+IG→instagrapi). Bluesky/Mastodon are open — use official libs, zero ban risk, front-load them.
+
 **Install guidance:** `reference/volatile/pricing-install.md` → social-publishing.

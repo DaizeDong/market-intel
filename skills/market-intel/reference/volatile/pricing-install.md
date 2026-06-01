@@ -74,6 +74,33 @@
 - App stores: `npm i google-play-scraper app-store-scraper` (free) or mobile-store-scraper-mcp (self-host).
 - Finnhub MCP: cfdude/mcp-finnhub (free 60/min key).
 
+## browser-automation `last_verified: 2026-06` (stars verified via GitHub API 2026-06-01)
+General frameworks (all free, self-host):
+- browser-use: `pip install browser-use` — github.com/browser-use/browser-use (96k★)
+- stagehand: `npm i @browserbasehq/stagehand` — github.com/browserbase/stagehand (23k★)
+- skyvern: github.com/Skyvern-AI/skyvern (22k★, self-host + API)
+- crawl4ai: `pip install crawl4ai` or docker — github.com/unclecode/crawl4ai (67k★)
+- crawlee: `npm i crawlee` — github.com/apify/crawlee (24k★)
+- scrapegraph-ai: `pip install scrapegraphai` — github.com/ScrapeGraphAI/Scrapegraph-ai (27k★)
+Anti-detection: nodriver (`pip install nodriver`, 4.3k★) · camoufox (`pip install camoufox`, 8.9k★) ·
+steel-browser (github.com/steel-dev/steel-browser, 7.1k★, self-host).
+playwright MCP already connected — verify with `claude mcp list`.
+
+Platform-specific OSS repos (free; most violate platform ToS — throwaway accounts for write/scrape):
+- X: d60/twikit (`pip install twikit`, 4.4k★) + MCP adhikasp/mcp-twikit
+- Instagram: subzeroid/instagrapi (`pip install instagrapi`, 6.3k★) · instaloader (`pip install instaloader`, 12.5k★, read-only)
+- LinkedIn: stickerdaniel/linkedin-mcp-server (2.1k★, ready MCP, ⚠ high ban risk) · joeyism/linkedin_scraper (4.2k★)
+- TikTok: davidteather/TikTok-Api (`pip install TikTokApi`, 6.4k★)
+- 小红书: xpzouying/xiaohongshu-mcp (14k★, Go, ready MCP, can post) · NanmiCoder/MediaCrawler (50k★, 7 中文平台)
+- YouTube/media: yt-dlp (`pip install yt-dlp`, 167k★)
+- 微博: dataabc/weibo-crawler (4.5k★)
+- Bluesky: `pip install atproto` (MarshalX/atproto, official) · Mastodon: `pip install Mastodon.py` (official)
+- Ecom: Cybrarist/Discount-Bandit (690★, self-host tracker) · omkarcloud/amazon-scraper (220★)
+- SERP/SEO: searxng/searxng (31k★, self-host meta-search) · towfiqi/serpbear (2k★, rank tracker) · deedy5/ddgs (2.7k★)
+- B2B leads: gosom/google-maps-scraper (4.2k★, low-risk) · omkarcloud/google-maps-scraper (2.7k★)
+- Trends: flack0x/trendspyg · sdil87/trendspy. App stores: facundoolano/google-play-scraper (2.9k★) + app-store-scraper
+- Dead/avoid: tomquirk/linkedin-api (404), pytrends (archived), snscrape (停更), elizaOS/agent-twitter-client (下架)
+
 ## Discovery registries (find more)
 smithery.ai (one-click) · glama.ai (largest) · mcp.so · pulsemcp.com (curated + traffic) ·
 registry.modelcontextprotocol.io (official) · mcp.apify.com (3000+ actors).

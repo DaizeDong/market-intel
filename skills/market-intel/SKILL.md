@@ -66,7 +66,16 @@ default GBK decode crashes on Windows). Prefer `claude mcp list` / `claude mcp g
 ### Step 3 — Select sources + guide install (non-blocking)
 
 For each triaged domain, read only its shard: `reference/domains/<domain>.md`. Pick the best
-**available** source. If the topic clearly depends on a source that is missing or not connected:
+**available** source. **Prefer the free browser-automation / act-like-human route (④) over paid
+APIs when it fits** — you already have the playwright MCP connected, plus free open-source repos
+per platform (see `reference/domains/browser-automation.md`). A real logged-in browser often
+returns **richer data** than a stripped/paid API, at zero cost. Reach for paid official ① / resale
+② sources when you need history the browser can't backfill (e.g. Keepa price history), large-scale
+reliability, or compliance (no ToS/ban risk). Note browser scraping needs a session/cookies and,
+at scale, a proxy pool, and most platform scraping violates that platform's ToS — use throwaway
+accounts for heavy/write work and respect the disconfirmation + source-tier guardrails.
+
+If the topic clearly depends on a source that is missing or not connected:
 
 > "This topic depends on <source> (e.g. real X tweet data). Recommend installing it:
 > `claude mcp add -s user <...>` (exact command + cost in `reference/volatile/pricing-install.md`).

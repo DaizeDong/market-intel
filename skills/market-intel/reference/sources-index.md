@@ -17,9 +17,13 @@ shard(s) in `domains/`. Do not read shards you didn't match.
 | leadgen-crm | B2B leads, email find, company intel, CRM, 获客 | Apollo.io ① + Hunter ① | `domains/leadgen-crm.md` |
 | trends-discovery | Google Trends, Product Hunt, app store, 趋势/选题 | GDELT + Product Hunt MCP ① free | `domains/trends-discovery.md` |
 | ready-skills | "is there a ready skill for marketing/SEO/research" | coreyhaines31/marketingskills | `domains/ready-skills.md` |
+| **browser-automation** | API too costly/walled, want real-browser "act like human", free | playwright MCP + browser-use/crawl4ai | `domains/browser-automation.md` |
 
 Barrier-route legend (see each shard for detail):
 ① official API — compliant, often paid/limited, no ban risk
 ② resale API — provider absorbs the barrier, cheap pay-per-use, gray-area
-③ self-host scrape — free but you supply accounts+proxies, ban risk
-④ headless browser — uses your logged-in session, most fragile, highest ToS risk
+③ self-host scrape (reverse-engineered API) — free, you supply accounts+proxies, ban risk
+④ **browser automation / act-like-human** — real logged-in browser (playwright MCP + OSS repos);
+   FIRST-CLASS, not last resort. Often **richer data** (rendered/logged-in view, fields APIs hide)
+   at zero API cost. Cost = proxies at scale; most platform scraping violates ToS (ban risk).
+   When a topic's official/resale source is paid or quota-capped, check route ④ before paying.

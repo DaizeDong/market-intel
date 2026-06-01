@@ -19,6 +19,19 @@ search traffic intel, 关键词/竞品SEO/排名.
 **Default pick:** Have a site → free GSC MCP first. External keyword/SERP/backlink cheap → DataForSEO
 (Sandbox first). Pro coverage + Claude-friendly → SE Ranking. Deep backlinks → Ahrefs.
 
+## ④ Browser/OSS route (free, self-host) — strong here
+| repo | route | note |
+|---|---|---|
+| **searxng/searxng** (31k★) | ④ self-host | meta-search → JSON = private SerpApi, dozens of engines |
+| **towfiqi/serpbear** (2k★) | ④ self-host | keyword rank tracker, replaces paid rank monitoring |
+| deedy5/ddgs (2.7k★) | ④ | lightweight free web search lib, no key |
+| flack0x/trendspyg / sdil87/trendspy | ④ | Google Trends after pytrends archived |
+| playwright MCP | ④ | drive trends.google.com / SERP directly when no repo fits |
+
+**Default (free route):** self-host **SearXNG** as a private SERP API + **serpbear** for rank
+tracking — covers most paid-SERP needs at zero cost (needs proxies at high volume). Keep GSC ① for
+your own site's real traffic (free, irreplaceable).
+
 **Shaky (avoid for prod):** pytrends (archived, 429s), "free Ahrefs" scraper MCPs needing CAPTCHA
 solvers. No official MCP: Moz, Majestic, Sitebulb.
 

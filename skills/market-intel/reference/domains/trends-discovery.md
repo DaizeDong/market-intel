@@ -20,7 +20,12 @@ opportunity, news sentiment, alt-data signals, 趋势/选题/产品机会/舆情
 Products → Product Hunt MCP + idea-reality-MCP. News/sentiment → GDELT MCP (free) + Finnhub.
 Selling → Trends MCP (TikTok leads Amazon 2–4 weeks = opportunity window).
 
-**Notes:** pytrends = relative values, no absolute volume, 429-prone. Composio Jungle Scout MCP being
-deprecated. data.ai has no dedicated MCP.
+**④ Browser/OSS route:** Trends → flack0x/trendspyg or sdil87/trendspy (pytrends archived). App
+stores → facundoolano/google-play-scraper (2.9k★) + app-store-scraper (free, no key). TikTok/抖音
+viral selling signals → davidteather/TikTok-Api (Playwright). Generic discovery scrape → crawl4ai /
+playwright MCP. See `browser-automation.md`.
+
+**Notes:** pytrends = relative values, no absolute volume, 429-prone (archived). Composio Jungle
+Scout MCP being deprecated. data.ai has no dedicated MCP.
 
 **Install guidance:** `reference/volatile/pricing-install.md` → trends-discovery.
