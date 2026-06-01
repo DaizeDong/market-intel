@@ -79,31 +79,63 @@ if orphan: warn("STRUCT", f"shards not in index: {sorted(orphan)}")
 # ---- gather repos + per-shard text ----
 shard_text = {d: read(os.path.join(DOMAINS, d + ".md")) for d in fs_domains}
 all_text = "\n".join(shard_text.values()) + "\n" + (read(PRICING) if os.path.exists(PRICING) else "")
+# HIGH-CONFIDENCE repos (404 → hard BLOCK): explicit github.com URLs + star-annotated slugs.
 repo_set = set(REPO_RE.findall(all_text))
-# also take owner/repo from high-confidence star-annotation lines (e.g. "d60/twikit (4.4k★)")
 repo_set |= {m.group(1) for m in STAR_LINE_RE.finditer(all_text)}
-# strip junk: .md pseudo-repos, must be exactly owner/repo
-repos = sorted(r for r in repo_set if not r.endswith(".md") and r.count("/") == 1)
+repos = sorted(r for r in repo_set if not r.endswith(".md") and r.count("/") == 1 and "github.com" not in r)
+
+# HEURISTIC bare slugs (404 → WARN only): unstarred slug-like tokens in table rows. Catches likely
+# hallucinations (e.g. a mistyped erithwik/mcp-hn) for human attention, but does NOT hard-block —
+# regex can't tell a real bare repo from prose like "10-K/Q" or an npm scope "@ryukimin/ghost-mcp".
+# The BLOCK-level existence guarantee for ALL repos is the job of the machine-readable mirror block
+# (ROADMAP Stage A root fix); this WARN is the interim visibility net, not a substitute.
+SLUG_RE = re.compile(r"(?<![A-Za-z0-9_./@-])([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)(?![A-Za-z0-9_./-])")
+warn_slugs = set()
+for txt in shard_text.values():
+    for ln in txt.splitlines():
+        if not ln.lstrip().startswith("|"):
+            continue
+        for tok in SLUG_RE.findall(ln):
+            o, _, r2 = tok.partition("/")
+            if ("-" in tok or "_" in tok) and o.isascii() and r2.isascii() \
+               and not tok.endswith(".md") and "github.com" not in tok and tok not in repo_set \
+               and not o[:1].isdigit():          # skip "10-K/Q"-style prose
+                warn_slugs.add(tok)
 
 # ---- REPO + STAR (fail-closed) ----
 repo_stars = {}
 if NO_NET:
     warn("REPO", "skipped GitHub verification (--no-net)")
 else:
+    import time
     for r in repos:
-        res = subprocess.run(["gh", "api", f"repos/{r}", "--jq", "{s:.stargazers_count,a:.archived}"],
-                             capture_output=True, text=True, encoding="utf-8")
+        res = None
+        for attempt in range(3):                 # retry transient errors; 404 is decided immediately
+            res = subprocess.run(["gh", "api", f"repos/{r}", "--jq", "{s:.stargazers_count,a:.archived}"],
+                                 capture_output=True, text=True, encoding="utf-8")
+            if res.returncode == 0:
+                break
+            if "Not Found" in (res.stderr or "") or "404" in (res.stderr or ""):
+                break                            # real 404 — don't retry, it's a hard fact
+            time.sleep(2 * (attempt + 1))        # transient (rate-limit/network): back off and retry
         if res.returncode != 0:
             if "Not Found" in (res.stderr or "") or "404" in (res.stderr or ""):
                 block("REPO", f"{r} does not exist (404) — hallucinated or dead repo")
             else:
-                block("REPO", f"{r} could not be verified (fail-closed): {res.stderr.strip()[:80]}")
+                block("REPO", f"{r} could not be verified after retries (fail-closed): {res.stderr.strip()[:80]}")
             continue
         try:
             d = json.loads(res.stdout)
             repo_stars[r] = d["s"]
         except Exception:
             block("REPO", f"{r} returned unparseable API response")
+    # heuristic bare slugs: verify but only WARN (avoid false-blocking prose / npm scopes)
+    for r in sorted(warn_slugs):
+        res = subprocess.run(["gh", "api", f"repos/{r}", "--jq", ".full_name"],
+                             capture_output=True, text=True, encoding="utf-8")
+        if res.returncode != 0 and ("Not Found" in (res.stderr or "") or "404" in (res.stderr or "")):
+            warn("REPO?", f"{r} not found on GitHub — if it's a repo it may be hallucinated/mistyped; "
+                          f"if prose/npm-scope, ignore (mirror block will disambiguate)")
     # STAR tolerance on lines pairing a repo with an (NNk★)
     for txt in list(shard_text.values()) + ([read(PRICING)] if os.path.exists(PRICING) else []):
         for ln in txt.splitlines():
