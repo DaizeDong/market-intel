@@ -78,8 +78,9 @@ The knowledge asset. Each domain shard names the best tool, its **barrier route*
 | [leadgen-crm](skills/market-intel/reference/domains/leadgen-crm.md) | Apollo.io ① + Hunter ① |
 | [trends-discovery](skills/market-intel/reference/domains/trends-discovery.md) | GDELT + Product Hunt MCP ① free |
 | [ready-skills](skills/market-intel/reference/domains/ready-skills.md) | coreyhaines31/marketingskills |
+| [browser-automation](skills/market-intel/reference/domains/browser-automation.md) | playwright MCP + browser-use / crawl4ai ④ |
 
-**Barrier routes:** ① official API (compliant, often paid) · ② resale API (provider absorbs the barrier, cheap, gray-area) · ③ self-host scrape (free, you supply accounts+proxies, ban risk) · ④ headless browser (your session, most fragile).
+**Barrier routes:** ① official API (compliant, often paid) · ② resale API (provider absorbs the barrier, cheap, gray-area) · ③ self-host scrape (reverse-engineered API, free, accounts+proxies, ban risk) · ④ **browser automation / act-like-human** — real logged-in browser (playwright MCP + free OSS repos). **First-class, not a footnote:** often returns richer data (rendered/logged-in view, fields APIs hide) at zero API cost. The skill prefers route ④ over paid APIs when it fits, reaching for ①/② only for history it can't backfill (e.g. Keepa), scale reliability, or compliance.
 
 Exact install commands and prices live in [`pricing-install.md`](skills/market-intel/reference/volatile/pricing-install.md), each line `last_verified`-stamped — verify against the official site before quoting.
 
