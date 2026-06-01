@@ -1,6 +1,6 @@
 {
   "name": "market-intel",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Thin orchestration skill for commercial/market research. Triages a topic across 12 commercial data domains (X/Twitter, e-commerce, finance, crypto, SEO, social, content/CMS, lead-gen, trends, community, web-scraping, ready-made skills), detects which specialized MCP sources are connected via `claude mcp list`, guides installing missing ones, and delegates the heavy fan-out/verify/synthesize to the built-in deep-research harness or research-lit. Ships a curated source matrix (best tool + barrier route + install command + cost) for each domain, with quality guardrails (citation verification, source tiers, multi-source corroboration, disconfirmation mandate) and a periodic refresh protocol.",
   "author": {
     "name": "DaizeDong"
