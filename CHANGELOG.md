@@ -3,6 +3,22 @@
 All notable changes to the source matrix and skill are recorded here. Each refresh sweep appends a
 dated entry with per-domain added/removed/changed tools.
 
+## [0.5.0] — 2026-06-01
+
+**Horizon scan** — the refresh now evolves the matrix's *scope*, not just its *content*. Beyond
+finding better tools within the existing 13 domains (Discovery phase), it actively looks for NEW
+territories, tool categories, and research angles the current map doesn't cover — applying
+PHILOSOPHY.md P1 (fix/expand the framing) to the skill's own scope so it keeps pace with the field.
+
+- New **Horizon scan** section in `refresh-protocol.md`: H1 what-to-scan (this-month events / new
+  platforms / new tool categories / novel research methodologies — cross-domain, trend-level), H2
+  fold-vs-new-domain-vs-new-skill decision gate, H3 anti-bloat guardrail (new ≠ needs-a-domain;
+  watchlist must recur across ≥2 scans; passes the generative test), H4 proposal output.
+- Runs on every full sweep (Jan/Apr/Jul/Oct) + a light monthly "this-month pulse"; structural
+  additions (new domain / sub-skill) are proposal-only and always go to human review — never
+  auto-created. Constrains P1 with P3: scope grows when justified, bloat is treated as decay.
+- Refresh script + Procedure wired to run Horizon scan first.
+
 ## [0.4.0] — 2026-06-01
 
 Crystallized the **design philosophy** as the project's organizing principle, made concrete and
