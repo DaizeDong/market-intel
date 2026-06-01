@@ -3,6 +3,20 @@
 All notable changes to the source matrix and skill are recorded here. Each refresh sweep appends a
 dated entry with per-domain added/removed/changed tools.
 
+## [0.7.0] — 2026-06-01
+
+**Stage C (part 1) — CI authority + liveness** (auto-merge intentionally still OFF):
+- `.github/workflows/gate.yml`: runs `verify_matrix.py` on every PR to main, independently of the
+  local machine that proposed the change — moving go/no-go authority off the proposer (P4 at the
+  infrastructure level). Set as a required status check to make a red gate block merge. Auto-merge is
+  deliberately NOT enabled yet: per EVOLUTION.md/red-team, it waits for Stage A's root fix
+  (machine-readable mirror block + cross-model audit) so the gate is a fact-gate, not a format-gate.
+- `.github/workflows/heartbeat.yml`: on the 5th monthly, if no refresh commit touched the matrix
+  that month (e.g. the local machine was off), opens an issue so the missed run is visible (P6).
+
+Remaining: Stage A root fix (mirror block + cross-model audit) → then Stage C auto-merge (tiered) →
+Stage D meta-loop. Ordering preserved: trust the gate before removing the human.
+
 ## [0.6.0] — 2026-06-01
 
 Toward the full closed loop — implementing the EVOLUTION.md stages in dependency order. This ships
