@@ -9,8 +9,14 @@
 > Prefer `-s user` scope for reusable sources. Prefer HTTP-transport sources on Windows.
 
 ## x-twitter `last_verified: 2026-06`
-- twitterapi.io: pay-per-use $0.15/1k tweets, $0.18/1k profiles, $0.1 free credit, .edu discount.
-  Get key at twitterapi.io → then add its MCP (see glama.ai/mcp kaitoInfra/twitterapi-io-mcp-server).
+- twitterapi.io: pay-per-use $0.15/1k tweets, $0.18/1k profiles, $0.1 free credit (no card),
+  .edu 50% rebate (email hello@twitterapi.io). Key from dashboard (Google login, no X dev account).
+  Official native MCP (HTTP, verified 2026-06): `claude mcp add --transport http --scope user
+  twitterapi-mcp https://mcp.twitterapi.io/mcp --header "Authorization: Bearer YOUR_API_KEY"`.
+  ⚠ Secret-config hygiene (lesson learned): `claude mcp add` ECHOES the header (key leaks into the
+  transcript) — for secret-bearing MCPs, edit `~/.claude.json` headers directly from clipboard
+  instead, and never `browser_snapshot` a dashboard page that reveals the key (use the copy button
+  → clipboard pipe; verify by length only). twitterapi.io rotates only once / 24h.
 - Apify tweet actors: pay-per-result ~$0.1–0.25/1k. Apify MCP: `https://mcp.apify.com` (HTTP).
 - twscrape (self-host, free): `pip install twscrape` — needs X account cookies + proxy.
 
