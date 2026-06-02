@@ -144,6 +144,25 @@ findings with tiered+dated+confidence-tagged claims, cross-verification verdicts
 matrix, risks & counter-evidence, explicit coverage gaps + "configure source X for deeper data",
 full source list.
 
+## Close the feedback loop (Step 5 — write what you observed)
+
+The refresh mechanism is open-loop unless real usage feeds back. So at the end of a real research
+run, append one line per source you actually touched to the repo's `metrics/live-runs.jsonl` (this
+reuses verdicts the guardrails above already produced — near-zero extra cost). This is the highest-
+value error signal: it tells the next refresh which matrix entries the real world just proved
+right or wrong.
+
+```jsonc
+{ "ts":"<UTC>", "domain":"x-twitter", "source":"d60/twikit", "route":"④",
+  "outcome":"verified|unverifiable|dead|fallback_used|price_mismatch",
+  "detail":"<what diverged, e.g. official price now $X vs shard $Y>",
+  "user_correction": null }   // set when the user manually corrected an entry — highest-weight truth
+```
+
+If you can't write the file (e.g. the repo isn't checked out), note the observations in your reply
+so they aren't lost. The refresh then reads these to prioritise which domains/sources to re-verify
+first (a source flagged `dead` in real use gets auto-nominated for the C4 deletion path next sweep).
+
 ## Progressive loading rules
 
 - SKILL.md (this file) is always loaded — keep it the only frequently-loaded content.
