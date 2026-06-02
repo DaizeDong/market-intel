@@ -7,7 +7,8 @@ new token monitoring, 加密/链上/套利.
 |---|---|---|---|---|
 | **CoinGecko MCP** | ① official | 15k+ coins price + GeckoTerminal on-chain DEX | connected (public no key) | best read-only price source |
 | CoinMarketCap MCP | ① official | quotes, TA, derivatives, narratives | connected + key | free 30/min; x402 pay-per-call |
-| **Etherscan MCP** | ① official | balances, tx, ABI, gas, 60+ chains | connected + free key | on-chain first pick |
+| **Etherscan MCP** | ① official | balances, tx, ABI, gas, 60+ chains | connected + free key | on-chain first pick; free-tier chain coverage cut ~10% 2026-05 (verified-contract + ABI endpoints stay free — info.etherscan.com) |
+| **Blockscout MCP** (blockscout/mcp-server 39★) | ① official | on-chain data across 3000+ chains: addresses, tx, blocks, contracts/ABI, view calls | connected (public endpoint, no key for dev) | free read-only; **backstops the Etherscan free-tier cut** on dropped chains |
 | Moralis / Covalent (GoldRush) | ① | multi-chain wallet/portfolio normalized | connected + key | 100+ chains normalized |
 | Nansen | ① | smart-money labels, token god mode | connected + key | unique labels, pricey |
 | GeckoTerminal API | ① | DEX OHLCV history to 1s, liquidity | via CoinGecko MCP | beats DexScreener (which has no history) |
@@ -16,7 +17,8 @@ new token monitoring, 加密/链上/套利.
 | funding-rates-mcp (Kukapay) | ① | cross-exchange funding-rate divergence table | connected | perp funding arb signal |
 
 **Default pick:** Monitor spreads → CoinGecko MCP + ccxt + funding-rates-mcp. On-chain analysis →
-Etherscan MCP + GeckoTerminal. Run arbitrage → Hummingbot + ccxt.
+Etherscan MCP + GeckoTerminal (+ **Blockscout MCP** free for chains Etherscan dropped from free tier).
+Run arbitrage → Hummingbot + ccxt.
 
 **Reality check:** public arbitrage bots/scripts basically don't profit; real edge = latency, order
 flow, gas/capital mgmt. Anything with private keys → small test wallet, never enable withdrawals.

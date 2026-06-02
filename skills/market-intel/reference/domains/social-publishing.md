@@ -9,7 +9,7 @@ LinkedIn free but approval wall (legal entity + vetting).
 
 | source | route | capability | detect | cost |
 |---|---|---|---|---|
-| **Buffer API** (+ MCP) | ① | 11 platforms, free tier works with API + MCP | connected + key | best value, free tier usable |
+| **Buffer API** (+ MCP) | ① | 11 platforms, free tier works with API + MCP | connected + key | best value; public API + hosted MCP officially launched 2026-05-27, on every plan incl. Free |
 | Ayrshare (+ MCP) | ② | 13+ platforms, multi-user SaaS | connected | $149/mo+; X creds自带 from 2026-03 |
 | Blotato (+ MCP) | ② | 9 platforms, native Claude Code MCP | connected + key | $29/mo, cheap personal |
 | Typefully API v2 | ① | text/thread first (X/LI/BS/Masto/Threads) | key | with subscription |

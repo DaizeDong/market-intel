@@ -1,0 +1,37 @@
+name: gate
+# Stage C (part 1): run the deterministic anti-regression gate in CI, independently of the local
+# machine that proposed the change. This moves go/no-go authority off the proposer (PHILOSOPHY P4:
+# the editor is never its own verifier). Set this as a REQUIRED status check in branch protection
+# to make a red gate block merge. Auto-merge stays OFF until Stage A's root fix + cross-model audit
+# land (see EVOLUTION.md preconditions).
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-matrix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # COVER/CHURN/CONST need to diff against base main
+      - run: git fetch origin main:main || true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run anti-regression gate
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # public repo: gh api repos/* needs only read
+          PYTHONIOENCODING: utf-8
+        run: python tools/verify_matrix.py --base main | tee gate-output.log
+      - name: Upload gate log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gate-log-${{ github.run_id }}
+          path: gate-output.log
+          retention-days: 90

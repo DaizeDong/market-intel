@@ -184,6 +184,35 @@ for d in fs_domains:
 if base_total and (base_total - cur_total) / base_total > COVER_GLOBAL_DROP:
     block("COVER", f"total source rows dropped {base_total}->{cur_total} (>{int(COVER_GLOBAL_DROP*100)}%)")
 
+# ---- CHURN (C7: incremental edits, not rewrite) + DELETE (C4: deletion needs a death-code) ----
+def git_diff(relpath):
+    return subprocess.run(["git", "diff", BASE, "--", relpath], cwd=ROOT,
+                          capture_output=True, text=True, encoding="utf-8").stdout
+
+DEATH_CODES = ("D-404", "D-STALE", "D-PRICE", "D-TOS", "D-SUPERSEDED")
+changelog_added = "\n".join(l[1:] for l in git_diff("CHANGELOG.md").splitlines()
+                            if l.startswith("+") and not l.startswith("+++"))
+for d in fs_domains:
+    rel = f"skills/market-intel/reference/domains/{d}.md"
+    diff = git_diff(rel)
+    if not diff.strip():
+        continue                                  # untouched shard
+    added = [l for l in diff.splitlines() if l.startswith("+") and not l.startswith("+++")]
+    removed = [l for l in diff.splitlines() if l.startswith("-") and not l.startswith("---")]
+    base_lines = len(git_show(BASE, rel).splitlines()) or 1
+    churn = (len(added) + len(removed)) / base_lines
+    if churn > 0.40:
+        block("CHURN", f"{d}: {int(churn*100)}% of lines changed (>40%) — looks like a rewrite, not an "
+                       f"incremental edit (C7); route to human review")
+    removed_rows = [l for l in removed
+                    if l.lstrip("-").strip().startswith("|") and "---" not in l
+                    and not re.search(r"\|\s*(source|repo|tool|name)\s*\|", l, re.I)]
+    if removed_rows:
+        added_text = "\n".join(added)
+        if not any(c in changelog_added or c in added_text for c in DEATH_CODES):
+            block("DELETE", f"{d}: source row(s) removed without a death-code (C4: "
+                            f"D-404/D-STALE/D-PRICE/D-TOS/D-SUPERSEDED) in CHANGELOG or an Avoid(dead) line")
+
 # ---- CONST (scope guard: automated run must not modify CONSTITUTION.md) ----
 const_path = os.path.join(ROOT, "CONSTITUTION.md")
 if not os.path.exists(const_path):
