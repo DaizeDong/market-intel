@@ -88,9 +88,27 @@ If the topic clearly depends on a source that is missing or not connected:
 > **Note: a newly added MCP only takes effect after you restart the session or `/mcp` reconnect —
 > it will NOT work this turn.** For now I'll proceed with a fallback source and flag the gap."
 
-Never block on install. Never fill in or echo the user's API key — have the user run the
-`-e KEY=$VAR` injection themselves; `~/.claude.json` stores keys in plaintext, so warn them not to
-commit/screenshot it. Prefer HTTP-transport sources on Windows (no local Node needed).
+Never block on install. Prefer HTTP-transport sources on Windows (no local Node/uv needed; stdio
+`npx`/`uvx` MCPs are flaky there).
+
+#### Secret-handling hygiene — HARD rules (learned the hard way; real runs leaked keys 3×)
+Configuring the tool yourself is fine and often expected — but a key must **never leak into the
+transcript** (it may sync to the user's cloud backup). Follow exactly:
+- **NEVER `browser_snapshot` a page that displays a key.** Provider dashboards and post-rotation
+  pages render the API key in **plaintext in the DOM** → the snapshot captures it. (Confirmed on
+  twitterapi.io rotation page AND Bright Data's API-keys table.) Instead: have the user click the
+  page's **copy button**, then read the OS clipboard (`powershell Get-Clipboard`) and pipe it;
+  verify by **length only**, never print the value.
+- **For secret-bearing MCPs, do NOT use `claude mcp add`** — it **echoes the `--header`/URL (with
+  the key) to stdout**. Edit `~/.claude.json` directly: a tiny python script reads the clipboard and
+  writes `mcpServers.<name>.headers.Authorization` (or the token-in-URL), with no echo.
+- **Mask tokens when verifying**: token-in-URL servers print the token in `claude mcp list` → pipe
+  through `sed -E 's/token=[^ &]*/token=***/'`.
+- **Rotation cooldowns**: if a key leaks, rotate it — but check the provider's cooldown (e.g.
+  twitterapi.io = once/24h). A truly transcript-clean key = the **user** rotates from their own
+  browser, not the agent.
+- Keys land plaintext in `~/.claude.json` — never commit/screenshot it. **The skill holds the
+  procedure, not the key.**
 
 ### Step 4 — Delegate execution
 
