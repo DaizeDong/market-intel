@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.8.0] — 2026-06-02
+
+Hardened the skill from real-run experience (patio-heaters research + tool configs) so the next
+user is faster and safer:
+
+- **Secret-handling HARD rules in SKILL.md Step 3** (we leaked keys 3× — now prevented for others):
+  never `browser_snapshot` a page that shows a key (dashboards/rotation pages render it plaintext —
+  confirmed on twitterapi.io + Bright Data); get keys via the page's copy button → clipboard →
+  direct `~/.claude.json` edit; **do NOT `claude mcp add` for secret-bearing MCPs** (it echoes the
+  header/URL); mask tokens in `claude mcp list` output; respect rotation cooldowns; a clean key =
+  the user rotates from their own browser.
+- **web-scraping shard**: for live e-commerce prices, **skip firecrawl/WebFetch → go straight to
+  browser(④)/Bright Data** (Amazon returns 500 to firecrawl; Taobao hides per-SKU price behind
+  login; Reddit returns empty to web search; playwright read the real Amazon price in one shot).
+  Bright Data row updated with verified hosted-HTTP MCP (free 5k/mo Rapid, no card).
+- **x-twitter shard**: X is a LOW-signal source for consumer/non-tech demand (patio-heater "Top" search
+  ~empty); route consumer-demand to 抖音/小红书/B站/Reddit/forums; keep X for tech/crypto/influencer.
+- **pricing-install.md**: verified Bright Data hosted-HTTP install command + secret-hygiene reminder.
+- **gate fix (verify_matrix.py C4)**: distinguish a MODIFIED table row (remove+add same source name) from a real DELETION — editing a row no longer false-trips the death-code block; genuine deletions still blocked (self-tested).
+
+
 All notable changes to the source matrix and skill are recorded here. Each refresh sweep appends a
 dated entry with per-domain added/removed/changed tools.
 

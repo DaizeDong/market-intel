@@ -31,7 +31,13 @@
 - Tavily: `claude mcp add --transport http tavily https://mcp.tavily.com/mcp/?tavilyApiKey=...`
   (free 1000 credits/mo).
 - Exa: remote MCP, free 1000/mo with key or 150/day no-key. Skill `exa-search` already present.
-- Bright Data: `@brightdata/mcp` — free 5000 req/mo, no card (Rapid mode).
+- Bright Data (verified 2026-06, **hosted HTTP, Windows-friendly**): add to `~/.claude.json`
+  `mcpServers.brightdata = {"type":"http","url":"https://mcp.brightdata.com/mcp?token=<API_TOKEN>"}`
+  (token = Bright Data dashboard → Settings → "Users and API keys" → API keys; **free 5000 req/mo
+  Rapid, no card**). ⚠ token is shown PLAINTEXT in that table — have the user copy it, do NOT
+  browser_snapshot the page; write the URL via direct .claude.json edit (NOT `claude mcp add`, which
+  echoes the URL+token). Verify: `claude mcp list | grep brightdata | sed -E 's/token=[^ &]*/token=***/'`.
+  Stdio alt: `npx @brightdata/mcp` with env `API_TOKEN`.
 - DataForSEO: official TS MCP github.com/dataforseo/mcp-server-typescript; $1 trial + free Sandbox, $50 min.
 
 ## ecommerce-arbitrage
