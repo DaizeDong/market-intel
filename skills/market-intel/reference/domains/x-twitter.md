@@ -2,6 +2,12 @@
 
 **Triage signals:** tweets, X/Twitter search, user/influencer analysis, viral tracking, 推特/X 舆情.
 
+> **Real-run lesson (2026-06): X is a LOW-signal source for consumer / non-tech demand research.**
+> For e.g. auto-modding/patio-heater, X "Top" search was nearly empty; the real demand discourse lives on
+> 抖音/小红书/B站/懂车帝 (China) and Reddit/vertical forums (US). Route consumer-demand questions there
+> (web/Bright Data), not X. X earns its keep for **tech/crypto/startup/founder** discourse, breaking
+> news, and named-account/influencer tracking — use twitterapi for those, not for "do people buy X".
+
 **Hard truth:** X killed anonymous scraping (login wall since 2024). Official free API is unusable;
 snscrape and public Nitter instances are effectively dead. Choice = who absorbs the
 account+proxy+login-wall cost.
