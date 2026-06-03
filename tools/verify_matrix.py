@@ -204,10 +204,18 @@ for d in fs_domains:
     if churn > 0.40:
         block("CHURN", f"{d}: {int(churn*100)}% of lines changed (>40%) — looks like a rewrite, not an "
                        f"incremental edit (C7); route to human review")
-    removed_rows = [l for l in removed
-                    if l.lstrip("-").strip().startswith("|") and "---" not in l
-                    and not re.search(r"\|\s*(source|repo|tool|name)\s*\|", l, re.I)]
-    if removed_rows:
+    def _row_name(line):
+        # first cell of a markdown table row = the source identity; strip markdown emphasis
+        cells = [c.strip() for c in line.lstrip("+-").strip().strip("|").split("|")]
+        return re.sub(r"[*`]", "", cells[0]).strip().lower() if cells else ""
+    def _is_src_row(line):
+        s = line.lstrip("+-").strip()
+        return s.startswith("|") and "---" not in s and not re.search(r"\|\s*(source|repo|tool|name)\s*\|", s, re.I)
+    added_names = {_row_name(l) for l in added if _is_src_row(l)}
+    # a removed table row whose source-name still appears in an added row = MODIFICATION, not a
+    # deletion (git diff shows an edited line as remove+add). Only a name that's GONE is a real delete.
+    genuinely_removed = [l for l in removed if _is_src_row(l) and _row_name(l) and _row_name(l) not in added_names]
+    if genuinely_removed:
         added_text = "\n".join(added)
         if not any(c in changelog_added or c in added_text for c in DEATH_CODES):
             block("DELETE", f"{d}: source row(s) removed without a death-code (C4: "
