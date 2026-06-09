@@ -5,12 +5,14 @@ headless CMS, 发博客/内容发布.
 
 | source | route | capability | detect | auth |
 |---|---|---|---|---|
-| **WordPress MCP** (gaupoit / official adapter) | ① | post CRUD + publish, media, categories | connected | Application Password |
-| **Ghost MCP** (@ryukimin/ghost-mcp) | ① | 46 tools incl members/newsletter/tiers, OAuth 2.1 | connected | Admin API Key |
+| **WordPress MCP** (WordPress/mcp-adapter, 1236★ official) | ① | post CRUD + publish, media, categories via Abilities API | connected | App Password; **D-SUPERSEDED** old gaupoit (0★) / archived Automattic/wordpress-mcp |
+| **Ghost MCP** (MFYDev/ghost-mcp, 199★) | ① | ~45 tools incl members/newsletter/tiers | connected | Admin API Key; old @ryukimin/ghost-mcp **D-404** (community repo, not official Ghost org) |
 | **Sanity hosted MCP** (mcp.sanity.io) | ① | 40+ tools, schema-aware, rules auto-update | connected (OAuth) | best headless experience, GA |
-| Contentful MCP (official) | ① | create/edit/publish, multi-locale | connected | CMA token |
+| Contentful MCP (contentful/contentful-mcp-server 58★) | ① | create/edit/publish, multi-locale | connected | CMA token; free 100k API calls/mo |
 | Strapi 5 native MCP | ① | baked-in, token-scoped per content type | self-host | admin token (no new media upload) |
 | Notion hosted MCP (mcp.notion.com) | ① | Notion-flavored markdown, token-efficient | connected (OAuth) | as CMS via status property |
+| **directus/mcp** (79★ official) | ① | official MCP for Directus (SQL-backed headless CMS, 36k★) | connected | for SQL-backed headless stacks |
+| **webflow/mcp-server** (132★ official) | ① | Webflow CMS collections/items/publish | connected (OAuth) | fills the Webflow gap (was a rate-limit footnote only) |
 | **Pipepost** (multi-platform) | ① | Dev.to+Hashnode+Ghost+WP+Medium + social broadcast | connected | handles canonical + SEO |
 | Static blog (Hugo/Astro) + claude-blog skill | — | write MD/frontmatter → git push → Vercel deploy | skill present | zero platform fee |
 

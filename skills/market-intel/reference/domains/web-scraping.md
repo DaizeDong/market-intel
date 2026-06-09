@@ -14,6 +14,7 @@ built-in WebSearch returns title+url only. Layer specialists on top.
 | DataForSEO | ② | cheap large-scale SERP | connected | ~$0.0006/query, 1/10 of SerpApi |
 | Apify | ② | 3000+ prebuilt actors (social/ecom/maps) | apify MCP | pin specific actors to avoid tool flood |
 | Crawl4AI | ③ free | OSS self-host LLM crawler, auto anti-bot | docker MCP | zero cost if you self-host |
+| **Patchright** (3.4k★) | ④ free | undetected-Playwright patch: passes Cloudflare/DataDome/Akamai/Kasada/F5 | `pip install patchright` / npm | free Apache-2.0; patches the browser fingerprint but needs a proxy for IP-reputation blocks (complements Bright Data) |
 
 **Default architecture:** WebFetch (static/PDF fallback) + Tavily/Exa (search) + Firecrawl (JS
 scrape) + Bright Data (hard targets) + DataForSEO (bulk SERP monitoring).
