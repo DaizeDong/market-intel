@@ -31,6 +31,15 @@ months). Re-run this protocol periodically to keep `domains/`, `volatile/pricing
    `domains/<domain>.md`; move/refresh price+install lines in `volatile/pricing-install.md`; bump
    that section's `last_verified: YYYY-MM`. Update `sources-index.md` only if a domain's top pick
    changed.
+3b. **Keep the L2 per-tool docs + install guide in sync** (added v0.10.0): for every tool **ADDed or
+   REPLACEd**, create/update `reference/tools/<slug>.md` (per-tool how-to: install + auth + usage +
+   踩坑, each fact gh-api/official-site verified) and add its row to `reference/tools/index.md`. For
+   every tool **deleted/tombstoned**, mark its doc `⚠ Avoid (dead)` (never silent-delete) and drop its
+   index row. Touch `reference/install-guide.md` only when install *mechanics* change (a new
+   prerequisite, an HTTP/stdio transport shift) — per-tool commands live in the tool doc +
+   `pricing-install.md`, not the overview. The gate's **TOOLS** check enforces index↔doc coverage and
+   **REPO/STAR** now also verify repos cited inside tool docs, so a hallucinated repo in a doc 404s →
+   BLOCK like any shard entry.
 4. **Record the diff** in `CHANGELOG.md` at the repo root (date + per-domain added/removed/changed),
    and bump the plugin `version` in `.claude-plugin/plugin.json`.
 5. **Commit + push** to the repo (DaizeDong/market-intel).
