@@ -1,5 +1,75 @@
 # Changelog
 
+## [0.10.0] — 2026-06-09
+
+Two big moves in one release: (1) a **new L2 per-tool documentation layer** — every tool in the
+matrix now has its own install + usage + 踩坑 how-to doc, plus a multi-level **install guide**; and
+(2) a **full 14-domain refresh sweep** (discovery + freshness + horizon) that corrected several
+broken/dead pointers and refreshed prices. Built and adversarially verified with parallel subagents.
+
+### New: per-tool docs + install guide (the "how-to" layer)
+
+- **`reference/tools/<slug>.md` — one how-to doc per matrix tool** (~130, growing). Each carries:
+  what-it-does/when-to-pick, exact install, auth/keys (+ secret hygiene for key-bearing), call
+  examples, **General experience & gotchas (踩坑)**, and failure-signals/fallback. Every repo + star
+  count is gh-api-verified; every price points at an official URL. Progressive-loading preserved:
+  read **only** the one tool doc you need, via the thin `reference/tools/index.md`.
+- **`reference/install-guide.md` — L0 install overview** (prerequisites, MCP transport types, the
+  `claude mcp add` vs direct-`~/.claude.json` mechanics, secret hygiene, Windows notes, per-domain
+  entry points). Three levels: L0 overview → L1 per-domain (`pricing-install.md`) → L2 per-tool doc.
+- **`reference/tools/index.md`** — thin tool index (slug → doc → domain → route → top-pick).
+- **Gate upgrade (`tools/verify_matrix.py`): new `TOOLS` check** enforces `tools/index.md` ↔
+  `tools/*.md` coverage (missing doc = BLOCK), and the existing **REPO/STAR** existence+tolerance
+  checks now also scan every tool doc — a hallucinated repo inside a doc 404s → BLOCK like any shard.
+- **SKILL.md + refresh-protocol.md**: progressive-loading rules + a refresh step (3b) so future
+  sweeps keep the per-tool docs and install guide in sync with the matrix.
+
+### Refresh sweep — confirmed matrix changes (verify-corrected; skeptic audit overrides discovery)
+
+- **3 REPLACEs (all fixed broken/dead pointers):**
+  - reddit-community: top pick **GridfireAI/reddit-mcp → karanb192/reddit-mcp-buddy** (702★, zero-setup
+    anon/app-id/login tiers; old pick stale 2025-03, read-only — **D-SUPERSEDED**, kept as fallback row).
+  - content-cms: **WordPress MCP pointer → WordPress/mcp-adapter** (1236★, official Abilities-API MCP);
+    old gaupoit (0★, stale) / Automattic/wordpress-mcp (archived) — **D-SUPERSEDED**.
+  - content-cms: **Ghost MCP → MFYDev/ghost-mcp** (199★, ~45 tools); old ryukimin/ghost-mcp returns
+    **404 — D-404**.
+- **18 ADDs** across domains, e.g.: DefiLlama free TVL/yields REST (crypto), yahoo-finance-mcp free
+  no-key route (finance), paper-search-mcp + PaperQA2 (frontier, fills biomed/full-text gaps),
+  vercel-labs/agent-browser + jo-inc/camofox-browser (browser), directus/mcp + webflow/mcp-server
+  (CMS), king-of-the-grackles/reddit-research-mcp (semantic subreddit discovery), Patchright
+  (anti-detect), Google Suggest + respectaso/ASO (seo), trend-pulse + google-news-trends-mcp (trends),
+  postiz-agent + langchain social-media-agent (social), ericosiu/ai-marketing-skills +
+  digital-marketing-pro (ready-skills). Each has a new `tools/<slug>.md`.
+- **Deaths / supersessions (death-coded):** Papers-with-Code API **sunset by Meta — D-404** (SOTA-
+  leaderboard signal lost; flagged as a gap, HF Papers trending = weak proxy); Polygon.io **rebranded
+  to Massive** (a rename — same API/keys, still the live Pro pick, NOT a death); ryukimin/ghost-mcp
+  **D-404**; GridfireAI/reddit-mcp & WordPress
+  gaupoit/Automattic **D-SUPERSEDED**; funding-rates-mcp (kukapay) & karpathy/arxiv-sanity-lite
+  **D-STALE** (kept, staleness-flagged); Smartlead MCP repo archived + its shard install hint was
+  wrong (corrected); Product Hunt MCP path + Bright Data Crunchbase product URL **D-404** (paths fixed).
+- **Verified price/policy refreshes:** Firecrawl free 500-one-time → **1,000 credits/mo**; PriceAPI
+  entry **€499 → €99/mo** (+ free 1k trial); CoinMarketCap free **30 → 50 req/min + 15k credits/mo**;
+  Nansen down to ~**$49/mo** (was up to ~$999); Semrush entry **$299 → ~$140/mo**; SerpApi free
+  **100 → 250/mo**; Blotato "9 platforms" → **20 social accounts**, API needs paid plan; Typefully
+  tiers (Free→Team $39); Trends MCP **15+ → 25+ sources**; Exploding Topics now trial-only (no free
+  tier); Etherscan free coverage cut ~10% + July-2026 record-cap change.
+- **Star refreshes (within tolerance):** marketingskills 31k→32.5k, claude-seo 7.7k→8.5k,
+  alirezarezvani/claude-skills 16.7k→17.5k (337 skills), awesome-claude-skills 62.7k→63.8k,
+  browser-use 96k→97.9k, idea-reality-MCP annotated 718★.
+- **discovery-state.md:** ~27 WATCHLIST + ~21 REJECT-LOG additions (incl. 5 discovery ADD/REPLACE
+  candidates the skeptic downgraded — x-tweet-fetcher, Botasaurus, Tosheroon, mcp-amazon-sp-api,
+  Beton→SKIP), and 6 new-angle Horizon signals.
+
+### Horizon scan (proposals only — human review; nothing auto-created)
+
+- **Prediction-market odds as queryable alt-data** (Polymarket/Kalshi/Manifold) → **WATCH**, the
+  strongest future NEW-DOMAIN candidate; promote only if it recurs next sweep with a maintained
+  no-key MCP. **Agentic-payments / x402** → WATCH (a payment rail, not a queryable source). All other
+  signals FOLD into existing domains. 0 NEW-DOMAIN, 0 NEW-SKILL auto-created (burden-of-proof unmet on
+  first sighting per anti-bloat H3).
+
+- **Version bump 0.9.0 → 0.10.0** (new doc layer + full refresh).
+
 ## [0.9.0] — 2026-06-09
 
 Added a new **frontier-research** domain — the skill's first non-commercial shard — filling the

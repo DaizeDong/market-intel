@@ -7,7 +7,8 @@ unusual options flow, 股票/期权/基本面. (Tools only — not investment ad
 |---|---|---|---|---|
 | **SEC EDGAR MCP** (stefanoamorelli) | ① free | 13M+ filings, 10-K/Q, XBRL, insider | connected, no key (User-Agent only) | zero cost, institutional-grade |
 | **FRED MCP** | ① free | 800k+ macro series (GDP/CPI/rates) | connected + free FRED key | zero cost |
-| Polygon.io | ① | realtime + 20yr history + WebSocket | connected + key | $29/mo unlimited (15min delay), $199 realtime |
+| Polygon.io (now **Massive**) | ① | realtime + 20yr history + WebSocket | connected + key | **REBRAND** → massive.com (301); still the live Pro pick — same API/keys; free 5/min, $29/$79/$199 tiers |
+| **Alex2Yang97/yahoo-finance-mcp** (306★) | ④ | free no-key price/fundamentals/options/news | `uvx` self-host | the only **free, no-key** route here; ⚠ yfinance scrapes Yahoo — not for prod/algo, IP-ban prone |
 | Finnhub / Twelve Data | ① | fundamentals + alt-data / multi-asset realtime | connected + key | best free tiers (60/min, 800/day) |
 | Financial Modeling Prep | ① | financials/valuation | key | free 250/day |
 | Unusual Whales MCP | ① | options flow, dark pool, congress trades | connected + paid token | differentiated arb signals |
