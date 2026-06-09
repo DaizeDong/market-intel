@@ -4,8 +4,9 @@
 
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-orange?style=flat)](https://docs.anthropic.com/en/docs/claude-code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Domains](https://img.shields.io/badge/%E6%BA%90%E7%9F%A9%E9%98%B5-12%20%E4%B8%AA%E6%96%B9%E5%90%91-green?style=flat)](skills/market-intel/reference/sources-index.md)
-[![Roadmap](https://img.shields.io/badge/Roadmap-v0.1.0%20alpha-purple?style=flat)](ROADMAP.md)
+[![Domains](https://img.shields.io/badge/Source%20Matrix-14%20domains-green?style=flat)](skills/market-intel/reference/sources-index.md)
+[![Tool docs](https://img.shields.io/badge/Tool%20docs-per--tool%20how--to-blue?style=flat)](skills/market-intel/reference/tools/index.md)
+[![Version](https://img.shields.io/badge/version-0.10.0-purple?style=flat)](CHANGELOG.md)
 
 [English](README.md) | [中文版](README_CN.md)
 
@@ -30,8 +31,8 @@ Claude Code 已经内置了 `deep-research`（fan-out → 抓取 → 验证 → 
 
 `market-intel` 就是补这个缺口的**瘦层**。它**只做三件别人不做的事**，其余全部委托出去：
 
-1. **分诊** —— 把商业课题映射到 12 个数据方向中的 1~N 个。
-2. **检测 + 引导安装** —— 用 `claude mcp list`（不是靠工具名瞎猜）查哪些专业 MCP 真的连上了；关键源缺失时，直接给你那条 `claude mcp add` 命令。
+1. **分诊** —— 把商业课题映射到 14 个数据方向中的 1~N 个。
+2. **检测 + 引导安装** —— 用 `claude mcp list`（不是靠工具名瞎猜）查哪些专业 MCP 真的连上了；关键源缺失时，直接给你那条 `claude mcp add` 命令——或打开它的**逐工具操作文档**（[`reference/tools/`](skills/market-intel/reference/tools/index.md)）查安装 + 鉴权 + 用法 + 踩坑，由[多层安装指南](skills/market-intel/reference/install-guide.md)引导。
 3. **质量护栏** —— 引用回验、源等级、多源印证、强制反方检索、显式缺口。
 
 真正的 fan-out、抓取、对抗式验证、带引用合成，**委托**给 `deep-research` / `research-lit`。不重造引擎，不抢触发。
@@ -73,14 +74,14 @@ git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market
 
 ---
 
-## 源矩阵（12 个方向）
+## 源矩阵（14 个方向）
 
-核心知识资产。每个方向分片标明首选工具、**信息壁垒路线**、如何检测、装什么。薄索引 → 只加载你需要的方向。
+核心知识资产。每个方向分片标明首选工具、**信息壁垒路线**、如何检测、装什么。薄索引 → 只加载你需要的方向。每个工具还配有一份 [`reference/tools/`](skills/market-intel/reference/tools/index.md) 下的**逐工具操作文档**（安装 + 鉴权 + 用法 + 踩坑），通过薄工具索引按需加载。
 
 | 方向 | 首选（壁垒路线） |
 |---|---|
-| [x-twitter](skills/market-intel/reference/domains/x-twitter.md) | twitterapi.io ② 转售 |
-| [reddit-community](skills/market-intel/reference/domains/reddit-community.md) | HN MCP ① 免费 · Reddit API ① |
+| [x-twitter](skills/market-intel/reference/domains/x-twitter.md) | twikit ④③ · twitterapi.io ② 转售 |
+| [reddit-community](skills/market-intel/reference/domains/reddit-community.md) | HN MCP ① · reddit-mcp-buddy ① |
 | [web-scraping](skills/market-intel/reference/domains/web-scraping.md) | Tavily/Exa + Firecrawl + Bright Data |
 | [ecommerce-arbitrage](skills/market-intel/reference/domains/ecommerce-arbitrage.md) | Keepa ① 官方 |
 | [finance-markets](skills/market-intel/reference/domains/finance-markets.md) | SEC EDGAR + FRED ① 免费 |
@@ -90,12 +91,13 @@ git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market
 | [content-cms](skills/market-intel/reference/domains/content-cms.md) | Sanity/WordPress MCP ① |
 | [leadgen-crm](skills/market-intel/reference/domains/leadgen-crm.md) | Apollo.io ① + Hunter ① |
 | [trends-discovery](skills/market-intel/reference/domains/trends-discovery.md) | GDELT + Product Hunt MCP ① 免费 |
+| [frontier-research](skills/market-intel/reference/domains/frontier-research.md) | arXiv API + HF Daily Papers ① 免费 |
 | [ready-skills](skills/market-intel/reference/domains/ready-skills.md) | coreyhaines31/marketingskills |
 | [browser-automation](skills/market-intel/reference/domains/browser-automation.md) | playwright MCP + browser-use / crawl4ai ④ |
 
 **壁垒路线：** ① 官方 API（合规、多为付费）· ② 转售 API（服务商承担壁垒、便宜、灰区）· ③ 自托管抓取（逆向 API、免费、自备账号+代理、有封号风险）· ④ **浏览器自动化 / 模拟人**——真实登录态浏览器（playwright MCP + 免费开源仓库）。**一等路线，不是脚注：** 常能拿到比付费 API 更丰富的数据（渲染后/登录后视图、API 不返回的字段），且零 API 成本。skill 在适用时**优先走路线 ④**，只在需要它无法回溯的历史数据（如 Keepa 历史价）、规模化可靠性、或合规（无封号风险）时才用 ①/②。
 
-精确安装命令和价格在 [`pricing-install.md`](skills/market-intel/reference/volatile/pricing-install.md)，每行带 `last_verified` 时间戳——引用前请到官网二次核实。
+三层安装指南：[`install-guide.md`](skills/market-intel/reference/install-guide.md)（L0 安装机制）→ [`pricing-install.md`](skills/market-intel/reference/volatile/pricing-install.md)（L1 逐方向命令 + 价格，带 `last_verified` 时间戳）→ [`tools/<slug>.md`](skills/market-intel/reference/tools/index.md)（L2 逐工具）。时效价格引用前请到官网二次核实。
 
 ---
 
