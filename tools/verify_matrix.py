@@ -26,6 +26,9 @@ DOMAINS = os.path.join(REF, "domains")
 INDEX = os.path.join(REF, "sources-index.md")
 PRICING = os.path.join(REF, "volatile", "pricing-install.md")
 SKILLMD = os.path.join(SKILL, "SKILL.md")
+TOOLS_DIR = os.path.join(REF, "tools")
+TOOLS_INDEX = os.path.join(TOOLS_DIR, "index.md")
+INSTALL_GUIDE = os.path.join(REF, "install-guide.md")
 
 STAR_TOL = 0.25          # display star annotations vs real, allow 25%
 COVER_GLOBAL_DROP = 0.10 # total source rows may not drop >10%
@@ -76,12 +79,39 @@ orphan = fs_domains - idx_domains
 if missing: block("STRUCT", f"index references missing shards: {sorted(missing)}")
 if orphan: warn("STRUCT", f"shards not in index: {sorted(orphan)}")
 
+# ---- TOOLS (per-tool doc coverage: tools/index.md <-> tools/*.md) ----
+# Every tool listed in tools/index.md must have a doc file, and vice versa. Deterministic, like
+# STRUCT. Missing doc = BLOCK (the index promised a how-to that isn't there); orphan doc = WARN.
+tool_docs_text = {}
+if os.path.isdir(TOOLS_DIR):
+    if not os.path.exists(TOOLS_INDEX):
+        block("TOOLS", "reference/tools/ exists but index.md is missing")
+        tools_idx = ""
+    else:
+        tools_idx = read(TOOLS_INDEX)
+    idx_slugs = set(re.findall(r"\(([a-z0-9][a-z0-9-]*)\.md\)", tools_idx))
+    fs_slugs = {f[:-3] for f in os.listdir(TOOLS_DIR) if f.endswith(".md") and f != "index.md"}
+    miss_docs = idx_slugs - fs_slugs
+    orphan_docs = fs_slugs - idx_slugs
+    if miss_docs: block("TOOLS", f"tools/index.md references missing docs: {sorted(miss_docs)}")
+    if orphan_docs: warn("TOOLS", f"tool docs not listed in index.md: {sorted(orphan_docs)}")
+    tool_docs_text = {s: read(os.path.join(TOOLS_DIR, s + ".md")) for s in fs_slugs}
+else:
+    warn("TOOLS", "reference/tools/ directory not present (no per-tool docs)")
+
 # ---- gather repos + per-shard text ----
 shard_text = {d: read(os.path.join(DOMAINS, d + ".md")) for d in fs_domains}
-all_text = "\n".join(shard_text.values()) + "\n" + (read(PRICING) if os.path.exists(PRICING) else "")
+# tool docs + install-guide are scanned alongside shards/pricing so the REPO existence + STAR
+# tolerance gates also cover per-tool docs (a hallucinated repo in a tool doc 404s -> BLOCK).
+all_text = ("\n".join(shard_text.values()) + "\n" + (read(PRICING) if os.path.exists(PRICING) else "")
+            + "\n" + "\n".join(tool_docs_text.values())
+            + "\n" + (read(INSTALL_GUIDE) if os.path.exists(INSTALL_GUIDE) else ""))
 # HIGH-CONFIDENCE repos (404 → hard BLOCK): explicit github.com URLs + star-annotated slugs.
-repo_set = set(REPO_RE.findall(all_text))
-repo_set |= {m.group(1) for m in STAR_LINE_RE.finditer(all_text)}
+# Strip a trailing ".git" — a `git clone https://github.com/o/r.git` URL is the same repo as o/r;
+# without this the literal "o/r.git" token 404s on the API (false positive).
+def _strip_git(r): return r[:-4] if r.endswith(".git") else r
+repo_set = {_strip_git(r) for r in REPO_RE.findall(all_text)}
+repo_set |= {_strip_git(m.group(1)) for m in STAR_LINE_RE.finditer(all_text)}
 repos = sorted(r for r in repo_set if not r.endswith(".md") and r.count("/") == 1 and "github.com" not in r)
 
 # HEURISTIC bare slugs (404 → WARN only): unstarred slug-like tokens in table rows. Catches likely
@@ -137,7 +167,7 @@ else:
             warn("REPO?", f"{r} not found on GitHub — if it's a repo it may be hallucinated/mistyped; "
                           f"if prose/npm-scope, ignore (mirror block will disambiguate)")
     # STAR tolerance on lines pairing a repo with an (NNk★)
-    for txt in list(shard_text.values()) + ([read(PRICING)] if os.path.exists(PRICING) else []):
+    for txt in list(shard_text.values()) + list(tool_docs_text.values()) + ([read(PRICING)] if os.path.exists(PRICING) else []):
         for ln in txt.splitlines():
             m = STAR_LINE_RE.search(ln)
             if not m:

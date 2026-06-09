@@ -11,9 +11,11 @@ LinkedIn free but approval wall (legal entity + vetting).
 |---|---|---|---|---|
 | **Buffer API** (+ MCP) | ① | 11 platforms, free tier works with API + MCP | connected + key | best value; public API + hosted MCP officially launched 2026-05-27, on every plan incl. Free |
 | Ayrshare (+ MCP) | ② | 13+ platforms, multi-user SaaS | connected | $149/mo+; X creds自带 from 2026-03 |
-| Blotato (+ MCP) | ② | 9 platforms, native Claude Code MCP | connected + key | $29/mo, cheap personal |
-| Typefully API v2 | ① | text/thread first (X/LI/BS/Masto/Threads) | key | with subscription |
+| Blotato (+ MCP) | ② | native Claude Code MCP | connected + key | Starter $29/mo = **20 social accounts** (not "9 platforms"); API needs a paid plan |
+| Typefully API v2 | ① | text/thread first (X/LI/BS/Masto/Threads) | key | Free $0 (1 post) / Starter $8 / Creator $19 / Team $39; API needs a paid plan |
 | **Postiz** (OSS, built-in MCP) | ③ self-host | 30+ platforms, agentic-first, no token storage | self-host URL | free OSS; v2.12+ needs Temporal |
+| **gitroomhq/postiz-agent** (278★) | ③ | official Postiz agent front-end (`npx skills add`) for 28+ platforms | self-host | lowers agent-vs-API friction over Postiz |
+| **langchain-ai/social-media-agent** (2.6k★) | ③ | source/curate/schedule agent w/ human-in-loop | self-host + key | content-pipeline tier above the post APIs; pairs w/ Buffer/Postiz |
 | Mixpost (OSS) | ③ self-host | 11 platforms, REST+n8n, buy-once | self-host | Lite free / Pro $269 one-time |
 | X single: EnesCinr/twitter-mcp, OpenTweet | ①/② | post+search / hosted no-dev-portal | connected | X API cost自负 / OpenTweet $11.99/mo |
 
@@ -28,9 +30,9 @@ ToS → use throwaway accounts; write/post is far more ban-prone than read. Veri
 
 | platform | repo | route | note |
 |---|---|---|---|
-| X | d60/twikit (4.4k★) + adhikasp/mcp-twikit | ③/④ | read+write+DM, ready MCP, free |
+| X | d60/twikit (4.5k★) + adhikasp/mcp-twikit | ③/④ | read+write+DM, ready MCP, free |
 | Instagram | subzeroid/instagrapi (6.3k★) | ③ | post图文/Reels/comment/DM, most active |
-| LinkedIn | stickerdaniel/linkedin-mcp-server (2.1k★) | ④ | ready MCP; ⚠ highest ban risk, small acct |
+| LinkedIn | stickerdaniel/linkedin-mcp-server (2.2k★) | ④ | ready MCP; ⚠ highest ban risk, small acct |
 | TikTok | davidteather/TikTok-Api (6.4k★) | ④ | Playwright-signed, scrape+search |
 | 小红书 | **xpzouying/xiaohongshu-mcp (14k★)** | ④ | browser + ready MCP, **can post notes** |
 | 中文多平台 | NanmiCoder/MediaCrawler (50k★) | ④ | Playwright, 小红书/抖音/B站/微博/快手/知乎/贴吧 |

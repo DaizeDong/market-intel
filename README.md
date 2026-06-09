@@ -4,8 +4,9 @@ A thin orchestration skill for commercial/market research. It triages your topic
 
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-orange?style=flat)](https://docs.anthropic.com/en/docs/claude-code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Domains](https://img.shields.io/badge/Source%20Matrix-12%20domains-green?style=flat)](skills/market-intel/reference/sources-index.md)
-[![Roadmap](https://img.shields.io/badge/Roadmap-v0.1.0%20alpha-purple?style=flat)](ROADMAP.md)
+[![Domains](https://img.shields.io/badge/Source%20Matrix-14%20domains-green?style=flat)](skills/market-intel/reference/sources-index.md)
+[![Tool docs](https://img.shields.io/badge/Tool%20docs-per--tool%20how--to-blue?style=flat)](skills/market-intel/reference/tools/index.md)
+[![Version](https://img.shields.io/badge/version-0.10.0-purple?style=flat)](CHANGELOG.md)
 
 [English](README.md) | [中文版](README_CN.md)
 
@@ -32,8 +33,8 @@ Claude Code already has a `deep-research` harness (fan-out → fetch → verify 
 
 `market-intel` is the **thin layer** that fills exactly that gap. It does **only three things nothing else does**, and delegates everything else:
 
-1. **Triage** — map a commercial topic to 1–N of 12 data domains.
-2. **Detect + guide install** — check which specialized MCP sources are actually connected (via `claude mcp list`, not unreliable tool-name guessing), and if a key source is missing, hand you the exact `claude mcp add` command.
+1. **Triage** — map a commercial topic to 1–N of 14 data domains.
+2. **Detect + guide install** — check which specialized MCP sources are actually connected (via `claude mcp list`, not unreliable tool-name guessing), and if a key source is missing, hand you the exact `claude mcp add` command — or open its **per-tool how-to doc** ([`reference/tools/`](skills/market-intel/reference/tools/index.md)) for install + auth + usage + gotchas, guided by a multi-level [install guide](skills/market-intel/reference/install-guide.md).
 3. **Quality guardrails** — citation verification, source tiers, multi-source corroboration, mandatory disconfirmation, explicit gaps.
 
 The actual fan-out, fetching, adversarial verification, and citation synthesis are **delegated** to `deep-research` / `research-lit`. No reinvented engine, no trigger fights.
@@ -75,29 +76,30 @@ What runs:
 
 ---
 
-## The source matrix (12 domains)
+## The source matrix (14 domains)
 
-The knowledge asset. Each domain shard names the best tool, its **barrier route**, how to detect it, and what to install. Thin index → load only the domain(s) you need.
+The knowledge asset. Each domain shard names the best tool, its **barrier route**, how to detect it, and what to install. Thin index → load only the domain(s) you need. Each tool also has a **per-tool how-to doc** under [`reference/tools/`](skills/market-intel/reference/tools/index.md) (install + auth + usage + 踩坑), reached on-demand via the thin tool index.
 
 | Domain | Top pick (barrier route) |
 |---|---|
-| [x-twitter](skills/market-intel/reference/domains/x-twitter.md) | twitterapi.io ② resale |
-| [reddit-community](skills/market-intel/reference/domains/reddit-community.md) | HN MCP ① free · Reddit API ① |
+| [x-twitter](skills/market-intel/reference/domains/x-twitter.md) | twikit ④③ · twitterapi.io ② resale |
+| [reddit-community](skills/market-intel/reference/domains/reddit-community.md) | HN MCP ① free · reddit-mcp-buddy ① |
 | [web-scraping](skills/market-intel/reference/domains/web-scraping.md) | Tavily/Exa + Firecrawl + Bright Data |
 | [ecommerce-arbitrage](skills/market-intel/reference/domains/ecommerce-arbitrage.md) | Keepa ① official |
 | [finance-markets](skills/market-intel/reference/domains/finance-markets.md) | SEC EDGAR + FRED ① free |
 | [crypto-defi](skills/market-intel/reference/domains/crypto-defi.md) | CoinGecko ① + ccxt |
 | [seo-keywords](skills/market-intel/reference/domains/seo-keywords.md) | GSC ① free + DataForSEO ② |
 | [social-publishing](skills/market-intel/reference/domains/social-publishing.md) | Buffer ① · Postiz OSS |
-| [content-cms](skills/market-intel/reference/domains/content-cms.md) | Sanity/WordPress MCP ① |
+| [content-cms](skills/market-intel/reference/domains/content-cms.md) | Sanity / WordPress MCP ① |
 | [leadgen-crm](skills/market-intel/reference/domains/leadgen-crm.md) | Apollo.io ① + Hunter ① |
 | [trends-discovery](skills/market-intel/reference/domains/trends-discovery.md) | GDELT + Product Hunt MCP ① free |
+| [frontier-research](skills/market-intel/reference/domains/frontier-research.md) | arXiv API + HF Daily Papers ① free |
 | [ready-skills](skills/market-intel/reference/domains/ready-skills.md) | coreyhaines31/marketingskills |
 | [browser-automation](skills/market-intel/reference/domains/browser-automation.md) | playwright MCP + browser-use / crawl4ai ④ |
 
 **Barrier routes:** ① official API (compliant, often paid) · ② resale API (provider absorbs the barrier, cheap, gray-area) · ③ self-host scrape (reverse-engineered API, free, accounts+proxies, ban risk) · ④ **browser automation / act-like-human** — real logged-in browser (playwright MCP + free OSS repos). **First-class, not a footnote:** often returns richer data (rendered/logged-in view, fields APIs hide) at zero API cost. The skill prefers route ④ over paid APIs when it fits, reaching for ①/② only for history it can't backfill (e.g. Keepa), scale reliability, or compliance.
 
-Exact install commands and prices live in [`pricing-install.md`](skills/market-intel/reference/volatile/pricing-install.md), each line `last_verified`-stamped — verify against the official site before quoting.
+Three install levels: [`install-guide.md`](skills/market-intel/reference/install-guide.md) (L0 mechanics) → [`pricing-install.md`](skills/market-intel/reference/volatile/pricing-install.md) (L1 per-domain commands + prices, `last_verified`-stamped) → [`tools/<slug>.md`](skills/market-intel/reference/tools/index.md) (L2 per-tool). Verify volatile prices against the official site before quoting.
 
 ---
 

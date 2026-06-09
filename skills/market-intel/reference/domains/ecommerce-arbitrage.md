@@ -7,9 +7,9 @@ arbitrage, cross-platform price compare, 选品/比价/套利.
 |---|---|---|---|---|
 | **Keepa** (+ Keepa MCP cosjef/BWB03) | ① official | **price history curve + BSR/sales history + Buy Box/stock** — irreplaceable | connected + KEEPA_API_KEY | low; €49/mo+ scales with tokens |
 | Amazon SP-API (private app) | ① official | your own cost/fees → profit calc | OAuth | private self-use = no dev fee |
-| Rainforest API | ② resale | real-time ASIN, Buy Box detection | connected | history weaker than Keepa |
+| Rainforest API (now trajectdata.com) | ② resale | real-time ASIN, Buy Box detection | connected | history weaker than Keepa; Hobbyist $23/mo |
 | eBay Browse/Finding API | ① official | item price, discounts, lowest-price compare | AppID | free, official |
-| PriceAPI | ② resale | Amazon + Google Shopping + eBay multi-source compare | connected | €499/mo start |
+| PriceAPI | ② resale | Amazon + Google Shopping + eBay multi-source compare | connected | now **Go €99/mo** (5k credits) + free 1k trial (was €499; €499 is now Starter tier) |
 | Oxylabs / Bright Data | ② resale | anti-bot ecom scrape, datasets | mcp connected | absorbs ToS risk |
 
 **Default pick:** Amazon arbitrage → Keepa (the unique foundation) + SP-API private for profit.
@@ -18,7 +18,7 @@ Cross-platform compare → PriceAPI, plus free official eBay/Shopify Storefront 
 ## ④ Browser/OSS route (free, self-host)
 | repo | route | note |
 |---|---|---|
-| **Cybrarist/Discount-Bandit** (690★) | ④ self-host | multi-store price tracker (Amazon/AliExpress/eBay) — **self-built Keepa**: it records history from your deploy day |
+| **Cybrarist/Discount-Bandit** (697★) | ④ self-host | multi-store price tracker (Amazon/AliExpress/eBay) — **self-built Keepa**: it records history from your deploy day |
 | omkarcloud/amazon-scraper (220★) | ④ | 24 Amazon sites, search/detail/reviews, built-in anti-detect browser |
 | playwright MCP | ④ | bespoke price/stock checks on any store, real rendered page |
 
