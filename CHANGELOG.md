@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.9.0] — 2026-06-09
+
+Added a new **frontier-research** domain — the skill's first non-commercial shard — filling the
+academic/paper gap. Previously the skill delegated ALL academic literature to `research-lit` with no
+source routing of its own; now AI-frontier scouting gets its own discovery layer (and still hands
+off deep synthesis to `research-lit`).
+
+- **New domain shard `domains/frontier-research.md`** (11-source table): arXiv API (+ blazickjp
+  arxiv-mcp-server), Hugging Face Daily Papers + Hub API (official HF MCP), Semantic Scholar Graph
+  API (citation velocity), Papers with Code (SOTA leaderboards), OpenReview (pre-publication reviewer
+  scores), GitHub trending (star velocity = adoption proxy), official AI-lab blogs
+  (OpenAI/Anthropic/DeepMind/Meta AI/Mistral/Qwen/DeepSeek), AINews (smol.ai) / The Batch / Import AI
+  roundups, alphaXiv / arxiv-sanity-lite, Connected Papers / ResearchRabbit — plus an explicit
+  **delegation row to the `research-lit` skill** for deep multi-paper synthesis (this domain is
+  SOURCE ROUTING/discovery, not a re-implementation of lit-review). Real-run lesson baked in: the
+  L1/L2 floor is arXiv + HF Daily Papers + official lab blogs + GitHub trending; X/social is L4 (a
+  lead, not evidence — cross-check via Semantic Scholar / Papers-with-Code, not retweet count).
+- **`sources-index.md`**: added the `frontier-research` triage row (AI/ML papers, arXiv, SOTA, new
+  models, conference, citations, 论文/前沿研究 → arXiv API + HF Daily Papers ① free).
+- **`pricing-install.md`**: added the `frontier-research` install section (`last_verified: 2026-06`)
+  — most sources are free / no-key (arXiv, HF read, Papers with Code, OpenReview); Semantic Scholar's
+  free key only lifts rate limits.
+- **Version bump 0.8.0 → 0.9.0** (new domain = minor); plugin.json description now notes the academic
+  frontier-research domain alongside the 12 commercial domains.
+
 ## [0.8.0] — 2026-06-02
 
 Hardened the skill from real-run experience (patio-heaters research + tool configs) so the next

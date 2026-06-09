@@ -90,6 +90,23 @@
 - App stores: `npm i google-play-scraper app-store-scraper` (free) or mobile-store-scraper-mcp (self-host).
 - Finnhub MCP: cfdude/mcp-finnhub (free 60/min key).
 
+## frontier-research `last_verified: 2026-06`
+Most sources are free / no-key (arXiv, HF read, Papers with Code, OpenReview).
+- arXiv: REST `http://export.arxiv.org/api/query` (free, no key). MCP: `uvx arxiv-mcp-server`
+  (blazickjp/arxiv-mcp-server). Be polite (~1 req / 3s).
+- Hugging Face: Daily Papers `https://huggingface.co/api/daily_papers` + Hub API (free, no key for
+  read). Official HF MCP `https://huggingface.co/mcp` (HF token only for write/private/gated).
+- Semantic Scholar: Graph API `https://api.semanticscholar.org/graph/v1` (free; request a free key
+  at semanticscholar.org/product/api to lift rate limits). MCP: search "semantic-scholar mcp".
+- Papers with Code: REST `https://paperswithcode.com/api/v1/` (free, no key).
+- OpenReview: API2 `https://api2.openreview.net` (free; openreview-py client `pip install openreview-py`).
+- GitHub: official github MCP (PAT) or REST for trending/releases/star velocity.
+- AI lab blogs / roundups: RSS where available + playwright MCP (no API) — OpenAI, Anthropic,
+  DeepMind, Meta AI, Mistral, Qwen, DeepSeek; AINews (smol.ai), The Batch, Import AI.
+- alphaXiv (browser) · arxiv-sanity-lite (`karpathy/arxiv-sanity-lite`, self-host free) ·
+  Connected Papers / ResearchRabbit (browser, no official API → playwright MCP).
+- Deep synthesis → delegate to the `research-lit` skill (don't re-implement lit-review here).
+
 ## browser-automation `last_verified: 2026-06` (stars verified via GitHub API 2026-06-01)
 General frameworks (all free, self-host):
 - browser-use: `pip install browser-use` — github.com/browser-use/browser-use (96k★)
