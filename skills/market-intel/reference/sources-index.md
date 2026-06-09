@@ -16,6 +16,7 @@ shard(s) in `domains/`. Do not read shards you didn't match.
 | content-cms | blog publish to WordPress/Ghost/Notion/Sanity, 发博客 | Sanity/WordPress MCP ① | `domains/content-cms.md` |
 | leadgen-crm | B2B leads, email find, company intel, CRM, 获客 | Apollo.io ① + Hunter ① | `domains/leadgen-crm.md` |
 | trends-discovery | Google Trends, Product Hunt, app store, 趋势/选题 | GDELT + Product Hunt MCP ① free | `domains/trends-discovery.md` |
+| frontier-research | AI/ML papers, arXiv, SOTA, new models, conference, citations, 论文/前沿研究 | arXiv API + HF Daily Papers ① free | `domains/frontier-research.md` |
 | ready-skills | "is there a ready skill for marketing/SEO/research" | coreyhaines31/marketingskills | `domains/ready-skills.md` |
 | **browser-automation** | API too costly/walled, want real-browser "act like human", free | playwright MCP + browser-use/crawl4ai | `domains/browser-automation.md` |
 
