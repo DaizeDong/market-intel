@@ -5,8 +5,8 @@ shard(s) in `domains/`. Do not read shards you didn't match.
 
 | domain | triage signals | top pick (barrier route) | shard |
 |---|---|---|---|
-| x-twitter | tweets, X sentiment, influencer, viral, 推特舆情 | twitterapi.io ② resale | `domains/x-twitter.md` |
-| reddit-community | Reddit/HN/Discord/forum pain points, 社区调研 | HN MCP ① free · Reddit API ① | `domains/reddit-community.md` |
+| x-twitter | tweets, X sentiment, influencer, viral, 推特舆情 | twikit ④③ free · playwright ④ (twitterapi.io ② resale if paid) | `domains/x-twitter.md` |
+| reddit-community | Reddit/HN/Discord/forum pain points, 社区调研 | HN MCP ① free · reddit-mcp-buddy ① | `domains/reddit-community.md` |
 | web-scraping | general SERP, crawl, JS site, break paywall, 抓取 | Tavily/Exa + Firecrawl + Bright Data | `domains/web-scraping.md` |
 | ecommerce-arbitrage | Amazon/eBay price, BSR, retail arbitrage, 选品比价 | Keepa ① official | `domains/ecommerce-arbitrage.md` |
 | finance-markets | stocks, options, fundamentals, SEC, macro, 股票 | SEC EDGAR + FRED ① free | `domains/finance-markets.md` |

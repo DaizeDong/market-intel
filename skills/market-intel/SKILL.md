@@ -187,6 +187,14 @@ first (a source flagged `dead` in real use gets auto-nominated for the C4 deleti
 - Read `reference/sources-index.md` at triage (thin).
 - Read `reference/domains/<domain>.md` only for triaged domains. **Never read the whole domains/
   directory.**
+- Read `reference/tools/index.md` (thin) to find a picked tool's doc slug; then read
+  `reference/tools/<slug>.md` **only for the specific tool you're about to use** — per-tool install +
+  auth + usage + 踩坑. **Never read the whole `tools/` directory** (that breaks progressive loading
+  — the whole point of per-tool docs is on-demand, one-at-a-time loading). The shard decides *which*
+  tool; the tool doc is the *how-to*.
+- Read `reference/install-guide.md` (L0 install mechanics: prerequisites, MCP transport, secret
+  hygiene, Windows) when setting up any source. It points down to L1 (`pricing-install.md`, per
+  domain) and L2 (`tools/<slug>.md`, per tool).
 - Read `reference/volatile/pricing-install.md` only when actually guiding an install — prices and
   commands there are time-stamped and may be stale; verify against the official site before use.
 

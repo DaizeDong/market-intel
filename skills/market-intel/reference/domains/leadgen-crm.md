@@ -11,7 +11,7 @@
 | ZoomInfo / Lusha | ① | enterprise database / mid-tier (free tier) | connected | ZoomInfo $15k+/yr; Lusha 40 free/mo |
 | People Data Labs | ① | $0.01/record, cheapest at volume | self-wrap (no MCP) | dev API-first |
 | **HubSpot / Salesforce / Attio** (official MCP) | ① | CRM read/write, log activity | connected | use whichever CRM you run |
-| Smartlead MCP (LeadMagic) | ① | 113+ tools, deliverability + warmup | connected + key | outreach send/sequence |
+| Smartlead MCP (LeadMagic) | ① | 113+ tools, deliverability + warmup | connected + key | outreach send/sequence; ⚠ repo archived 2025-07 — verify the npm install hint before relying |
 | ZeroBounce (official MCP) | ① | email verification, batch | connected + key | only mature verify MCP |
 | Bright Data Crunchbase MCP | ② | company intel, real-time public data | connected | free 5k/mo, legally tested |
 
@@ -22,10 +22,10 @@ ZeroBounce. Outreach → Smartlead. CRM → your CRM's official MCP. Min combo: 
 ## ④ Browser/OSS route (free, self-host)
 | repo | route | note |
 |---|---|---|
-| **gosom/google-maps-scraper** (4.2k★) | ④ self-host | local B2B leads: name/phone/site/**email**, **far lower risk than LinkedIn** |
+| **gosom/google-maps-scraper** (4.3k★) | ④ self-host | local B2B leads: name/phone/site/**email**, **far lower risk than LinkedIn** |
 | omkarcloud/google-maps-scraper (2.7k★) | ④ | 50+ fields incl email/socials + enrichment |
 | joeyism/linkedin_scraper (4.2k★) | ④ | Selenium + your login session; ⚠ highest ban risk, small batch only |
-| cullenwatson/StaffSpy (254★) | ④ | scrape company staff lists; ⚠ ToS/ban risk |
+| cullenwatson/StaffSpy (255★) | ④ | scrape company staff lists; ⚠ ToS/ban risk |
 
 **Default (free route):** for local-business B2B leads use **gosom/google-maps-scraper** (emails +
 phones, low legal risk). Avoid LinkedIn scraping when possible — if unavoidable use a throwaway acct.
