@@ -1,7 +1,7 @@
 {
   "name": "market-intel",
-  "version": "0.9.0",
-  "description": "Thin orchestration skill for commercial/market research. Triages a topic across 12 commercial data domains (X/Twitter, e-commerce, finance, crypto, SEO, social, content/CMS, lead-gen, trends, community, web-scraping, ready-made skills) plus an academic frontier-research domain (AI/ML papers, arXiv, SOTA, lab blogs), detects which specialized MCP sources are connected via `claude mcp list`, guides installing missing ones, and delegates the heavy fan-out/verify/synthesize to the built-in deep-research harness or research-lit. Ships a curated source matrix (best tool + barrier route + install command + cost) for each domain, with quality guardrails (citation verification, source tiers, multi-source corroboration, disconfirmation mandate) and a periodic refresh protocol.",
+  "version": "0.10.0",
+  "description": "Thin orchestration skill for commercial/market research. Triages a topic across 13 commercial data domains (X/Twitter, e-commerce, finance, crypto, SEO, social, content/CMS, lead-gen, trends, community, web-scraping, browser-automation, ready-made skills) plus an academic frontier-research domain (AI/ML papers, arXiv, SOTA, lab blogs), detects which specialized MCP sources are connected via `claude mcp list`, guides installing missing ones, and delegates the heavy fan-out/verify/synthesize to the built-in deep-research harness or research-lit. Ships a curated source matrix (best tool + barrier route + install command + cost) for each domain, a per-tool how-to doc library (install + usage + gotchas) with a multi-level install guide, and quality guardrails (citation verification, source tiers, multi-source corroboration, disconfirmation mandate) plus a periodic refresh protocol with a deterministic anti-regression gate.",
   "author": {
     "name": "DaizeDong"
   },

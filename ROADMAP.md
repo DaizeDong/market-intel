@@ -1,9 +1,9 @@
 # Roadmap
 
-## v0.1.0 (alpha) — current
+## v0.1.0 (alpha) — foundation
 
 - Thin orchestration layer: triage → detect (`claude mcp list`) → guide install → delegate.
-- 12-domain source matrix (thin index + per-domain shards + isolated volatile pricing/install).
+- 14-domain source matrix (thin index + per-domain shards + isolated volatile pricing/install).
 - 8 quality guardrails (citation verification, ≥2-source corroboration, tiers, no silent
   degradation, dated volatile data, disconfirmation mandate, conflict surfacing, explicit gaps).
 - Refresh protocol for keeping the matrix current.
@@ -19,6 +19,12 @@
       angles beyond the existing domains (not just better tools within them), with a fold/new-domain/
       new-skill decision gate, an anti-bloat watchlist (must recur across ≥2 scans), and human review
       for any structural addition. Scope evolves with the field, decay-guarded.
+- [x] **Per-tool doc layer + multi-level install guide (v0.10.0)** — every matrix tool now has a
+      `reference/tools/<slug>.md` how-to (what/install/auth/usage + General experience & gotchas/
+      failure-fallback), reached on-demand via a thin `tools/index.md`; an L0 `install-guide.md`
+      overview sits atop the L1 per-domain `pricing-install.md` and L2 per-tool docs. The gate gained a
+      **TOOLS** coverage check (index↔doc) and now also gh-api-verifies repos/stars cited inside tool
+      docs. The refresh protocol keeps the docs in sync each sweep (step 3b).
 
 ## Next — deferred pieces of the 5-subagent design
 
@@ -58,7 +64,7 @@
 
 | scope | cadence |
 |---|---|
-| full 12-domain sweep | quarterly |
+| full 14-domain sweep | quarterly |
 | volatile domains (x-twitter, web-scraping, social-publishing, crypto-defi) | monthly |
 | opportunistic single-shard fix | whenever a live run hits a dead/changed tool |
 
