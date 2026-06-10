@@ -30,6 +30,8 @@ current top pick (Discovery D3/D5). `first_seen` lets us measure "is it gaining 
 | tatumio/blockchain-mcp | crypto-defi | 14★ (MIT) | ① key | overlaps Moralis/Covalent multi-chain; no clear edge | 2026-06 |
 | Philidor-Labs/philidor-mcp | crypto-defi | 4★ (MIT, no-key) | ① no-key | novel niche (DeFi vault risk scoring, 700+ vaults) not in matrix; far too new | 2026-06 |
 | CoinStatsHQ/coinstats-mcp | crypto-defi | 14★ (MIT, free key) | ① free key | redundant w/ CoinGecko MCP for price/market; only edge = portfolio tracking | 2026-06 |
+| messari/skills (official) | crypto-defi | 5★ (gh-api 2026-06, created 2026-02) | ① | official Messari research-grade crypto market-intel skill — fills research/news gap vs price feeds; brand is L1-credible but repo adoption 5★ thin + capability unverified → verify before ADD | 2026-06 |
+| nextdev-labs/mcp (Agent Usability Index) | trends-discovery (meta) | 75★ (gh-api 2026-06, created 2026-06-03) | ① | rates APIs by agent-readiness — a source-SELECTION meta-tool, NOT a data feed; genuinely new+gaining but park until it proves a research use | 2026-06 |
 | ythx-101/x-tweet-fetcher | x-twitter | 862★ | ④ | discovery ADD→WATCH (skeptic): revives self-host Nitter+Playwright, but maintainer README admits fetch not proven E2E; users report fails (#67/#66/#61); 83% stars front-loaded in 5wk = star-farming smell | 2026-06 |
 | Panniantong/Agent-Reach | reddit-community | 24768★ | ④ | multi-platform keyless reader CLI (Reddit/X/YT/Bili/XHS); high star:fork ratio + cookie-auth ToS risk; CLI not MCP | 2026-06 |
 | omkarcloud/botasaurus | web-scraping | 4756★ | ③ | discovery ADD→WATCH: all-in-one anti-detect w/ Cloudflare bypass, but 83-day stale, force-pushed/squashed history, zero releases | 2026-06 |
