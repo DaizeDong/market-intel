@@ -8,6 +8,7 @@ check can't be performed (e.g. GitHub API unreachable), that's a BLOCK, not a pa
 Checks (the real failure modes of an unattended LLM refresh):
   STRUCT   every domain in sources-index.md has a shard file, and vice versa
   TOOLS    tools/index.md <-> tools/*.md coverage (missing doc = BLOCK, orphan doc = WARN)
+  REGISTRY tools/registry.json <-> index <-> docs 3-way (covers non-repo SaaS too; mismatch = BLOCK)
   REPO     every github.com/<owner>/<repo> in shards/pricing/tool-docs exists (gh api, fail-closed)
   STAR     where a repo and an (NNk★) annotation co-occur on a line, the count is within tolerance
   FRESH    every `last_verified:`/`Last verified:` is real + non-future (shards, pricing, AND tool docs)
@@ -234,6 +235,31 @@ if tool_docs_text:
         items = ", ".join(f"{r}({d})" for r, d in list(undoc.items())[:10])
         warn("DOCCOVER", f"{len(undoc)} live shard repo(s) have no per-tool doc — add tools/<slug>.md "
                          f"+ an index row (or tombstone the shard row): {items}")
+
+# ---- REGISTRY (machine-readable authoritative tool list — 3-way registry<->index<->doc) ----
+# Brings NON-GitHub SaaS/lib tools into a deterministic tracking net (DOCCOVER only sees repos).
+# registry.json is THE list of tools; the gate enforces it equals the doc files and the index slugs,
+# so a SaaS tool can't lose its doc or fall out of the index without a hard BLOCK.
+REGISTRY = os.path.join(TOOLS_DIR, "registry.json")
+if os.path.isdir(TOOLS_DIR) and 'fs_slugs' in dir():
+    if not os.path.exists(REGISTRY):
+        warn("REGISTRY", "tools/registry.json absent — SaaS/non-repo tools have no deterministic net")
+    else:
+        try:
+            reg = json.loads(read(REGISTRY))
+        except Exception as e:
+            block("REGISTRY", f"tools/registry.json is not valid JSON: {e}")
+            reg = {"tools": []}
+        reg_slugs = {t.get("slug") for t in reg.get("tools", []) if t.get("slug")}
+        no_doc = reg_slugs - fs_slugs
+        no_idx = reg_slugs - idx_slugs
+        no_reg = fs_slugs - reg_slugs
+        if no_doc: block("REGISTRY", f"registry lists tools with no doc file: {sorted(no_doc)}")
+        if no_idx: block("REGISTRY", f"registry lists tools missing from index.md: {sorted(no_idx)}")
+        if no_reg: block("REGISTRY", f"tool docs missing from registry (it is authoritative — add them): {sorted(no_reg)}")
+        for t in reg.get("tools", []):
+            if not t.get("domain"):
+                warn("REGISTRY", f"{t.get('slug')} has no domain in registry")
 
 # ---- METH ----
 skill = read(SKILLMD)
