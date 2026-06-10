@@ -1,5 +1,49 @@
 # Changelog
 
+## [0.10.2] — 2026-06-09
+
+Closes the last tracking gap: **non-GitHub SaaS tools** (59 of 151) now have a deterministic net too.
+
+- **`reference/tools/registry.json`** — a machine-readable authoritative tool registry: every tool
+  (89 repo + 59 saas + 3 lib) as `{slug, name, kind, repo, domain, top_pick}`. Derived from
+  index.md + the docs (not hand-written), so it can't drift.
+- **Gate (`tools/verify_matrix.py`) — new REGISTRY check (BLOCK)**: enforces `registry.json` ↔
+  `tools/index.md` ↔ `tools/*.md` three-way consistency. Because SaaS tools are listed in the
+  registry by slug, they can no longer lose their doc or fall out of the index without a hard BLOCK —
+  the gap the repo-based DOCCOVER net couldn't see. Validated: dropping a SaaS tool (twitterapi.io)
+  from the registry → BLOCK.
+- **Refresh protocol R1** upgraded to a **4-file atomic op** (shard + index + doc + registry); the
+  registry is the authoritative tool list, regenerated (not hand-edited) with:
+
+  ```python
+  # python3 - from repo root; regenerates reference/tools/registry.json from index.md + docs
+  import re,glob,json,os; from collections import Counter
+  T="skills/market-intel/reference/tools"; idx=open(f"{T}/index.md",encoding="utf-8").read()
+  dom=None; rows=[]
+  for ln in idx.splitlines():
+      h=re.match(r"^##\s+([a-z0-9-]+)\s*$",ln.strip())
+      if h: dom=h.group(1); continue
+      m=re.match(r"^- (★ )?\[[^\]]+\]\(([a-z0-9-]+)\.md\)",ln.strip())
+      if m and dom: rows.append((m.group(2),dom,bool(m.group(1))))
+  seen={}
+  for s,d,st in rows: seen[s]=(seen.get(s,(d,False))[0], seen.get(s,(d,False))[1] or st)
+  tools=[]
+  for s,(d,st) in seen.items():
+      p=f"{T}/{s}.md"; repo=None; kind="saas"; name=s
+      if os.path.exists(p):
+          t=open(p,encoding="utf-8").read()
+          tm=re.search(r"^#\s+Tool:\s*(.+)$",t,re.M); name=tm.group(1).strip() if tm else s
+          rm=re.search(r"github\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)",t)
+          if rm: repo=rm.group(1).removesuffix(".git"); kind="repo"
+          elif re.search(r"pip install|npm i |library|\(lib\)",t,re.I): kind="lib"
+      tools.append({"slug":s,"name":name,"kind":kind,"repo":repo,"domain":d,"top_pick":st})
+  tools.sort(key=lambda x:(x["domain"],x["slug"]))
+  json.dump({"count":len(tools),"by_kind":dict(Counter(t["kind"] for t in tools)),"tools":tools},
+            open(f"{T}/registry.json","w",encoding="utf-8"),ensure_ascii=False,indent=1)
+  ```
+
+- **Version 0.10.1 → 0.10.2.**
+
 ## [0.10.1] — 2026-06-09
 
 Anti-rot hardening so the new L2 doc layer can't silently decay or lose tracking across future

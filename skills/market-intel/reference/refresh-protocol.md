@@ -257,10 +257,13 @@ ROI 最高。其余域每轮至少跑角度②（GitHub）+ 角度③（社区�
 L2 逐工具文档（`reference/tools/<slug>.md`）+ L0 `install-guide.md` 是 v0.10.0 起的一等资产。迭代最易在
 这层出三种腐化：**孤儿文档 · 静默过期 · 丢追踪**。三道防线兜底：**确定性闸门否决 + 协议强制 + 周期独立审计**。
 
-### R1. 增删工具 = 三文件原子操作
+### R1. 增删工具 = 四文件原子操作
 新增一个工具 ⇒ 必须**同时**落：(a) 分片行 `domains/<域>.md`、(b) 索引行 `tools/index.md`、(c) 文档
-`tools/<slug>.md`。绝不允许只改其一。闸门 **TOOLS**（index↔doc，缺即 BLOCK）+ **DOCCOVER**（活跃分片仓库
-无对应文档即 WARN）会暴露漏建；DOCCOVER 虽是 WARN，本协议要求**清零后才落地**。
+`tools/<slug>.md`、(d) 机读清单 `tools/registry.json` 一条 `{slug,name,kind,repo,domain,top_pick}`。
+绝不允许只改其一。闸门三网兜底：**REGISTRY**（registry↔index↔doc 三方一致，**含非仓库 SaaS**，不符即
+BLOCK——这是 SaaS 工具的确定性追踪网）+ **TOOLS**（index↔doc，缺即 BLOCK）+ **DOCCOVER**（活跃分片仓库无
+文档即 WARN）。`registry.json` 是工具清单的**权威来源**，由 `index.md` + 文档**派生生成**（再生成脚本见
+CHANGELOG 0.10.2）——改完工具后重跑该脚本即可保持同步，不必手编。
 
 ### R2. 扫到一个域，复检该域的全部文档（不止变更项）
 旧步骤 3b 只更新「被改动」工具的文档，不变的会静默腐化。补足：每次 sweep 对**所扫域**的每份
