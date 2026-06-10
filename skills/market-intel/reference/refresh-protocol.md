@@ -37,9 +37,12 @@ months). Re-run this protocol periodically to keep `domains/`, `volatile/pricing
    every tool **deleted/tombstoned**, mark its doc `⚠ Avoid (dead)` (never silent-delete) and drop its
    index row. Touch `reference/install-guide.md` only when install *mechanics* change (a new
    prerequisite, an HTTP/stdio transport shift) — per-tool commands live in the tool doc +
-   `pricing-install.md`, not the overview. The gate's **TOOLS** check enforces index↔doc coverage and
-   **REPO/STAR** now also verify repos cited inside tool docs, so a hallucinated repo in a doc 404s →
-   BLOCK like any shard entry.
+   `pricing-install.md`, not the overview. **Also re-verify the swept domain's EXISTING docs (not just
+   changed ones) and bump each `## Last verified` only when actually re-checked** — full doctrine in
+   **§文档层防腐协议 (R1–R4)** below. The gate enforces this layer: **TOOLS** (index↔doc, BLOCK) +
+   **REPO/STAR** verify repos cited inside tool docs (a hallucinated doc repo 404s → BLOCK) +
+   **FRESH** rejects future doc dates + **STALE** WARNs docs unchecked >9mo + **DOCCOVER** WARNs a live
+   shard repo with no doc (catches lost tracking).
 4. **Record the diff** in `CHANGELOG.md` at the repo root (date + per-domain added/removed/changed),
    and bump the plugin `version` in `.claude-plugin/plugin.json`.
 5. **Commit + push** to the repo (DaizeDong/market-intel).
@@ -248,6 +251,34 @@ ROI 最高。其余域每轮至少跑角度②（GitHub）+ 角度③（社区�
 
 > 调度脚本 `a local refresh-market-intel.sh` 已实现 1/5/6 的编排骨架与 scope guard（拒绝越界改动）。
 > v1 闸门覆盖协议强制的格式（github URL + star 标注）；裸 slug 无标注的漏检由 ROADMAP 的「机读镜像块」补全。
+
+## 文档层防腐协议（anti-rot）—— 保证 L2 逐工具文档不因迭代而失效或丢追踪
+
+L2 逐工具文档（`reference/tools/<slug>.md`）+ L0 `install-guide.md` 是 v0.10.0 起的一等资产。迭代最易在
+这层出三种腐化：**孤儿文档 · 静默过期 · 丢追踪**。三道防线兜底：**确定性闸门否决 + 协议强制 + 周期独立审计**。
+
+### R1. 增删工具 = 三文件原子操作
+新增一个工具 ⇒ 必须**同时**落：(a) 分片行 `domains/<域>.md`、(b) 索引行 `tools/index.md`、(c) 文档
+`tools/<slug>.md`。绝不允许只改其一。闸门 **TOOLS**（index↔doc，缺即 BLOCK）+ **DOCCOVER**（活跃分片仓库
+无对应文档即 WARN）会暴露漏建；DOCCOVER 虽是 WARN，本协议要求**清零后才落地**。
+
+### R2. 扫到一个域，复检该域的全部文档（不止变更项）
+旧步骤 3b 只更新「被改动」工具的文档，不变的会静默腐化。补足：每次 sweep 对**所扫域**的每份
+`tools/<slug>.md` 复检——`gh api` 复核仓库存活 + star、抓官网复核头条价格——**仅在真正复检后**才把
+`## Last verified: YYYY-MM` 推进到当月。闸门 **STALE**（>9 月未检 → WARN，按最旧优先点名复检清单）+
+**FRESH**（禁未来日期，防「名新实旧」）。**禁止不复检就改日期**（C8 时间只前进 + 诚实原则）。
+
+### R3. 死亡 = 墓碑，不是删除（保住追踪链）
+工具死亡（死亡码 D-404/D-STALE/D-PRICE/D-TOS/D-SUPERSEDED）时：分片行进 `⚠ Avoid (dead, D-xxx)` 墓碑、
+索引行去星或标注、**文档保留并在顶部加死亡横幅**（不要删文件）——死条目才不会被下一轮重新「幻觉」回来，
+追踪链不断。**改名（rebrand，如 Polygon→Massive）不是死亡**：保留为 live、标 REBRAND，别误套死亡码。
+
+### R4. 经验必须真实，禁止编造
+文档的「General experience & gotchas / 踩坑」只能来自：分片沉淀的真实运行教训、`metrics/live-runs.jsonl`
+反馈、或本轮实跑/实抓所得——**绝不凭模型记忆编造**（C1/C6），所有 star/价格实测带 URL。每轮 sweep 派一个
+**零上文的独立审计 subagent**（仿 `citation-audit` 模式）抽检若干文档：核对仓库存在性、star 容差、价格、
+以及 shard↔doc↔index↔pricing 四者自洽，发现即修。`metrics/live-runs.jsonl` 是经验的活水——真实调研中触到
+新坑就回写一行，下轮据此把对应 `tools/<slug>.md` 的踩坑段加厚。
 
 ## Trigger
 
