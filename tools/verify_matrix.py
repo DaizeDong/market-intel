@@ -6,13 +6,16 @@ Exit 0 = matrix may land; exit non-zero = BLOCK (caller must not commit/push). F
 check can't be performed (e.g. GitHub API unreachable), that's a BLOCK, not a pass.
 
 Checks (the real failure modes of an unattended LLM refresh):
-  STRUCT  every domain in sources-index.md has a shard file, and vice versa
-  REPO    every github.com/<owner>/<repo> referenced actually exists (gh api, fail-closed)
-  STAR    where a repo and an (NNk★) annotation co-occur on a line, the count is within tolerance
-  FRESH   every `last_verified: YYYY-MM` is a real, non-future month
-  METH    SKILL.md still contains the 8 numbered guardrails, L1/L5 tiers, and ①②③④ route legend
-  COVER   vs git main baseline: total source rows didn't drop >10%, no shard lost >30% of its rows
-  CONST   CONSTITUTION.md exists and was not modified by this run (scope guard)
+  STRUCT   every domain in sources-index.md has a shard file, and vice versa
+  TOOLS    tools/index.md <-> tools/*.md coverage (missing doc = BLOCK, orphan doc = WARN)
+  REPO     every github.com/<owner>/<repo> in shards/pricing/tool-docs exists (gh api, fail-closed)
+  STAR     where a repo and an (NNk★) annotation co-occur on a line, the count is within tolerance
+  FRESH    every `last_verified:`/`Last verified:` is real + non-future (shards, pricing, AND tool docs)
+  STALE    (WARN) a tool doc not re-verified in >9 months is nominated for re-check (anti-rot)
+  DOCCOVER (WARN) a github repo in a LIVE (non-tombstone) shard row with no per-tool doc (anti-lost-tracking)
+  METH     SKILL.md still contains the 8 numbered guardrails, L1/L5 tiers, and ①②③④ route legend
+  COVER    vs git main baseline: total source rows didn't drop >10%, no shard lost >30% of its rows
+  CONST    CONSTITUTION.md exists and was not modified by this run (scope guard)
 
 Usage: python tools/verify_matrix.py [--no-net] [--base main]
 Run from the repo root (~/market-intel).
@@ -180,13 +183,57 @@ else:
             if real == 0 or abs(claimed - real) / real > STAR_TOL:
                 block("STAR", f"{repo}: claims {claimed_k}k★ but API says {real} (>{int(STAR_TOL*100)}% off)")
 
-# ---- FRESH ----
+# ---- FRESH (shards/pricing: `last_verified:` · tool docs: `Last verified:`) ----
 import datetime
-this_month = datetime.date.today().strftime("%Y-%m")
+today = datetime.date.today()
+this_month = today.strftime("%Y-%m")
+def _ym_to_months(ym): return int(ym[:4]) * 12 + int(ym[5:7])
+this_m = _ym_to_months(this_month)
+STALE_MONTHS = 9          # a per-tool doc unchecked this long is nominated for re-verification (WARN)
 for m in re.finditer(r"last_verified:\s*(\d{4})-(\d{2})", all_text):
     ym = f"{m.group(1)}-{m.group(2)}"
     if ym > this_month:
         block("FRESH", f"last_verified {ym} is in the future")
+# Per-tool doc freshness: every doc must carry a `Last verified: YYYY-MM`; future = BLOCK (a lie),
+# >STALE_MONTHS old = WARN (surfaced so a sweep re-verifies it — closes the silent-rot gap).
+stale_docs = []
+for slug, txt in tool_docs_text.items():
+    fm = re.search(r"Last verified:\s*(\d{4})-(\d{2})", txt)
+    if not fm:
+        warn("FRESH", f"tools/{slug}.md has no 'Last verified: YYYY-MM' line")
+        continue
+    ym = f"{fm.group(1)}-{fm.group(2)}"
+    if ym > this_month:
+        block("FRESH", f"tools/{slug}.md 'Last verified {ym}' is in the future")
+    elif this_m - _ym_to_months(ym) > STALE_MONTHS:
+        stale_docs.append((slug, ym))
+if stale_docs:
+    worst = sorted(stale_docs, key=lambda x: x[1])
+    shown = ", ".join(f"{s}({y})" for s, y in worst[:10])
+    warn("STALE", f"{len(stale_docs)} tool doc(s) not re-verified in >{STALE_MONTHS}mo — re-check "
+                  f"repo/price + bump 'Last verified' when next sweeping their domain: {shown}"
+                  f"{' …' if len(stale_docs) > 10 else ''}")
+
+# ---- DOCCOVER (coverage net: every repo in a LIVE shard row should have a per-tool doc) ----
+# Surfaces "added a shard tool but forgot its tools/<slug>.md" — the tracking gap that TOOLS
+# (index<->doc) cannot see. WARN, not BLOCK: prose / cross-domain / tombstone repos would false-block.
+if tool_docs_text:
+    documented = {_strip_git(r).lower() for txt in tool_docs_text.values() for r in REPO_RE.findall(txt)}
+    TOMB = ("avoid", "dead", "d-404", "d-stale", "d-supersed", "~~", "deprecated", "(404)")
+    undoc = {}
+    for d, txt in shard_text.items():
+        for ln in txt.splitlines():
+            s = ln.strip()
+            if not s.startswith("|") or "---" in s or any(t in s.lower() for t in TOMB):
+                continue
+            for r in REPO_RE.findall(ln):
+                r = _strip_git(r).lower()
+                if r not in documented:
+                    undoc.setdefault(r, d)
+    if undoc:
+        items = ", ".join(f"{r}({d})" for r, d in list(undoc.items())[:10])
+        warn("DOCCOVER", f"{len(undoc)} live shard repo(s) have no per-tool doc — add tools/<slug>.md "
+                         f"+ an index row (or tombstone the shard row): {items}")
 
 # ---- METH ----
 skill = read(SKILLMD)

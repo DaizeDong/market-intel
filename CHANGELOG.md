@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.10.1] — 2026-06-09
+
+Anti-rot hardening so the new L2 doc layer can't silently decay or lose tracking across future
+refreshes (the failure mode of an unattended self-maintaining system). No matrix content change.
+
+- **Gate (`tools/verify_matrix.py`) — 3 new safety nets:**
+  - **FRESH now covers tool docs**: every `tools/<slug>.md` must carry a `Last verified: YYYY-MM`;
+    a future date is a BLOCK (prevents "looks fresh, isn't"). Missing line = WARN.
+  - **STALE (WARN)**: a tool doc not re-verified in >9 months is named (oldest first) so the next
+    sweep re-checks it — closes the silent-rot gap (docs were freshness-untracked before).
+  - **DOCCOVER (WARN)**: a github repo in a LIVE (non-tombstone) shard row with no per-tool doc is
+    flagged — catches "added a shard tool but forgot its doc", the lost-tracking gap that the
+    index↔doc TOOLS check couldn't see.
+- **Refresh protocol — new `文档层防腐协议 (anti-rot)` section (R1–R4):** R1 add/remove a tool = an
+  atomic 3-file op (shard + index + doc); R2 each sweep re-verifies the swept domain's EXISTING docs
+  (not just changed ones) and bumps `Last verified` only when actually re-checked (honest dates, C8);
+  R3 death = tombstone-not-delete (keeps the tracking trail; rebrand ≠ death); R4 gotchas must come
+  from real runs / shard lessons / `live-runs.jsonl` — never invented, with an independent zero-context
+  audit subagent spot-checking shard↔doc↔index↔pricing each sweep.
+- **Version 0.10.0 → 0.10.1.**
+
 ## [0.10.0] — 2026-06-09
 
 Two big moves in one release: (1) a **new L2 per-tool documentation layer** — every tool in the
