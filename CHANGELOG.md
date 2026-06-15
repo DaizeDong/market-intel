@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.10.4] — 2026-06-15
+
+Sister-skill integration: cross-references to **[DaizeDong/shopping-aggregator](https://github.com/DaizeDong/shopping-aggregator)**, a newly-authored consumer-shopping-price-compare orchestration skill that fills a gap surfaced by the 2026-06-15 user research run. Net: +1 domain (routing-only), +1 ready-skills row, +2 README cross-links, no tool churn, no shard breakage.
+
+- **`reference/domains/consumer-price-compare.md`** (new) — routing-only shard. Documents the boundary: market-intel handles broad commercial research + seller-side ecommerce-arbitrage; shopping-aggregator handles the consumer buy decision (multi-retailer landed-cost, history via Keepa/Camelcamelcamel/慢慢买, coupon stacks via Capital One Shopping/Karma/购物党, deal discovery via Slickdeals/Flipp/什么值得买, Honey 2026 trust event). When triage hits this domain, defer to the sister skill rather than fan out — per P5 (delegate, don't reinvent).
+- **`reference/sources-index.md`** — added consumer-price-compare row (15 domains total).
+- **`reference/domains/ready-skills.md`** — added a top row for shopping-aggregator with install command; reframed the ecosystem judgment line ("consumer shopping was a gap until 2026-06").
+- **`README.md` + `README_CN.md`** — added a "Sister skill" callout section above the source matrix, bumped the matrix count badge to 15, added the consumer-price-compare row to the matrix table, added a Sister-skill shield badge. The seller-side ecommerce-arbitrage row is annotated "(seller-side)" to make the consumer/seller split explicit.
+- No tool-doc changes; no tools added/removed/retombstoned. The matrix is monotonic (+1 domain, +0 dead, +0 silent change) per P3.
+
 ## [0.10.3] — 2026-06-15
 
 Minor doctrine-aligned edits prompted by a review of the Horizon (Thysrael/Horizon) news-aggregator — which **confirmed the skill's boundary rather than expanding it**. Net: **0 new features**; 1 watchlist entry + 2 one-line guardrail/doc sharpenings. Rejected (with reasons): OpenBB as a tool (aggregator over in-matrix providers yfinance/FRED/FMP → trips the D4 套壳工具 filter, duplicates the skill's own delegation role per P5); an AI relevance-scoring/threshold prune (conflicts head-on with guardrails #4/#7/#8 + P6 — silent degradation, and an LLM 0–10 with no deterministic check is the P4 confident-fabrication failure mode); a built-in digest/monitor mode (P5 scope creep — reconstructs Horizon's orchestration+distribution spine and duplicates `/schedule` + `discord_relay` + `feishu-notify`; per H3 a new mode is human-approval-only). Established doctrine for a Horizon-shaped orchestration product is to FOLD it as a delegation back-end (`discovery-state.md` "Deep-research-as-a-service" precedent), not clone it.
