@@ -19,6 +19,7 @@ shard(s) in `domains/`. Do not read shards you didn't match.
 | frontier-research | AI/ML papers, arXiv, SOTA, new models, conference, citations, 论文/前沿研究 | arXiv API + HF Daily Papers ① free | `domains/frontier-research.md` |
 | ready-skills | "is there a ready skill for marketing/SEO/research" | coreyhaines31/marketingskills | `domains/ready-skills.md` |
 | **browser-automation** | API too costly/walled, want real-browser "act like human", free | playwright MCP + browser-use/crawl4ai | `domains/browser-automation.md` |
+| **consumer-price-compare** | "I'm buying X — find me the cheapest", coupon stack, 历史价, 比价, 凑单 | DaizeDong/shopping-aggregator (sister skill — delegates here) | `domains/consumer-price-compare.md` |
 
 Barrier-route legend (see each shard for detail):
 ① official API — compliant, often paid/limited, no ban risk

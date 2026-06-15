@@ -4,9 +4,10 @@
 
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-orange?style=flat)](https://docs.anthropic.com/en/docs/claude-code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Domains](https://img.shields.io/badge/Source%20Matrix-14%20domains-green?style=flat)](skills/market-intel/reference/sources-index.md)
+[![Domains](https://img.shields.io/badge/Source%20Matrix-15%20domains-green?style=flat)](skills/market-intel/reference/sources-index.md)
 [![Tool docs](https://img.shields.io/badge/Tool%20docs-per--tool%20how--to-blue?style=flat)](skills/market-intel/reference/tools/index.md)
-[![Version](https://img.shields.io/badge/version-0.10.0-purple?style=flat)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.10.4-purple?style=flat)](CHANGELOG.md)
+[![Sister skill](https://img.shields.io/badge/sister-shopping--aggregator-yellow?style=flat)](https://github.com/DaizeDong/shopping-aggregator)
 
 [English](README.md) | [中文版](README_CN.md)
 
@@ -74,7 +75,21 @@ git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market
 
 ---
 
-## 源矩阵（14 个方向）
+## 姊妹 skill — 消费侧特化
+
+对于**消费者购物比价**（Amazon / eBay / Walmart / Target / 淘宝 / 京东 价格对比 + Keepa /
+Camelcamelcamel / 慢慢买 历史价 + Capital One Shopping / Karma / 购物党 优惠码 + Honey 2026
+信任事件），market-intel 委托给姊妹 skill：
+**[`shopping-aggregator`](https://github.com/DaizeDong/shopping-aggregator)**。market-intel
+管广义商业调研+卖家侧 ecommerce-arbitrage；shopping-aggregator 管消费者购买决策。两个 skill 可
+共存——见 [`consumer-price-compare`
+shard](skills/market-intel/reference/domains/consumer-price-compare.md) 路由逻辑。
+
+```
+/plugin install github:DaizeDong/shopping-aggregator
+```
+
+## 源矩阵（15 个方向）
 
 核心知识资产。每个方向分片标明首选工具、**信息壁垒路线**、如何检测、装什么。薄索引 → 只加载你需要的方向。每个工具还配有一份 [`reference/tools/`](skills/market-intel/reference/tools/index.md) 下的**逐工具操作文档**（安装 + 鉴权 + 用法 + 踩坑），通过薄工具索引按需加载。
 
@@ -83,7 +98,7 @@ git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market
 | [x-twitter](skills/market-intel/reference/domains/x-twitter.md) | twikit ④③ · twitterapi.io ② 转售 |
 | [reddit-community](skills/market-intel/reference/domains/reddit-community.md) | HN MCP ① · reddit-mcp-buddy ① |
 | [web-scraping](skills/market-intel/reference/domains/web-scraping.md) | Tavily/Exa + Firecrawl + Bright Data |
-| [ecommerce-arbitrage](skills/market-intel/reference/domains/ecommerce-arbitrage.md) | Keepa ① 官方 |
+| [ecommerce-arbitrage](skills/market-intel/reference/domains/ecommerce-arbitrage.md) | Keepa ① 官方（卖家侧） |
 | [finance-markets](skills/market-intel/reference/domains/finance-markets.md) | SEC EDGAR + FRED ① 免费 |
 | [crypto-defi](skills/market-intel/reference/domains/crypto-defi.md) | CoinGecko ① + ccxt |
 | [seo-keywords](skills/market-intel/reference/domains/seo-keywords.md) | GSC ① 免费 + DataForSEO ② |
@@ -94,6 +109,7 @@ git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market
 | [frontier-research](skills/market-intel/reference/domains/frontier-research.md) | arXiv API + HF Daily Papers ① 免费 |
 | [ready-skills](skills/market-intel/reference/domains/ready-skills.md) | coreyhaines31/marketingskills |
 | [browser-automation](skills/market-intel/reference/domains/browser-automation.md) | playwright MCP + browser-use / crawl4ai ④ |
+| [consumer-price-compare](skills/market-intel/reference/domains/consumer-price-compare.md) | **委托给姊妹 skill** shopping-aggregator |
 
 **壁垒路线：** ① 官方 API（合规、多为付费）· ② 转售 API（服务商承担壁垒、便宜、灰区）· ③ 自托管抓取（逆向 API、免费、自备账号+代理、有封号风险）· ④ **浏览器自动化 / 模拟人**——真实登录态浏览器（playwright MCP + 免费开源仓库）。**一等路线，不是脚注：** 常能拿到比付费 API 更丰富的数据（渲染后/登录后视图、API 不返回的字段），且零 API 成本。skill 在适用时**优先走路线 ④**，只在需要它无法回溯的历史数据（如 Keepa 历史价）、规模化可靠性、或合规（无封号风险）时才用 ①/②。
 
