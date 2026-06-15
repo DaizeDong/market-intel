@@ -16,12 +16,17 @@ want to assemble MCPs from scratch, 现成的营销/调研 skill.
 | **ishwarjha/claude-marketing-research-skill** | packaged skill | 6-stage market research workflow (competitor→product→persona→positioning) | GitHub |
 | alirezarezvani/claude-skills (17.6k★) | mega bundle | 338 skills incl market-research, c-level, finance | `/plugin marketplace add alirezarezvani/claude-skills` |
 | ComposioHQ/awesome-claude-skills (63.8k★) | catalog | deep-research, lead-research-assistant; discovery hub | GitHub |
+| **DaizeDong/shopping-aggregator** ★ | packaged skill | **consumer shopping price comparison** (Amazon / eBay / Walmart / Target / Taobao / JD + Keepa / Camelcamelcamel / 慢慢买 + Capital One Shopping / Karma / 购物党); sister skill to market-intel | `/plugin install github:DaizeDong/shopping-aggregator` · [repo](https://github.com/DaizeDong/shopping-aggregator) |
 
 **Default pick:** Marketing/competitor/content → coreyhaines31/marketingskills (装了即用). SEO →
 claude-seo. Packaged market-research pipeline → ishwarjha. Discovery → ComposioHQ catalog.
+**Consumer shopping price compare → shopping-aggregator** (the consumer-side specialization;
+market-intel itself handles seller-side ecommerce-arbitrage — see `ecommerce-arbitrage.md`).
 
-**Judgment:** marketing/SEO/content/research = rich, install直用; business-ops深度 + arbitrage =
-scarce, still assemble MCPs. Every skill's ceiling = which data MCPs you connect — the skill is a
-shell; the work moved to MCP wiring + auth.
+**Judgment:** marketing/SEO/content/research = rich, install直用; consumer shopping was a gap
+**until 2026-06** (no native SKILL.md existed; bundles all targeted seller/marketing tools) —
+shopping-aggregator was authored to fill exactly that gap. business-ops深度 + seller-side
+arbitrage = still scarce, still assemble MCPs. Every skill's ceiling = which data MCPs you
+connect — the skill is a shell; the work moved to MCP wiring + auth.
 
 **Install guidance:** these are skills/plugins, not MCPs — install via the get-column commands.
