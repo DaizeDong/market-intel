@@ -38,6 +38,13 @@ Before doing anything, decide if this skill even applies:
   feeds, on-chain data, SEO metrics, social sentiment, lead data) → continue below. This is the
   only case where this skill earns its keep.
 
+> **Recurring / digest use:** this skill is one-shot by design. To watch a topic over time, wrap it
+> in a user-owned `/schedule` routine (or `/loop`) — the routine owns cadence, watchlist, and
+> delivery (`the local discord relay` / the `feishu-notify` skill); market-intel just runs
+> its normal workflow on each fire and emits its standard report. Do **not** build
+> monitoring/distribution *into* the skill — that's an orchestration-product job, not the seam this
+> skill owns (`PHILOSOPHY.md` P5).
+
 ## Workflow
 
 ### Step 1 — Triage
@@ -133,7 +140,9 @@ main context never holds N long reports.
    quote). Mark each `✓verified / ⚠unverifiable / ✗dead`. Drop `✗dead`; demote quote-less numbers
    to "unverified." A plausible URL is not a verified source.
 2. **≥2 independent sources for decision-grade claims.** "Independent" = not syndicated from the
-   same origin. Label confidence: high = ≥2 independent L1/L2 sources + verified; medium = 2
+   same origin — treat byline/wire-service reprints (AP/Reuters/PR-Newswire pickups, identical
+   verbatim quotes, the same press release) as **one** source, not several; the corroboration count
+   must reflect that merge. Label confidence: high = ≥2 independent L1/L2 sources + verified; medium = 2
    sources incl. secondary, or 1 primary; low = single/secondary/unverified.
 3. **Source tiers.** Tag every source L1 first-party/official · L2 independent third-party ·
    L3 interested party (vendor/marketing) · L4 UGC/anonymous · L5 fallback web / model inference.
