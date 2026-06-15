@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.3] — 2026-06-15
+
+Minor doctrine-aligned edits prompted by a review of the Horizon (Thysrael/Horizon) news-aggregator — which **confirmed the skill's boundary rather than expanding it**. Net: **0 new features**; 1 watchlist entry + 2 one-line guardrail/doc sharpenings. Rejected (with reasons): OpenBB as a tool (aggregator over in-matrix providers yfinance/FRED/FMP → trips the D4 套壳工具 filter, duplicates the skill's own delegation role per P5); an AI relevance-scoring/threshold prune (conflicts head-on with guardrails #4/#7/#8 + P6 — silent degradation, and an LLM 0–10 with no deterministic check is the P4 confident-fabrication failure mode); a built-in digest/monitor mode (P5 scope creep — reconstructs Horizon's orchestration+distribution spine and duplicates `/schedule` + `discord_relay` + `feishu-notify`; per H3 a new mode is human-approval-only). Established doctrine for a Horizon-shaped orchestration product is to FOLD it as a delegation back-end (`discovery-state.md` "Deep-research-as-a-service" precedent), not clone it.
+
+- **`reference/volatile/discovery-state.md`** — logged "public Telegram channels as alt-data" to the new-angle watchlist (FOLD candidate; verdict deferred to the next Discovery sweep per H2/H3 + C9). Telegram is genuinely uncovered as a *data source* (in-matrix only as a notification channel), but a new social/messaging territory is human-PR-gated on ≥3 API-verified readers + recurrence — not a hand-add.
+- **`SKILL.md` guardrail #2** — one-clause sharpening: byline/wire-service reprints (AP/Reuters/PR-Newswire pickups, identical verbatim quotes, same press release) count as **one** source; corroboration count must reflect the merge. Enforces the existing "independent = not syndicated from the same origin" rule without adding a synthesis pass.
+- **`SKILL.md`** — added a 3-line note that recurring/digest use is achieved by wrapping the one-shot skill in a user-owned `/schedule`/`/loop` routine (routine owns cadence + delivery), keeping monitoring/distribution out of the thin layer per P5.
+
 ## [0.10.2] — 2026-06-09
 
 Closes the last tracking gap: **non-GitHub SaaS tools** (59 of 151) now have a deterministic net too.
