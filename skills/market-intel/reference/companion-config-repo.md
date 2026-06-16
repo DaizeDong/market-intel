@@ -309,14 +309,42 @@ git diff --cached --name-only | grep -E "\.env$" | grep -v "\.template$" \
 # 10. git add tools/<slug>/ ; git commit ; git push   (secrets/ is auto-excluded)
 ```
 
-## Why "private" matters
+## Two storage modes (Mode A vs Mode B)
 
-A leaked API key in a public repo is harvested by bots within seconds — public GitHub is
-continuously scanned. Even **private repos can leak** through forks, OAuth-token compromises,
-accidental visibility flips, and cached mirrors. So:
+The spec recognizes two valid ways to store the actual secret values:
+
+- **Mode A** — secrets `*.env` files **committed** alongside templates in the (private)
+  repo. Single source of truth, `git clone` is the full backup + bootstrap. Appropriate
+  when the repo is genuinely private and all keys are data-API tier from providers NOT in
+  GitHub's Secret Scanning Partnership (most read-only data APIs qualify: Tavily, Etherscan,
+  FRED, Finnhub, CoinGecko, etc.).
+- **Mode B** — secrets `*.env` files **gitignored**; real values backed up via cloud-storage
+  sync, encrypted USB, or a dedicated secret-management tool. Appropriate when keys come
+  from partnership providers (OpenAI `sk-`, Anthropic `sk-ant-`, AWS `AKIA`, Stripe
+  `sk_live_`, GitHub `ghp_`, Slack `xox`, etc.) — those WILL be auto-revoked by GitHub
+  Secret Scanning even in private repos.
+
+Either mode is conformant; see [`companion-config-spec.md`](companion-config-spec.md) §5.3
+for the full trade-off analysis.
+
+### Defense-in-depth posture under Mode A
+
+A leaked API key in a **public** repo is harvested by bots within seconds. Even **private
+repos can leak** through forks, OAuth-token compromises, accidental visibility flips, and
+cached mirrors — but for low-stakes data-API keys the residual risk is acceptable in
+exchange for the simpler workflow. Mitigations:
+
+- The repo is **private**.
+- The repo's `secrets/README.md` declares Mode A explicitly so future maintainers / agents
+  know what to expect.
+- If you ever need to add a partnership-provider key, switch that key (and only that key,
+  or the whole repo) to Mode B before committing.
+
+### Defense-in-depth posture under Mode B
 
 - **`secrets/` is gitignored** (primary defense).
-- **CI gate scans for typical key patterns on every push** (defense in depth).
+- Optional **CI gate** scans for typical key patterns on every push (defense in depth) —
+  recommended when the repo has multiple contributors.
 - The repo itself is **private** (third layer).
 - Real secrets live on **local filesystem + an out-of-band backup** (cloud sync, encrypted
   drive, etc.), never on GitHub.

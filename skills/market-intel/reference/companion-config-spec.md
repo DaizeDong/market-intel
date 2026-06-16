@@ -260,12 +260,54 @@ UTF-8 **without BOM**. Plain `KEY=VALUE` lines. Values:
 - MAY use forward slashes for filesystem paths on Windows (avoid backslash JSON escape
   issues when values are substituted into `claude.json.template`).
 
-### 5.3 Backup model
+### 5.3 Storage modes (Mode A vs Mode B)
 
-Real secret values MUST be backed up out-of-band (cloud sync folder, encrypted USB, or a
-secret-management tool — user's choice). The spec deliberately does NOT mandate a specific
-backup mechanism. `scripts/backup-secrets.sh` and `scripts/restore-from-onedrive.sh` are
-conventional but not required.
+The spec recognizes **two valid storage modes**. Either is conformant; pick based on
+threat model.
+
+#### Mode A — committed to the (private) repo
+
+- `secrets/*.env` is **committed** alongside templates.
+- **Pros**: single source of truth; `git clone` + `apply.py` is the full new-machine
+  bootstrap; git history is the backup.
+- **Cons**: GitHub data-breach / OAuth-token compromise / accidental-public-flip / forking
+  by a collaborator all expose the keys. GitHub Secret Scanning Partnership scans private
+  repos too — partner providers (OpenAI `sk-`, Anthropic `sk-ant-`, AWS `AKIA`, Stripe
+  `sk_live_`, GitHub `ghp_`, Slack `xox`, etc.) are notified on detection and may
+  **auto-revoke** the key.
+- **When appropriate**: the repo is genuinely private (no collaborators), all keys are
+  data-API tier from non-partnership providers (Tavily, Etherscan, FRED, Finnhub,
+  CoinGecko, etc.), and the user accepts the residual risk for the simpler workflow.
+- **When NOT appropriate**: any partnership-provider key. Those WILL auto-revoke.
+
+#### Mode B — gitignored + out-of-band backup
+
+- `secrets/*.env` is **gitignored**; real values backed up via cloud-storage sync, encrypted
+  USB, or a dedicated secret-management tool.
+- **Pros**: keys never enter git; no GitHub exposure surface; safe to add collaborators.
+- **Cons**: bootstrap is two-step (`git clone` + restore).
+- **Required `.gitignore` patterns under Mode B**:
+  ```
+  secrets/*
+  !secrets/README.md
+  !secrets/.gitkeep
+  *.env
+  !*.env.template
+  !env.template
+  claude.json
+  .claude.json
+  ```
+
+#### Declaring the mode
+
+A conforming repo's `secrets/README.md` SHOULD state which mode it uses at the top so future
+maintainers / agent consumers know whether to expect `*.env` files in git or not.
+
+### 5.4 Backup
+
+- **Mode A**: git is the backup (pushing to a private remote covers durability).
+- **Mode B**: backup mechanism is the user's choice. `scripts/backup-secrets.sh` +
+  `scripts/restore-from-onedrive.sh` are conventional helpers but not required.
 
 ---
 
