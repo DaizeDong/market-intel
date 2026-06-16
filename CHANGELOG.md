@@ -1,5 +1,66 @@
 # Changelog
 
+## [0.15.0] — 2026-06-16
+
+End-to-end restore-pipeline audit by 4 parallel forks (cold-start sim / per-tool depth
+test / scripts black-box / security posture). Implements all C-tier recommendations.
+
+### Spec v1.1 (additive, backward-compat)
+
+- **`reference/companion-config-spec.md`** §3.1 — `transport` enum expands to include
+  `"rest"` (REST-only credentials, no MCP) and `"python-lib"` (installable Python
+  libraries). `expires` and `rotate_after` documented as OPTIONAL fields for
+  credential-lifecycle tracking. `health_last` gains values `credential_ready` /
+  `verified` / `installed`. v1 consumers ignore unknown fields per the existing
+  forward-compat rule — no migration needed.
+- Spec status header bumped: `Spec version: 1.1`.
+
+### README rewrite — "Now what?" routing block
+
+- **`README.md`** gains a 3-row routing table right under Install: pick by intent (use
+  the skill / install first MCP / set up companion repo) and you're told the next file
+  to open. Addresses the cold-start audit's #1 friction (L0→L3 ladder was buried).
+
+### Companion-config-repo.md — 3-file MVS skeleton
+
+- New section "Minimum viable conformant repo (3 files)" near top — gives the smallest
+  spec-conformant repo shape (`.gitignore` + empty `registry.json` + `tools/.gitkeep`) so
+  new users can validate tooling against the spec before committing real secrets.
+
+### Stub for `stackexchange` tool doc
+
+- **`reference/tools/stackexchange.md`** (NEW) — covers raw Stack Exchange REST API
+  (no MCP exists). Key insight: registering an App raises rate limit 300 → 10k req/day per
+  IP. Indexed under `reddit-community` in `tools/index.md`. Closes the gap where the
+  companion repo's `stackexchange` slug had no matrix-side doc.
+
+### env.template gotcha pointer footer
+
+- All 26 `tools/<slug>/env.template` files in the companion config repo (DaizeDong's
+  reference instance) gain a footer: `# Gotchas + full how-to: see ../market-intel/...
+  /reference/tools/<slug>.md`. A new user filling out an env file is now signposted to
+  the gotcha catalog (per-tool docs traditionally held those; env.templates didn't).
+
+### Companion config repo v0.9.0 (separate release in DaizeDong/market-intel-config)
+
+The companion-repo side of this audit shipped as its own v0.9.0 — see that repo's
+CHANGELOG for: `_account-info.env` Mode-B-header purge + `_credentials.env` split,
+`.gitignore` `*.jsonl` block, `apply.py --list-rest-only`, `verify.sh` fuzzy slug match,
+`install-libs.sh` for Python libs, Mode-A guards on backup/restore scripts,
+`new-machine.md` Mode A/B branching, `secret-rotation.md` transcript-leak section,
+6 transcript-leaked tokens get `rotate_after: "2026-09-16"` in `registry.json`.
+
+### Files touched
+
+- `reference/companion-config-spec.md` (transport enum + expires + rotate_after)
+- `reference/companion-config-repo.md` (MVS skeleton section)
+- `reference/tools/stackexchange.md` (NEW)
+- `reference/tools/index.md` (stackexchange row)
+- `README.md` + `README_CN.md` (Now-what block + version badge)
+- `CHANGELOG.md`, `plugin.json`
+
+No matrix-structure changes. Audit-driven hygiene release.
+
 ## [0.14.0] — 2026-06-16
 
 Comprehensive **anti-automation + onboarding gotcha rollup** from two real batch-registration
