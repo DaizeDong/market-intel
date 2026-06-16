@@ -24,6 +24,7 @@ Endpoints/tools cover time series (OHLC bars at various intervals), realtime quo
 - **"Free realtime" caveat (shard):** for any non-included market the free tier is delayed/EOD; verify the timestamp before treating a quote as live.
 - **Paid pricing confirmed 2026-06** (Grow $79 / Pro $229 / Ultra $999) — still re-verify before committing spend, prices rot.
 - Multi-asset breadth is the draw; for SEC fundamentals use EDGAR, for macro use FRED.
+- **Google OAuth signup is instant, key is plaintext-visible in DOM** (confirmed 2026-06-16) — `twelvedata.com/register` → Google OAuth → straight to `/account/api-keys` where the key is rendered as plaintext text in the page (no masking, no copy-only button). **Reading via `browser_evaluate` pipes the value into the agent transcript.** Have the user click the page's own Copy button instead, and pipe through `Get-Clipboard`. Format is 32-char hex.
 
 ## Failure signals & fallback
 Failure looks like: HTTP 429 / "API limit reached" (800/day or 8/min hit), delayed data on a non-included market (plan gate), or a 401 on a bad key. **Fallbacks:** higher free rate + alt-data → **Finnhub** (60/min); deep history / WebSocket / volume → **Polygon.io**; fundamentals/filings → **SEC EDGAR**; macro → **FRED**.

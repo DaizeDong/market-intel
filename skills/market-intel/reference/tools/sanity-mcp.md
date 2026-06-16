@@ -24,6 +24,9 @@ Tools cover document create/patch/publish, schema introspection, GROQ query, and
 - OAuth scope is per-project/per-org; if you're in the wrong org the tools connect but return empty/permission errors — confirm the active project.
 - Drafts vs. published is a real distinction in Sanity (`drafts.` prefix); "I created it but it's not live" usually means you created a draft and never published.
 - **SEO命门:** if Sanity feeds a site that also syndicates, set canonical on the rendered front-end.
+- **8-step onboarding wizard before any token can issue** (confirmed 2026-06-16) — `/get-started` walks useCase → referralSource → javascriptLevel → projectType → projectName → technologies → isIntegratingExisting → isMigratingCms. Radios use `sr-only` (visually hidden) inputs under cosmetic labels; clicks must hit `label[for=...]`, not the `<input>`. Sticky page header intercepts `playwright.click` events — fall back to JS `.click()` on the label. **Project must exist before any API token can be created.**
+- **Robot Token UI is per-project**, at `/organizations/<orgId>/project/<projectId>/api/tokens`. Generate with role = `Editor` for read+write (`Viewer` = read-only, `Developer` = same+manage CORS/webhooks). Both Project ID (e.g. `a3lrf522`) and Organization ID (e.g. `obe3my3wm`) are needed when calling the API — record both in `secrets/sanity.env`.
+- **Free Growth Trial = 30 days**, then converts to Personal (free, public datasets only). Trial gives access to AI Assist + Comments + Scheduled drafts; if you depend on those past day 30 budget for paid Growth.
 
 ## Failure signals & fallback
 `! Needs authentication` in `claude mcp list` (OAuth not completed) or empty results (wrong org/project). Fallback within domain: **WordPress MCP** for a blog backend, or **Contentful MCP** as the other major headless option (multi-locale).

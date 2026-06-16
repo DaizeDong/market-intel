@@ -25,6 +25,8 @@ Via MCP: search questions by keyword/tag, fetch a question's accepted/top answer
 - **Question score ≠ demand** — a high-score question signals a common technical snag, which can be a *feature opportunity*, but don't read it as market size.
 - Tag-scoped search is much sharper than free-text — use `tagged=<tag>` to cut noise.
 - Free official API, so per CONSTITUTION C2 prefer it over any paid dev-sentiment source.
+- **OAuth-app registration is fully headless-friendly** (confirmed 2026-06-16) — sign in to `stackapps.com` with Stack Exchange's Google login → `Register an application` at `/applications/register` → fill app name + description + URL + accept terms → submit creates a Client ID (the OAuth app number, e.g. 39160). Then on the app page click **Generate new API Key** → name + expiry (`Never` is option index 4) → key is shown ONCE in a dialog, masked except last 4 chars in the visible cell but the full 28-char value is reachable via `navigator.clipboard.writeText` from a hidden readonly input. **Key raises rate limit 300→10,000/day per IP** — confirmed by `quota_remaining: 9999` on first call.
+- The "API Key" (rate-limit raiser) and "OAuth Client Secret" (user-context auth) are separate — the key alone gives anonymous-read 10k/day; the secret is only needed for user-write ops you probably don't want.
 
 ## Failure signals & fallback
 Failure looks like: HTTP 400 `throttle_violation` (quota hit — add the SE key or wait for the daily reset), the 0★ wrapper failing to connect (drop to the REST API directly), or empty results on a niche tag (broaden the query / drop the tag filter). **Fallbacks:** call the SE REST API directly; for broader developer sentiment switch to **mcp-hn**; for subreddit-level technical complaints use **reddit-mcp-buddy**.
