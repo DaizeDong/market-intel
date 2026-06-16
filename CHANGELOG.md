@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.10.6] — 2026-06-16
+
+Strengthens the companion-config-repo coupling in three ways without compromising the
+private/personal nature of per-user companion repos:
+
+- **SKILL.md** — adds a substantial new section under Step 3's secret-handling block:
+  "Where the user's keys + install state live: the COMPANION CONFIG REPO". Documents the
+  discovery convention ($MARKET_INTEL_CONFIG env → ~/CodesSelf/market-intel-config/ →
+  ~/.config/market-intel-config/), the canonical directory structure (tools/<slug>/,
+  secrets/<slug>.env, registry.json, scripts/apply.py, etc.), and how Step 3 should use it
+  (read registry.json + per-tool README for tier/quota context; never read secrets/<slug>.env;
+  recommend additions via the standard procedure). Skill flow degrades gracefully when no
+  companion repo exists — matrix-only mode still works.
+- **`reference/companion-config-repo.md`** — rewritten to be a generic spec (not an
+  advertisement for a specific person's repo). Every per-user identifier removed. Adds the
+  detailed file-format spec for `claude.json.template` (covering stdio/HTTP/SSE transports,
+  bearer-token and token-in-URL variants), `env.template`, `tools/<slug>/README.md`, and
+  `registry.json` schema. Explicit warning to keep per-account identifying info (email,
+  username, phone, account IDs) OUT of committed READMEs and IN a gitignored
+  `_account-info.env`.
+- **`install-guide.md` L3 row** — removed the named-repo reference, reframed as "per-user
+  private companion repo, each user maintains their own — there is no canonical shared one."
+
+This codifies in the public skill what was previously informal practice. Any user can replicate
+the companion-repo pattern on their own infrastructure (any Git host, any backup target); no
+dependency on a specific account or organization.
+
 ## [0.10.5] — 2026-06-15
 
 Adds the **companion-config-repo** pattern as a formal L3 layer of the install system: introduces
