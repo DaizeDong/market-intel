@@ -55,8 +55,9 @@ tool yourself is fine — leaking the value is not.
 
 - **NEVER `browser_snapshot` a page that displays a key.** Provider dashboards render the API key in
   **plaintext in the DOM** (confirmed: twitterapi.io rotation page, Bright Data API-keys table).
-  Instead: have the user click the page's **copy button**, read the OS clipboard
-  (`powershell Get-Clipboard`), pipe it in, and **verify by length only — never print the value**.
+  Instead: have the user click the page's **copy button**, read the OS clipboard using whichever
+  command fits the user's shell (Windows PowerShell: `Get-Clipboard`; macOS: `pbpaste`; Linux:
+  `xclip -o` or `wl-paste`), pipe it in, and **verify by length only — never print the value**.
 - **For secret-bearing MCPs, do NOT use `claude mcp add`** (it echoes the `--header`/URL with the key).
   Edit `~/.claude.json` directly: a tiny python script reads the clipboard and writes
   `mcpServers.<name>.headers.Authorization` (or token-in-URL), with **no echo**.
