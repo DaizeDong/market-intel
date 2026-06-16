@@ -127,10 +127,12 @@ the user's machine** and treat it as the authoritative source of "what the user 
 
 **Discovery convention (try in order):**
 
-1. **`$MARKET_INTEL_CONFIG`** env var — explicit path, highest priority.
-2. **`~/CodesSelf/market-intel-config/`** — the conventional location next to a checkout of
-   this matrix repo.
-3. **`~/.config/market-intel-config/`** — Linux/macOS XDG-style fallback.
+1. **`$MARKET_INTEL_CONFIG`** env var — explicit path, highest priority and the recommended way.
+2. **`~/.market-intel-config/`** — dotfile-in-home fallback (works on all OSes).
+3. **`~/.config/market-intel-config/`** — XDG-style fallback (Linux/macOS).
+
+Each user picks where to place their companion repo and either sets the env var or uses one of
+the fallbacks. There is no required filesystem location.
 
 If found, the repo follows this structure (memorize the shape — it's identical across users):
 
