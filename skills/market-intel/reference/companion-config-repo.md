@@ -28,6 +28,30 @@ detects whether the current user has one mounted and treats it as the authoritat
 > uninstalled / scoped, Copilot training opt-out). ~15 min the first time. **Do this before
 > Step 4 in the bootstrap below.**
 
+## Minimum viable conformant repo (3 files)
+
+If you want the absolute smallest companion repo that the spec accepts:
+
+```
+<your-companion-repo>/
+├── .gitignore             # at minimum block real .env files & live ~/.claude.json
+├── registry.json          # {"schema_version": 1, "tools": []}
+└── tools/                 # empty dir (may have sub-dirs as tools are added)
+    └── .gitkeep
+```
+
+That's it — empty `tools[]` plus empty `tools/` dir is a valid v1-conformant companion
+repo. Spec §2 only requires `registry.json` + `tools/` to exist; `secrets/` becomes
+required when you add your first tool. Skills consuming this repo will detect it via the
+discovery convention (§1) and treat it as "no tools installed yet".
+
+Add your first tool by creating `tools/<slug>/{claude.json.template, env.template}` plus
+`secrets/<slug>.env` (Mode A) or filling templates and gitignoring the env (Mode B).
+
+Use this minimal shape to validate your tooling (apply.py / verify.sh) before adding real
+secrets.
+
+
 ## The split
 
 The user keeps two repos (locations are entirely up to them):
