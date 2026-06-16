@@ -37,6 +37,8 @@ source. Minimal read: search contacts by `lifecyclestage=lead` created this week
   against existing contacts (by email) before creating, and prefer upsert over blind create.
 - HubSpot API rate limits + daily caps apply per portal tier; large syncs need batching/backoff.
 - Free tier is generous for objects but gates automation/sequences — outreach still belongs in Smartlead.
+- **Signup has NO Google OAuth despite what some matrices claim** (confirmed 2026-06-16) — `app.hubspot.com/signup-hubspot/crm` only offers Microsoft / Apple / email. Use Microsoft if you have one, else email with captcha.
+- **API tokens live under Settings → Integrations → Private Apps** (not at user profile level). Each Private App has per-scope access control — name the app, pick `crm.objects.contacts.read` + `crm.objects.companies.read` at minimum for research use; add `.write` scopes only if you need to land records. Token is shown once; copy immediately.
 
 ## Failure signals & fallback
 "Needs authentication" in `claude mcp list` (OAuth expired) → re-auth. 429 = rate-limited, batch and

@@ -24,6 +24,7 @@ Tools cover latest quotes, listings, market metrics/categories, and (plan-gated)
 - **Many endpoints are plan-gated:** historical, some derivatives, and advanced TA are paid-tier-only and return a `1006`/subscription error on Basic — that's an access gate, not "no data."
 - **x402 pay-per-call** exists as an alternative to a subscription for occasional heavy calls — worth knowing before you upgrade a whole tier.
 - Symbol collisions: prefer CMC's numeric `id` over ticker `symbol` to avoid pulling the wrong token.
+- **Consumer site vs developer portal are SEPARATE account systems** (confirmed 2026-06) — `coinmarketcap.com` (the consumer dashboard, watchlists, etc.) and `pro.coinmarketcap.com` (the API developer portal where the key issues) require independent signups. The consumer site accepts `gmail.com` freely; the pro portal applies anti-abuse on signup ("The email is restricted for this action") and on password reset — sometimes you can recover by registering on the consumer site first then visiting the pro portal under the same browser session. Don't assume one credential works on both.
 
 ## Failure signals & fallback
 Failure looks like: `1006`/subscription-required on a gated endpoint, HTTP 429 (50/min), or a monthly-credit-exhausted error. **Fallbacks:** routine price/volume + on-chain DEX history → **CoinGecko MCP** (keyless, default); on-chain address/tx/ABI → **Etherscan MCP** / **Blockscout MCP**; protocol TVL/yields/fees → **DefiLlama** REST; smart-money labels → **Nansen**.

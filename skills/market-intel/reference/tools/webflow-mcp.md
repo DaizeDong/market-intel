@@ -24,6 +24,7 @@ Tools cover: list collections, list/read items, create/update/delete an item, an
 - **Field slugs are strict** — items must match the collection's defined fields (slug + type); a typo'd or missing required field is rejected, not silently dropped.
 - **Star reality:** repo is 132★, MIT, pushed 2026-06 (actively maintained, official). It's new to this domain (was only a rate-limit footnote before the 2026-06 refresh) — treat it as a recently-promoted first-class source.
 - **SEO命门:** if Webflow content is also syndicated elsewhere, set the canonical URL to your Webflow original to avoid dedup penalties (general content-cms rule).
+- **Signup is PerimeterX/Akamai fingerprint-blocked** (confirmed 2026-06-16) — `webflow.com/signup` returns "Access to this page has been denied" page immediately on headless navigation. No bypass via UA spoof, cookies, or stealth in tested config. **User-only signup in a normal browser.** Once the account exists, API token is at Workspace settings → Integrations → Generate API token; OAuth path for the MCP works normally once the account is real.
 
 ## Failure signals & fallback
 `! Needs authentication` in `claude mcp list` (OAuth not completed), publish throttling (you exceeded ~1/min), or field-validation errors (item doesn't match collection schema). Verify `✓ Connected`. Fallback within domain: there is no like-for-like Webflow alternative — if you only need cross-platform publishing rather than Webflow specifically, use **Pipepost** (multi-platform syndication) or move the blog to **WordPress MCP** / static (Hugo/Astro).
