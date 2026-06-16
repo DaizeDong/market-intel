@@ -6,7 +6,7 @@ A thin orchestration skill for commercial/market research. It triages your topic
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Domains](https://img.shields.io/badge/Source%20Matrix-15%20domains-green?style=flat)](skills/market-intel/reference/sources-index.md)
 [![Tool docs](https://img.shields.io/badge/Tool%20docs-per--tool%20how--to-blue?style=flat)](skills/market-intel/reference/tools/index.md)
-[![Version](https://img.shields.io/badge/version-0.14.0-purple?style=flat)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.15.0-purple?style=flat)](CHANGELOG.md)
 [![Sister skill](https://img.shields.io/badge/sister-shopping--aggregator-yellow?style=flat)](https://github.com/DaizeDong/shopping-aggregator)
 
 [English](README.md) | [中文版](README_CN.md)
@@ -55,6 +55,20 @@ git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market
 ```
 
 It auto-activates on phrases like `市场调研`, `competitor analysis`, `research this market`, `find arbitrage opportunities`, `X/Twitter sentiment`, `SEO intel`, `product trends`. For single-fact lookups or general web reports it deliberately steps aside (use plain search / `deep-research`); for academic literature it defers to `research-lit`.
+
+---
+
+## Now what? — installed it, what do I read first?
+
+Three different "next steps" depending on intent. Pick one:
+
+| If you want to… | Open this |
+|---|---|
+| **Use the skill** (just have it trigger automatically and run research for you) | Nothing else — the skill is loaded; type a research query. |
+| **Install your first specialized MCP** (e.g. a real X data source, a finance API) | `skills/market-intel/reference/install-guide.md` — L0 install mechanics; then `skills/market-intel/reference/tools/<slug>.md` for the specific tool you picked from the source matrix below. |
+| **Set up a private companion config repo** to persist your install state + secrets across machines (recommended for >1 tool) | `skills/market-intel/reference/companion-config-repo.md` — overview + tutorial. Then `companion-config-spec.md` (formal contract) and `companion-config-hardening.md` (GitHub-side lockdown BEFORE first push). |
+
+Most users want path 2 first, then path 3 once they accumulate >1 tool / >1 machine.
 
 ---
 
