@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.13.2] — 2026-06-16
+
+User-flagged addition to `crypto-defi`: **Barker** (barker.money) — stablecoin yield
+aggregator covering 515+ DeFi protocols + 20+ CEX. Fills a real gap DefiLlama doesn't
+(DefiLlama is DeFi-only — Binance/OKX/Bybit Earn campaign rates never appear there).
+
+- **`reference/tools/barker.md`** (NEW) — full per-tool doc. Route ① / source tier L2 /
+  REST + agent-friendly `llms.txt` index at docs.barker.money / no MCP yet / no key
+  claimed for read. Decision rule: pick Barker for "best safe USD yield across CEX +
+  DeFi"; stick with DefiLlama for cross-protocol TVL/fees/volume or non-stable assets.
+  Hard guardrail #5 callout: CEX yields are campaign-driven and time-boxed, so every
+  quoted Barker CEX APY must carry a fetch date.
+- **`reference/domains/crypto-defi.md`** — new row between DefiLlama and Moralis. Default
+  pick paragraph updated: "stablecoin yield discovery → Barker (CEX + DeFi unified) +
+  DefiLlama yields (DeFi-only ground truth) — cross-check the two."
+- **`reference/tools/index.md`** — crypto-defi section gets a Barker line.
+- **`reference/volatile/pricing-install.md`** — crypto-defi block gets the Barker
+  install line with the `llms.txt` pointer and the note that the `BarkerEngine` ERC-4626
+  contract is out of scope for research (only relevant if recommending as execution venue).
+- **`metrics/live-runs.jsonl`** — appended a `user_correction:"add"` entry recording this
+  as the highest-weight signal (user manually flagged the gap).
+
+No structural changes.
+
 ## [0.13.1] — 2026-06-16
 
 Post-v0.13.0 doc cleanup pass — addresses duplication risk between SKILL.md / 3 companion-*
