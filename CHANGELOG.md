@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.16.0] — 2026-06-16
+
+Adds **Cleanup pass** as a mandatory per-sweep step in `reference/refresh-protocol.md`.
+Doc/script entropy grows silently in any long-running skill; without an explicit prune
+step the matrix bloats ~5-10% per cycle. The new section codifies what to cut (one-shot
+artifacts, stale Mode-B refs, CHANGELOG bloat post-doctrinal-pivot, PII drift in
+committed READMEs, single-purpose <80-line runbook fragments) and what NOT to cut (per-tool
+docs, domain shards, the 3 companion-config-* docs, active feedback ledgers).
+
+Includes a "Cleanup" section template for the sweep CHANGELOG entry. First execution
+shipped as companion-config-repo v0.9.1.
+
+### Files touched
+
+- `reference/refresh-protocol.md` — new "Cleanup pass (mandatory every sweep)" section
+- `CHANGELOG.md`, `plugin.json`, `README.md`, `README_CN.md`
+
 ## [0.15.0] — 2026-06-16
 
 End-to-end restore-pipeline audit by 4 parallel forks (cold-start sim / per-tool depth
