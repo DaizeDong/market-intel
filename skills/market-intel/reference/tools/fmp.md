@@ -10,13 +10,13 @@
 FMP serves company financials and valuation: income statement / balance sheet / cash flow (already parsed), ratios, DCF/valuation, key metrics, and market data. **Decision rule:** pick FMP when you want **pre-parsed financial statements and valuation ratios** without doing the XBRL extraction yourself — it's the convenience layer over what SEC EDGAR holds raw. Use EDGAR when you need the authoritative source-of-truth number or a non-standard line; use FMP when you want ratios/DCF/standardized statements fast. For live quotes prefer Finnhub/Twelve Data/Polygon.
 
 ## Install
-**No ready MCP** — FMP is a plain REST API. Either call REST directly (`financialmodelingprep.com/api/v3/...` with `?apikey=`) or wrap it in a small custom MCP. Exact context: `reference/volatile/pricing-install.md → finance-markets` (shard line: "Financial Modeling Prep free 250/day"). L0 mechanics: `reference/install-guide.md`.
+**No ready MCP** — FMP is a plain REST API. ⚠ **API path migrated 2025-08-31**: legacy `/api/v3/...` returns `"Legacy Endpoint"` error for new accounts; use the current `/stable/...` namespace instead (e.g. `https://financialmodelingprep.com/stable/quote?symbol=AAPL&apikey=KEY`). Either call REST directly or wrap it in a small custom MCP. Exact context: `reference/volatile/pricing-install.md → finance-markets` (shard line: "Financial Modeling Prep free 250/day"). L0 mechanics: `reference/install-guide.md`.
 
 ## Auth / keys
 Free API key from site.financialmodelingprep.com (signup → dashboard; free 250 req/day, no card). **Secret hygiene (key-bearing):** USER supplies the key; never echo it into the transcript; never `browser_snapshot` the dashboard key page; keep the key out of any committed file. One line + full rules: `reference/install-guide.md`. (Key goes in the `apikey` query param for REST.)
 
 ## Usage — call examples
-REST endpoints cover `income-statement/{ticker}`, `balance-sheet-statement`, `cash-flow-statement`, `ratios`, `key-metrics`, `discounted-cash-flow`, and `quote`. Minimal: `GET /api/v3/income-statement/AAPL?period=annual&apikey=KEY` → parsed annual income statements as JSON.
+REST endpoints cover `income-statement`, `balance-sheet-statement`, `cash-flow-statement`, `ratios`, `key-metrics`, `discounted-cash-flow`, and `quote`. Minimal (current /stable namespace): `GET https://financialmodelingprep.com/stable/quote?symbol=AAPL&apikey=KEY` → quote JSON; `GET https://financialmodelingprep.com/stable/income-statement?symbol=AAPL&period=annual&apikey=KEY` → annual income statement. The argument convention also changed: legacy used path params (`/api/v3/quote/AAPL`), `/stable` uses query params (`?symbol=AAPL`).
 
 ## General experience & gotchas (踩坑)
 - **Free = 250/day (shard, confirmed 2026-06).** Lowest free budget of the quote-tier siblings (Finnhub 60/min, Twelve Data 800/day) — fine for a handful of company pulls, not for wide scans. Cache aggressively.
