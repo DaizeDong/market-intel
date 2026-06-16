@@ -1,5 +1,48 @@
 # Changelog
 
+## [0.13.1] — 2026-06-16
+
+Post-v0.13.0 doc cleanup pass — addresses duplication risk between SKILL.md / 3 companion-*
+docs after the hardening doc landed, and ports user-facing onboarding gotchas from
+real-world tool installs into the per-tool docs.
+
+**De-duplication (companion-* docs):**
+- **`SKILL.md`** Step 3 — removed the inline directory-tree + JSON-schema + registry.json
+  snippet (~40 lines). The structure is now spec §2 / §3 / §4 — paraphrasing it in SKILL.md
+  was creating drift risk across 3 sibling docs. Replaced with a one-paragraph pointer.
+- **`companion-config-repo.md`** §"Detailed file formats" — collapsed 5 transport-shape JSON
+  examples + the README.md skeleton (~120 lines) into one worked finnhub example + pointer
+  to spec §4.1. Same drift-risk reason.
+- **`SKILL.md`** Step 3 detection rule 4 — `runbooks/add-new-tool.md` reference now
+  acknowledges that each user authors their own runbooks; pointer is conditional.
+
+**install-guide.md:**
+- L3 table row split into L3a (overview), L3b (formal spec), L3c (hardening) — single cell
+  was ~5 sentences after v0.13.0.
+- New `## Troubleshoot a non-Connected MCP` section ports the 5 diagnostic categories from
+  the companion-config runbook (token expired / stdio PATH / HTTP token wrong / env var
+  missing / subscription gate). These belong in the public skill because every market-intel
+  user hits them; the runbook is one user's instance.
+- Secret hygiene gains a "clipboard-capture sanity gates" bullet — reject anything outside
+  `length ∈ [8, 512]`, whitespace, or `^https?://`. Battle-tested anti-footgun checks.
+
+**Per-tool onboarding gotchas (ported from real installs):**
+- **`tools/finnhub.md`** — `FINNHUB_STORAGE_DIR` must exist before first run (stdio exits
+  silently otherwise).
+- **`tools/dataforseo.md`** — "password" is the API password from the dashboard, NOT the
+  account login password (HTTP 401 with no helpful error).
+- **`tools/sec-edgar-mcp.md`** — User-Agent MUST contain a contact email (`@`), not just an
+  app name (SEC fair-access throttles without it).
+- **`tools/product-hunt-mcp.md`** — env var wants the Developer Token, not the API Key /
+  Secret pair listed alongside; token is locked to one PH account.
+
+**Mode A / Mode B clarification (post-Mode-A switch):**
+- **`companion-config-repo.md`** structure tree — `no-secret-leak.yml` workflow + `backup-
+  secrets.sh` / `restore-from-onedrive.sh` scripts now marked "Mode B ONLY" with reasoning.
+  Under Mode A the CI gate fights intentional commits.
+
+No tool/matrix changes.
+
 ## [0.13.0] — 2026-06-16
 
 New L3 reference doc: `reference/companion-config-hardening.md` — a 12-step GitHub-side
