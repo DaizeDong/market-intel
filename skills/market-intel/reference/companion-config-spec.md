@@ -8,7 +8,9 @@ mechanically read by SKILL.md's Step 3 detection logic, by future automation, an
 that needs to know what the user installed without reading 15 free-form READMEs.
 
 The companion repo concept + rationale is in [`companion-config-repo.md`](companion-config-repo.md);
-this file is the spec.
+this file is the spec. The GitHub-side repo lockdown (visibility, Actions, Apps, Copilot
+training opt-out) is in [`companion-config-hardening.md`](companion-config-hardening.md) — run
+that checklist **before** committing the first secret.
 
 > ⚠️ **Conformance**: Any companion config repo claiming to be "market-intel spec v1" MUST
 > satisfy every MUST clause below. Skills consuming such repos SHOULD ignore unknown fields
@@ -375,7 +377,17 @@ Tooling (apply.py, verify.sh, capture-key) is RECOMMENDED but not part of confor
 
 ---
 
-## 10. Future extensions (reserved)
+## 10. Companion to this spec — see also
+
+- [`companion-config-repo.md`](companion-config-repo.md) — overview + tutorial (the
+  rationale, the recommended bootstrap flow, the file-format examples).
+- [`companion-config-hardening.md`](companion-config-hardening.md) — GitHub-side hardening
+  runbook (visibility, Features lockdown, Actions disable, GitHub Apps audit, Copilot
+  training opt-out, periodic re-audit). Run this BEFORE the first push.
+
+---
+
+## 11. Future extensions (reserved)
 
 - **`tools/<slug>/manifest.json`** — structured per-tool metadata (tier, transport, env_vars
   with descriptions, registration URLs). Currently OPTIONAL; v2 of this spec may make it
