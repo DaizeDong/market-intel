@@ -45,7 +45,7 @@ months). Re-run this protocol periodically to keep `domains/`, `volatile/pricing
    shard repo with no doc (catches lost tracking).
 4. **Record the diff** in `CHANGELOG.md` at the repo root (date + per-domain added/removed/changed),
    and bump the plugin `version` in `.claude-plugin/plugin.json`.
-5. **Commit + push** to the repo (DaizeDong/market-intel).
+5. **Commit + push** to whichever Git remote this matrix repo lives at.
 
 ## Discovery phase（前沿发现 + 质量筛选）
 
