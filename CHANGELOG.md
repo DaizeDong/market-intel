@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.10.7] — 2026-06-16
+
+Hardens the v0.10.6 work — removes ALL environment-specific path assumptions and per-maintainer
+references from the skill, so the matrix is truly forkable without doc edits.
+
+- **SKILL.md discovery convention** — removed `~/CodesSelf/market-intel-config/`. The new
+  convention: `$MARKET_INTEL_CONFIG` env var (recommended) → `~/.market-intel-config/`
+  (dotfile-in-home, universal) → `~/.config/market-intel-config/` (XDG, Linux/macOS). No
+  filesystem path is required; the user picks.
+- **`reference/companion-config-repo.md`** — every `~/CodesSelf/...` path removed. The bootstrap
+  example now uses `$CFG=~/.market-intel-config` as a parametric placeholder. The discovery
+  section explicitly says "There is no required filesystem location."
+- **`reference/install-guide.md`** — secret-handling hygiene now lists clipboard commands for
+  all three OSes (PowerShell `Get-Clipboard`, macOS `pbpaste`, Linux `xclip -o` / `wl-paste`)
+  rather than implying PowerShell. The "Windows notes" section retains PowerShell appropriately
+  since it's the Windows-specific section.
+- **`reference/refresh-protocol.md`** — "Commit + push to (DaizeDong/market-intel)" replaced
+  with "Commit + push to whichever Git remote this matrix repo lives at." Removes the implicit
+  assumption that this matrix is hosted at one specific account.
+
+Sister-skill cross-references (`DaizeDong/shopping-aggregator`) intentionally retained — those
+are PUBLIC published-repo URLs needed for `/plugin install` to work. Anyone reading the doc can
+clone them.
+
+Net effect: a fork of this matrix can ship as-is without per-fork edits except for the sister-
+skill URL in the cross-references (if the forker also forks shopping-aggregator).
+
 ## [0.10.6] — 2026-06-16
 
 Strengthens the companion-config-repo coupling in three ways without compromising the
