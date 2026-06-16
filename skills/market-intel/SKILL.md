@@ -122,8 +122,14 @@ transcript** (it may sync to the user's cloud backup). Follow exactly:
 The user's per-machine ops state — which MCPs they installed, their per-tool tier, their API
 keys, their rotation history — does **not** live in this matrix repo. It belongs in a **separate,
 private companion config repo**. This is a hard architectural rule; see
-`reference/companion-config-repo.md` for the rationale. As an agent, **assume one may exist on
-the user's machine** and treat it as the authoritative source of "what the user has installed."
+`reference/companion-config-repo.md` for the rationale.
+
+The exchange between this skill and any companion config repo follows a **formal spec**
+([`reference/companion-config-spec.md`](reference/companion-config-spec.md), spec version 1).
+As an agent, **assume one may exist on the user's machine**, and treat it as the authoritative
+source of "what the user has installed." The spec defines: discovery convention, required
+directory layout, `registry.json` schema, per-tool template formats, conformance checklist,
+and versioning policy.
 
 **Discovery convention (try in order):**
 
