@@ -18,28 +18,31 @@ detects whether the current user has one mounted and treats it as the authoritat
 
 ## The split
 
-```
-~/CodesSelf/   (or wherever the user keeps their repos)
-├── market-intel/           # PUBLIC — the matrix (this repo)
-└── market-intel-config/    # PRIVATE — ops state + secrets (per-user, NOT shared)
-```
+The user keeps two repos (locations are entirely up to them):
+
+- **The matrix** (this public repo, cloned wherever).
+- **The companion config repo** (a separate, **private** repo that holds the user's per-machine
+  ops state — installed-tools registry, JSON templates, gitignored secrets, scripts).
 
 The companion config repo is **per-user / per-organization**: each user creates their own
-private repo and links it to their own GitHub account (or self-hosted Git, or no remote at
+private repo on their own Git host (GitHub, GitLab, Codeberg, self-hosted, or no remote at
 all). There is no shared canonical companion repo — by design — because the contents are by
 nature personal.
 
 ## Discovery convention (used by SKILL.md Step 3)
 
-The skill probes these paths in order; the first that exists is used:
+The skill probes for a companion repo in this order; the first that resolves is used:
 
-1. **`$MARKET_INTEL_CONFIG`** env var (set in `.bashrc` / `.profile` / Windows env).
-2. **`~/CodesSelf/market-intel-config/`** (conventional location next to a checkout of this
-   matrix repo).
-3. **`~/.config/market-intel-config/`** (Linux/macOS XDG-style).
+1. **`$MARKET_INTEL_CONFIG`** env var (set in the user's shell rc / profile / OS-level env).
+   This is the **recommended** way — explicit, location-independent.
+2. **`~/.market-intel-config/`** — dotfile-in-home fallback (works on all OSes uniformly).
+3. **`~/.config/market-intel-config/`** — XDG-style fallback (Linux/macOS).
 
-If none exists, the skill degrades to "matrix-only" mode and just uses `claude mcp list` to see
-what's available, with no awareness of per-tool tier / quota / rotation info.
+The user picks. There is no required filesystem location.
+
+If no companion repo is found, the skill degrades to "matrix-only" mode and just uses
+`claude mcp list` to see what's available, with no awareness of per-tool tier / quota /
+rotation info.
 
 ## Repo structure (memorize the shape — it's identical across users)
 
@@ -253,10 +256,14 @@ Splitting them keeps each repo focused: matrix = knowledge asset; companion = op
 
 ## How to bootstrap your own companion repo
 
+Pick any path that works for you (set `$MARKET_INTEL_CONFIG` to point at it, or use one of the
+discovery fallbacks above):
+
 ```bash
-# 1. Create the directory layout
-mkdir -p ~/CodesSelf/market-intel-config/{tools,secrets,scripts,runbooks,.github/workflows}
-cd ~/CodesSelf/market-intel-config
+# 1. Create the directory layout (substitute YOUR chosen path for $CFG)
+CFG=~/.market-intel-config   # or wherever you want; or `mkdir -p "$MARKET_INTEL_CONFIG"`
+mkdir -p "$CFG"/{tools,secrets,scripts,runbooks,.github/workflows}
+cd "$CFG"
 
 # 2. Author the canonical files (.gitignore, README.md, PHILOSOPHY.md, scripts/apply.py,
 #    scripts/verify.sh, scripts/capture-key.ps1, .github/workflows/no-secret-leak.yml).
