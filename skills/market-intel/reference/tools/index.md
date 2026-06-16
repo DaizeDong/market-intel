@@ -69,6 +69,7 @@ directory** — that breaks progressive loading. Install mechanics overview: `re
 - [Hummingbot (+ MCP)](hummingbot.md) — ① · CEX/DEX arbitrage execution
 - [funding-rates-mcp](funding-rates-mcp.md) — ① · cross-exchange funding divergence
 - [DefiLlama API](defillama.md) — ① · free no-key TVL/yields/stablecoins/fees REST
+- [Barker](barker.md) — ① L2 · stablecoin yields across 515 DeFi + 20 CEX, REST + `llms.txt`
 
 ## seo-keywords
 - ★ [Google Search Console MCP](gsc-mcp.md) — ① · free your-site real clicks/position

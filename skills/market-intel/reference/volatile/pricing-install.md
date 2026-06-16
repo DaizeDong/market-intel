@@ -77,6 +77,10 @@
 - Nansen: ~$49/mo annual / $69 monthly (collapsed from up to ~$999/mo).
 - DefiLlama: free no-key REST `https://api.llama.fi` + `https://yields.llama.fi`
   (TVL/yields/stablecoins/fees); 3rd-party MCPs only — frame as REST.
+- Barker: free no-key REST + agent-friendly index at `https://docs.barker.money/llms.txt`
+  (read this first for endpoint catalog). Stablecoin yields across 515 DeFi + 20 CEX, no MCP yet.
+  Vault deposits via per-partner `BarkerEngine` ERC-4626 contract on Base/Arbitrum/ETH/BNB
+  (out of scope for research; relevant only if recommending it as user's execution venue).
 
 ## seo-keywords `last_verified: 2026-06`
 - GSC: ahonn/mcp-server-gsc — `npx -y mcp-server-gsc` (free; Google OAuth/service-account JSON).
