@@ -149,46 +149,11 @@ and versioning policy.
 Each user picks where to place their companion repo and either sets the env var or uses one of
 the fallbacks. There is no required filesystem location.
 
-If found, the repo follows this structure (memorize the shape — it's identical across users):
-
-```
-<companion-config-repo>/
-├── registry.json                # machine-readable installed-tools summary
-├── tools/                       # one dir per tool — committed (no keys)
-│   └── <slug>/
-│       ├── claude.json.template # JSON snippet for ~/.claude.json, with <PLACEHOLDER>
-│       │                        # tokens that get substituted at apply time
-│       ├── env.template         # KEY=VALUE skeleton for required env vars
-│       └── README.md            # tier, registered date, dashboard URL, rate limits
-├── secrets/                     # ── GITIGNORED ── real keys live here
-│   └── <slug>.env               # KEY=value lines, plaintext, backed up out-of-band
-└── scripts/
-    ├── apply.py                 # merge templates + secrets → ~/.claude.json (idempotent)
-    ├── verify.sh                # snapshot `claude mcp list` health → registry.json
-    └── capture-key.ps1          # clipboard-only key capture, length-verified, no echo
-```
-
-**Why each piece exists:**
-
-- `tools/<slug>/claude.json.template` — the SHAPE of the MCP server entry (transport, URL,
-  command, env-var names). Placeholders use `<UPPER_SNAKE_CASE>` matching the env var name in
-  the corresponding `secrets/<slug>.env`. Safe to commit because no real values are in it.
-- `secrets/<slug>.env` — the secret values, as `KEY=VALUE` lines (UTF-8 no BOM). Storage
-  mode depends on the repo's policy declared in `secrets/README.md`: **Mode A** (committed
-  alongside templates — viable when the repo is genuinely private and keys are data-API
-  tier from non-partnership providers) or **Mode B** (gitignored, backed up out-of-band).
-  See spec §5.3 for the trade-offs.
-- `registry.json` — the index. Conventional schema:
-  ```json
-  {
-    "schema_version": 1,
-    "summary": {"connected_count": N, "needs_auth_count": N, "failed_count": N},
-    "tools": [{"slug": "<slug>", "installed": true, "health_last": "connected"}]
-  }
-  ```
-- `scripts/apply.py` — runs on demand, merges templates + secrets into the live
-  `~/.claude.json` mcpServers section. Refuses to substitute a placeholder when the
-  corresponding secret is missing, so a literal `<YOUR_TOKEN>` never lands in production.
+If found, the repo follows the layout defined in
+[`reference/companion-config-spec.md`](reference/companion-config-spec.md) §2 — `registry.json`
+at root, `tools/<slug>/` per-tool dirs with `claude.json.template` + `env.template`, and
+`secrets/<slug>.env` (committed under Mode A, gitignored under Mode B per spec §5.3).
+**The spec is the canonical structure reference — don't paraphrase it here.**
 
 **How to use it from this skill (Step 2 detection enhancement):**
 
@@ -202,8 +167,9 @@ If found, the repo follows this structure (memorize the shape — it's identical
    stored. apply.py handles substitution into `~/.claude.json`; you never need to look at
    the raw value.
 4. When a tool the user would benefit from is NOT in their companion repo, recommend
-   adding it using the standard procedure (see `runbooks/add-new-tool.md` inside the
-   companion repo, or summarize the procedure from `reference/companion-config-repo.md`).
+   adding it using the standard procedure: if the user's companion repo includes
+   `runbooks/add-new-tool.md`, follow that (each user authors their own runbooks);
+   otherwise summarize the procedure from `reference/companion-config-repo.md` here.
 
 **Rotation triggers:** if a key turns out to have leaked (the user pasted it into chat by
 mistake, or you find evidence of unauthorized usage in a dashboard), tell them to:
