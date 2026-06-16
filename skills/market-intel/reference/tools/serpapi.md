@@ -24,6 +24,8 @@ MCP/REST takes an `engine` (e.g. `google`, `google_trends`, `bing`) plus query p
 - **One credit per search**, and each `engine`/page is a separate search — paginating SERP or scanning many keywords multiplies cost silently.
 - **Google Trends via SerpApi** is the stable paid path now that **pytrends is archived (429s)** — for free Trends, OSS `trendspy`/`trendspyg` exist (④) but are flakier.
 - Results are **point-in-time** SERP — rankings drift; for ongoing rank monitoring self-host **serpbear** (④) instead of re-billing SerpApi.
+- **Google OAuth signup is clean BUT key release requires email + phone verify** (confirmed 2026-06-16) — `serpapi.com/users/sign_up` accepts Google OAuth without captcha. Account lands on `/users/welcome` with "Free Plan" selected, then `Check your inbox to verify your email`. **API key does NOT issue until both email confirmation link AND phone number are verified.** Free plan is non-commercial only — Starter $25/1k for any paid/commercial use.
+- API key page at `/manage-api-key`. Format is 64-char hex.
 
 ## Failure signals & fallback
 Failure looks like: 401 (bad key), 429 (hourly throughput or monthly quota hit), or empty parsed sections when a SERP feature isn't present. **Fallbacks:** bulk/cheap SERP → **DataForSEO** (②, ~$0.0006/query); free SERP at zero cost → self-host **SearXNG** (④) or `ddgs`; ongoing rank tracking → **serpbear** (④); your-site real data → **GSC** (①); free Trends → `trendspy`/`trendspyg` (④, less reliable than SerpApi's Trends JSON).

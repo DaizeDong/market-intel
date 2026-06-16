@@ -41,6 +41,9 @@ address through Email Verifier before sending.
   accept-all as deliverable.
 - The 50/mo free tier exhausts fast on any real run; the jump to $49 Starter is the first real spend.
 - PII workflows need GDPR/CCPA delete-request handling (shard compliance red line).
+- **Google OAuth signup requires first+last name pre-filled in the form** (confirmed 2026-06-16) — clicking "Sign up with Google" on `hunter.io/users/sign_up` BEFORE typing both name fields fails with "Google signup failed: Your first and last names are required." React state pre-validates the form before triggering OAuth.
+- **API keys page at `/api-keys`** (not at user profile). Key is dot-masked with `Reveal` + Copy buttons; click the Copy button next to the example URL line (`POST https://api.hunter.io/v2/discover?api_key=...`), not the masked display. Free tier confirmed 25 searches + 50 verifies/mo as of 2026-06.
+- Registration also asks for a phone number at signup (verification optional but recommended) — Hunter binds phone to account at this stage, not later.
 
 ## Failure signals & fallback
 401 / "Needs authentication" in `claude mcp list` = bad key; empty results on a real domain = pattern
