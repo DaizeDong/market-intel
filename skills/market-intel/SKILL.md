@@ -164,9 +164,11 @@ If found, the repo follows this structure (memorize the shape — it's identical
 - `tools/<slug>/claude.json.template` — the SHAPE of the MCP server entry (transport, URL,
   command, env-var names). Placeholders use `<UPPER_SNAKE_CASE>` matching the env var name in
   the corresponding `secrets/<slug>.env`. Safe to commit because no real values are in it.
-- `secrets/<slug>.env` — the secret values, as `KEY=VALUE` lines (UTF-8 no BOM). NEVER
-  committed. Backed up out-of-band (a cloud-storage sync folder, encrypted USB, etc. — that's
-  the user's choice).
+- `secrets/<slug>.env` — the secret values, as `KEY=VALUE` lines (UTF-8 no BOM). Storage
+  mode depends on the repo's policy declared in `secrets/README.md`: **Mode A** (committed
+  alongside templates — viable when the repo is genuinely private and keys are data-API
+  tier from non-partnership providers) or **Mode B** (gitignored, backed up out-of-band).
+  See spec §5.3 for the trade-offs.
 - `registry.json` — the index. Conventional schema:
   ```json
   {
@@ -186,7 +188,10 @@ If found, the repo follows this structure (memorize the shape — it's identical
 2. If yes, read its `registry.json` to learn which tools the user has *configured*, and read
    the specific `tools/<slug>/README.md` only when you need tier/rate-limit context for that
    tool.
-3. **Never** read `secrets/<slug>.env` — those values must not enter the transcript.
+3. **Never** read `secrets/<slug>.env` files even when they're committed in the repo (Mode
+   A) — reading them spills key values into the transcript regardless of where they're
+   stored. apply.py handles substitution into `~/.claude.json`; you never need to look at
+   the raw value.
 4. When a tool the user would benefit from is NOT in their companion repo, recommend
    adding it using the standard procedure (see `runbooks/add-new-tool.md` inside the
    companion repo, or summarize the procedure from `reference/companion-config-repo.md`).
