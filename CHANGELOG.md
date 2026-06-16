@@ -1,5 +1,57 @@
 # Changelog
 
+## [0.13.0] — 2026-06-16
+
+New L3 reference doc: `reference/companion-config-hardening.md` — a 12-step GitHub-side
+lockdown runbook for users creating a private companion config repo from scratch. Lives in
+the **skill** (not in any companion repo) because the companion repo is generated
+per-user, so the hardening instructions must reach the user *before* the repo exists.
+
+Why this doc was needed: the default GitHub configuration for a freshly-created private
+repo is dangerously permissive for a place that may hold API keys. The single biggest
+gotcha is that installed GitHub Apps (ChatGPT Codex, Devin.ai, etc.) default to "All
+repositories" scope — meaning the moment you create the new private repo, those AI tools
+silently gain Read+Write access to it. Account-level Copilot training is also opt-out,
+not opt-in. The runbook closes all of these by hand in ~15 min.
+
+- **`reference/companion-config-hardening.md`** (NEW) — covers:
+  - Threat model table (8 named threats with their mitigation).
+  - Step 1 PRIVATE creation + incognito-window verification.
+  - Step 2 Mode A/B decision (delegated to spec §5.3).
+  - Step 3 Features lockdown (Wikis / Issues / Projects / Discussions all OFF).
+  - Step 4 Code security — every Dependabot toggle OFF; on paid plans also Secret
+    Scanning / Push Protection OFF (Mode A's whole point is conscious key storage; Push
+    Protection would block legitimate commits).
+  - Step 5 Actions Disabled (radio: Disable actions). Removes the entire compromised-
+    workflow exfiltration surface.
+  - Step 6 Pages source None.
+  - Step 7 Webhooks / Deploy keys / Actions / Codespaces / Dependabot secrets verified
+    empty.
+  - Step 8 Collaborators empty (with a note that every collaborator gets ALL history,
+    including rotated keys).
+  - Step 9 account-level Copilot data-sharing Disabled (canonical "don't train on my
+    code" opt-out).
+  - Step 10 GitHub Apps audit — the most overlooked step. Walks per-app: scope = "All
+    repositories" or "Only select"? Which AI tools to uninstall vs restrict.
+  - Step 11 Branch protection (skip for solo use).
+  - Step 12 Periodic re-audit with a gh CLI snippet.
+  - Quick-reference checklist (sticky-note-sized).
+  - Closing section explaining why this doc lives in market-intel and not in the
+    companion repo (chicken-and-egg: you can't read instructions inside a repo before
+    you've created it).
+- **`reference/companion-config-spec.md`** §1 intro and new §10 "see also" now cross-
+  reference the hardening doc. §10 is the canonical pointer for "what else applies to a
+  conforming repo beyond the file-format contract."
+- **`reference/companion-config-repo.md`** top notice + bootstrap Step 4 inline note
+  both point at the hardening runbook with the line "Harden BEFORE the first push."
+- **`reference/install-guide.md`** L3 row updated to list all three companion-* docs
+  (spec, overview, hardening) with the new "harden before first commit" note.
+- **`SKILL.md`** Step 3 companion section gains a callout box: when guiding a user to
+  bootstrap a new companion repo, ALWAYS surface the hardening runbook *before* the first
+  push.
+
+No tool/matrix changes. Hardening posture only.
+
 ## [0.12.0] — 2026-06-16
 
 companion-config-spec v1 gains an explicit **storage-mode** dimension. Both "secrets
