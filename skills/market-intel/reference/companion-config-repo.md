@@ -16,6 +16,11 @@ The **companion config repo pattern** is the recommended way to manage it. SKILL
 detects whether the current user has one mounted and treats it as the authoritative source of
 "what is installed" (in addition to `claude mcp list`).
 
+> 📐 **Formal contract**: For the precise schema (required vs optional fields, forward
+> compatibility rules, conformance checklist), see
+> [`companion-config-spec.md`](companion-config-spec.md). This file is the **overview +
+> rationale + tutorial**; the spec file is what skills and tooling actually consume.
+
 ## The split
 
 The user keeps two repos (locations are entirely up to them):
