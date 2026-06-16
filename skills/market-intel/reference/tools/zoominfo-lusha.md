@@ -40,6 +40,7 @@ actually planned.
 - Lusha coverage skews US/EU corporate; thin on SMB and non-Western markets — cross-check against
   Apollo/Google-Maps for local-business leads.
 - Both are PII sources — GDPR/CCPA delete-request handling required (shard compliance red line).
+- **Lusha signup URL is `auth.lusha.com/signup`** — NOT `lusha.com/signup` or `lusha.com/sign-up` (both 404). The signup form has a placeholder "Enter your work email" and a captcha; **rejects consumer email domains** (gmail.com, etc.). Skip Lusha unless you have a work-domain email. (ZoomInfo signup is sales-rep-driven, no self-serve.)
 
 ## Failure signals & fallback
 401 / "Needs authentication" in `claude mcp list`, or reveal returns no contact (out of coverage or
