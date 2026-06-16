@@ -32,6 +32,8 @@ For rich posts use `client_utils.TextBuilder` (mentions/links/tags); images via 
 - `send_post` text is **300 graphemes** max; over-length silently/errors depending on path — truncate first.
 - Links/mentions are **not auto-detected** from plain text — you must attach facets (use `TextBuilder`) or the URL posts as inert text.
 - Small star count (0.7k) is **not** a quality signal here — it is the de-facto reference SDK and tracks the protocol closely (pushed 2026-06).
+- **Bluesky signup ends in a captcha** (confirmed 2026-06-16) — `bsky.app` 3-step flow (account / handle / "Complete the challenge") cannot be automated past the captcha. User-only signup. Once on the platform, `pip install atproto` + `client.login(handle, app_password)` works headlessly.
+- **App Password creation dialog displays the value ONCE with no copy button** — `Settings → Privacy and security → App passwords` (URL is `/settings/app-passwords` directly, NOT `/settings/account/app-passwords` which 404s). Format is 4-4-4-4 dashed groups, e.g. `xxxx-xxxx-xxxx-xxxx` (19 chars). Agent must read the DOM string before user closes the dialog; once closed the value is unrecoverable and you must generate a new one.
 
 ## Failure signals & fallback
 Failure looks like: `login` raising on a bad/again-rate-limited app password, or posts appearing as plain text because facets were omitted. **Fallbacks:** drive Bluesky through a **multi-platform aggregator** (Buffer ① free-tier / Blotato / Postiz) if you need it bundled with other networks; for ad-hoc one-offs the Bluesky web UI. There is no scraping fallback needed — the API is open.

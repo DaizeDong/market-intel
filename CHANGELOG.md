@@ -1,5 +1,61 @@
 # Changelog
 
+## [0.14.0] — 2026-06-16
+
+Comprehensive **anti-automation + onboarding gotcha rollup** from two real batch-registration
+sessions (2026-06-15 + 2026-06-16). Surfaces every bot defense, captcha pattern, and React-
+state trap a first-time-setup user will hit when following this skill's per-tool docs.
+
+### New L0 section: `install-guide.md` → "Anti-automation patterns to expect during install"
+
+Single table indexing the bot defenses we actually hit, with workarounds. Covers:
+
+- PerimeterX/Akamai fingerprint deny (Webflow)
+- Cloudflare Turnstile (Buffer)
+- reCAPTCHA + hCaptcha double gate (Contentful)
+- hCaptcha on forgot-password (eBay)
+- B2B work-email gate (Attio, Lusha)
+- readonly+disabled with active watcher (Apollo)
+- OAuth-provider mismatch — no Google option (HubSpot)
+- Provider-side approval delay — not bot defense (eBay 1-business-day)
+- Email-verification-link out of reach when Gmail MCP is on a different Google account
+- Multi-step React onboarding wizards with `sr-only` radios + sticky-header pointer
+  interception (Sanity 8-step, Apollo, FMP 5-question)
+- DOM-visible plaintext credentials transcript-hygiene hazard (Twelve Data, FMP,
+  Mastodon, Bluesky once-shown App Password, Stack Apps key)
+
+### Per-tool docs — gotcha bullets appended
+
+20 tool docs updated under `## General experience & gotchas (踩坑)` with the 2026-06
+discoveries. None rewritten; one to three new bullets each:
+
+- buffer · sanity-mcp · contentful-mcp · apollo · hubspot-mcp · attio-mcp · hunter
+- exa · serpapi · twelve-data · fmp · moralis · trends-mcp · ebay-api
+- stack-overflow-mcp · atproto · mastodon-py · webflow-mcp · zoominfo-lusha · zerobounce
+- coinmarketcap-mcp (consumer vs pro account split) · polygon (PyPI MCP unstable)
+- paper-qa (large install footprint warning)
+
+### `metrics/live-runs.jsonl` — 16 entries appended
+
+Each barrier we hit, each verification we confirmed. Future refresh sweeps read this to
+prioritise which matrix entries the real world just proved right or wrong.
+
+### `companion-config-spec.md` schema note
+
+The 3 Python libs (atproto, Mastodon.py, paper-qa) introduce a new `transport: "python-lib"`
+value beyond the spec's documented `stdio | http | sse` enum. Recorded in companion-config
+repo's v0.7.0 entry — informally honored until v2 of the spec; treat as extension, not
+breaking change.
+
+### Files touched
+
+- `reference/install-guide.md` (new section)
+- 22 tool docs in `reference/tools/`
+- `metrics/live-runs.jsonl` (+16 lines)
+- `CHANGELOG.md`, `plugin.json`, `README.md`, `README_CN.md` (version bump)
+
+No matrix-structure changes; this release is documentation hygiene only.
+
 ## [0.13.2] — 2026-06-16
 
 User-flagged addition to `crypto-defi`: **Barker** (barker.money) — stablecoin yield

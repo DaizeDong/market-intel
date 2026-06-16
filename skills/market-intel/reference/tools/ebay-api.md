@@ -24,6 +24,8 @@ Mint token: `POST https://api.ebay.com/identity/v1/oauth2/token` (client-credent
 - Sandbox returns fake inventory — always confirm you're hitting the **Production** host before trusting prices.
 - Application token expires (~2h) and must be refreshed; a 401 mid-run is usually an expired token, not a bad key.
 - Marketplace is per-site (`EBAY_US`, `EBAY_GB`…) via the `X-EBAY-C-MARKETPLACE-ID` header — omitting it defaults to US and silently skews a non-US compare.
+- **Signup → keyset is a 3-step gated process** (confirmed 2026-06-16). (1) You must have an **eBay buyer account first** — `developer.ebay.com/signin` re-uses ebay.com credentials, no Google/social OAuth at the developer surface. (2) Forgot-password and Join paths both have **hCaptcha** on `/fyp` (`target-icaptcha-slot` + 2 hcaptcha iframes; "Send Now" stays disabled until solved). (3) After successful Join, `/my/keys` shows **"Access to your new account is pending approval, which takes at least one business day."** Not bot defense — fraud-prevention policy. Plan for a >24h gap between signup and keyset creation.
+- **Production keyset has 3 values:** App ID (Client ID), Dev ID, Cert ID (Client Secret). The Browse API only needs App ID + Cert ID for client-credentials; Dev ID is required when you want server-side OAuth or sandbox switching. Copy all three at creation; eBay shows Cert ID only once.
 
 ## Failure signals & fallback
 Failure: HTTP 401 (expired/invalid token), 403 (scope not granted — common for Insights), or empty `itemSummaries`. **Fallback:** PriceAPI ② (paid, includes eBay + Amazon + Google Shopping in one) for convenience, or playwright ④ to read a sold-listings page if Insights access is denied. Flag the gap when sold data is unavailable.
