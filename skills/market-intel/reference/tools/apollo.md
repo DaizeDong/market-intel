@@ -38,6 +38,7 @@ re-verify before sending.
 - Apollo email accuracy is good but not gospel; **always re-verify before a send** (it does not absorb
   bounce risk for you). Apollo's own "verified" label still bounces enough to hurt deliverability.
 - PII workflows need GDPR/CCPA delete-request handling (shard compliance red line).
+- **Google OAuth signup is bot-friendly; onboarding wizard is hard-blocked** (confirmed 2026-06-16) — `app.apollo.io/sign-up` accepts Google OAuth headlessly (scopes `userinfo.email + userinfo.profile`; the callback URL contains `gmail_oauth_callback` which is **misleading — it is NOT Gmail-read access**). But the post-signup `/onboard` wizard renders the Full Name input with `readonly disabled`, and a watcher reapplies those attributes within milliseconds if JS removes them. `playwright.fill` fails, JS event dispatch fails, attribute removal fails — designed specifically to defeat headless. **API key cannot issue until onboarding completes** so the user must finish it in their own browser. Once onboarded, the model-training toggle MUST be flipped off at Settings → Privacy & Security BEFORE generating the API key.
 
 ## Failure signals & fallback
 Out of credits / OAuth shows "Needs authentication" in `claude mcp list` (or the connector greys out) →

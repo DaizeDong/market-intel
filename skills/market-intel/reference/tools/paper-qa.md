@@ -28,6 +28,7 @@ Or as a library: `from paperqa import ask; ask("...")` after pointing it at your
 - **It answers from the corpus you give it, not the web.** It will not discover papers — feed it the right set first (`paper-search-mcp` / `arxiv` / Semantic Scholar). Missing-but-relevant work simply won't appear in the answer.
 - **Grounding ≠ infallible.** Citations are checkable by design, but verify a load-bearing claim against the cited passage before quoting — that's the feature, use it.
 - **First run downloads models / builds an index** and embedding the corpus takes time; reuse the index across questions instead of re-embedding per query.
+- **`pip install paper-qa` is large** (verified 2026-06-16): pulls litellm + tantivy + pybtex + paper-qa-pypdf + many transitives. Plan for a few minutes + a few hundred MB of disk on first install. Bumped litellm version reinstalls it — note the existing litellm version before installing if other tools depend on it.
 
 ## Failure signals & fallback
 Failure looks like: an auth error (missing/invalid `OPENAI_API_KEY` or chosen provider key); empty / "insufficient context" answers (PDFs didn't parse, or the corpus doesn't actually cover the question — re-collect papers); or runaway cost (corpus too large — narrow it or switch embed model). **Fallbacks:** to *find* the papers first → **paper-search-mcp** (multi-venue) / the **arxiv** MCP; significance ranking → **Semantic Scholar**; for a written multi-paper survey rather than a Q&A engine → delegate to the **research-lit** skill.

@@ -24,6 +24,7 @@ REST/MCP endpoints cover aggregates (OHLC bars), trades/quotes, reference data (
 - **Tier pricing rots — confirm before quoting (this file's numbers are corroborated by web search 2026-06, not the live page).** The shard lists $29 / $79 / $199; re-verify on massive.com before committing spend.
 - **Rate-limit shape matters:** free is 5 req/min (easy to trip in a loop); paid tiers remove the per-minute cap. Batch and back off on the free tier.
 - It's a quote/market-data source, not fundamentals — for filings use SEC EDGAR, for macro use FRED.
+- **PyPI MCP wrappers for Polygon are unstable** (confirmed 2026-06) — community packages publishing as `polygon-mcp` / `polygon-mcp-server` have flaky installs and break across uvx versions. Recommendation: **keep the API key in `secrets/polygon.env` and call REST directly from a subagent Bash** rather than chasing a stable MCP install. The companion-config-repo pattern records this as `pending_registrations.polygon` with `mcp_installed: false, key_saved: true`.
 
 ## Failure signals & fallback
 Failure looks like: HTTP 429 (free 5/min exceeded), delayed data when you expected realtime (wrong tier), or auth errors after the rebrand (key should still work — re-check the dashboard). **Fallbacks:** low-volume free quotes → **Finnhub** (60/min) or **Twelve Data** (800/day); fundamentals/filings → **SEC EDGAR**; the only free *no-key* price route in this domain is `Alex2Yang97/yahoo-finance-mcp` (④, yfinance — not for prod, IP-ban prone).
