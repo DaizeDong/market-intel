@@ -283,6 +283,55 @@ CHANGELOG 0.10.2）——改完工具后重跑该脚本即可保持同步，不�
 以及 shard↔doc↔index↔pricing 四者自洽，发现即修。`metrics/live-runs.jsonl` 是经验的活水——真实调研中触到
 新坑就回写一行，下轮据此把对应 `tools/<slug>.md` 的踩坑段加厚。
 
+## Cleanup pass (mandatory every sweep)
+
+Doc/script entropy grows silently. Every full sweep must include a 5-min cleanup pass that
+kills accumulated cruft. Without this, the skill bloats by ~5-10% per cycle and new users
+get buried.
+
+### What to check + cut
+
+1. **One-shot session artifacts** — any runbook/doc that's clearly tied to a past session's
+   task list (e.g. `phase3-handoff.md`, `bucket-B-checklist.md`). If all items are
+   completed → delete; if any pending → migrate the pending parts into a generic runbook
+   and delete the stub.
+2. **Stale Mode-B / out-of-band-backup references** — under Mode A the OneDrive backup
+   scripts are no-ops. They live in `scripts/legacy/` per v0.9.0 convention. If a runbook
+   still references them as live, fix to "Mode B fallback only".
+3. **CHANGELOG bloat** — once a major doctrinal pivot lands (e.g. Mode B → Mode A,
+   spec v1 → v2), compress all pre-pivot entries to a single summary paragraph. Keep
+   only entries from the current doctrinal era as full text.
+4. **PII drift in committed READMEs** — grep `tools/*/README.md` for email patterns,
+   phone numbers, real usernames. Per spec §4.3 these belong in
+   `secrets/_credentials.env` + `secrets/_account-info.env`, not in committed docs.
+5. **Duplicate or near-duplicate docs** — when a runbook covers one Windows gotcha or one
+   provider quirk, ask "should this be a standalone file or a section in a larger
+   runbook?" Single-purpose files <80 lines that share an audience with a sibling are
+   merge candidates.
+6. **Per-tool docs with `## Last verified` >9mo old** — covered by the STALE gate, but
+   the cleanup pass should triage: re-verify, deprecate, or tombstone (`⚠ Avoid (dead)`).
+7. **Skill `metrics/live-runs.jsonl`** — keep all entries; this is the feedback ledger and
+   the refresh consumes it. Don't compress.
+
+### What NOT to cut
+
+- Per-tool docs (`tools/<slug>.md`) regardless of count — they're load-on-demand.
+- Domain shards regardless of length — same.
+- Companion-config-* docs (overview/spec/hardening) — three distinct audiences.
+- Active feedback ledgers (`live-runs.jsonl`, `discovery-state.md`).
+
+### Output
+
+In the sweep CHANGELOG entry, the cleanup pass gets its own section:
+
+```
+### Cleanup (mandatory per-sweep)
+- Deleted: <files>
+- Merged: <a> → <b>
+- Compressed: CHANGELOG pre-<version>
+- PII stripped from: <N> READMEs
+```
+
 ## Trigger
 
 - Manual: ask "refresh the market-intel source matrix" / "刷新工具库".
