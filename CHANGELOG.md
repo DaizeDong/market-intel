@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.12.0] — 2026-06-16
+
+companion-config-spec v1 gains an explicit **storage-mode** dimension. Both "secrets
+committed to private repo" (Mode A) and "secrets gitignored + out-of-band backup" (Mode B)
+are now recognized as valid spec-conformant choices. Skills consuming companion repos MUST
+read `secrets/README.md` (or the repo's policy declaration) to know which mode is in use.
+
+Why: privately deployed companion repos with low-stakes data-API keys often prefer the
+single-source-of-truth convenience of committing secrets directly. The previous spec wording
+implicitly assumed Mode B; this release makes the choice explicit and analyzes the residual
+risk of each.
+
+- **`reference/companion-config-spec.md`** §5.3 rewritten as "Storage modes (Mode A vs Mode
+  B)". Documents:
+  - Mode A trade-offs: pros (single source of truth, bootstrap is `git clone` + apply),
+    cons (GitHub Secret Scanning Partnership providers auto-revoke detected keys even in
+    private repos — explicit list: OpenAI `sk-`, Anthropic `sk-ant-`, AWS `AKIA`, Stripe
+    `sk_live_`, GitHub `ghp_`, Slack `xox`, etc.).
+  - Mode B trade-offs: pros (keys never enter git), cons (two-step bootstrap, requires
+    out-of-band backup machinery).
+  - Required `.gitignore` patterns for Mode B (unchanged from v0.11.0).
+  - SHOULD: every conforming repo declares its mode at the top of `secrets/README.md`.
+- **`reference/companion-config-repo.md`** "Why private matters" section becomes "Two
+  storage modes" + per-mode defense-in-depth posture.
+- **`SKILL.md`** Step 3 companion section — the description of `secrets/<slug>.env` now
+  says "storage mode depends on the repo's policy declared in `secrets/README.md`".
+  Detection rule clarified: even under Mode A, the skill MUST NOT read raw secret values
+  (it spills to transcript regardless of where the file is stored on disk).
+
+The reference implementation `DaizeDong/market-intel-config` adopted Mode A in its v0.5.0
+release; its CHANGELOG documents the migration.
+
 ## [0.11.0] — 2026-06-16
 
 Minor version bump: introduces a **formal specification** for companion config repos so
