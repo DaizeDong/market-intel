@@ -20,6 +20,13 @@ detects whether the current user has one mounted and treats it as the authoritat
 > compatibility rules, conformance checklist), see
 > [`companion-config-spec.md`](companion-config-spec.md). This file is the **overview +
 > rationale + tutorial**; the spec file is what skills and tooling actually consume.
+>
+> 🔒 **Harden GitHub-side BEFORE first commit**: a freshly-created GitHub repo is
+> dangerously permissive for a place that may hold API keys. See
+> [`companion-config-hardening.md`](companion-config-hardening.md) for the 12-step lockdown
+> runbook (visibility verification, Features off, Actions disabled, AI-tool GitHub Apps
+> uninstalled / scoped, Copilot training opt-out). ~15 min the first time. **Do this before
+> Step 4 in the bootstrap below.**
 
 ## The split
 
@@ -295,7 +302,12 @@ git add .
 git diff --cached --name-only | grep -E "\.env$" | grep -v "\.template$" \
   && echo "🚨 ABORT: real .env staged" || echo "✓ clean"
 
-# 4. Create a PRIVATE repo on GitHub (or your Git host), point origin at it, push.
+# 4. Create a PRIVATE repo on GitHub (or your Git host), point origin at it.
+#    ⚠️ BEFORE pushing: run the GitHub-side hardening checklist in
+#    reference/companion-config-hardening.md — visibility, Features off, Actions disabled,
+#    Pages off, GitHub Apps audit (uninstall AI tools like Codex/Devin or restrict scope),
+#    account-level Copilot data-sharing opt-out. ~15 min the first time.
+#    Then push.
 
 # 5. For each tool in market-intel you want to install, create tools/<slug>/ with the
 #    three files above. Acquire the key via the provider's dashboard.
