@@ -1,5 +1,49 @@
 # Changelog
 
+## [0.11.0] — 2026-06-16
+
+Minor version bump: introduces a **formal specification** for companion config repos so
+any conforming repo can be mechanically read by this skill (or future tooling). Previously
+the companion-config-repo doc described the pattern, but there was no contract — fields
+were de-facto rather than de-jure.
+
+- **`reference/companion-config-spec.md`** (new) — formal spec, status STABLE, spec
+  version `1`. Covers:
+  - §1 Discovery convention (env var → dotfile → XDG).
+  - §2 Required vs optional directory structure (`.gitignore` patterns mandatory).
+  - §3 `registry.json` schema with REQUIRED / OPTIONAL field markings + forward-
+    compatibility rules (skills MUST ignore unknown fields).
+  - §3.1 Per-tool entry schema: `slug` and `installed` are the only strictly required
+    fields; `matrix_slug`, `matrix_origin`, `domain`, `tier`, `transport`, `health_last`
+    are OPTIONAL but RECOMMENDED for richer skill consumption.
+  - §4 `tools/<slug>/` per-tool layout with REQUIRED `claude.json.template` +
+    `env.template`; RECOMMENDED `README.md`; RESERVED `manifest.json` (future v2).
+  - §4.1 `claude.json.template` placeholder syntax (`<UPPER_SNAKE_CASE>`), transport-
+    specific shapes for stdio/http/sse (incl. token-in-URL variant).
+  - §4.2 `env.template` UTF-8 no BOM mandate.
+  - §5 `secrets/` directory conventions incl. `_account-info.env` underscore prefix for
+    "not-a-tool" cross-service metadata.
+  - §6 The apply contract (idempotency, no-echo, fail-loud on missing placeholders,
+    backup, atomic write).
+  - §7 The verify contract.
+  - §8 Versioning policy (single integer; minor changes don't bump; major changes do).
+  - §9 Conformance checklist.
+  - §10 Future-reserved extensions (manifest.json, JSON Schema files).
+
+- **`reference/companion-config-repo.md`** — adds a callout at top pointing readers to the
+  spec for the formal contract. The repo doc remains the overview + rationale + tutorial.
+
+- **`SKILL.md`** Step 3 companion section — explicitly references the spec by version
+  number so any future agent knows what contract it's consuming.
+
+- **`reference/install-guide.md`** — L3 row reframed to show both the overview
+  (`companion-config-repo.md`) and the formal contract
+  (`companion-config-spec.md`) as the L3 reading list.
+
+Net: any user can now stand up a companion config repo conforming to a published v1
+contract, ship tooling against it, and trust that this skill (and future versions) will
+mechanically consume it.
+
 ## [0.10.7] — 2026-06-16
 
 Hardens the v0.10.6 work — removes ALL environment-specific path assumptions and per-maintainer
