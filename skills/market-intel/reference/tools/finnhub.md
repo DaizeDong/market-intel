@@ -19,6 +19,7 @@ Free API key from finnhub.io (signup → dashboard). Free tier is real and usabl
 Endpoints/tools cover quote, company profile, basic financials, news + sentiment, and (where available) congressional trades. Minimal: pull a company quote and its recent news sentiment, then cross-check the headline fundamentals against the EDGAR 10-K for the authoritative numbers.
 
 ## General experience & gotchas (踩坑)
+- **Onboarding gotcha — `FINNHUB_STORAGE_DIR` must exist before first run.** The MCP needs a writable cache dir; create it before applying (e.g. `mkdir -p the finnhub cache dir`) or the stdio process exits immediately on launch with an opaque error.
 - **Best free rate limit in the domain (shard): 60/min.** Use it as the default quote source on the free start before reaching for anything paid (CONSTITUTION C2).
 - **Wrapper is small/young (9★, last push 2026-03).** It's a thin MCP over the official API — if a specific endpoint is missing or stale in the wrapper, call the Finnhub REST API directly with the same key rather than waiting on the wrapper.
 - **Free-tier coverage is gated:** many premium endpoints (deeper history, some fundamentals/alt-data) are paid-only and return empty/`403` on the free key — don't mistake an access gate for "no data."

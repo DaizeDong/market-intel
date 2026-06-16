@@ -64,29 +64,35 @@ rotation info.
 ├── PHILOSOPHY.md                # secret-by-design principles
 ├── CHANGELOG.md
 ├── LICENSE                      # typically MIT (or whatever the user prefers)
-├── .gitignore                   # *** THE PRIMARY SECRET GATE ***
+├── .gitignore                   # *** THE PRIMARY SECRET GATE *** (patterns differ Mode A vs B)
 ├── .github/workflows/
-│   └── no-secret-leak.yml       # CI scans every push for key patterns (defense in depth)
+│   └── no-secret-leak.yml       # Mode B ONLY — CI scans every push for key patterns.
+│                                # Under Mode A this fights intentional commits; delete or
+│                                # narrow to non-secret patterns. GitHub-side Push Protection
+│                                # similarly should be OFF under Mode A.
 │
 ├── registry.json                # 🟢 machine-readable installed-tools state (committed)
 │
 ├── tools/                       # 🟢 per-tool ops record (committed)
 │   └── <slug>/
 │       ├── README.md            # tier + register URL + rotation history + dashboard URL
+│       │                        # NO per-account PII (see spec §4.3)
 │       ├── claude.json.template # JSON snippet for ~/.claude.json mcpServers section
 │       └── env.template         # KEY=VALUE skeleton (no values)
 │
-├── secrets/                     # 🚨 gitignored — real keys live here
-│   ├── README.md                # explains what this dir is (the only committed file)
+├── secrets/                     # 🟢 committed under Mode A · 🚨 gitignored under Mode B
+│   ├── README.md                # ⚠️ declares ACTIVE storage mode (Mode A vs B)
 │   ├── .gitkeep                 # ensures the dir exists after fresh clone
-│   └── <slug>.env               # real KEY=VALUE per tool (gitignored)
+│   ├── _account-info.env        # per-account PII (email/username/phone) — namespace marker
+│   └── <slug>.env               # real KEY=VALUE per tool
 │
 ├── scripts/                     # 🟢 automation (committed)
 │   ├── apply.py                 # merges templates + secrets → ~/.claude.json idempotently
-│   ├── verify.sh                # parses `claude mcp list` → updates registry.json
 │   ├── capture-key.ps1          # clipboard-only key capture (Windows; no echo, length-verified)
-│   ├── backup-secrets.sh        # syncs secrets/ to an out-of-band backup location
-│   └── restore-from-onedrive.sh # restores secrets/ from backup on a new machine
+│   ├── verify.sh                # parses `claude mcp list` → updates registry.json
+│   ├── functional-test.py       # JSON-RPC pings each MCP transport (real-call test)
+│   ├── backup-secrets.sh        # Mode B ONLY — copy secrets/ → out-of-band store
+│   └── restore-from-onedrive.sh # Mode B ONLY — restore secrets/ from backup on new machine
 │
 └── runbooks/                    # 🟢 human ops docs (committed)
     ├── new-machine.md           # bootstrap on a fresh machine
@@ -95,15 +101,15 @@ rotation info.
     └── uv-path.md               # Windows uvx PATH gotcha
 ```
 
-## Detailed file formats
+## File formats — one worked example, full spec elsewhere
 
-### `tools/<slug>/claude.json.template`
+The normative shape of every file (template syntax, JSON schema, gitignore patterns, BOM
+requirement) is in [`companion-config-spec.md`](companion-config-spec.md) §4. Don't
+paraphrase it here. One worked example to ground the idea:
 
-A complete JSON snippet that will be merged into `~/.claude.json` under `mcpServers`. Use
-`<UPPER_SNAKE_CASE>` placeholders for any secret value — they get substituted at apply time
-from `secrets/<slug>.env`. Examples:
+**`tools/finnhub/claude.json.template`** — stdio MCP with `<UPPER_SNAKE_CASE>` placeholders
+that get substituted from `secrets/finnhub.env` at apply time:
 
-**stdio MCP with one key:**
 ```json
 {
   "mcpServers": {
@@ -120,138 +126,21 @@ from `secrets/<slug>.env`. Examples:
 }
 ```
 
-**HTTP MCP with bearer token:**
-```json
-{
-  "mcpServers": {
-    "apify": {
-      "type": "http",
-      "url": "https://mcp.apify.com",
-      "headers": {"Authorization": "Bearer <APIFY_API_TOKEN>"}
-    }
-  }
-}
-```
-
-**Token-in-URL HTTP MCP:**
-```json
-{
-  "mcpServers": {
-    "brightdata": {
-      "type": "http",
-      "url": "https://mcp.brightdata.com/mcp?token=<BRIGHTDATA_TOKEN>"
-    }
-  }
-}
-```
-
-**SSE MCP (no key, public endpoint):**
-```json
-{
-  "mcpServers": {
-    "coingecko": {
-      "type": "sse",
-      "url": "https://mcp.api.coingecko.com/sse"
-    }
-  }
-}
-```
-
-**Key-free stdio MCP:**
-```json
-{
-  "mcpServers": {
-    "mcp-hn": {
-      "type": "stdio",
-      "command": "uvx",
-      "args": ["mcp-hn"],
-      "env": {}
-    }
-  }
-}
-```
-
-### `tools/<slug>/env.template`
-
-KEY=VALUE skeleton with empty values + a registration URL comment. Real values go in
-`secrets/<slug>.env`, never here. Example:
+**`tools/finnhub/env.template`** — KEY=VALUE skeleton with empty values; real values in
+`secrets/finnhub.env`:
 
 ```bash
 # Finnhub — register at https://finnhub.io/register (instant key in dashboard)
-# Storage dir is local-only, no network value — pick any writable folder
-
 FINNHUB_API_KEY=
 FINNHUB_STORAGE_DIR=
 ```
 
-### `tools/<slug>/README.md`
+For HTTP-bearer, token-in-URL, SSE, and key-free shapes, see spec §4.1 table.
 
-Recommended fields (skip what doesn't apply):
-
-```markdown
-# <slug>
-
-- **Domain**: <which market-intel domain shard this tool belongs to>
-- **Provider**: [<name>](<registration URL>)
-- **Tier**: <free / freemium / paid — describe quota briefly>
-- **Transport**: <stdio (uvx) | stdio (npx) | HTTP (hosted) | SSE>
-- **Status**: <Connected / Needs auth / Failed> (verified <YYYY-MM-DD>)
-- **Installed**: <YYYY-MM-DD>
-- **Dashboard**: <URL>
-- **Last rotated**: <YYYY-MM-DD>
-
-## What it provides
-
-<2-5 bullets on capabilities>
-
-## Reinstall on a new machine
-
-\`\`\`bash
-python3 scripts/apply.py --tool <slug>
-# Restart Claude session
-\`\`\`
-```
-
-> ⚠️ Do **not** include per-account identifying info (email, username, phone, account IDs)
-> here. Those go in `secrets/_account-info.env` (gitignored), not in this README which a
-> future maintainer or collaborator might see.
-
-### `secrets/<slug>.env`
-
-Plain `.env`, UTF-8 **without BOM** (PowerShell 5's `Set-Content -Encoding UTF8` writes BOM —
-`scripts/capture-key.ps1` and the canonical `apply.py` both handle the no-BOM convention
-correctly). Example:
-
-```bash
-FINNHUB_API_KEY=<real key value>
-FINNHUB_STORAGE_DIR=<local path>
-```
-
-### `secrets/_account-info.env` (optional, gitignored)
-
-Per-service registration log: which email used, which username, registered date, dashboard
-URL, last-rotation date, phone (if required). Useful for survival across machine wipes and for
-your own audit. **Never committed.**
-
-### `registry.json`
-
-Machine-readable index updated by `scripts/verify.sh`:
-
-```json
-{
-  "schema_version": 1,
-  "generated": "<YYYY-MM-DD>",
-  "summary": {
-    "connected_count": <N>,
-    "needs_auth_count": <N>,
-    "failed_count": <N>,
-    "total_in_repo": <N>
-  },
-  "tools": [
-    {"slug": "<slug>", "installed": true, "health_last": "connected"}
-  ]
-}
-```
+> ⚠️ **Per-tool README content rule** (spec §4.3, applies under BOTH Mode A and Mode B):
+> a committed `tools/<slug>/README.md` MUST NOT contain per-account PII (email, username,
+> phone, account IDs). PII goes in `secrets/_account-info.env`, which under Mode A is
+> committed but lives in the `secrets/` namespace, and under Mode B is gitignored.
 
 ## Why this split
 
