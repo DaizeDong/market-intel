@@ -15,6 +15,7 @@ to everything*; the exact per-tool command + price lives one level down.
 | **L0 overview** (this file) | `reference/install-guide.md` | prerequisites, MCP transport types, the `add` mechanics, secret hygiene, Windows notes, how to verify |
 | **L1 per-domain** | `reference/volatile/pricing-install.md` (+ each `domains/<domain>.md` "Install guidance" line) | the exact install command + price for every source, grouped by domain |
 | **L2 per-tool** | `reference/tools/<slug>.md` → `## Install` | exact steps + auth + gotchas for one specific tool. Find the slug in `reference/tools/index.md` |
+| **L3 ops state (optional)** | `reference/companion-config-repo.md` | the recommended pattern for managing **your** install state — which tools *you* installed, *your* tier, *your* key rotation history — in a private companion repo separate from this public matrix. Reference impl: `DaizeDong/market-intel-config` (private). Templates committed, secrets gitignored, OneDrive-backed. |
 
 Flow: triage the domain → open its shard → for the picked tool, read `tools/<slug>.md` `## Install`
 (or the L1 line in `pricing-install.md`) → if it's an MCP, restart/reconnect before using it.
