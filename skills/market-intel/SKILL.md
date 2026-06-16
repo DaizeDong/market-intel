@@ -117,6 +117,85 @@ transcript** (it may sync to the user's cloud backup). Follow exactly:
 - Keys land plaintext in `~/.claude.json` — never commit/screenshot it. **The skill holds the
   procedure, not the key.**
 
+#### Where the user's keys + install state live: the COMPANION CONFIG REPO
+
+The user's per-machine ops state — which MCPs they installed, their per-tool tier, their API
+keys, their rotation history — does **not** live in this matrix repo. It belongs in a **separate,
+private companion config repo**. This is a hard architectural rule; see
+`reference/companion-config-repo.md` for the rationale. As an agent, **assume one may exist on
+the user's machine** and treat it as the authoritative source of "what the user has installed."
+
+**Discovery convention (try in order):**
+
+1. **`$MARKET_INTEL_CONFIG`** env var — explicit path, highest priority.
+2. **`~/CodesSelf/market-intel-config/`** — the conventional location next to a checkout of
+   this matrix repo.
+3. **`~/.config/market-intel-config/`** — Linux/macOS XDG-style fallback.
+
+If found, the repo follows this structure (memorize the shape — it's identical across users):
+
+```
+<companion-config-repo>/
+├── registry.json                # machine-readable installed-tools summary
+├── tools/                       # one dir per tool — committed (no keys)
+│   └── <slug>/
+│       ├── claude.json.template # JSON snippet for ~/.claude.json, with <PLACEHOLDER>
+│       │                        # tokens that get substituted at apply time
+│       ├── env.template         # KEY=VALUE skeleton for required env vars
+│       └── README.md            # tier, registered date, dashboard URL, rate limits
+├── secrets/                     # ── GITIGNORED ── real keys live here
+│   └── <slug>.env               # KEY=value lines, plaintext, backed up out-of-band
+└── scripts/
+    ├── apply.py                 # merge templates + secrets → ~/.claude.json (idempotent)
+    ├── verify.sh                # snapshot `claude mcp list` health → registry.json
+    └── capture-key.ps1          # clipboard-only key capture, length-verified, no echo
+```
+
+**Why each piece exists:**
+
+- `tools/<slug>/claude.json.template` — the SHAPE of the MCP server entry (transport, URL,
+  command, env-var names). Placeholders use `<UPPER_SNAKE_CASE>` matching the env var name in
+  the corresponding `secrets/<slug>.env`. Safe to commit because no real values are in it.
+- `secrets/<slug>.env` — the secret values, as `KEY=VALUE` lines (UTF-8 no BOM). NEVER
+  committed. Backed up out-of-band (a cloud-storage sync folder, encrypted USB, etc. — that's
+  the user's choice).
+- `registry.json` — the index. Conventional schema:
+  ```json
+  {
+    "schema_version": 1,
+    "summary": {"connected_count": N, "needs_auth_count": N, "failed_count": N},
+    "tools": [{"slug": "<slug>", "installed": true, "health_last": "connected"}]
+  }
+  ```
+- `scripts/apply.py` — runs on demand, merges templates + secrets into the live
+  `~/.claude.json` mcpServers section. Refuses to substitute a placeholder when the
+  corresponding secret is missing, so a literal `<YOUR_TOKEN>` never lands in production.
+
+**How to use it from this skill (Step 2 detection enhancement):**
+
+1. After running `claude mcp list` (still primary signal), also check whether a companion
+   config repo exists at one of the paths above.
+2. If yes, read its `registry.json` to learn which tools the user has *configured*, and read
+   the specific `tools/<slug>/README.md` only when you need tier/rate-limit context for that
+   tool.
+3. **Never** read `secrets/<slug>.env` — those values must not enter the transcript.
+4. When a tool the user would benefit from is NOT in their companion repo, recommend
+   adding it using the standard procedure (see `runbooks/add-new-tool.md` inside the
+   companion repo, or summarize the procedure from `reference/companion-config-repo.md`).
+
+**Rotation triggers:** if a key turns out to have leaked (the user pasted it into chat by
+mistake, or you find evidence of unauthorized usage in a dashboard), tell them to:
+- Rotate the key at the provider's dashboard.
+- Use the companion repo's `scripts/capture-key.ps1 -Slug <slug> -Var <VARNAME>` to refresh
+  `secrets/<slug>.env` via clipboard with no echo.
+- Re-run `python3 scripts/apply.py --tool <slug>`.
+- Restart the Claude session.
+
+**What this skill does NOT need to do:** none of the above is required for the matrix to be
+useful. Users without a companion repo just install MCPs ad-hoc via `claude mcp add` and lose
+the durable ops state. The companion pattern is the recommended, audit-friendly way; the
+skill's flow degrades gracefully when it's absent.
+
 ### Step 4 — Delegate execution
 
 Hand the selected sources + sub-questions to the heavy harness:

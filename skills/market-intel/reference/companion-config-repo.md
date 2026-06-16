@@ -1,6 +1,6 @@
-# Companion config repo (optional ops-state backing)
+# Companion config repo (recommended ops-state backing)
 
-market-intel is the **matrix** (which tools exist, where they live, how to install them). The
+market-intel is the **matrix** — which tools exist, where they live, how to install them. The
 matrix is **public** and **shared**. But once a user actually starts installing tools and
 acquiring API keys, they accumulate per-machine **operational state**:
 
@@ -9,90 +9,313 @@ acquiring API keys, they accumulate per-machine **operational state**:
 - Where are my credentials? When were they last rotated?
 - Is my MCP currently healthy?
 
-That ops state is **private** to one user (or one organization). It does not belong in
-market-intel's public source tree.
+That ops state is **private** to one user (or one organization). It does not belong in this
+matrix repo.
 
-The **companion config repo pattern** is the recommended way to manage it.
+The **companion config repo pattern** is the recommended way to manage it. SKILL.md's Step 3
+detects whether the current user has one mounted and treats it as the authoritative source of
+"what is installed" (in addition to `claude mcp list`).
 
-## The pattern
+## The split
 
 ```
-~/CodesSelf/
+~/CodesSelf/   (or wherever the user keeps their repos)
 ├── market-intel/           # PUBLIC — the matrix (this repo)
-└── market-intel-config/    # PRIVATE — ops state + secrets
+└── market-intel-config/    # PRIVATE — ops state + secrets (per-user, NOT shared)
 ```
 
-The private companion repo:
-- Mirrors the matrix's per-tool granularity (`tools/<slug>/`).
-- For each installed tool, holds:
-  - `claude.json.template` (with `<YOUR_TOKEN>` placeholder, committed).
-  - `env.template` (skeleton, committed).
-  - `<slug>.env` (real key, gitignored, OneDrive-backed up).
-  - `README.md` (register URL, tier, last-rotated date, registered-with email).
-- Holds `scripts/apply.py` that merges templates + secrets → `~/.claude.json` idempotently.
-- Holds `scripts/verify.sh` that snapshots `claude mcp list` health into a registry file.
-- Ships a CI gate (`.github/workflows/no-secret-leak.yml`) that fails on common key patterns.
+The companion config repo is **per-user / per-organization**: each user creates their own
+private repo and links it to their own GitHub account (or self-hosted Git, or no remote at
+all). There is no shared canonical companion repo — by design — because the contents are by
+nature personal.
 
-Reference implementation: [DaizeDong/market-intel-config](https://github.com/DaizeDong/market-intel-config) (private — author's
-own ops state; structure replicable, content per-user).
+## Discovery convention (used by SKILL.md Step 3)
+
+The skill probes these paths in order; the first that exists is used:
+
+1. **`$MARKET_INTEL_CONFIG`** env var (set in `.bashrc` / `.profile` / Windows env).
+2. **`~/CodesSelf/market-intel-config/`** (conventional location next to a checkout of this
+   matrix repo).
+3. **`~/.config/market-intel-config/`** (Linux/macOS XDG-style).
+
+If none exists, the skill degrades to "matrix-only" mode and just uses `claude mcp list` to see
+what's available, with no awareness of per-tool tier / quota / rotation info.
+
+## Repo structure (memorize the shape — it's identical across users)
+
+```
+<companion-config-repo>/
+├── README.md
+├── PHILOSOPHY.md                # secret-by-design principles
+├── CHANGELOG.md
+├── LICENSE                      # typically MIT (or whatever the user prefers)
+├── .gitignore                   # *** THE PRIMARY SECRET GATE ***
+├── .github/workflows/
+│   └── no-secret-leak.yml       # CI scans every push for key patterns (defense in depth)
+│
+├── registry.json                # 🟢 machine-readable installed-tools state (committed)
+│
+├── tools/                       # 🟢 per-tool ops record (committed)
+│   └── <slug>/
+│       ├── README.md            # tier + register URL + rotation history + dashboard URL
+│       ├── claude.json.template # JSON snippet for ~/.claude.json mcpServers section
+│       └── env.template         # KEY=VALUE skeleton (no values)
+│
+├── secrets/                     # 🚨 gitignored — real keys live here
+│   ├── README.md                # explains what this dir is (the only committed file)
+│   ├── .gitkeep                 # ensures the dir exists after fresh clone
+│   └── <slug>.env               # real KEY=VALUE per tool (gitignored)
+│
+├── scripts/                     # 🟢 automation (committed)
+│   ├── apply.py                 # merges templates + secrets → ~/.claude.json idempotently
+│   ├── verify.sh                # parses `claude mcp list` → updates registry.json
+│   ├── capture-key.ps1          # clipboard-only key capture (Windows; no echo, length-verified)
+│   ├── backup-secrets.sh        # syncs secrets/ to an out-of-band backup location
+│   └── restore-from-onedrive.sh # restores secrets/ from backup on a new machine
+│
+└── runbooks/                    # 🟢 human ops docs (committed)
+    ├── new-machine.md           # bootstrap on a fresh machine
+    ├── secret-rotation.md       # when a key leaks or rotates
+    ├── add-new-tool.md          # how to onboard a new tool into the companion repo
+    └── uv-path.md               # Windows uvx PATH gotcha
+```
+
+## Detailed file formats
+
+### `tools/<slug>/claude.json.template`
+
+A complete JSON snippet that will be merged into `~/.claude.json` under `mcpServers`. Use
+`<UPPER_SNAKE_CASE>` placeholders for any secret value — they get substituted at apply time
+from `secrets/<slug>.env`. Examples:
+
+**stdio MCP with one key:**
+```json
+{
+  "mcpServers": {
+    "finnhub": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["mcp-finnhub"],
+      "env": {
+        "FINNHUB_API_KEY": "<FINNHUB_API_KEY>",
+        "FINNHUB_STORAGE_DIR": "<FINNHUB_STORAGE_DIR>"
+      }
+    }
+  }
+}
+```
+
+**HTTP MCP with bearer token:**
+```json
+{
+  "mcpServers": {
+    "apify": {
+      "type": "http",
+      "url": "https://mcp.apify.com",
+      "headers": {"Authorization": "Bearer <APIFY_API_TOKEN>"}
+    }
+  }
+}
+```
+
+**Token-in-URL HTTP MCP:**
+```json
+{
+  "mcpServers": {
+    "brightdata": {
+      "type": "http",
+      "url": "https://mcp.brightdata.com/mcp?token=<BRIGHTDATA_TOKEN>"
+    }
+  }
+}
+```
+
+**SSE MCP (no key, public endpoint):**
+```json
+{
+  "mcpServers": {
+    "coingecko": {
+      "type": "sse",
+      "url": "https://mcp.api.coingecko.com/sse"
+    }
+  }
+}
+```
+
+**Key-free stdio MCP:**
+```json
+{
+  "mcpServers": {
+    "mcp-hn": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["mcp-hn"],
+      "env": {}
+    }
+  }
+}
+```
+
+### `tools/<slug>/env.template`
+
+KEY=VALUE skeleton with empty values + a registration URL comment. Real values go in
+`secrets/<slug>.env`, never here. Example:
+
+```bash
+# Finnhub — register at https://finnhub.io/register (instant key in dashboard)
+# Storage dir is local-only, no network value — pick any writable folder
+
+FINNHUB_API_KEY=
+FINNHUB_STORAGE_DIR=
+```
+
+### `tools/<slug>/README.md`
+
+Recommended fields (skip what doesn't apply):
+
+```markdown
+# <slug>
+
+- **Domain**: <which market-intel domain shard this tool belongs to>
+- **Provider**: [<name>](<registration URL>)
+- **Tier**: <free / freemium / paid — describe quota briefly>
+- **Transport**: <stdio (uvx) | stdio (npx) | HTTP (hosted) | SSE>
+- **Status**: <Connected / Needs auth / Failed> (verified <YYYY-MM-DD>)
+- **Installed**: <YYYY-MM-DD>
+- **Dashboard**: <URL>
+- **Last rotated**: <YYYY-MM-DD>
+
+## What it provides
+
+<2-5 bullets on capabilities>
+
+## Reinstall on a new machine
+
+\`\`\`bash
+python3 scripts/apply.py --tool <slug>
+# Restart Claude session
+\`\`\`
+```
+
+> ⚠️ Do **not** include per-account identifying info (email, username, phone, account IDs)
+> here. Those go in `secrets/_account-info.env` (gitignored), not in this README which a
+> future maintainer or collaborator might see.
+
+### `secrets/<slug>.env`
+
+Plain `.env`, UTF-8 **without BOM** (PowerShell 5's `Set-Content -Encoding UTF8` writes BOM —
+`scripts/capture-key.ps1` and the canonical `apply.py` both handle the no-BOM convention
+correctly). Example:
+
+```bash
+FINNHUB_API_KEY=<real key value>
+FINNHUB_STORAGE_DIR=<local path>
+```
+
+### `secrets/_account-info.env` (optional, gitignored)
+
+Per-service registration log: which email used, which username, registered date, dashboard
+URL, last-rotation date, phone (if required). Useful for survival across machine wipes and for
+your own audit. **Never committed.**
+
+### `registry.json`
+
+Machine-readable index updated by `scripts/verify.sh`:
+
+```json
+{
+  "schema_version": 1,
+  "generated": "<YYYY-MM-DD>",
+  "summary": {
+    "connected_count": <N>,
+    "needs_auth_count": <N>,
+    "failed_count": <N>,
+    "total_in_repo": <N>
+  },
+  "tools": [
+    {"slug": "<slug>", "installed": true, "health_last": "connected"}
+  ]
+}
+```
 
 ## Why this split
 
 **P5 (delegate, don't reinvent)** from `PHILOSOPHY.md`: market-intel is a thin layer. Mixing
-operational state into the matrix repo would:
+operational state into the matrix would:
+
 - Bloat clones for users who just want to read the matrix.
 - Create awkward decisions about "which tools should be visible in the index" — your installed
   set ≠ everyone else's.
 - Tempt users to commit secrets to the matrix repo by mistake.
-- Force a coupling between matrix updates and your personal install state.
+- Force a coupling between matrix updates and personal install state.
 
 Splitting them keeps each repo focused: matrix = knowledge asset; companion = ops state.
 
-## How to bootstrap your own
+## How to bootstrap your own companion repo
 
 ```bash
-# 1. Fork the directory layout from market-intel-config
-mkdir -p ~/CodesSelf/<your-org>-market-intel-config/{tools,secrets,scripts,runbooks,.github/workflows}
-cd ~/CodesSelf/<your-org>-market-intel-config
+# 1. Create the directory layout
+mkdir -p ~/CodesSelf/market-intel-config/{tools,secrets,scripts,runbooks,.github/workflows}
+cd ~/CodesSelf/market-intel-config
 
-# 2. Copy the canonical .gitignore + CI gate + apply.py + verify.sh from the reference impl
-# (or fork DaizeDong/market-intel-config private and rewrite README.md)
+# 2. Author the canonical files (.gitignore, README.md, PHILOSOPHY.md, scripts/apply.py,
+#    scripts/verify.sh, scripts/capture-key.ps1, .github/workflows/no-secret-leak.yml).
+#    Use the structure section above as the spec. The canonical .gitignore must include:
+#
+#    secrets/*
+#    !secrets/README.md
+#    !secrets/.gitkeep
+#    *.env
+#    !*.env.template
+#    !env.template
+#    claude.json
+#    .claude.json
+#    *credentials*.json
+#    *.key
+#    *.pem
+#    !*.key.template
+#    !*.pem.template
+#
+#    plus defense-in-depth patterns for *_token / *api_key* / etc.
 
-# 3. For each tool in market-intel you want to install, create tools/<slug>/:
-#    - claude.json.template (the MCP snippet with placeholders)
-#    - env.template (skeleton)
-#    - README.md (you'll fill in tier/email/rotation as you go)
+# 3. git init, then sanity-check before any commit:
+git add .
+git diff --cached --name-only | grep -E "\.env$" | grep -v "\.template$" \
+  && echo "🚨 ABORT: real .env staged" || echo "✓ clean"
 
-# 4. Sign up for the service, get the key, paste into secrets/<slug>.env via clipboard
-#    (NEVER paste keys into the Claude chat input)
+# 4. Create a PRIVATE repo on GitHub (or your Git host), point origin at it, push.
 
-# 5. Run: python3 scripts/apply.py
+# 5. For each tool in market-intel you want to install, create tools/<slug>/ with the
+#    three files above. Acquire the key via the provider's dashboard.
 
-# 6. Restart Claude session
+# 6. Capture the key via clipboard (PowerShell on Windows):
+.\scripts\capture-key.ps1 -Slug <slug> -Var <KEY_VAR_NAME>
 
-# 7. Verify: bash scripts/verify.sh
+# 7. Apply: python3 scripts/apply.py --tool <slug>
+# 8. Restart Claude session.
+# 9. Verify: bash scripts/verify.sh
+# 10. git add tools/<slug>/ ; git commit ; git push   (secrets/ is auto-excluded)
 ```
 
 ## Why "private" matters
 
-A leaked API key in a public repo is harvested by bots within seconds — GitHub's public
-surface is continuously scanned. Even **private repos can leak** through forks, OAuth-token
-compromises, accidental visibility flips, and cached mirrors. So:
+A leaked API key in a public repo is harvested by bots within seconds — public GitHub is
+continuously scanned. Even **private repos can leak** through forks, OAuth-token compromises,
+accidental visibility flips, and cached mirrors. So:
 
 - **`secrets/` is gitignored** (primary defense).
-- **CI gate scans for typical key patterns** (defense in depth).
+- **CI gate scans for typical key patterns on every push** (defense in depth).
 - The repo itself is **private** (third layer).
-- Real secrets actually live on **filesystem + OneDrive** (Microsoft's encryption boundary),
-  never on GitHub.
-
-See the reference implementation's `PHILOSOPHY.md` for the full rationale.
+- Real secrets live on **local filesystem + an out-of-band backup** (cloud sync, encrypted
+  drive, etc.), never on GitHub.
 
 ## Cross-skill applicability
 
 The same companion-repo pattern fits any market-intel-style "matrix" skill:
-- `shopping-aggregator` users can stand up a `shopping-aggregator-config` companion repo
-  for their Keepa subscription, Camelcamelcamel email, Apify token, etc.
-- Future matrix-shaped skills (e.g. an academic-research-tools matrix) would follow the
-  same split.
+
+- `shopping-aggregator` users can stand up a `shopping-aggregator-config` companion repo for
+  their Keepa subscription, Camelcamelcamel email, Apify token, etc.
+- Future matrix-shaped skills (e.g. an academic-research-tools matrix) would follow the same
+  split.
 
 In all cases the matrix is shared knowledge; the companion is private ops state.
