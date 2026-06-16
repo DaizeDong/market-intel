@@ -21,6 +21,7 @@ directory** — that breaks progressive loading. Install mechanics overview: `re
 - [subscope](subscope.md) — ④ · keyless buyer-intent scoring (post-GummySearch)
 - [praw](praw.md) — ① · mature Python Reddit API client
 - [stack-overflow-mcp](stack-overflow-mcp.md) — ① · Stack Exchange search/answers
+- [stackexchange](stackexchange.md) — ① REST · raw REST API, key raises rate limit 300→10k/day/IP
 - [discord-mcp](discord-mcp.md) — ④ · read Discord via user session (ToS risk)
 
 ## web-scraping
