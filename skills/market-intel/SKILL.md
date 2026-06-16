@@ -131,6 +131,15 @@ source of "what the user has installed." The spec defines: discovery convention,
 directory layout, `registry.json` schema, per-tool template formats, conformance checklist,
 and versioning policy.
 
+> 🔒 **When guiding the user to bootstrap a new companion repo, ALWAYS surface the
+> hardening runbook ([`reference/companion-config-hardening.md`](reference/companion-config-hardening.md))
+> BEFORE the first push.** A freshly-created GitHub repo defaults to "All repositories"
+> access for installed GitHub Apps (ChatGPT Codex, Devin.ai, etc.) and account-level
+> Copilot training is opt-out, not opt-in. The runbook is a 12-step lockdown that closes
+> these by hand; ~15 min the first time. Skipping it means the user's API keys may be
+> visible to third-party AI agents and used as future training data the moment the repo
+> exists.
+
 **Discovery convention (try in order):**
 
 1. **`$MARKET_INTEL_CONFIG`** env var — explicit path, highest priority and the recommended way.
