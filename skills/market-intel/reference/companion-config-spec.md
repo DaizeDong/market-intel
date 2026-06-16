@@ -1,6 +1,11 @@
 # Companion config repo — formal specification
 
-**Status**: STABLE. Spec version: `1`.
+**Status**: STABLE. Spec version: `1.1`.
+
+> v1.1 (additive, backward-compatible): adds `transport: "rest"` and `transport:
+> "python-lib"` to the documented enum; adds OPTIONAL `expires` and `rotate_after` fields
+> for credential-lifecycle tracking. v1 consumers ignore unknown fields per §3
+> (forward-compat), so no migration needed.
 
 This is the **formal contract** between the market-intel skill (and sister skills following the
 same pattern) and any companion config repo the user maintains. Conforming repos can be
@@ -109,9 +114,28 @@ Skills SHOULD:
                                   //            (e.g. "shopping-aggregator" for biggo-mcp)
   "domain": "string",             // OPTIONAL — fast-path routing hint (e.g. "finance-markets")
   "tier": "string",               // OPTIONAL — short summary: "free" | "freemium" | "paid"
-  "transport": "string",          // OPTIONAL — "stdio" | "http" | "sse"
-  "health_last": "string",        // OPTIONAL — "connected" | "needs_auth" | "failed" | "unknown"
+  "transport": "string",          // OPTIONAL — "stdio" | "http" | "sse" | "rest" | "python-lib"
+                                  //            "rest"        = REST-only credential (no MCP, no
+                                  //                            claude.json.template; loaded via
+                                  //                            os.environ in subagent code).
+                                  //            "python-lib"  = installable Python library that
+                                  //                            uses creds from secrets/<slug>.env
+                                  //                            via its own auth (e.g. atproto,
+                                  //                            Mastodon.py). Listed by
+                                  //                            scripts/install-libs.sh.
+  "health_last": "string",        // OPTIONAL — "connected" | "needs_auth" | "failed" | "unknown" |
+                                  //            "credential_ready" | "verified" | "installed"
+                                  //            (credential_ready: secret captured but not exercised;
+                                  //             verified: REST call or library import confirmed;
+                                  //             installed: python-lib pip-installed locally)
   "health_checked": "ISO8601",    // OPTIONAL — when health_last was last verified
+  "expires": "string",            // OPTIONAL — "never" or "YYYY-MM-DD (reason)" — platform-
+                                  //            enforced expiration of the credential.
+  "rotate_after": "string",       // OPTIONAL — "YYYY-MM-DD (reason)" or "annual" — voluntary
+                                  //            rotation deadline distinct from `expires`
+                                  //            (e.g. transcript-leak rotation, shared-password
+                                  //            hygiene). Tooling SHOULD warn when rotate_after
+                                  //            is reached even if expires says "never".
   "notes": "string"               // OPTIONAL — free text
 }
 ```
