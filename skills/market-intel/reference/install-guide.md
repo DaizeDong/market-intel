@@ -15,7 +15,9 @@ to everything*; the exact per-tool command + price lives one level down.
 | **L0 overview** (this file) | `reference/install-guide.md` | prerequisites, MCP transport types, the `add` mechanics, secret hygiene, Windows notes, how to verify |
 | **L1 per-domain** | `reference/volatile/pricing-install.md` (+ each `domains/<domain>.md` "Install guidance" line) | the exact install command + price for every source, grouped by domain |
 | **L2 per-tool** | `reference/tools/<slug>.md` → `## Install` | exact steps + auth + gotchas for one specific tool. Find the slug in `reference/tools/index.md` |
-| **L3 ops state (recommended)** | `reference/companion-config-repo.md` (overview + tutorial) + `reference/companion-config-spec.md` (formal contract, version 1) + `reference/companion-config-hardening.md` (GitHub repo lockdown runbook) | the recommended pattern for managing **your** install state — which tools *you* installed, *your* tier, *your* key rotation history — in a **per-user private companion repo** separate from this public matrix. Each user maintains their own; there is no canonical shared one. Templates committed, secrets either committed-to-private-repo (Mode A) or gitignored + out-of-band backup (Mode B). **Mechanically interfaceable**: the formal spec defines a stable contract so any conforming companion repo can be consumed by this skill (or future tooling). **Harden before first commit**: the hardening runbook walks every GitHub setting that prevents AI tools, training scrapers, and accidental-visibility-flip risks from touching the private repo. |
+| **L3a ops state — overview** | `reference/companion-config-repo.md` | the recommended pattern + tutorial for managing **your** install state in a per-user private companion repo separate from this public matrix |
+| **L3b ops state — formal spec** | `reference/companion-config-spec.md` (version 1) | machine-readable contract: discovery convention, `registry.json` schema, template formats, conformance checklist. What skills + tooling actually consume. |
+| **L3c ops state — GitHub hardening** | `reference/companion-config-hardening.md` | 12-step lockdown runbook for a freshly-created private repo (visibility, Features off, Actions disabled, GitHub Apps audit, Copilot training opt-out). **Run before the first push.** |
 
 Flow: triage the domain → open its shard → for the picked tool, read `tools/<slug>.md` `## Install`
 (or the L1 line in `pricing-install.md`) → if it's an MCP, restart/reconnect before using it.
@@ -67,6 +69,26 @@ tool yourself is fine — leaking the value is not.
   twitterapi.io = once/24h). A truly transcript-clean key = the **user** rotates from their own browser.
 - Keys land plaintext in `~/.claude.json` — **never commit/screenshot it.** The skill holds the
   *procedure*, not the key. Prefer `-e KEY=$VAR` forms the **user** runs themselves.
+- **Clipboard-capture sanity gates** — when piping a key from clipboard, reject anything outside
+  `length ∈ [8, 512]`, anything containing whitespace, or anything matching `^https?://` (someone
+  copied a URL by mistake). These cheap checks catch ~all paste-by-mistake errors before the value
+  reaches `~/.claude.json`. Reference impl: companion-config-repo's `scripts/capture-key.ps1`.
+
+## Troubleshoot a non-Connected MCP
+
+When `claude mcp list` shows `✗ Failed` or `! Needs authentication`, the cause is almost always
+one of five categories. Walk these in order:
+
+| symptom | likely cause | first move |
+|---|---|---|
+| `! Needs authentication` | OAuth token expired or never completed | run `/mcp` and re-OAuth the server |
+| `✗ Failed` for stdio MCP, immediate exit | `uvx`/`npx` not on PATH, or absolute path wrong | shell-test the exact `command + args` line outside Claude; check `uv --version` / `node -v`; on Windows see `uv-path.md`-style PATH gotchas |
+| `✗ Failed` for HTTP MCP | Bearer token wrong / rotated / quota exceeded | `curl -H "Authorization: Bearer $TOKEN" <url>/health` to isolate transport vs auth |
+| `✗ Failed` with env var error in logs | required env var missing from `mcpServers.<name>.env` | re-check `tools/<slug>/env.template` against `secrets/<slug>.env`; common miss: `_STORAGE_DIR` paths that need pre-creating |
+| `✓ Connected` but actual tool calls fail | provider subscription gate (free tier read-only, etc.) | check provider dashboard for plan + quota; `functional-test.py`-style JSON-RPC ping catches this where `claude mcp list` doesn't |
+
+If still stuck, the active session's `the local logs dir` directory has per-MCP stderr capture —
+search for the server name in the most recent log file.
 
 ## Verify an install (always do this after adding)
 

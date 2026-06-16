@@ -13,7 +13,7 @@ Wraps the SEC EDGAR system: 13M+ filings, full-text 10-K / 10-Q / 8-K, XBRL fina
 stdio MCP via `uvx` (or Docker). The AGPL repo requires a `SEC_EDGAR_USER_AGENT` env (SEC mandates a contact string like `"Name email@domain"`). Exact, time-stamped command: `reference/volatile/pricing-install.md → finance-markets`. L0 mechanics (stdio is flaky on Windows — prefer absolute paths, test in a plain shell first): `reference/install-guide.md`. Restart / `/mcp` reconnect after adding.
 
 ## Auth / keys
-No API key. The only requirement is a valid **User-Agent** identifying you to the SEC (a name + email); requests without it get throttled/blocked by EDGAR. No secret involved, so the secret-hygiene rules don't apply here — set the User-Agent in the env and you're done.
+No API key. The only requirement is a valid **User-Agent** identifying you to the SEC. **Onboarding gotcha:** the UA string MUST contain a contact email (SEC fair-access policy), not just an app name — e.g. `"market-intel-research yourname@example.com"`, not `"market-intel-research"`. A UA without `@` gets silently throttled by EDGAR with no error message. No secret involved, so the secret-hygiene rules don't apply here — set the User-Agent in the env and you're done.
 
 ## Usage — call examples
 MCP tools cover company lookup (by ticker/CIK), filing retrieval, XBRL financial-fact extraction, and insider transactions. Minimal: resolve a ticker to its CIK, pull the latest 10-K, then extract a specific XBRL concept (e.g. `Revenues`, `NetIncomeLoss`) rather than dumping the whole filing.
