@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.10.5] — 2026-06-15
+
+Adds the **companion-config-repo** pattern as a formal L3 layer of the install system: introduces
+a recommended split between the public matrix (this repo) and a private per-user ops state repo
+(reference impl: `DaizeDong/market-intel-config`, private). The split keeps secrets out of git and
+keeps ops state out of the matrix.
+
+- **`reference/companion-config-repo.md`** (new) — documents the pattern: per-tool JSON templates +
+  empty env templates live in the companion repo's `tools/<slug>/` (committed); real keys live in
+  `secrets/<slug>.env` (gitignored, OneDrive-backed). A `scripts/apply.py` merges templates +
+  secrets idempotently into `~/.claude.json` without ever echoing key values. A CI gate
+  (`no-secret-leak.yml`) scans for typical key patterns as defense in depth.
+- **`reference/install-guide.md`** — three-level install table extended with **L3 ops state**
+  pointing to companion-config-repo.md. The L0/L1/L2 layers (mechanics / per-domain / per-tool) are
+  unchanged; L3 is purely additive — no existing flow breaks if the user doesn't adopt a
+  companion repo.
+- No tool churn. Matrix monotonic (+1 doc, 0 deleted, 0 silent change) per P3.
+
+This codifies what was previously informal — users were already maintaining ops state in private
+notes, scattered `.env` files, and out-of-band tooling. Documenting the pattern makes the secret
+hygiene story end-to-end (the install-guide L0 secret rules apply at acquisition; companion-repo
+L3 mechanics apply at persistence + restore).
+
 ## [0.10.4] — 2026-06-15
 
 Sister-skill integration: cross-references to **[DaizeDong/shopping-aggregator](https://github.com/DaizeDong/shopping-aggregator)**, a newly-authored consumer-shopping-price-compare orchestration skill that fills a gap surfaced by the 2026-06-15 user research run. Net: +1 domain (routing-only), +1 ready-skills row, +2 README cross-links, no tool churn, no shard breakage.
