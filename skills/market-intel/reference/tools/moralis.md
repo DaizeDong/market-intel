@@ -24,6 +24,7 @@ Tools cover wallet token/NFT balances, token/NFT transfers, native + ERC-20 port
 - 40 RPS is generous for research, but the **daily CU cap resets daily** — a long backfill can stall at the cap; spread it or upgrade.
 - Some advanced/enterprise endpoints (deep history, certain DeFi protocol coverage) are higher-tier — a free-tier call may return partial coverage rather than an error.
 - Read-only data API — no execution; private keys → small test wallet (shard reality check).
+- **Signup silently rejects headless Google OAuth** (confirmed 2026-06-16) — `admin.moralis.com/register` shows "Login with Google" but clicking does not navigate from headless playwright (no visible error; the page just stays on /register). Likely a Cloudflare-like fingerprint check. User-only signup. Once logged in, key is at admin.moralis.com Web3 APIs tab.
 
 ## Failure signals & fallback
 Failure looks like: HTTP 429 (40 RPS) or daily-CU-exhausted error, partial coverage on a higher-tier endpoint, or empty result on an unsupported chain. **Fallbacks:** equivalent normalized multi-chain portfolio → **Covalent (GoldRush)**; single-chain raw tx/ABI → **Etherscan MCP** / **Blockscout MCP** (free); price/DEX history → **CoinGecko MCP**; smart-money labels → **Nansen**.

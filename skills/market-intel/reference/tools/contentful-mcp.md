@@ -24,6 +24,8 @@ Tools cover entry/asset create-update-publish, content-type introspection, and l
 - Multi-locale fields are objects keyed by locale code — sending a bare string to a localized field errors or only sets the default locale.
 - Free tier caps at **2 locales**; multi-locale work past that forces the paid plan.
 - **SEO命门:** Contentful is headless — set canonical on the rendered front-end, especially if content syndicates.
+- **Signup is half-OAuth half-captcha** (confirmed 2026-06-16) — "Continue with Google" works for the OAuth leg, but redirects to a follow-up lead-gen form at `be.contentful.com/register` that has BOTH `g-recaptcha-response` AND `h-captcha-response` textareas. Submit silently no-ops without both solved. Account is not fully provisioned until the form clears; `app.contentful.com` redirects back to /login until then. **The agent can drive the OAuth leg; the user must clear both captchas.**
+- **CMA token (Content Management API), not Content Delivery, is what you want for read+write.** It lives at Settings → API keys → "Add API key" inside a space (so a space must exist first). The displayed "Personal Access Tokens" UI under user profile is a different surface — also valid for management, scoped to your user not a space.
 
 ## Failure signals & fallback
 401 (revoked/space-mismatched CMA token) or validation errors on localized fields → verify `✓ Connected` in `claude mcp list` and confirm the space/environment. Fallback within domain: **Sanity hosted MCP** (the other major headless option), or **WordPress MCP** for a non-headless blog target.

@@ -74,6 +74,52 @@ tool yourself is fine — leaking the value is not.
   copied a URL by mistake). These cheap checks catch ~all paste-by-mistake errors before the value
   reaches `~/.claude.json`. Reference impl: companion-config-repo's `scripts/capture-key.ps1`.
 
+## Anti-automation patterns to expect during install
+
+Real-world batch registrations across 2026-06 hit these bot defenses. **None can be bypassed
+headlessly**; the agent's job is to recognize the pattern fast, stop wasting cycles, and hand
+off cleanly to the user with the right URL + clipboard handoff. Recording them here so a
+first-time-setup user knows what to expect *before* clicking signup.
+
+| Defense | Where we hit it | What it looks like | Workaround |
+|---|---|---|---|
+| **PerimeterX / Akamai fingerprint deny** | Webflow `/signup` | "Access to this page has been denied" served on first navigation | User-only signup in a normal browser |
+| **Cloudflare Turnstile** | Buffer `/signup` | Submit button hangs in "Signing Up..." waiting for Turnstile token the headless browser never produces | User-only signup |
+| **reCAPTCHA + hCaptcha double gate** | Contentful post-Google-OAuth lead-gen form | OAuth completes, but the follow-up form has `g-recaptcha-response` + `h-captcha-response` textareas; submit silently no-ops without both solved | User clears both captchas |
+| **hCaptcha on forgot-password** | eBay `/fyp` | DOM has `target-icaptcha-slot` + 2 hcaptcha iframes; "Send Now" stays `disabled` | User solves captcha first |
+| **B2B work-email gate** | Attio, Lusha | Rejects `gmail.com`; Attio's Google OAuth callback redirects to `email_is_public=1` error; Lusha's signup placeholder says "Enter your work email" | Skip unless you have a work-domain email |
+| **readonly+disabled with active watcher** | Apollo onboarding wizard | Inputs render `readonly disabled`; if JS removes attrs, a watcher reapplies within milliseconds — defeats `playwright.fill`, JS event dispatch, attr removal | User-driven onboarding only |
+| **OAuth provider mismatch** | HubSpot CRM signup | Only Microsoft / Apple / email; some matrices say Google but the page doesn't offer it | User chooses Microsoft or email + captcha |
+| **Provider-side approval delay** | eBay developer | New developer account shows "Access to your new account is pending approval, which takes at least one business day" — not a bot defense, fraud-prevention policy | Wait 1 business day, re-check `/my/keys` |
+| **Email-verification email out of reach** | SerpApi, Buffer, Contentful, ZeroBounce, Mastodon | Verification email goes to the signup mailbox (e.g. `user1@example.com`); if the agent's Gmail MCP is bound to a *different* Google account (e.g. user's claude.ai login), agent can't read it | User opens the mailbox, clicks link, then continues |
+| **Multi-step React onboarding wizards** | Sanity (8 steps), Apollo, FMP (5 questions) | Radio buttons rendered with `sr-only` (visually hidden) `<input>` under cosmetic labels; sticky header intercepts `playwright.click`; "Next" only enables after React state validates inputs | Click the `label[for=...]`, not the hidden input; use JS `.click()` to bypass sticky-header pointer interception; tolerate that some wizards need real keystrokes |
+
+### DOM-visible plaintext credentials — a transcript-hygiene hazard
+
+Several providers render the secret in **readable plaintext** on the dashboard page (no
+masking, no copy-only button):
+
+- **Twelve Data** `/account/api-keys` — key in the page DOM unmasked.
+- **FMP** dashboard — key in the page DOM unmasked.
+- **Mastodon** `/settings/applications/<id>` — all 3 of `client_key`, `client_secret`,
+  `access_token` rendered simultaneously as readonly plaintext inputs.
+- **Bluesky** App Password dialog — shows the password ONCE with no copy button; agent must
+  read the DOM string before the user closes the dialog.
+- **Stack Apps** new-API-key dialog — masks all but last 4 chars in the visible cell, but
+  the actual full value is reachable via `navigator.clipboard.writeText` from a hidden
+  readonly input — the agent must copy from DOM, not from the masked display.
+
+When the agent reads any of these via `browser_evaluate`, the **full value enters the
+conversation transcript**. Under Mode A (committed-secrets) the residual exposure is
+tolerable; under Mode B prefer one of:
+
+1. Have the user click the page's own copy button, then `Get-Clipboard | length-verify`.
+2. Use `navigator.clipboard.writeText(...)` from inside the page (browser-side), then read
+   clipboard — never returns the value to the JS evaluation result.
+
+See [`companion-config-hardening.md`](companion-config-hardening.md) for the wider Mode
+A vs Mode B trade-off.
+
 ## Troubleshoot a non-Connected MCP
 
 When `claude mcp list` shows `✗ Failed` or `! Needs authentication`, the cause is almost always

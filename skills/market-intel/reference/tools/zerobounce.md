@@ -40,6 +40,7 @@ finder. Minimal: batch-validate an enriched list, then keep only `valid` (drop `
 - Verify *before* Smartlead, always — sending to an unverified list is the #1 way to wreck sender
   reputation (the whole reason this hop exists).
 - Business-domain requirement for the free tier: a free-mail signup may not get the 100/mo.
+- **Signup is captcha-gated + email-verify-link required** — `zerobounce.net/members/signup` typical email+password flow has a captcha; account activates only after clicking the verification link (sent to signup mailbox, out of agent reach if the Gmail MCP isn't on that account). User-only signup. API key lives at Dashboard → API after activation.
 
 ## Failure signals & fallback
 Failure looks like: 401/invalid-key, `! Needs authentication`, or out-of-credits at call time

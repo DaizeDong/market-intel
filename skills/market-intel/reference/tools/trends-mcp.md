@@ -24,6 +24,8 @@ After connecting, tools let you query a keyword/topic across the source set and 
 - **Resale (②) means you're trusting the provider's normalization** — the cross-platform "normalized" number hides each source's own quirks (e.g. Google Trends is relative 0–100, not absolute volume). Treat it as a comparative signal, not an absolute install/sales count.
 - **Selling-research play (shard):** TikTok virality typically leads Amazon demand by 2–4 weeks — a term accelerating on TikTok but flat on Amazon is the classic arbitrage window. Confirm with app-store/Amazon data before acting.
 - For absolute search *volume* (not relative trend) you still need Google Ads Keyword Planner / DataForSEO — Trends MCP gives direction, not magnitude.
+- **Signup is email-magic-link, no captcha** (confirmed 2026-06-16) — `trendsmcp.ai/account?tab=signup` accepts the agent's form fill; API key is **emailed instantly** to the signup mailbox (not displayed in dashboard). The email body also contains a ready-to-paste MCP config snippet.
+- **MCP path is the claude.ai connector UI**, NOT `claude mcp add` — the server publishes at `https://www.trendsmcp.ai/mcp` and surfaces in `claude mcp list` as `claude.ai TrendsMCP` (i.e. claude.ai-managed, not user-managed). Means it's session-wide but does NOT appear in a user-managed companion config repo's `registry.json`.
 
 ## Failure signals & fallback
 Failure looks like: HTTP 429 (monthly cap hit), or a normalized number with no growth field on an unsupported source. **Fallbacks:** for clean Google Trends JSON cross-region use **SerpApi** (free 250/mo); for a fully free route use OSS **flack0x/trendspyg** or **sdil87/trendspy** (route ④, see browser-automation shard); pytrends is archived/429-prone — avoid.

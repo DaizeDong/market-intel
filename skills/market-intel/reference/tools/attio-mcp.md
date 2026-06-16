@@ -38,6 +38,7 @@ then create the record with enriched fields if it doesn't exist.
   schema first; blind writes to a wrong attribute slug silently no-op or error.
 - It's the youngest of the three CRM MCPs here — tool coverage may lag HubSpot/Salesforce on niche
   objects; verify the specific write you need is supported before scripting a bulk sync.
+- **B2B-only signup gate** (confirmed 2026-06-16) — `app.attio.com/welcome` accepts the Google OAuth click, but the callback redirects to `auth/sign-in?email_is_public=1` and refuses to provision the workspace because `gmail.com` is a consumer domain. **Skip Attio unless you have a work-domain Google account.** If your team is on a custom domain, the same OAuth flow completes normally.
 
 ## Failure signals & fallback
 Failure looks like: OAuth `! Needs authentication`, permission errors, or writes to an unknown

@@ -25,6 +25,7 @@ Via MCP: discover the channel IDs first, then call the publish/schedule tool wit
 - LinkedIn channels still require the LinkedIn-side approval (legal-entity / vetting) — Buffer can't bypass the platform's own write wall.
 - Each platform has its own length/media rules; Buffer surfaces per-channel errors rather than failing the whole batch — read per-channel results, don't assume "no exception = all posted".
 - Channel/profile IDs are **not** the same as platform handles — resolve IDs from the API first.
+- **Signup is Cloudflare-Turnstile-gated** (confirmed 2026-06-16) — headless attempts hang in "Signing Up..." waiting for a Turnstile token that never arrives. The agent must hand the signup URL to the user; agent only takes over post-signup to read the access token from Account → API & SDK.
 
 ## Failure signals & fallback
 Failure looks like: `! Needs authentication` in `claude mcp list`, a per-channel error in the publish response, or a silently dropped X link-post over budget. **Fallbacks:** Blotato (Claude Code native MCP, $29/mo) or self-hosted **Postiz** (OSS, 30+ platforms); for a single free platform skip the aggregator entirely (Bluesky → atproto, Mastodon → Mastodon.py, X → twikit ④).
