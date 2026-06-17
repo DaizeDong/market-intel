@@ -60,12 +60,67 @@
 - [ ] **Delegation polish.** Tighten the hand-off contract to `deep-research` / `research-lit`
       (structured evidence-unit schema, combiner layer for large fan-outs).
 
+## Triggered work (v0.18.1) — gated by external conditions
+
+The items below are designed but deferred. Each has a **trigger condition**: when the
+condition fires, the item moves to "Next" and gets a sweep. Don't pre-build.
+
+- [ ] **MCP-registry federation — sync-check bucket H.** Trigger: `registry.modelcontextprotocol.io`
+      exposes a stable `/v0/servers?since=` API (verified working in 2026-06, but auth +
+      stability unconfirmed). Action: extend `companion-config/scripts/sync-check.py` with
+      bucket H ("upstream registry has it, our local matrix is stale"). Companion-config
+      consumers gain auto-prompted catch-up. Future audit predicted as Q4 2026 critical
+      cliff — without this, ~50% of `tools/*.md` becomes mirror negative-value.
+
+- [ ] **`transport: brokerage` abstraction.** Trigger: 3rd D-PRICE event hits the matrix in
+      a single sweep (`live-runs.jsonl` outcome=barrier_found, code=D-PRICE, distinct
+      domains ≥3). Action: add `transport: brokerage` to companion-config-spec; matrix gets
+      pay-per-query wrappers (datarade, Bright Data Marketplace, SerpApi) as canonical
+      "the API I rent so I don't have to pay 5 separate subscriptions" tier. The
+      brokerage tier blunts the X / Reddit / finance-data paywall wave.
+
+- [ ] **Compliance fields — `data_lineage`, `tos_ack_required`, `jurisdiction`.** Trigger:
+      EU AI Act implementation detail rules land, OR any US state-level anti-scraping
+      legislation passes. Action: add the three OPTIONAL fields to spec §3.1. matrix gates
+      gain a COMPLIANCE check for high ban_risk + missing tos_ack_required combinations.
+
+- [ ] **Route ⑤ agent-native default.** Trigger: Computer Use / Operator / Skyvern single-
+      call cost drops below playwright + residential-proxy aggregate cost for a representative
+      benchmark task. Track via spot-checks during browser-automation weekly sweeps. Action:
+      change SKILL.md language — route ⑤ becomes the recommended barrier-breaker for at
+      least 3 domains; matrix entries flip `route_agent_native: true` where appropriate;
+      patchright drops to "still useful for fingerprint-only blocks".
+
+- [ ] **`model_tier: local-ok` migration.** Trigger: a local model (Llama 4 / Qwen3-VL /
+      DeepSeek class) becomes viable on the user's machine for triage / dedup /
+      citation-recheck tasks (benchmark: matches Claude Sonnet output on a 20-task eval
+      with <50% latency hit). Action: tag matrix entries' `model_tier`; subagent
+      dispatcher routes the tagged tasks to local; frontier-only tasks stay on Claude.
+      Expected to cut refresh-token cost 50%+ at no quality loss.
+
+## Future domain placeholders (v0.18.1)
+
+The audit identified six new domains that will likely materialize in 2026-2027. Each gets
+an empty placeholder in `sources-index.md` — owning the namespace before someone duplicates
+it. Per future-proofing doctrine: occupied placeholders force refresh-protocol to point at
+them, so they don't get forgotten until the right moment to populate.
+
+- [ ] `agent-marketplace` — Anthropic Skills Hub / OpenAI GPT Store / Smithery as research
+      surfaces themselves (not just MCP distribution channels — research on what's selling
+      / which builders are launching what).
+- [ ] `ai-data-licensing` — datarade / Bright Data DaaS / Scale Data Engine / similar.
+      Where to legally rent data when scraping isn't permitted.
+- [ ] `voice-and-podcast-intel` — Podscan / Listen Notes / video-subtitle corpora;
+      ElevenLabs class generation-side reverse-lookup.
+- [ ] `synthetic-and-evals` — synthetic-data catalogs / Vals.ai / lmarena; research's
+      "self-verification basis" — eval-driven matrix.
+- [ ] `regulatory-watch` — SEC 8-K / EU AI Act trackers / state-level anti-scraping
+      legislation; legal-tech MCPs as they mature.
+- [ ] `on-chain-intel-private` — TEE / zk privacy on-chain data (Chainlink Functions /
+      Nillion / EigenLayer class).
+
 ## Maintenance cadence
 
-| scope | cadence |
-|---|---|
-| full 14-domain sweep | quarterly |
-| volatile domains (x-twitter, web-scraping, social-publishing, crypto-defi) | monthly |
-| opportunistic single-shard fix | whenever a live run hits a dead/changed tool |
-
-See [`skills/market-intel/reference/refresh-protocol.md`](skills/market-intel/reference/refresh-protocol.md) for the procedure.
+See `skills/market-intel/reference/refresh-protocol.md` — cadence overhauled in v0.17.0.
+Default monthly · weekly for the fast-moving set (crypto-defi / browser-automation /
+frontier-research / mcp-ecosystem) · quarterly reserved for Horizon scan.
