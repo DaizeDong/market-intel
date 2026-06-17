@@ -204,6 +204,13 @@ Skills SHOULD:
 **MUST**: `slug` and `installed` are the only strictly required fields. Everything else is
 OPTIONAL but RECOMMENDED.
 
+**MUST (2026-06-17, on new entries only)**: any entry added after spec v1.3 MUST also include
+`evidence_url`, `ban_risk`, and `model_tier` (the v1.2 judgment fields). The matrix's irreplaceable
+value once MCP registry matures is its judgment metadata — leaving these blank on new entries is
+spec rot (debt fork audit). Existing v1.0/v1.1/v1.2 entries do NOT need backfill: P3 (monotonic
+evolution) prefers not spending tokens rewriting historical entries when only forward-going
+discipline is needed.
+
 **MUST**: `slug` MUST be valid as a filesystem directory name on all major OSes (no `/`, `\`,
 `:`, `?`, `*`, `"`, `<`, `>`, `|`, no leading dot, no trailing whitespace). Convention:
 kebab-case ASCII.
@@ -217,6 +224,16 @@ tier/domain info from the matrix.
 form, e.g. `fred` rather than `fred-mcp`) MUST be recorded in `mcp_server_name` when applicable.
 sync-check uses `mcp_server_name` as the precise match against `~/.claude.json` and falls back
 to fuzzy suffix stripping (`-mcp/-io/-py/-server`) only when `mcp_server_name` is absent.
+
+**SHOULD (2026-06-17, naming rule for `tools/<slug>.md`)**: the matrix-side slug is the **pure
+tool name** (kebab-case, no owner prefix) when it is unambiguous. Owner prefix is added ONLY
+when a same-name tool already exists from a different owner (e.g. `discord-mcp.md` already exists
+for elyxlz's version → SaseQ's version must be filed as `saseq-discord-mcp.md`). One-off OSS
+catalog forks like `sickn33/antigravity-awesome-skills` get the pure tool name
+(`antigravity-awesome-skills.md`) since "antigravity" is already a unique brand. Examples:
+- `arctic_shift.md` not `arthurheitmann-arctic-shift.md` (unique brand)
+- `saseq-discord-mcp.md` (owner needed — `discord-mcp.md` already taken)
+- `antigravity-awesome-skills.md` not `sickn33-antigravity-awesome-skills.md` (unique brand)
 
 ### 3.2 `summary` shape (optional)
 
