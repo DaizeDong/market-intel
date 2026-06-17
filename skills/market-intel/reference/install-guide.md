@@ -71,10 +71,18 @@ to write to base — pause and confirm with the user.
 
 ## MCP transport types — which to prefer
 
+> Canonical enum lives in `companion-config-spec.md §3.1` (`transport` field). Five values:
+> `stdio` · `http` · `sse` · `rest` · `python-lib`. Below is the operational guidance.
+
 - **HTTP (hosted/remote)** — `claude mcp add --transport http <name> <url>`. **Prefer this on Windows**:
   no local Node/uv process, far fewer flakes. Many providers now ship a hosted MCP URL.
 - **stdio (local `npx`/`uvx`)** — launches a local process per call. Works, but **flaky on Windows**
   (path/shell quirks). Use only when there is no HTTP option.
+- **sse** — uncommon; mostly older hosted MCPs. Treat like HTTP for hygiene purposes.
+- **rest** — *not* an MCP; the credential is exercised by your subagent code via `os.environ`
+  loading `secrets/<slug>.env`. No `claude mcp add` step.
+- **python-lib** — Python library installed by `scripts/install-libs.sh`. No MCP transport;
+  imported directly. Credential (if any) loaded the same way as `rest`.
 
 ## Adding an MCP — two ways (and when to use each)
 
