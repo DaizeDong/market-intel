@@ -58,6 +58,34 @@ It auto-activates on phrases like `市场调研`, `competitor analysis`, `resear
 
 ---
 
+## Quick start — install the free no-key bootstrap pack (3 minutes)
+
+Want to try it without configuring API keys? Install these 3 free, no-key MCPs first — they cover
+HN/Reddit-style community + market trends + AI papers at zero cost:
+
+```bash
+# 1. Hacker News (community)
+claude mcp add -s user mcp-hn 'uvx mcp-hn'
+
+# 2. GDELT (global news + trends, no key)
+claude mcp add -s user gdelt 'uvx gdelt-mcp'
+
+# 3. arXiv (research papers, no key)
+claude mcp add -s user arxiv 'uvx arxiv-mcp-server'
+```
+
+Then **restart the Claude session** (`claude` → re-enter; MCPs only register on session start).
+
+Now ask: `调研一下 AI agent 工具生态的趋势`. The skill will fan out research subagents that
+use these three sources together — community signal + trends + papers — and produce a sourced
+report. No keys, no signup, ~30s start-to-first-finding.
+
+After this, the [60-second tour](#60-second-tour) below explains the **specialized MCPs**
+(paid X data, Bright Data, Keepa, etc.) — these unlock the high-quality routes the skill is
+really designed for.
+
+---
+
 ## Now what? — installed it, what do I read first?
 
 Three different "next steps" depending on intent. Pick one:

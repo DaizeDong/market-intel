@@ -1,6 +1,6 @@
 {
   "npm:@modelcontextprotocol/server-filesystem": {
-    "checked_at": "2026-06-17T05:27:28.488509",
+    "checked_at": "2026-06-17T05:46:22.120341",
     "modified": "2026-06-04T19:41:47.625Z",
     "pkg": "@modelcontextprotocol/server-filesystem",
     "reason": "time.modified 2026-06-04 within 12mo",
@@ -9,7 +9,7 @@
   "reg:https://chatgpt.com/apps": {
     "cert_expires": "2026-08-07",
     "cert_ok": true,
-    "checked_at": "2026-06-17T05:27:28.488509",
+    "checked_at": "2026-06-17T05:46:22.120341",
     "dns_ok": true,
     "final_url": "https://chatgpt.com/apps",
     "last_modified": null,
@@ -22,7 +22,7 @@
   "web:https://outscraper.com": {
     "cert_expires": "2026-09-02",
     "cert_ok": true,
-    "checked_at": "2026-06-17T05:27:28.488509",
+    "checked_at": "2026-06-17T05:46:22.120341",
     "dns_ok": true,
     "final_url": "https://outscraper.com/",
     "last_modified": null,
@@ -35,7 +35,7 @@
   "web:https://publora.com": {
     "cert_expires": "2026-08-24",
     "cert_ok": true,
-    "checked_at": "2026-06-17T05:27:28.488509",
+    "checked_at": "2026-06-17T05:46:22.120341",
     "dns_ok": true,
     "final_url": "https://publora.com/",
     "last_modified": null,
@@ -48,7 +48,7 @@
   "web:https://this-domain-does-not-exist-fake12345.com": {
     "cert_expires": null,
     "cert_ok": false,
-    "checked_at": "2026-06-17T05:27:28.488509",
+    "checked_at": "2026-06-17T05:46:22.120341",
     "dns_ok": false,
     "final_url": "https://this-domain-does-not-exist-fake12345.com",
     "last_modified": null,
