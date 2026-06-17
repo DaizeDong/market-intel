@@ -34,6 +34,41 @@ Flow: triage the domain → open its shard → for the picked tool, read `tools/
 | **Docker** (optional) | self-host MCPs (crawl4ai, hummingbot, steel-browser…) | `docker --version` |
 | **throwaway account + proxy pool** (route ③④ only) | platform scraping at scale; software is free, proxies are the hidden cost | — |
 
+## Python install target — ASK FIRST on the first `pip install`
+
+The skill's scraper libs (`ddgs`, `trendspy`, `yt-dlp`, `ccxt`, `praw`, `botasaurus`,
+`patchright`, etc. — see `scripts/install-libs.sh`) are pure Python and go wherever
+`pip` is pointed. Where they land matters: drop them in the user's `base` / system
+Python and they pollute every other project; drop them in the wrong project venv and
+they vanish next session.
+
+**Before the first `pip install` of this session, ask the user explicitly.** Default
+options to offer:
+
+1. **Conda `base` / system Python** — simplest, subagents can just `python -c "import X"`.
+   Acceptable when the user explicitly says so. Risk: a future pin (e.g. `requests<2.30`
+   from some lib) breaks unrelated envs.
+2. **Dedicated env** (`conda create -n market-intel python=3.13` or
+   `python -m venv ~/.venvs/market-intel`) — clean isolation. Cost: subagents must
+   prefix calls with `conda run -n market-intel python ...` or activate the venv first;
+   `scripts/install-libs.sh` must reflect that.
+3. **Existing project env** — only if the user already has one they want everything in.
+
+Whatever the user picks, **record it** in their companion-config repo (a one-liner in
+the runbook is enough) so the next session doesn't have to re-ask. After install,
+verify with `python -c "import sys; print(sys.executable)"` to confirm it actually
+landed where intended.
+
+Detect the active env before installing:
+
+```bash
+python -c "import sys; print(sys.executable, sys.prefix)"
+echo "$CONDA_DEFAULT_ENV / $VIRTUAL_ENV"
+```
+
+If neither env var is set and `sys.prefix` points at a global Python, you are about
+to write to base — pause and confirm with the user.
+
 ## MCP transport types — which to prefer
 
 - **HTTP (hosted/remote)** — `claude mcp add --transport http <name> <url>`. **Prefer this on Windows**:
