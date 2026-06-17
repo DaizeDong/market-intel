@@ -1,5 +1,78 @@
 # Changelog
 
+## [0.20.0] — 2026-06-17
+
+**Full refresh sweep landed.** First end-to-end execution of the v0.17–v0.19 pipeline
+(feedback-bump → discover → 16-domain Discovery → 3-lens adversarial verify → synthesis
+→ pre-land verify → philosophy reflection → land). Sweep + landing took ~17 min wall-clock,
+214 agents, ~7.5M tokens.
+
+### Sweep results
+
+12 add · 4 replace · 1 hold · 39 watch — net 16/16 domains processed; 0 reject.
+
+**Adds (12):** reddit-community (`arctic_shift`, `SaseQ/discord-mcp`), finance-markets
+(`OpenBB MCP`), leadgen-crm (`Instantly.ai MCP`, `Outscraper Google Maps`),
+frontier-research (`LMArena`), ready-skills (`academic-research-skills`, `gtm-agents`,
+`aso-skills`), mcp-ecosystem (`GitHub MCP Registry`, `ChatGPT Apps Directory`).
+
+**Replaces (4):** `polygon-io/mcp_polygon` → `massive-com/mcp_massive`;
+`funding-rates-mcp` (D-STALE) → `vooi-app/mcp`; `Blotato` → `Publora`;
+`ComposioHQ/awesome-claude-skills` → `sickn33/antigravity-awesome-skills`.
+
+**HOLD (1):** BigGo Search MCP — caught by the new gh-api gate as 13.5mo stale despite
+passing all 3 LLM-judgment lenses. Logged to discovery-state.md with explicit caveat.
+
+### Philosophy violations caught + fixed (PHILOSOPHY.md reflection)
+
+PHILOSOPHY fork audited the sweep against the 6 principles. **PASS** on P2/P3/P5/P6.
+**PARTIAL** on P1/P4. Four quiet violations found, all fixed this release:
+
+- **§1 (P1 — patch vs. framing):** P2 trigger fired in `feedback-bump.py` (5 distinct
+  domains with `barrier_found` in 90d window). Original plan deferred to ROADMAP.
+  **Fix:** spec v1.3 promotes `transport: brokerage` from reserved → active;
+  `domains/web-scraping.md` gains brokerage tier (Bright Data DaaS + datarade).
+- **§4 (P4 — facts over recall):** BigGo's URL passed all 3 LLM lenses but turned
+  out to be 13.5mo stale — exactly the "confident fabrication" failure mode P4 names.
+  **Fix:** `tools/verify_matrix.py` gains the **GHACTIVE** gate — deterministic
+  `gh api repos/<o>/<r>` check on every github.com URL. 404→BLOCK, archived→BLOCK,
+  >12mo stale→WARN. **Caught 6 stale repos in existing matrix on first run** (most
+  egregious: `arxiv-sanity-lite` at 35 months).
+- **§3 (P6 — honest boundaries):** content-cms saturated (10+ sources, 5 candidates
+  all demoted). **Fix:** explicit saturation flag — next sweep skips Discovery here
+  unless `live-runs.jsonl` surfaces a gap.
+- **§2 (P1 — grandfathered top pick):** seo-keywords never questions whether
+  DataForSEO should remain top pick. **Fix:** "top-pick grandfather watch" added —
+  next sweep MUST run a "could DataForSEO be replaced" angle.
+
+### Landed files
+
+- `domains/`: 9 shards edited; 2 gain saturation/grandfather flags.
+- `tools/`: 11 new per-tool docs.
+- `discovery-state.md`: BigGo HOLD + 39 watches categorized + P2-fired note.
+- `companion-config-spec.md`: v1.2 → v1.3 (`brokerage` enum).
+- `tools/verify_matrix.py`: +GHACTIVE gate (~115 lines).
+- `ROADMAP.md`: P2 brokerage-trigger checked off.
+
+### Pipeline timing (max-effort)
+
+| Stage | Duration |
+|---|---|
+| Step -1 (`feedback-bump.py`) | 0.115s |
+| Discovery prescan (`discover.py` E1-E6) | 14.6s |
+| Workflow (16 domains, 3-lens adversarial) | 12m22s |
+| Pre-land verify (16 changes) | 3m49s |
+| Philosophy reflection | 0m41s |
+| sync-check downstream | 0.118s |
+| **Total** | **~17m** |
+
+### Net
+
+- Tool docs: 152 → 163 (+11).
+- Doctrine: spec v1.2 → v1.3 (brokerage active).
+- Deterministic gates: +1 (GHACTIVE — catches what LLM-judgment cannot).
+- ROADMAP triggers: 1 of 5 fired (transport: brokerage).
+
 ## [0.16.0] — 2026-06-16
 
 Adds **Cleanup pass** as a mandatory per-sweep step in `reference/refresh-protocol.md`.

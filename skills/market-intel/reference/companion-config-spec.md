@@ -1,7 +1,15 @@
 # Companion config repo — formal specification
 
-**Status**: STABLE. Spec version: `1.2`.
+**Status**: STABLE. Spec version: `1.3`.
 
+> v1.3 (additive, backward-compatible): adds `brokerage` to the `transport` enum (§3.1).
+> **Promoted from ROADMAP-reserved to active** by the 2026-06-17 sweep's P2 trigger
+> firing: `feedback-bump.py` detected ≥3 distinct domains with `barrier_found` outcome
+> in a 90-day window. `brokerage` covers pay-per-query wrappers (Bright Data DaaS,
+> datarade marketplace, SerpApi resale, etc.) that absorb the data-acquisition barrier
+> the user no longer wants to fight. v1.2 / v1.1 / v1 consumers ignore unknown enum
+> values per §3 (forward-compat) — no migration needed.
+>
 > v1.2 (additive, backward-compatible): adds OPTIONAL judgment fields (`mcp_server_name`,
 > `deprecation_code`, `ban_risk`, `evidence_url`, `supersedes`, `replacement_for`,
 > `model_tier`, `route_agent_native`) — these protect the matrix's *judgment* value once
@@ -123,6 +131,7 @@ Skills SHOULD:
   "domain": "string",             // OPTIONAL — fast-path routing hint (e.g. "finance-markets")
   "tier": "string",               // OPTIONAL — short summary: "free" | "freemium" | "paid"
   "transport": "string",          // OPTIONAL — "stdio" | "http" | "sse" | "rest" | "python-lib"
+                                  //            | "brokerage"
                                   //            "rest"        = REST-only credential (no MCP, no
                                   //                            claude.json.template; loaded via
                                   //                            os.environ in subagent code).
@@ -131,6 +140,13 @@ Skills SHOULD:
                                   //                            via its own auth (e.g. atproto,
                                   //                            Mastodon.py). Listed by
                                   //                            scripts/install-libs.sh.
+                                  //            "brokerage"   = pay-per-query wrapper that
+                                  //                            absorbs the upstream data-
+                                  //                            acquisition barrier (Bright Data
+                                  //                            DaaS, datarade marketplace,
+                                  //                            SerpApi resale). v1.3-active —
+                                  //                            promoted from ROADMAP-reserved
+                                  //                            by the 2026-06-17 P2 trigger.
   "health_last": "string",        // OPTIONAL — "connected" | "needs_auth" | "failed" | "unknown" |
                                   //            "credential_ready" | "verified" | "installed" |
                                   //            "deprecated"

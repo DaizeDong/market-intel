@@ -10,6 +10,8 @@ Checks (the real failure modes of an unattended LLM refresh):
   TOOLS    tools/index.md <-> tools/*.md coverage (missing doc = BLOCK, orphan doc = WARN)
   REGISTRY tools/registry.json <-> index <-> docs 3-way (covers non-repo SaaS too; mismatch = BLOCK)
   REPO     every github.com/<owner>/<repo> in shards/pricing/tool-docs exists (gh api, fail-closed)
+  GHACTIVE every github repo is alive (not archived) and pushed_at within 12mo (P4 deterministic gate
+           against LLM-only "freshness" judgments; 404/archived = BLOCK, stale = WARN, RL = bypass)
   STAR     where a repo and an (NNk★) annotation co-occur on a line, the count is within tolerance
   FRESH    every `last_verified:`/`Last verified:` is real + non-future (shards, pricing, AND tool docs)
   STALE    (WARN) a tool doc not re-verified in >9 months is nominated for re-check (anti-rot)
@@ -184,8 +186,122 @@ else:
             if real == 0 or abs(claimed - real) / real > STAR_TOL:
                 block("STAR", f"{repo}: claims {claimed_k}k★ but API says {real} (>{int(STAR_TOL*100)}% off)")
 
-# ---- FRESH (shards/pricing: `last_verified:` · tool docs: `Last verified:`) ----
+# ---- GHACTIVE (P4 deterministic activity gate) ----
+# WHY: LLM-judgment lenses (existence, freshness, top_pick_impact) confidently passed a candidate
+# (BigGo, 2026-06-17 sweep) whose repo was 13 months stale. PHILOSOPHY §4 demands an independent
+# deterministic source — gh api `pushed_at` + `archived`. Inviolable, not optional.
+# 404                  -> BLOCK (URL fabricated or dead)
+# archived=true        -> BLOCK (formally retired upstream)
+# pushed_at >12mo old  -> WARN  (silent rot; same severity class as STALE)
+# rate-limited         -> RATE_LIMITED (do NOT block on transient external state; surfaces as WARN)
+# Cache results to metrics/gh-api-cache.json keyed by owner/repo with timestamp; entries older
+# than 7d are refetched. This avoids hammering the API on every refresh.
 import datetime
+GH_CACHE = os.path.join(ROOT, "metrics", "gh-api-cache.json")
+GH_CACHE_MAX_AGE_DAYS = 7
+GHACTIVE_STALE_MONTHS = 12
+_now_ts = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+_now_iso = _now_ts.isoformat()
+gh_cache = {}
+if os.path.exists(GH_CACHE):
+    try:
+        gh_cache = json.loads(read(GH_CACHE))
+    except Exception:
+        gh_cache = {}
+ghactive_results = []
+if NO_NET:
+    warn("GHACTIVE", "skipped GitHub activity verification (--no-net)")
+else:
+    for r in repos:
+        # cache hit if entry exists and is fresh enough
+        c = gh_cache.get(r)
+        if c and "checked_at" in c:
+            try:
+                age = (_now_ts - datetime.datetime.fromisoformat(c["checked_at"])).days
+            except Exception:
+                age = 999
+            if age <= GH_CACHE_MAX_AGE_DAYS and c.get("verdict") != "RATE_LIMITED":
+                ghactive_results.append(c)
+                continue
+        res = subprocess.run(
+            ["gh", "api", f"repos/{r}", "--jq", "{pushed_at:.pushed_at,archived:.archived}"],
+            capture_output=True, text=True, encoding="utf-8")
+        if res.returncode != 0:
+            stderr = (res.stderr or "")
+            if "Not Found" in stderr or "404" in stderr:
+                entry = {"repo": r, "pushed_at": None, "archived": None,
+                         "verdict": "BLOCK", "reason": "404 not found", "checked_at": _now_iso}
+                block("GHACTIVE", f"{r}: 404 not found (URL fabricated, deleted, or moved)")
+            elif "rate limit" in stderr.lower() or "API rate" in stderr or "403" in stderr:
+                # Rate-limit is transient external state; per the philosophy we must not gate the
+                # gate on it. Surface as WARN and skip — re-run will pick it up.
+                entry = {"repo": r, "pushed_at": None, "archived": None,
+                         "verdict": "RATE_LIMITED", "reason": "gh api rate-limited",
+                         "checked_at": _now_iso}
+                warn("GHACTIVE", f"{r}: rate-limited — re-run when quota resets (not blocking)")
+            else:
+                # Other transient errors: surface as WARN, do not block (REPO gate already
+                # fail-closed on existence; GHACTIVE is the activity layer, not the existence layer).
+                entry = {"repo": r, "pushed_at": None, "archived": None,
+                         "verdict": "RATE_LIMITED",
+                         "reason": f"gh error: {stderr.strip()[:60]}", "checked_at": _now_iso}
+                warn("GHACTIVE", f"{r}: could not check activity ({stderr.strip()[:60]})")
+            ghactive_results.append(entry)
+            gh_cache[r] = entry
+            continue
+        try:
+            d = json.loads(res.stdout)
+            pushed_at = d.get("pushed_at")
+            archived = bool(d.get("archived"))
+        except Exception:
+            entry = {"repo": r, "pushed_at": None, "archived": None,
+                     "verdict": "RATE_LIMITED", "reason": "unparseable response",
+                     "checked_at": _now_iso}
+            warn("GHACTIVE", f"{r}: unparseable activity response")
+            ghactive_results.append(entry)
+            gh_cache[r] = entry
+            continue
+        if archived:
+            entry = {"repo": r, "pushed_at": pushed_at, "archived": True,
+                     "verdict": "BLOCK", "reason": "archived upstream", "checked_at": _now_iso}
+            block("GHACTIVE", f"{r}: archived=true (formally retired upstream — tombstone the row)")
+        else:
+            # parse pushed_at (RFC3339 like "2026-06-17T04:33:39Z")
+            try:
+                pushed_dt = datetime.datetime.strptime(pushed_at[:10], "%Y-%m-%d")
+                months_old = (_now_ts - pushed_dt).days / 30.44
+            except Exception:
+                months_old = 0
+            if months_old > GHACTIVE_STALE_MONTHS:
+                entry = {"repo": r, "pushed_at": pushed_at, "archived": False,
+                         "verdict": "WARN",
+                         "reason": f"pushed_at {pushed_at[:10]} is ~{int(months_old)}mo old (>{GHACTIVE_STALE_MONTHS}mo)",
+                         "checked_at": _now_iso}
+                warn("GHACTIVE", f"{r}: last push {pushed_at[:10]} (~{int(months_old)}mo ago, "
+                                 f">{GHACTIVE_STALE_MONTHS}mo) — re-verify still maintained")
+            else:
+                entry = {"repo": r, "pushed_at": pushed_at, "archived": False,
+                         "verdict": "PASS",
+                         "reason": f"pushed_at {pushed_at[:10]} within {GHACTIVE_STALE_MONTHS}mo",
+                         "checked_at": _now_iso}
+        ghactive_results.append(entry)
+        gh_cache[r] = entry
+    # persist cache (best-effort; cache miss is harmless)
+    try:
+        os.makedirs(os.path.dirname(GH_CACHE), exist_ok=True)
+        with open(GH_CACHE, "w", encoding="utf-8") as f:
+            json.dump(gh_cache, f, ensure_ascii=False, indent=2, sort_keys=True)
+    except Exception:
+        pass
+    # aggregate summary into the gate's output
+    _verdicts = {v: 0 for v in ("PASS", "WARN", "BLOCK", "RATE_LIMITED")}
+    for e in ghactive_results:
+        _verdicts[e["verdict"]] = _verdicts.get(e["verdict"], 0) + 1
+    print(f"GHACTIVE summary: {_verdicts['PASS']} PASS, {_verdicts['WARN']} WARN, "
+          f"{_verdicts['BLOCK']} BLOCK, {_verdicts['RATE_LIMITED']} RATE_LIMITED "
+          f"(of {len(ghactive_results)} repos checked)")
+
+# ---- FRESH (shards/pricing: `last_verified:` · tool docs: `Last verified:`) ----
 today = datetime.date.today()
 this_month = today.strftime("%Y-%m")
 def _ym_to_months(ym): return int(ym[:4]) * 12 + int(ym[5:7])

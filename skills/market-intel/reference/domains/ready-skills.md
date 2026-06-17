@@ -15,11 +15,16 @@ want to assemble MCPs from scratch, 现成的营销/调研 skill.
 | **AgricIDaniel/claude-seo** (8.5k★) | plugin | strongest SEO, 25 sub-skills + 18 agents, offline | `/plugin marketplace add AgricIDaniel/claude-seo` |
 | **ishwarjha/claude-marketing-research-skill** | packaged skill | 6-stage market research workflow (competitor→product→persona→positioning) | GitHub |
 | alirezarezvani/claude-skills (17.6k★) | mega bundle | 338 skills incl market-research, c-level, finance | `/plugin marketplace add alirezarezvani/claude-skills` |
-| ComposioHQ/awesome-claude-skills (63.8k★) | catalog | deep-research, lead-research-assistant; discovery hub | GitHub |
+| **sickn33/antigravity-awesome-skills** (40k★, active 2026-06) | catalog | broader multi-platform installable awesome-skills catalog | GitHub | **replaces ComposioHQ/awesome-claude-skills** (less-maintained); 40k★, last push 1d ago |
+| **Imbad0202/academic-research-skills** (32.2k★) | skill bundle | full academic-research pipeline: planning → lit review → methodology → drafting → peer review (v3.12.1 on 2026-06-15) | `/plugin marketplace add Imbad0202/academic-research-skills` |
+| **gtmagents/gtm-agents** (279★) | agents bundle | GTM agents: 67 plugins / 92 agents / 52 skills (sales pipeline, lead gen, cold-email personalization) — Apache-2.0 | GitHub |
+| **Eronred/aso-skills** (1.5k★) | skill bundle | 40+ App Store Optimization skills (keyword/metadata/competitor/paywall/preview-video) — backed by appeeky.com data | GitHub |
 | **DaizeDong/shopping-aggregator** ★ | packaged skill | **consumer shopping price comparison** (Amazon / eBay / Walmart / Target / Taobao / JD + Keepa / Camelcamelcamel / 慢慢买 + Capital One Shopping / Karma / 购物党); sister skill to market-intel | `/plugin install github:DaizeDong/shopping-aggregator` · [repo](https://github.com/DaizeDong/shopping-aggregator) |
 
 **Default pick:** Marketing/competitor/content → coreyhaines31/marketingskills (装了即用). SEO →
-claude-seo. Packaged market-research pipeline → ishwarjha. Discovery → ComposioHQ catalog.
+claude-seo. Packaged market-research pipeline → ishwarjha. Academic pipeline → academic-research-skills.
+GTM/sales → gtm-agents. Mobile App Store Optimization → aso-skills. Discovery →
+**sickn33/antigravity-awesome-skills** (replaces less-maintained ComposioHQ catalog).
 **Consumer shopping price compare → shopping-aggregator** (the consumer-side specialization;
 market-intel itself handles seller-side ecommerce-arbitrage — see `ecommerce-arbitrage.md`).
 
