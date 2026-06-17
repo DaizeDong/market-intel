@@ -50,8 +50,14 @@ Before doing anything, decide if this skill even applies:
 ### Step 1 — Triage
 
 Identify which commercial domain(s) the topic touches. Read `reference/sources-index.md` (a thin
-one-line-per-domain index, ~12 lines). Match the topic to 1–N domains. **Do not read the full
-domain shards yet.** If the topic maps to zero commercial domains, delegate per the section above.
+one-line-per-domain index, ~12 lines). Match the topic to 1–N of the **real** domains. **Do not
+read the full domain shards yet.** If the topic maps to zero commercial domains, delegate per the
+section above.
+
+**Skip meta-domains during triage.** `sources-index.md` lists "Meta-domains" (currently:
+`mcp-ecosystem`) — these are infrastructure shards consumed by the refresh sweep's Discovery phase
+only. NEVER route a user research query to them. If a topic's only match is a meta-domain, the
+topic is not in market-intel's scope (route to plain web search instead).
 
 Pick a depth budget and hold to its hard caps:
 
