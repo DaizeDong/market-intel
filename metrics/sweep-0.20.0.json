@@ -1,0 +1,272 @@
+{
+  "skill_version": "0.20.0",
+  "sweep_date": "2026-06-17",
+  "previous_version": "0.16.0",
+  "adds": [
+    {
+      "slug": "arctic-shift",
+      "domain": "reddit-community",
+      "route": "3",
+      "tier": "free (no key)",
+      "transport_hint": "self-host",
+      "repo_url": "https://github.com/ArthurHeitmann/arctic_shift",
+      "signup_url": null,
+      "env_vars": [],
+      "install_cmd": "(see https://github.com/ArthurHeitmann/arctic_shift)",
+      "auto_configurable_hint": true,
+      "doc_path": "skills/market-intel/reference/tools/arctic-shift.md"
+    },
+    {
+      "slug": "saseq-discord-mcp",
+      "domain": "discord-community",
+      "route": "1",
+      "tier": "free",
+      "transport_hint": "uvx",
+      "repo_url": "https://github.com/SaseQ/discord-mcp",
+      "signup_url": "https://discord.com/developers/applications",
+      "env_vars": [
+        "DISCORD_TOKEN"
+      ],
+      "install_cmd": "git clone https://github.com/SaseQ/discord-mcp",
+      "auto_configurable_hint": false,
+      "doc_path": "skills/market-intel/reference/tools/saseq-discord-mcp.md"
+    },
+    {
+      "slug": "openbb-mcp",
+      "domain": "finance-markets",
+      "route": "1",
+      "tier": "free OSS plus paid provider keys",
+      "transport_hint": "pip",
+      "repo_url": "https://github.com/OpenBB-finance/OpenBB",
+      "signup_url": null,
+      "env_vars": [],
+      "install_cmd": "pip install openbb-mcp-server",
+      "auto_configurable_hint": true,
+      "doc_path": "skills/market-intel/reference/tools/openbb-mcp.md"
+    },
+    {
+      "slug": "instantly-mcp",
+      "domain": "leadgen-crm",
+      "route": "1",
+      "tier": "paid (Instantly Growth plan)",
+      "transport_hint": "http",
+      "repo_url": null,
+      "signup_url": null,
+      "env_vars": [],
+      "install_cmd": "mcp.instantly.ai/mcp",
+      "auto_configurable_hint": true,
+      "doc_path": "skills/market-intel/reference/tools/instantly-mcp.md"
+    },
+    {
+      "slug": "outscraper-google-maps",
+      "domain": "leadgen-crm (also: none)",
+      "route": "2",
+      "tier": "L2",
+      "transport_hint": "stdio",
+      "repo_url": null,
+      "signup_url": null,
+      "env_vars": [],
+      "install_cmd": "claude mcp add",
+      "auto_configurable_hint": true,
+      "doc_path": "skills/market-intel/reference/tools/outscraper-google-maps.md"
+    },
+    {
+      "slug": "lmarena",
+      "domain": "frontier-research",
+      "route": "1",
+      "tier": "free",
+      "transport_hint": "browser",
+      "repo_url": null,
+      "signup_url": null,
+      "env_vars": [],
+      "install_cmd": "(see tool doc)",
+      "auto_configurable_hint": true,
+      "doc_path": "skills/market-intel/reference/tools/lmarena.md"
+    },
+    {
+      "slug": "academic-research-skills",
+      "domain": "ready-skills",
+      "route": "1",
+      "tier": "free OSS",
+      "transport_hint": null,
+      "repo_url": "https://github.com/Imbad0202/academic-research-skills",
+      "signup_url": null,
+      "env_vars": [],
+      "install_cmd": "(see https://github.com/Imbad0202/academic-research-skills)",
+      "auto_configurable_hint": true,
+      "doc_path": "skills/market-intel/reference/tools/academic-research-skills.md"
+    },
+    {
+      "slug": "gtm-agents",
+      "domain": "ready-skills (sales-driven GTM)",
+      "route": "1",
+      "tier": "free OSS",
+      "transport_hint": "http",
+      "repo_url": "https://github.com/gtmagents/gtm-agents",
+      "signup_url": null,
+      "env_vars": [],
+      "install_cmd": "/plugin marketplace add gtmagents/gtm-agents",
+      "auto_configurable_hint": true,
+      "doc_path": "skills/market-intel/reference/tools/gtm-agents.md"
+    },
+    {
+      "slug": "aso-skills",
+      "domain": "ready-skills (mobile App Store Optimization)",
+      "route": "1",
+      "tier": "free OSS (backing API: appeeky.com)",
+      "transport_hint": "http",
+      "repo_url": "https://github.com/Eronred/aso-skills",
+      "signup_url": null,
+      "env_vars": [],
+      "install_cmd": "(see https://github.com/Eronred/aso-skills)",
+      "auto_configurable_hint": true,
+      "doc_path": "skills/market-intel/reference/tools/aso-skills.md"
+    },
+    {
+      "slug": "github-mcp-registry",
+      "domain": "mcp-ecosystem",
+      "route": "1",
+      "tier": "free",
+      "transport_hint": null,
+      "repo_url": "https://github.com/mcp",
+      "signup_url": null,
+      "env_vars": [],
+      "install_cmd": "gh browse mcp",
+      "auto_configurable_hint": true,
+      "doc_path": "skills/market-intel/reference/tools/github-mcp-registry.md"
+    },
+    {
+      "slug": "chatgpt-apps-directory",
+      "domain": "mcp-ecosystem",
+      "route": "1",
+      "tier": "free",
+      "transport_hint": null,
+      "repo_url": null,
+      "signup_url": null,
+      "env_vars": [],
+      "install_cmd": "(see tool doc)",
+      "auto_configurable_hint": false,
+      "doc_path": "skills/market-intel/reference/tools/chatgpt-apps-directory.md"
+    }
+  ],
+  "replaces": [
+    {
+      "old": {
+        "slug": "polygon-io/mcp_polygon",
+        "domain": null,
+        "route": null,
+        "tier": null,
+        "transport_hint": null,
+        "repo_url": null,
+        "signup_url": null,
+        "env_vars": [],
+        "install_cmd": null,
+        "auto_configurable_hint": false,
+        "doc_path": null
+      },
+      "new": {
+        "slug": "massive-com/mcp_massive",
+        "domain": null,
+        "route": null,
+        "tier": null,
+        "transport_hint": null,
+        "repo_url": null,
+        "signup_url": null,
+        "env_vars": [],
+        "install_cmd": null,
+        "auto_configurable_hint": false,
+        "doc_path": null
+      }
+    },
+    {
+      "old": {
+        "slug": "funding-rates-mcp",
+        "domain": "crypto-defi (also: none)",
+        "route": "1",
+        "tier": "L1",
+        "transport_hint": "stdio",
+        "repo_url": "https://github.com/kukapay/funding-rates-mcp",
+        "signup_url": null,
+        "env_vars": [],
+        "install_cmd": "git clone https://github.com/kukapay/funding-rates-mcp && cd funding-rates-mcp && uv sync",
+        "auto_configurable_hint": true,
+        "doc_path": "skills/market-intel/reference/tools/funding-rates-mcp.md"
+      },
+      "new": {
+        "slug": "vooi-app/mcp",
+        "domain": null,
+        "route": null,
+        "tier": null,
+        "transport_hint": null,
+        "repo_url": null,
+        "signup_url": null,
+        "env_vars": [],
+        "install_cmd": null,
+        "auto_configurable_hint": false,
+        "doc_path": null
+      }
+    },
+    {
+      "old": {
+        "slug": "blotato",
+        "domain": "social-publishing (also: none)",
+        "route": "2",
+        "tier": "L2",
+        "transport_hint": "self-host",
+        "repo_url": null,
+        "signup_url": null,
+        "env_vars": [],
+        "install_cmd": "/mcp",
+        "auto_configurable_hint": true,
+        "doc_path": "skills/market-intel/reference/tools/blotato.md"
+      },
+      "new": {
+        "slug": "Publora",
+        "domain": null,
+        "route": null,
+        "tier": null,
+        "transport_hint": null,
+        "repo_url": null,
+        "signup_url": null,
+        "env_vars": [],
+        "install_cmd": null,
+        "auto_configurable_hint": false,
+        "doc_path": null
+      }
+    },
+    {
+      "old": {
+        "slug": "awesome-claude-skills",
+        "domain": "ready-skills (also: none)",
+        "route": "—",
+        "tier": "L2",
+        "transport_hint": "npx",
+        "repo_url": null,
+        "signup_url": null,
+        "env_vars": [],
+        "install_cmd": "npx skills add",
+        "auto_configurable_hint": true,
+        "doc_path": "skills/market-intel/reference/tools/awesome-claude-skills.md"
+      },
+      "new": {
+        "slug": "antigravity-awesome-skills",
+        "domain": "ready-skills",
+        "route": "1",
+        "tier": "L2",
+        "transport_hint": "browser",
+        "repo_url": "https://github.com/sickn33/antigravity-awesome-skills",
+        "signup_url": null,
+        "env_vars": [],
+        "install_cmd": "git clone https://github.com/sickn33/antigravity-awesome-skills",
+        "auto_configurable_hint": true,
+        "doc_path": "skills/market-intel/reference/tools/antigravity-awesome-skills.md"
+      }
+    }
+  ],
+  "unresolved": [
+    "polygon-io/mcp_polygon",
+    "massive-com/mcp_massive",
+    "vooi-app/mcp",
+    "Publora"
+  ]
+}
