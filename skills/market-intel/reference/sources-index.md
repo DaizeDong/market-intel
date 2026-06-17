@@ -58,10 +58,7 @@ Barrier-route legend (see each shard for detail):
    class. Currently flagged via `route_agent_native: true` in the registry; promoted to a default
    route when cost falls below ④ + residential-proxy aggregate. Not the default in 2026-06.
 
-Death-code legend (`⚠ Avoid (dead, D-xxx)` tombstones in tool docs — full doctrine in
-`refresh-protocol.md` §C4 and `runbooks/sync-with-skill.md` §C):
-- **D-404** — provider gone (purge config-side)
-- **D-TOS** — ToS forbids; legal risk (purge)
-- **D-PRICE** — was free, now paid (keep secret 30d in legacy/, remove MCP)
-- **D-STALE** — unmaintained, may still work (mark `health_last: deprecated`)
-- **D-SUPERSEDED** — replaced by another tool (follow rename, use `replacement_for`)
+Death-code legend (`⚠ Avoid (dead, D-xxx)` tombstones): D-404 / D-TOS / D-PRICE / D-STALE
+/ D-SUPERSEDED. **Canonical semantics + per-code action**: `refresh-protocol.md` §C4
+(skill side) and `runbooks/sync-with-skill.md` §C (config side). Don't paraphrase here —
+2026-06-17 cleanup confirmed it had drifted across 4 files.

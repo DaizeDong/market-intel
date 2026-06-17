@@ -270,7 +270,7 @@ candidate → L0 deterministic → (PASS / BLOCK / UNCERTAIN)
 - L0=UNCERTAIN + L1=refuted → final=HOLD
 
 **节省**: 18 个候选 18 LLM calls(单 lens),vs 旧版 18×3=54 calls。约 50% token,质量严于(BigGo 类 case
-不再漏)。验证回放报告:`metrics/r1-safety-replay-2026-06-17.md`。
+不再漏)。验证回放报告: `CHANGELOG.md` v0.21.0 entry §R1 + v0.22.0 entry edge fixes 段(就地记录,不存独立 md)。
 
 ### D6. 发现阶段返回的候选单结构（structured candidate unit）
 
@@ -483,6 +483,26 @@ In the sweep CHANGELOG entry, the cleanup pass gets its own section:
 - Renames: <old> → <new>
 - Tombstoned in config: <slug> (code D-xxx)
 ```
+
+## After the sweep — landing checklist (2026-06-17 added)
+
+Once the sweep produces ADD/REPLACE/WATCH/SKIP verdicts, the actual landing is a 7-step
+mechanical sequence. Skip any step and the matrix drifts:
+
+1. **Edit `domains/<X>.md`** — add/replace/tombstone rows per verdict. Replaces tombstone with
+   `⚠ Avoid (dead, D-xxx)` (see §C4 for D-codes).
+2. **Update `sources-index.md`** — only if a domain's top pick changed. Most sweeps don't touch this.
+3. **Write `tools/<slug>.md`** for each ADD — follow `tools/polygon.md` shape. Per-tool naming
+   rule: `companion-config-spec.md §3.1`.
+4. **Update `tools/index.md`** — add the new row pointing at the new tool doc.
+5. **Run `python tools/verify_matrix.py`** — fail-closed gate (7 sub-gates). Any BLOCK → fix before continuing.
+6. **(If companion-config installed)** run `python ../market-intel-config/scripts/sync-check.py`
+   — bucket B-G must all = 0. Bucket A is intentional skips.
+7. **Write CHANGELOG entry + bump `.claude-plugin/plugin.json` version + `tools/release.ps1 -Version <new>`.**
+   The release script wraps commit + tag + push and aborts if step 5 or 6 fails.
+
+Discovery agents writing `git@` SSH or `/blob/` URLs is normal — `l0_verify.py` and the
+post-sweep `verify_matrix.py` GHACTIVE gate both sanitize them, so no extra step needed.
 
 ## Trigger
 
