@@ -1,0 +1,61 @@
+{
+  "npm:@modelcontextprotocol/server-filesystem": {
+    "checked_at": "2026-06-17T05:27:28.488509",
+    "modified": "2026-06-04T19:41:47.625Z",
+    "pkg": "@modelcontextprotocol/server-filesystem",
+    "reason": "time.modified 2026-06-04 within 12mo",
+    "verdict": "PASS"
+  },
+  "reg:https://chatgpt.com/apps": {
+    "cert_expires": "2026-08-07",
+    "cert_ok": true,
+    "checked_at": "2026-06-17T05:27:28.488509",
+    "dns_ok": true,
+    "final_url": "https://chatgpt.com/apps",
+    "last_modified": null,
+    "reason": "HTTP 200",
+    "registry_mode": true,
+    "status": 200,
+    "url": "https://chatgpt.com/apps",
+    "verdict": "PASS"
+  },
+  "web:https://outscraper.com": {
+    "cert_expires": "2026-09-02",
+    "cert_ok": true,
+    "checked_at": "2026-06-17T05:27:28.488509",
+    "dns_ok": true,
+    "final_url": "https://outscraper.com/",
+    "last_modified": null,
+    "reason": "HTTP 200",
+    "registry_mode": false,
+    "status": 200,
+    "url": "https://outscraper.com",
+    "verdict": "PASS"
+  },
+  "web:https://publora.com": {
+    "cert_expires": "2026-08-24",
+    "cert_ok": true,
+    "checked_at": "2026-06-17T05:27:28.488509",
+    "dns_ok": true,
+    "final_url": "https://publora.com/",
+    "last_modified": null,
+    "reason": "HTTP 200",
+    "registry_mode": false,
+    "status": 200,
+    "url": "https://publora.com",
+    "verdict": "PASS"
+  },
+  "web:https://this-domain-does-not-exist-fake12345.com": {
+    "cert_expires": null,
+    "cert_ok": false,
+    "checked_at": "2026-06-17T05:27:28.488509",
+    "dns_ok": false,
+    "final_url": "https://this-domain-does-not-exist-fake12345.com",
+    "last_modified": null,
+    "reason": "DNS unresolvable",
+    "registry_mode": false,
+    "status": null,
+    "url": "https://this-domain-does-not-exist-fake12345.com",
+    "verdict": "BLOCK"
+  }
+}
