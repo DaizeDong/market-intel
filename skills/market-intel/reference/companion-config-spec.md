@@ -469,4 +469,41 @@ Tooling (apply.py, verify.sh, capture-key) is RECOMMENDED but not part of confor
 - **`apply` as a callable** — currently apply.py is per-repo; a shared library could be
   factored out.
 
-Until v2 of this spec, these are NOT part of the contract.
+### 11.1 Skill-side `tools/<slug>.md` core / auto split (v1.2 prototype)
+
+This is a **skill-repo doctrine**, not part of the companion-config contract — but the
+companion spec documents it so consumers (sync-check, future generators) can rely on it.
+
+**Problem.** Once the upstream MCP registry (`registry.modelcontextprotocol.io`) and
+similar surfaces mature in Q3-Q4 2026, ~30-50% of each `tools/<slug>.md` (install
+command, env vars, basic usage shape, current pricing) becomes mechanically derivable
+from upstream metadata. Maintaining it by hand turns that fraction into **mirror
+negative-value**: maintenance cost without judgment value.
+
+**Convention.** A skill MAY split per-tool docs into two siblings:
+
+| File | Contents | Lifecycle |
+|---|---|---|
+| `tools/<slug>.md` (core) | Header bullets · "When to pick" decision rule · 踩坑 · failure signals · fallback · `## Last verified` | Hand-authored. **This is the matrix's irreplaceable value.** |
+| `tools/<slug>.auto.md` (auto) | Cost snapshot · install command · auth/keys · usage call shape | Hand-authored today; **regenerable** from upstream metadata once registry matures. |
+
+**Constraints:**
+1. `<slug>.md` is REQUIRED (sync-check looks for this filename for matrix membership).
+   `<slug>.auto.md` is OPTIONAL — its absence means "all content stayed in core".
+2. The two files MUST cross-reference each other in a short blockquote at the top.
+3. `<slug>.auto.md` is the only file generators may overwrite. `<slug>.md` is never
+   touched by automation.
+4. The refresh-protocol's `## Last verified` lives in core.md only — re-verifying the
+   auto.md sections (price, command) is the auto-regeneration's job, not the
+   reviewer's STALE gate.
+
+**Reference prototypes (v0.17.0):** `apify.md` + `apify.auto.md` (HTTP MCP),
+`polygon.md` + `polygon.auto.md` (REST). When MCP registry maturity hits the trigger
+condition in `ROADMAP.md`, migrate remaining `tools/<slug>.md` files following this
+shape.
+
+**Migration is NOT a P0** — only split a tool's doc when the auto.md content is
+substantial (≥10 lines) AND there's a clear matrix-judgment / mechanical-fact divide.
+Tiny tool docs stay as a single `<slug>.md`.
+
+Until v2 of this spec, the items above are NOT part of the contract.
