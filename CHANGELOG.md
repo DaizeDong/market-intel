@@ -1,5 +1,73 @@
 # Changelog
 
+## [0.23.0] — 2026-06-17
+
+Project structure cleanup pass driven by 4-fork audit (structure / docs / scripts / process).
+Mechanical mechanical hygiene + canonical-process scripts before the long-promised pivot to
+real research-run usage.
+
+### Cleanup
+
+- **Caches no longer git-tracked**: `metrics/gh-api-cache.json` + `metrics/l0-cache.json`
+  added to `.gitignore`, both `git rm --cached`. 7-day TTL caches in git history are useless
+  byte accretion (scripts fork). Now generated locally; cleanup-workflows.ps1 sweeps them
+  alongside workflow transcripts.
+- **One-shot migration retired**: `scripts/backfill_v12.py` → `scripts/legacy/` in
+  market-intel-config repo. Was the F3 v1.2-field backfill from 2026-06-16; never reachable
+  from normal flow again.
+- **Date-bound runbook archived**: `runbooks/expansion-2026-06.md` →
+  `runbooks/archive/expansion-2026-06.md` in market-intel-config. Sweep-tracking document
+  with no ongoing role.
+- **Dead link fixed**: `metrics/r1-safety-replay-2026-06-17.md` was referenced from
+  refresh-protocol §D5b and CHANGELOG v0.21.0 but never created (replay results were
+  inline). Both refs updated to point at CHANGELOG inline.
+
+### Doc consolidation (4 forks all flagged scattered facts)
+
+- **D-codes**: 5 codes (D-404 / D-PRICE / D-STALE / D-TOS / D-SUPERSEDED) were paraphrased
+  across `sources-index.md`, `runbooks/sync-with-skill.md`, `CONTRIBUTING.md`. Canonical is
+  now `refresh-protocol.md` §C4 + companion-config `runbooks/sync-with-skill.md` §C
+  (skill vs config side). Other places shrunk to "see canonical link."
+- **GHACTIVE**: canonical = `tools/verify_matrix.py` module docstring; other references now
+  just say "see canonical."
+
+### New canonical-process scripts (process fork P-2 + P-3)
+
+- **`tools/release.ps1`** (NEW, ~150 lines): 11-step release automation. `-Version X.Y.Z`
+  + `-DryRun`. Validates clean tree → CHANGELOG header date → bumps plugin.json → runs
+  `verify_matrix.py` → runs companion `sync-check.py` (bucket B-G must = 0) → commits +
+  tags + pushes. Each step has explicit abort message + recovery hint. Closes the
+  v0.17-v0.22 "release missed sync-check at least once" failure mode.
+- **`runbooks/release.md`** (NEW, ~85 lines): human-readable companion to release.ps1 with
+  per-step recovery commands + when-NOT-to-use.
+- **`runbooks/fix-broken-tool.md`** (NEW, ~190 lines): 6-step incident runbook for a tool
+  that died mid-research. Anchors live-runs.jsonl → D-code → shard edit → companion-config
+  sync → commit with `incident:` prefix. Worked example included. Closes the "5 actions
+  in 5 places, no checklist" gap.
+- **`tools/check_p5_drift.py`** (NEW, ~50 lines): one-grep PHILOSOPHY P5 hard-limit check.
+  Scans SKILL.md for any import/load/from/require of refresh-side scripts. Exit 0 = clean,
+  1 = violation. Currently 0. To run during every cleanup pass per PHILOSOPHY §P5 hard
+  limit (so it's mechanism, not intention).
+
+### Reader-path fixes
+
+- **README + README_CN both link CONTRIBUTING.md** (was missing — UX/docs fork).
+- **README "First real query" section**: 4 concrete query examples after Quick Start.
+  Closes UX fork's "no demo path after Quick Start" gap.
+- **README_CN gets Quick Start mirror** (was English-only).
+- **refresh-protocol "After the sweep — landing checklist"**: 7 mechanical steps so a
+  maintainer doesn't have to reconstruct them from git log. Closes process fork's "no
+  post-sweep landing procedure" gap.
+
+### Net
+
+- `.gitignore` + 2 file moves + 2 link fixes + 6 consolidations + 4 new canonical files.
+- 4 forks flagged 18 items; landed 11 high-ROI items; deferred 7 (SKILL.md TL;DR restructure,
+  feedback-bump.py rename, workflow_helpers.md relocation, CHANGELOG bulk archive,
+  canonical-sweep workflow script, refresh-protocol编号总览, health-dashboard).
+- The deferred items are correctly classified as "lower ROI than just using the system" —
+  see structure fork + real-run drought fork.
+
 ## [0.22.0] — 2026-06-17
 
 Defensive fixes + UX scaffolds + P5 hard limit. **Final code-side iteration before pivoting
@@ -104,7 +172,7 @@ same cutoff, votes correlated. BigGo's 13.5mo stale URL passed all 3. Replaced w
 - **L1 single LLM lens** (top-pick-impact only): only judges actual top-pick movement,
   skipped if L0=BLOCK.
 
-**Replay verification** (`metrics/r1-safety-replay-2026-06-17.md`): 18 candidates
+**Replay verification** (results inline below — no separate file): 18 candidates
 (15 LAND + 1 HOLD + 2 known-stale) replayed through new pipeline. 0 real regressions
 (4 false-positives were already-landed entries — L1 correctly refused re-landing).
 3 actual improvements (BigGo, arxiv-sanity-lite, kukapay/funding-rates all correctly

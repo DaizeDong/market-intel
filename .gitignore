@@ -15,3 +15,7 @@ desktop.ini
 tmp/
 scratch/
 .refresh-tmp/
+
+# Caches with TTL — not worth git history (scripts fork audit 2026-06-17)
+metrics/gh-api-cache.json
+metrics/l0-cache.json
