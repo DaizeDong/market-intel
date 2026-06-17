@@ -56,6 +56,29 @@ git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market
 
 ---
 
+## 快速开始 — 装免费无密钥三件套(3 分钟)
+
+不想配 API key 也想试用?先装这 3 个免费无密钥的 MCP —— 覆盖 HN / Reddit 风格社区 + 全球趋势 + AI 论文,零成本:
+
+```bash
+# 1. Hacker News (社区)
+claude mcp add -s user mcp-hn 'uvx mcp-hn'
+
+# 2. GDELT (全球新闻 + 趋势,无 key)
+claude mcp add -s user gdelt 'uvx gdelt-mcp'
+
+# 3. arXiv (研究论文,无 key)
+claude mcp add -s user arxiv 'uvx arxiv-mcp-server'
+```
+
+然后**重启 Claude 会话**(`claude` 退出重进; MCP 只在会话启动时注册)。
+
+接着说: `调研一下 AI agent 工具生态的趋势`。skill 会 fan-out 子任务用这三个源 —— 社区信号 + 趋势 + 论文 —— 出一份带引用的报告。无 key,无注册,30 秒出第一条发现。
+
+之后,看下面 60 秒演示了解**专用 MCP**(付费 X 数据、Bright Data、Keepa 等)—— 那些才是 skill 真正设计的高质量路线。
+
+---
+
 ## 60 秒演示
 
 你说：
@@ -140,3 +163,7 @@ shard](skills/market-intel/reference/domains/consumer-price-compare.md) 路由�
 ## 设计说明
 
 本 skill 是一次 12-子任务工具调研 + 5-子任务对抗式设计评审的产物。评审推翻了最初"再造一个全栈 deep-research"的方案（那会是带触发冲突的克隆），证实了 `claude mcp add` 需重连会话才生效，并强制加入了引用回验闸门、源等级、强制反方检索。后续计划见 [ROADMAP.md](ROADMAP.md)。
+
+## 贡献
+
+想加一个工具、修一个挂掉的条目、或者提一个新方向?见 [CONTRIBUTING.md](CONTRIBUTING.md) —— 一页指南覆盖 3 种贡献模式、4 文件同步规则、PR 必过的验证闸门。

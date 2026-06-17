@@ -117,6 +117,17 @@ What runs:
 5. **Guardrails** → independent verifier re-fetches each cited URL; decision-grade claims need ≥2 independent sources; a dedicated reverse-search subagent hunts risks/failures.
 6. **Report** → snapshot-dated, tier-tagged, with a disagreement matrix, a mandatory **Risks & counter-evidence** section, and an explicit **"configure source X for deeper data"** gap list.
 
+### Try one of these as your first real query
+
+After the Quick Start install, try invoking the skill on something concrete:
+
+- `调研一下 AI agent 工具生态最近一个月的趋势` — exercises trends + community + frontier-research
+- `compare the top 3 hosted MCP marketplaces (Smithery / Glama / PulseMCP) — coverage, pricing, signal-to-noise` — exercises mcp-ecosystem
+- `find me 3 underrated open-source web-scraping tools released in 2026 with > 200 stars` — exercises web-scraping + GitHub velocity discovery
+- `who's been launching credible LLM eval skills in the last 3 months` — exercises ready-skills + frontier-research
+
+Each will fan out subagents, surface evidence with citations, and end with a "gaps if you connect <X> source" list. If a query produces only web-fallback output, that's the skill being honest about its coverage — see the install-guide to add a specialized MCP for deeper data.
+
 ---
 
 ## Sister skill — consumer-side specialization
@@ -184,3 +195,7 @@ The matrix decays — APIs go paid, tools get acquired, prices move. The [refres
 ## Design notes
 
 This skill is the product of a 12-subagent tool survey followed by a 5-subagent adversarial design review. The review killed the original "build another full deep-research" plan (it would have been a clone with a trigger conflict), proved that `claude mcp add` doesn't take effect until a session reconnect, and forced in the citation-verification gate, source tiers, and disconfirmation mandate. See [ROADMAP.md](ROADMAP.md) for what's next.
+
+## Contributing
+
+Want to add a tool, fix a broken entry, or propose a new domain? See [CONTRIBUTING.md](CONTRIBUTING.md) — single-page guide covering the 3 contribution patterns, the 4-file sync rule, and the verification gates your PR has to pass.
