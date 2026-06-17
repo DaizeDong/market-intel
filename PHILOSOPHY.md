@@ -110,6 +110,32 @@ decision that follows.
 
 ---
 
+## P5 hard limit · 接缝硬边界(2026-06-17 added against drift)
+
+P5 守护"委托深度,守住接缝"——但 v0.17-v0.21 这一连串往 `tools/` 加了 ~2000 行刷新基础设施
+(discover.py / feedback-bump.py / verify_matrix.py / l0_verify.py / workflow_helpers.md /
+2 个 workflow scripts),而 SKILL.md (真正的接缝) ~270 行。**量级倒置 7x**。
+
+seam-drift fork 判 "PASS-but-fragile": 接缝守住了,但代码量级是漂移信号。为防未来安静越界,
+立这条 hard limit:
+
+```
+P5 hard limit:
+1. 任何 tools/<X>.py 或 scripts/<X>.py 只能在 REFRESH (月扫/周扫/手动 refresh) 时运行,
+   不能被 SKILL.md Step 1-5 (用户查询路径) 加载/调用。
+2. 用户研究查询时,fan-out 主路径 SHOULD 是 deep-research / research-lit;
+   直接 Agent tool fan-out 仅当连了具体商业 MCP 时才用。
+3. EVAL gate (若实施) 仅作为 refresh 期的 benchmark,不在 user-query 时运行。
+4. shard-as-view compiler (若实施) 仅做 markdown 渲染,不做 retrieval。
+5. 添加任何 user-query 路径上的新代码 → 必须 explicit revise this principle in PHILOSOPHY.md,
+   或拒绝改动。**never quietly violated.**
+```
+
+判 P5 是否被违反的命令: 一行 grep —— `grep -E "(import|load|from|require).*(discover|feedback-bump|l0_verify|verify_matrix|workflow_helpers)" SKILL.md`。
+任何命中都是 P5 违反。每次 refresh sweep cleanup pass 跑一次。
+
+---
+
 ## The generative test · 生成式检验
 
 Every future change to this skill — a new domain, a new tool, a new guardrail — must pass one test:
