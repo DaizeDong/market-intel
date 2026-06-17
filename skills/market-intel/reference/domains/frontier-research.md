@@ -15,6 +15,7 @@ conference (NeurIPS/ICLR/ICML/ACL), citations, 论文/前沿研究/学术.
 | **Hugging Face — Daily Papers + Hub API** (official HF MCP) | ① free | curated daily papers, trending models/datasets | connected, or REST | no key for read; HF token only for write/private |
 | **Semantic Scholar Graph API** (+ semantic-scholar MCP) | ① free | citations, influentialCitationCount, references/citations graph | REST or MCP | free key (raises rate limit); unauth is throttled |
 | ~~Papers with Code API~~ | ① | SOTA leaderboards | REST → **302 to huggingface.co/papers** | **D-404 — Meta sunset the API** (2026); the SOTA-leaderboard signal is LOST, HF Papers trending = weak proxy |
+| **LMArena** (arena.ai/leaderboard) | ① free | live human-eval Elo leaderboard for LLMs via pairwise blind voting; **partial** D-404 fill for Papers-with-Code | REST + web UI, no key | rebrand: lmarena.ai → arena.ai (Jan 2026, Series A $1.7B); **chat/agent rankings only — does NOT replace paper-task SOTA** |
 | **openags/paper-search-mcp** (1.8k★) | ① free | one MCP fans out arXiv + PubMed + bioRxiv/medRxiv+ | `uvx` self-host | covers biomed venues the arXiv-only pick misses |
 | **Future-House/paper-qa** (8.7k★) | ④ | grounded deep-research over full-text PDFs w/ citations | self-host | strongest free agentic paper-QA; a layer above raw search |
 | **OpenReview API** | ① free | ICLR/NeurIPS/etc. submissions + reviews + scores | REST (api2.openreview.net) | reviewer scores = early significance signal pre-publication |
@@ -26,8 +27,9 @@ conference (NeurIPS/ICLR/ICML/ACL), citations, 论文/前沿研究/学术.
 | **→ `research-lit` skill** | (delegate) | deep multi-paper synthesis / lit-review | skill present | this domain is SOURCE ROUTING/discovery, not re-implementing lit-review — hand off for synthesis |
 
 **Default pick:** Recent papers → arXiv API + HF Daily Papers (free). Significance/citation signal →
-Semantic Scholar (+ paper-search-mcp for biomed/multi-venue). **SOTA leaderboards are now a GAP —
-Papers-with-Code API was sunset by Meta (D-404)**; HF Papers trending is a weak proxy. Launches →
+Semantic Scholar (+ paper-search-mcp for biomed/multi-venue). **SOTA leaderboards partial-recovery
+via LMArena (arena.ai) for chat/agent rankings; paper-task SOTA still a GAP** since Papers-with-Code
+API was sunset by Meta (D-404). HF Papers trending is a weak proxy. Launches →
 official lab blog (L1) + GitHub trending. Breaking buzz → X (see `x-twitter.md`) but treat as L4 and
 cross-check. Full-text deep-research → Future-House/paper-qa; deep synthesis → `research-lit`.
 

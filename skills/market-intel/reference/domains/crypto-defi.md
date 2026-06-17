@@ -16,9 +16,9 @@ new token monitoring, 加密/链上/套利.
 | GeckoTerminal API | ① | DEX OHLCV history to 1s, liquidity | via CoinGecko MCP | beats DexScreener (which has no history) |
 | **ccxt** (lib) | — | unified 100+ exchanges, spread monitor | python lib | base for cross-exchange logic |
 | **Hummingbot** (+ MCP) | execution | CEX/DEX arb, AMM arbitrage strategy | docker MCP | run actual arbitrage; needs VPS |
-| funding-rates-mcp (Kukapay) | ① | cross-exchange funding-rate divergence table | connected | perp funding arb signal; ⚠ **D-STALE** (7★, last push 2025-04) — watch vooi-app/mcp as live alt |
+| **vooi-app/mcp** (active 2026-06) | ① | perp/DEX-aggregator MCP — funding-rate divergence + cross-venue spreads; hosted endpoint `perps-api.vooi.io/mcp` | hosted MCP, MIT | replaces `kukapay/funding-rates-mcp` (D-STALE since 2025-04); pre-vetted live alt confirmed in earlier shard footnote |
 
-**Default pick:** Monitor spreads → CoinGecko MCP + ccxt + funding-rates-mcp. On-chain analysis →
+**Default pick:** Monitor spreads → CoinGecko MCP + ccxt + **vooi-app/mcp** (funding-rate divergence). On-chain analysis →
 Etherscan MCP + GeckoTerminal (+ **Blockscout MCP** free for chains Etherscan dropped from free tier).
 Run arbitrage → Hummingbot + ccxt. **Stablecoin yield discovery → Barker (CEX + DeFi unified) +
 DefiLlama yields (DeFi-only ground truth) — cross-check the two.**

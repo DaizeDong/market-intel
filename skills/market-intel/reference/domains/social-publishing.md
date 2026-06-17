@@ -11,7 +11,7 @@ LinkedIn free but approval wall (legal entity + vetting).
 |---|---|---|---|---|
 | **Buffer API** (+ MCP) | ① | 11 platforms, free tier works with API + MCP | connected + key | best value; public API + hosted MCP officially launched 2026-05-27, on every plan incl. Free |
 | Ayrshare (+ MCP) | ② | 13+ platforms, multi-user SaaS | connected | $149/mo+; X creds自带 from 2026-03 |
-| Blotato (+ MCP) | ② | native Claude Code MCP | connected + key | Starter $29/mo = **20 social accounts** (not "9 platforms"); API needs a paid plan |
+| **Publora** (MCP-native) | ① core | MCP-native social publishing API across X/LinkedIn/TikTok/YouTube/Instagram + others | connected + key | **replaces Blotato** — confirmed via G2/ProductHunt/mcp.so/official GitHub org. 50-80% cost cut at the MCP-native tier (per Discovery; re-verify before quoting) |
 | Typefully API v2 | ① | text/thread first (X/LI/BS/Masto/Threads) | key | Free $0 (1 post) / Starter $8 / Creator $19 / Team $39; API needs a paid plan |
 | **Postiz** (OSS, built-in MCP) | ③ self-host | 30+ platforms, agentic-first, no token storage | self-host URL | free OSS; v2.12+ needs Temporal |
 | **gitroomhq/postiz-agent** (278★) | ③ | official Postiz agent front-end (`npx skills add`) for 28+ platforms | self-host | lowers agent-vs-API friction over Postiz |
@@ -19,8 +19,8 @@ LinkedIn free but approval wall (legal entity + vetting).
 | Mixpost (OSS) | ③ self-host | 11 platforms, REST+n8n, buy-once | self-host | Lite free / Pro $269 one-time |
 | X single: EnesCinr/twitter-mcp, OpenTweet | ①/② | post+search / hosted no-dev-portal | connected | X API cost自负 / OpenTweet $11.99/mo |
 
-**Default pick:** Multi-platform cheap + official → Buffer. Claude Code native cheap → Blotato.
-OSS self-host → Postiz. Front-load free platforms (Bluesky/Mastodon/Threads).
+**Default pick:** Multi-platform cheap + official → Buffer. Claude Code MCP-native → **Publora**
+(replaces Blotato 2026-06-17). OSS self-host → Postiz. Front-load free platforms (Bluesky/Mastodon/Threads).
 
 **Cost trap:** X link-posts $0.20 each — budget before bulk posting links.
 

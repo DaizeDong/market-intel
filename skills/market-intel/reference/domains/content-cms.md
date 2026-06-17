@@ -23,3 +23,8 @@ zero fee). CMS backend → WordPress MCP / Sanity hosted MCP. Cross-platform syn
 dedup-penalized. Rate limits: Webflow publish 1/min, Notion ~3 req/s.
 
 **Install guidance:** `reference/volatile/pricing-install.md` → content-cms.
+
+**Saturation flag (set 2026-06-17 sweep):** 10+ sources cover headless/visual/syndication routes;
+5 fresh candidates from the 2026-06-17 sweep all demoted to watch as not needle-moving. Next sweep:
+**skip full Discovery for this domain** unless a real-run `live-runs.jsonl` entry surfaces a gap
+(P6 honest boundary — don't burn Discovery budget on a saturated domain).
