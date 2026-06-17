@@ -1,5 +1,69 @@
 # Changelog
 
+## [0.25.0] — 2026-06-17
+
+Doc-drift gate + entropy doctrine. Closes the silent failure mode where
+v0.17 → v0.24 shipped without README badges or top-level narrative being
+touched (README version badge was 8 versions stale before manual fix).
+
+### NEW machinery
+
+- **`tools/check_doc_drift.py`** (~370 LOC, stdlib): fail-closed gate on
+  derived fields, warn-only on suspected stale narrative. Canonical sources:
+  - `plugin.json` version ↔ README + README_CN version badges + CHANGELOG top
+  - `len(domains/*.md)` excluding meta-domains (`mcp-ecosystem`) ↔ README
+    + README_CN "Source Matrix-N domains" badges + section headings
+  - `len(tools/*.md)` excluding `*.auto.md` ↔ (currently no narrative ref)
+  - PHILOSOPHY amendment dates: warn if >12mo old
+  - README "What it is" hash: warn if >6mo unchanged AND ≥3 CHANGELOG entries since
+  - README_CN structural parity with EN (## heading count match)
+  - Persistent cache: `metrics/doc-drift-cache.json` (sibling to gh-api-cache)
+  - Modes: default (check + exit 0/1/2), `--fix` (auto-bump derived), `--json`
+
+- **`runbooks/doc-sync.md`** (NEW, 105 lines): doctrinal companion. Defines
+  canonical-vs-derived split, narrative-vs-machine split, per-release + per-
+  refresh workflows, 5 entropy-control mechanisms (canonical source / drift
+  gate / time-decay alerts / P3 monotonic / P5 hard limit).
+
+### release.ps1 wiring
+
+- **NEW step 5c**: runs `check_doc_drift.py`. Fail-level → auto-fix attempt
+  → if still fail, abort release. Warn-level → log and continue.
+- **Step 6**: `git add` now also stages `README.md` + `README_CN.md` (if
+  --fix touched them) alongside CHANGELOG + plugin.json + sidecar.
+
+### refresh-protocol.md cleanup pass extension
+
+- New cleanup-pass item 8: top-level doc drift sweep. Machine-checkable via
+  `check_doc_drift.py`. Narrative freshness via fork agent (if 12+ months
+  untouched while CHANGELOG grew 5+ entries). ROADMAP demotion: 12-mo
+  unprogressed Triggered work items → propose deferred status.
+
+### Real drift caught + fixed by the new gate
+
+First run of `check_doc_drift.py` surfaced: **README_CN missing the "Now what?
+— installed it, what do I read first?" section** that was added to EN. Fixed
+in this commit by translating the section over. (Found by the structural-
+parity warn-level check — 12 ## headings in EN vs 11 in CN.)
+
+### Entropy doctrine (the long-term play)
+
+5 mechanisms together prevent unbounded entropy:
+1. Single canonical source per fact (one location of truth)
+2. Fail-closed drift gate (check_doc_drift.py at release time)
+3. Time-decay alerts (monthly cleanup pass flags stale narrative)
+4. PHILOSOPHY P3 monotonic evolution (guardrails accumulate)
+5. PHILOSOPHY P5 hard limit (refresh-side infra stays out of user-query path)
+
+### Files touched
+
+- `tools/check_doc_drift.py` (NEW)
+- `runbooks/doc-sync.md` (NEW)
+- `tools/release.ps1` (+step 5c, stage list)
+- `skills/market-intel/reference/refresh-protocol.md` (cleanup pass §8)
+- `README_CN.md` (port "Now what?" section from EN)
+- `CHANGELOG.md`, `.claude-plugin/plugin.json`
+
 ## [0.24.0] — 2026-06-17
 
 Auto-configure new tools after a sweep. Closes the manual gap where ADDed tools required
