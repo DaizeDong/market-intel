@@ -46,3 +46,14 @@ Barrier-route legend (see each shard for detail):
    FIRST-CLASS, not last resort. Often **richer data** (rendered/logged-in view, fields APIs hide)
    at zero API cost. Cost = proxies at scale; most platform scraping violates ToS (ban risk).
    When a topic's official/resale source is paid or quota-capped, check route ④ before paying.
+⑤ **agent-native browser** (reserved, see ROADMAP trigger) — Computer Use / Operator / Skyvern
+   class. Currently flagged via `route_agent_native: true` in the registry; promoted to a default
+   route when cost falls below ④ + residential-proxy aggregate. Not the default in 2026-06.
+
+Death-code legend (`⚠ Avoid (dead, D-xxx)` tombstones in tool docs — full doctrine in
+`refresh-protocol.md` §C4 and `runbooks/sync-with-skill.md` §C):
+- **D-404** — provider gone (purge config-side)
+- **D-TOS** — ToS forbids; legal risk (purge)
+- **D-PRICE** — was free, now paid (keep secret 30d in legacy/, remove MCP)
+- **D-STALE** — unmaintained, may still work (mark `health_last: deprecated`)
+- **D-SUPERSEDED** — replaced by another tool (follow rename, use `replacement_for`)
