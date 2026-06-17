@@ -72,12 +72,10 @@ condition fires, the item moves to "Next" and gets a sweep. Don't pre-build.
       consumers gain auto-prompted catch-up. Future audit predicted as Q4 2026 critical
       cliff — without this, ~50% of `tools/*.md` becomes mirror negative-value.
 
-- [ ] **`transport: brokerage` abstraction.** Trigger: 3rd D-PRICE event hits the matrix in
-      a single sweep (`live-runs.jsonl` outcome=barrier_found, code=D-PRICE, distinct
-      domains ≥3). Action: add `transport: brokerage` to companion-config-spec; matrix gets
-      pay-per-query wrappers (datarade, Bright Data Marketplace, SerpApi) as canonical
-      "the API I rent so I don't have to pay 5 separate subscriptions" tier. The
-      brokerage tier blunts the X / Reddit / finance-data paywall wave.
+- [x] **`transport: brokerage` abstraction.** ~~Trigger: 3rd D-PRICE event hits the matrix~~
+      **FIRED 2026-06-17** — `feedback-bump.py` Step -1 detected 5 distinct domains with
+      `barrier_found` outcome in 90d window. Landed in spec v1.3 + `domains/web-scraping.md`
+      brokerage tier with Bright Data DaaS + datarade marketplace. Action complete.
 
 - [ ] **Compliance fields — `data_lineage`, `tos_ack_required`, `jurisdiction`.** Trigger:
       EU AI Act implementation detail rules land, OR any US state-level anti-scraping

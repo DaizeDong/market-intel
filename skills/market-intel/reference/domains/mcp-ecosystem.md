@@ -21,6 +21,8 @@ upstream. Verified 2026-06.
 | **Smithery.ai** | `smithery.ai` | "trending" + "newest" + install-count sort; CLI: `npx @smithery/cli list` | **medium-high** — install-count is real signal but inflatable; great cross-IDE install surface (Claude/Cursor/Cline/Windsurf one-click) | weekly |
 | **mcp.so** | `mcp.so` | category browse + new listings | **medium-low** — widest catch, most noise; many dead/stub listings; use only when 上面 4 个都miss了 | monthly |
 | **Apify MCP store** | `mcp.apify.com` + `apify.com/store` | actor count + run-volume + maintainer | **medium-high** — actors carry real run counts and pricing → harder采用度 signal | monthly |
+| **GitHub MCP Registry** | `github.com/mcp` (NOT a repo — GitHub's official MCP discovery page launched 2025-09-16) | catalog browse + filter by category; aggregates ~100 community MCP servers (Figma, Postman, Stripe, Supabase, etc.) | **high** — GitHub-curated non-Anthropic discovery surface; official | weekly |
+| **ChatGPT Apps Directory** | `chatgpt.com/apps` (anti-bot 403s WebFetch; OpenAI Apps SDK / MCP integrations) | ~979 apps as of 2026-06; MCP-based; browse + search | **high** — OpenAI counterpart to GitHub MCP Registry; captures non-Anthropic MCP momentum the Anthropic-only sweep would miss | weekly (manual, anti-bot) |
 
 ## Tier 2 — GitHub velocity (poll weekly via gh-api)
 
