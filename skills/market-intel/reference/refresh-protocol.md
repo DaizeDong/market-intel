@@ -431,6 +431,19 @@ get buried.
    `live-runs.jsonl` first (default 90-day window); historical year files are read only
    when `--since` predates the current file's earliest entry. Prevents Step -1 scan cost
    from creeping past 0.5s at 500+ entry sizes.
+8. **Top-level doc drift sweep** (2026-06-17 added against entropy growth) —
+   - **Machine-checkable**: run `python tools/check_doc_drift.py`. Fail-level drift
+     blocks the sweep (must fix in this cleanup, not the next). Warn-level drift
+     surfaces in the sweep report.
+   - **Narrative freshness**: if any of `README.md` / `README_CN.md` / `PHILOSOPHY.md` /
+     `ROADMAP.md` / `EVOLUTION.md` has not been touched in 12+ months while `CHANGELOG.md`
+     has had ≥5 entries since, spawn a fork agent: "compare README narrative section to
+     `SKILL.md` + `sources-index.md`; does it still describe the system honestly?"
+     The fork judges PASS or specific drift; cleanup pass records the verdict.
+   - **ROADMAP demotion**: any "Triggered work" item with no progress in 12 months → propose
+     demotion to "deferred" with reason. Per P3 monotonic evolution: triggers only
+     accumulate or get explicitly retired, never silently sit indefinitely.
+   - Full doctrine: `runbooks/doc-sync.md`.
 8. **Auto-advance `## Last verified` from real runs** (v0.17.0) — at the END of cleanup
    pass, for every slug that appears in `live-runs.jsonl` since last refresh with
    `outcome: "verified"`, advance its `tools/<slug>.md` `## Last verified: YYYY-MM`

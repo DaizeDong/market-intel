@@ -203,6 +203,32 @@ if ($DryRun) {
 }
 
 # ---------------------------------------------------------------------------
+# Step 5c: top-level doc drift gate (2026-06-17 added against entropy growth)
+# Reads canonical sources (plugin.json, domain count, tool count) and confirms
+# derived fields (README badges, headings) match. --fix auto-bumps where possible.
+# ---------------------------------------------------------------------------
+Write-Host "[5c/11] python tools/check_doc_drift.py"
+$driftOut = & python tools/check_doc_drift.py 2>&1
+$driftExit = $LASTEXITCODE
+if ($driftExit -eq 1) {
+    Write-Host "       drift gate FAILED — attempting auto-fix:" -ForegroundColor Yellow
+    & python tools/check_doc_drift.py --fix 2>&1 | ForEach-Object { Write-Host "         $_" }
+    $driftOut = & python tools/check_doc_drift.py 2>&1
+    $driftExit = $LASTEXITCODE
+    if ($driftExit -eq 1) {
+        Write-Host "       remaining fail-level drift after --fix:" -ForegroundColor Red
+        $driftOut | Select-Object -Last 20 | ForEach-Object { Write-Host "         $_" }
+        Abort-Release "5c" "doc drift gate (recovery: run 'python tools/check_doc_drift.py' locally and fix the remaining fail-level entries by hand)"
+    }
+    Write-Host "       OK after --fix" -ForegroundColor Green
+} elseif ($driftExit -eq 2) {
+    Write-Host "       warn-level drift surfaced (see below); proceeding" -ForegroundColor Yellow
+    $driftOut | Select-Object -Last 10 | ForEach-Object { Write-Host "         $_" }
+} else {
+    Write-Host "       OK"
+}
+
+# ---------------------------------------------------------------------------
 # Step 5b: generate sidecar JSON for config-bridge auto-config
 # (2026-06-17 added — companion-config side reads metrics/sweep-<version>.json)
 # ---------------------------------------------------------------------------
@@ -221,13 +247,11 @@ if ($sidecarExit -ne 0) {
 # Step 6: git add
 # ---------------------------------------------------------------------------
 $sidecarPath = "metrics/sweep-$Version.json"
-if (Test-Path $sidecarPath) {
-    Write-Host "[6/11] git add CHANGELOG.md .claude-plugin/plugin.json $sidecarPath"
-    git add CHANGELOG.md .claude-plugin/plugin.json $sidecarPath
-} else {
-    Write-Host "[6/11] git add CHANGELOG.md .claude-plugin/plugin.json"
-    git add CHANGELOG.md .claude-plugin/plugin.json
-}
+$stageList = @("CHANGELOG.md", ".claude-plugin/plugin.json", "README.md", "README_CN.md")
+if (Test-Path $sidecarPath) { $stageList += $sidecarPath }
+$stageList = $stageList | Where-Object { Test-Path $_ }
+Write-Host "[6/11] git add $($stageList -join ' ')"
+git add $stageList
 if (-not $?) { Abort-Release 6 "git add failed (recovery: git restore --staged .)" }
 Write-Host "       OK"
 
