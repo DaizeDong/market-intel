@@ -1,11 +1,19 @@
 # Companion config repo — formal specification
 
-**Status**: STABLE. Spec version: `1.1`.
+**Status**: STABLE. Spec version: `1.2`.
 
-> v1.1 (additive, backward-compatible): adds `transport: "rest"` and `transport:
-> "python-lib"` to the documented enum; adds OPTIONAL `expires` and `rotate_after` fields
-> for credential-lifecycle tracking. v1 consumers ignore unknown fields per §3
-> (forward-compat), so no migration needed.
+> v1.2 (additive, backward-compatible): adds OPTIONAL judgment fields (`mcp_server_name`,
+> `deprecation_code`, `ban_risk`, `evidence_url`, `supersedes`, `replacement_for`,
+> `model_tier`, `route_agent_native`) — these protect the matrix's *judgment* value once
+> the upstream MCP registry can supply mechanical metadata. Single-sources the transport
+> enum to §3.1 (install-guide now references back). Drops the v1.1 `-mcp` suffix SHOULD
+> (replaced by `mcp_server_name` precise match + sync-check fuzzy fallback). Adds
+> `deprecated` to the `health_last` enum. v1.1 and v1 consumers ignore unknown fields
+> per §3 (forward-compat), so no migration needed.
+>
+> v1.1 (additive): adds `transport: "rest"` and `transport: "python-lib"` to the
+> documented enum; adds OPTIONAL `expires` and `rotate_after` for credential-lifecycle
+> tracking.
 
 This is the **formal contract** between the market-intel skill (and sister skills following the
 same pattern) and any companion config repo the user maintains. Conforming repos can be
@@ -124,10 +132,13 @@ Skills SHOULD:
                                   //                            Mastodon.py). Listed by
                                   //                            scripts/install-libs.sh.
   "health_last": "string",        // OPTIONAL — "connected" | "needs_auth" | "failed" | "unknown" |
-                                  //            "credential_ready" | "verified" | "installed"
+                                  //            "credential_ready" | "verified" | "installed" |
+                                  //            "deprecated"
                                   //            (credential_ready: secret captured but not exercised;
                                   //             verified: REST call or library import confirmed;
-                                  //             installed: python-lib pip-installed locally)
+                                  //             installed: python-lib pip-installed locally;
+                                  //             deprecated: upstream matrix tombstoned this tool,
+                                  //             see `deprecation_code`)
   "health_checked": "ISO8601",    // OPTIONAL — when health_last was last verified
   "expires": "string",            // OPTIONAL — "never" or "YYYY-MM-DD (reason)" — platform-
                                   //            enforced expiration of the credential.
@@ -136,6 +147,40 @@ Skills SHOULD:
                                   //            (e.g. transcript-leak rotation, shared-password
                                   //            hygiene). Tooling SHOULD warn when rotate_after
                                   //            is reached even if expires says "never".
+
+  // ---- v1.2 judgment fields (all OPTIONAL) -------------------------------
+  "mcp_server_name": "string",    // OPTIONAL — exact `mcpServers.<key>` in ~/.claude.json when
+                                  //            this entry maps to a live MCP. Lets sync-check
+                                  //            do precise match instead of fuzzy stripping.
+                                  //            Omit for non-MCP transports (rest, python-lib).
+  "deprecation_code": "string",   // OPTIONAL — when health_last="deprecated", one of:
+                                  //            "D-404" (provider gone),
+                                  //            "D-PRICE" (was free, now paid),
+                                  //            "D-STALE" (unmaintained, may still work),
+                                  //            "D-TOS" (ToS forbids; legal risk),
+                                  //            "D-SUPERSEDED" (replaced by another tool; use
+                                  //                            `replacement_for` to name it).
+  "ban_risk": "string",           // OPTIONAL — "low" | "medium" | "high" — IP/account ban
+                                  //            likelihood when using this tool against its
+                                  //            target. Mainly for route ③/④ scraping tools.
+  "evidence_url": "string",       // OPTIONAL — URL backing the claim in `notes` (GitHub release,
+                                  //            pricing page, etc). Used by sweep audits to
+                                  //            re-verify; missing = "you're trusting the notes".
+  "supersedes": "string",         // OPTIONAL — slug this entry replaces (used after rename).
+  "replacement_for": "string",    // OPTIONAL — when health_last="deprecated" with
+                                  //            deprecation_code="D-SUPERSEDED", the recommended
+                                  //            replacement slug.
+  "model_tier": "string",         // OPTIONAL — "local-ok" | "frontier-required" — what model
+                                  //            class is sufficient to operate this tool well.
+                                  //            local-ok: triage/dedup/citation-recheck-grade
+                                  //            tools that don't need frontier reasoning.
+  "route_agent_native": "boolean",// OPTIONAL — true if this entry represents a route-⑤
+                                  //            agent-native browser tool (Computer Use /
+                                  //            Operator / Skyvern / browser-use). Orthogonal
+                                  //            to route ④ (playwright-style) — flagged so
+                                  //            cadence/cost compares can be A/B-split.
+  // -----------------------------------------------------------------------
+
   "notes": "string"               // OPTIONAL — free text
 }
 ```
@@ -151,8 +196,11 @@ kebab-case ASCII.
 in the corresponding public matrix repo. This is how skill detection reverse-looks up
 tier/domain info from the matrix.
 
-**SHOULD**: When the matrix has a tool with a `-mcp` suffix, the companion repo's `slug` SHOULD
-also use that suffix for symmetry (e.g. `fred-mcp`, not `fred`).
+**SHOULD**: The companion repo's `slug` MAY follow the matrix slug verbatim (including any
+`-mcp`/`-io` suffix), but the **live MCP server key** in `~/.claude.json` (often the suffix-less
+form, e.g. `fred` rather than `fred-mcp`) MUST be recorded in `mcp_server_name` when applicable.
+sync-check uses `mcp_server_name` as the precise match against `~/.claude.json` and falls back
+to fuzzy suffix stripping (`-mcp/-io/-py/-server`) only when `mcp_server_name` is absent.
 
 ### 3.2 `summary` shape (optional)
 
