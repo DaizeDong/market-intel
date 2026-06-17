@@ -22,6 +22,22 @@ shard(s) in `domains/`. Do not read shards you didn't match.
 | **consumer-price-compare** | "I'm buying X — find me the cheapest", coupon stack, 历史价, 比价, 凑单 | DaizeDong/shopping-aggregator (sister skill — delegates here) | `domains/consumer-price-compare.md` |
 | [mcp-ecosystem](domains/mcp-ecosystem.md) | meta-domain: where MCPs come from | (not a research target — feeds Discovery D1) | `domains/mcp-ecosystem.md` |
 
+### Reserved placeholders (v0.18.1) — domains the audit predicts will materialize in 2026-2027
+
+These rows are intentional vacancies. Refresh's Horizon scan checks each at every quarterly
+sweep — when the field crosses a maturity threshold (≥3 viable tools across ≥2 tiers), the
+placeholder is populated into a real shard. Reasoning + triggers in `ROADMAP.md` "Future
+domain placeholders".
+
+| domain | triage signals | status |
+|---|---|---|
+| `agent-marketplace` | "what skills/agents are on Anthropic Hub / OpenAI GPT Store / Smithery" | reserved — populate when ≥3 tracked marketplaces have API surface |
+| `ai-data-licensing` | "legally rent data instead of scraping" — datarade / Bright Data DaaS / Scale Data Engine | reserved — populate on 3rd D-PRICE event (also triggers `transport: brokerage`) |
+| `voice-and-podcast-intel` | podcast/video transcript intel, podcast as research source | reserved — populate when Podscan-class tools >5 |
+| `synthetic-and-evals` | synthetic dataset catalogs / Vals.ai / lmarena as research basis | reserved — populate when evals-as-research becomes routine |
+| `regulatory-watch` | SEC 8-K / EU AI Act / state anti-scrape trackers, legal-tech MCPs | reserved — populate when EU AI Act detail rules land |
+| `on-chain-intel-private` | TEE / zk privacy on-chain data (Chainlink Functions / Nillion / EigenLayer) | reserved — populate when privacy-data MCPs >3 |
+
 Barrier-route legend (see each shard for detail):
 ① official API — compliant, often paid/limited, no ban risk
 ② resale API — provider absorbs the barrier, cheap pay-per-use, gray-area
