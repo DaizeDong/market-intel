@@ -188,7 +188,7 @@ directory** — that breaks progressive loading. Install mechanics overview: `re
 - ★ [claude-marketing-research-skill](claude-marketing-research-skill.md) — — · 6-stage market research (shard default for packaged research pipeline)
 - [alirezarezvani/claude-skills](alirezarezvani-claude-skills.md) — — · mega bundle 338 skills
 - [ComposioHQ/awesome-claude-skills](awesome-claude-skills.md) — — · discovery catalog (D-SUPERSEDED by sickn33/antigravity-awesome-skills 2026-06-17)
-- ★ [sickn33/antigravity-awesome-skills](sickn33-antigravity-awesome-skills.md) — — · active replacement catalog (40k★, 1d-old)
+- ★ [sickn33/antigravity-awesome-skills](antigravity-awesome-skills.md) — — · active replacement catalog (40k★, 1d-old)
 - [ericosiu/ai-marketing-skills](ai-marketing-skills.md) — — · business-ops/sales/revenue skills (fills the gap)
 - [digital-marketing-pro](digital-marketing-pro.md) — — · AEO/GEO answer-engine optimization
 - ★ [Imbad0202/academic-research-skills](academic-research-skills.md) — — · full academic-research pipeline (planning → lit review → peer review)
