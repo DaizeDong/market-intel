@@ -151,6 +151,14 @@
     "repo": "NanmiCoder/MediaCrawler",
     "verdict": "PASS"
   },
+  "SaseQ/discord-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T05:45:22.828491",
+    "pushed_at": "2026-04-25T13:55:22Z",
+    "reason": "pushed_at 2026-04-25 within 12mo",
+    "repo": "SaseQ/discord-mcp",
+    "verdict": "PASS"
+  },
   "ScrapeGraphAI/Scrapegraph-ai": {
     "archived": false,
     "checked_at": "2026-06-17T04:46:23.658027",
