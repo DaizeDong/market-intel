@@ -12,8 +12,10 @@
 | People Data Labs | ① | $0.01/record, cheapest at volume | self-wrap (no MCP) | dev API-first |
 | **HubSpot / Salesforce / Attio** (official MCP) | ① | CRM read/write, log activity | connected | use whichever CRM you run |
 | Smartlead MCP (LeadMagic) | ① | 113+ tools, deliverability + warmup | connected + key | outreach send/sequence; ⚠ repo archived 2025-07 — verify the npm install hint before relying |
+| **Instantly.ai MCP** (official hosted) | ① | sequence audits, deliverability checks, lead/campaign mgmt — 38 tools across 6 categories | `mcp.instantly.ai/mcp` HTTP + API key | **requires Growth plan**; product-level officialness (reference client `bcharleson/instantly-mcp` is community FastMCP) |
 | ZeroBounce (official MCP) | ① | email verification, batch | connected + key | only mature verify MCP |
 | Bright Data Crunchbase MCP | ② | company intel, real-time public data | connected | free 5k/mo, legally tested |
+| **Outscraper Google Maps API** | ② | resale Google Maps lead-scraping, pay-as-you-go | REST key | free first 500 records, then $3/1K up to 100K, $1/1K above — **~15x cheaper than SerpApi Maps** ($25/mo for 1K) |
 
 **Default pick:** Find+enrich → Apollo.io native MCP (turn off training first). Verify → Hunter or
 ZeroBounce. Outreach → Smartlead. CRM → your CRM's official MCP. Min combo: Apollo → Hunter/ZeroBounce
