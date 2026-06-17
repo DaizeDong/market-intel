@@ -203,10 +203,31 @@ if ($DryRun) {
 }
 
 # ---------------------------------------------------------------------------
+# Step 5b: generate sidecar JSON for config-bridge auto-config
+# (2026-06-17 added — companion-config side reads metrics/sweep-<version>.json)
+# ---------------------------------------------------------------------------
+Write-Host "[5b/11] sidecar generation (tools/sidecar_from_changelog.py)"
+$sidecarOut = & python tools/sidecar_from_changelog.py --version $Version 2>&1
+$sidecarExit = $LASTEXITCODE
+if ($sidecarExit -ne 0) {
+    Write-Host "       sidecar generator exited $sidecarExit; output:" -ForegroundColor Yellow
+    $sidecarOut | Select-Object -Last 10 | ForEach-Object { Write-Host "         $_" }
+    Write-Host "       WARN: continuing without sidecar (config-bridge will skip this version)" -ForegroundColor Yellow
+} else {
+    Write-Host "       $($sidecarOut | Select-Object -Last 1)"
+}
+
+# ---------------------------------------------------------------------------
 # Step 6: git add
 # ---------------------------------------------------------------------------
-Write-Host "[6/11] git add CHANGELOG.md .claude-plugin/plugin.json"
-git add CHANGELOG.md .claude-plugin/plugin.json
+$sidecarPath = "metrics/sweep-$Version.json"
+if (Test-Path $sidecarPath) {
+    Write-Host "[6/11] git add CHANGELOG.md .claude-plugin/plugin.json $sidecarPath"
+    git add CHANGELOG.md .claude-plugin/plugin.json $sidecarPath
+} else {
+    Write-Host "[6/11] git add CHANGELOG.md .claude-plugin/plugin.json"
+    git add CHANGELOG.md .claude-plugin/plugin.json
+}
 if (-not $?) { Abort-Release 6 "git add failed (recovery: git restore --staged .)" }
 Write-Host "       OK"
 
@@ -260,4 +281,27 @@ Write-Host "  version: $Version"
 Write-Host "  commit:  $sha"
 Write-Host "  tag:     $Tag"
 Write-Host "  pushed:  origin/main + $Tag"
+
+# ---------------------------------------------------------------------------
+# Optional follow-up: config-bridge auto-config on companion repo
+# (PHILOSOPHY §P5 amendment — config-side post-sweep automation requires per-tool consent)
+# ---------------------------------------------------------------------------
+$sidecarPath = "metrics/sweep-$Version.json"
+if ((Test-Path $sidecarPath) -and (Test-Path $ConfigRepo)) {
+    Write-Host ""
+    $resp = Read-Host "Run config-bridge --dry-run on this sweep? (y/N)"
+    if ($resp -eq "y" -or $resp -eq "Y") {
+        Push-Location $ConfigRepo
+        try {
+            $sidecarAbs = Join-Path $RepoRoot $sidecarPath
+            & python scripts/config-bridge.py --sweep $sidecarAbs --dry-run
+        } finally {
+            Pop-Location
+        }
+        Write-Host ""
+        Write-Host "  config-bridge dry-run complete — to actually apply, run:"
+        Write-Host "    cd $ConfigRepo && python scripts/config-bridge.py --sweep $sidecarAbs"
+    }
+}
+
 exit 0
