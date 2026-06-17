@@ -187,6 +187,28 @@ directory** — that breaks progressive loading. Install mechanics overview: `re
 - ★ [AgricIDaniel/claude-seo](claude-seo.md) — — · strongest SEO plugin, 25 sub-skills
 - ★ [claude-marketing-research-skill](claude-marketing-research-skill.md) — — · 6-stage market research (shard default for packaged research pipeline)
 - [alirezarezvani/claude-skills](alirezarezvani-claude-skills.md) — — · mega bundle 338 skills
-- [ComposioHQ/awesome-claude-skills](awesome-claude-skills.md) — — · discovery catalog
+- [ComposioHQ/awesome-claude-skills](awesome-claude-skills.md) — — · discovery catalog (D-SUPERSEDED by sickn33/antigravity-awesome-skills 2026-06-17)
+- ★ [sickn33/antigravity-awesome-skills](sickn33-antigravity-awesome-skills.md) — — · active replacement catalog (40k★, 1d-old)
 - [ericosiu/ai-marketing-skills](ai-marketing-skills.md) — — · business-ops/sales/revenue skills (fills the gap)
 - [digital-marketing-pro](digital-marketing-pro.md) — — · AEO/GEO answer-engine optimization
+- ★ [Imbad0202/academic-research-skills](academic-research-skills.md) — — · full academic-research pipeline (planning → lit review → peer review)
+- [gtmagents/gtm-agents](gtm-agents.md) — — · 67 plugins / 92 agents / 52 skills for sales-driven GTM
+- [Eronred/aso-skills](aso-skills.md) — — · 40+ App Store Optimization skills (iOS + Google Play)
+
+## reddit-community
+- ★ [ArthurHeitmann/arctic_shift](arctic-shift.md) — historical Reddit · monthly dumps + JSON API + hosted UI
+- ★ [SaseQ/discord-mcp](saseq-discord-mcp.md) — Discord MCP · ToS-compliant bot-token model
+
+## finance-markets (added 2026-06-17)
+- ★ [OpenBB-finance/OpenBB MCP](openbb-mcp.md) — finance aggregator · ~100 data providers behind one MCP
+
+## leadgen-crm (added 2026-06-17)
+- [Instantly.ai MCP](instantly-mcp.md) — outreach platform · 38 tools (Growth plan)
+- [Outscraper Google Maps](outscraper-google-maps.md) — pay-as-you-go · ~15x cheaper than SerpApi Maps
+
+## frontier-research (added 2026-06-17)
+- [LMArena (arena.ai)](lmarena.md) — live LLM leaderboard · partial fill of D-404 Papers-with-Code
+
+## mcp-ecosystem (added 2026-06-17)
+- [GitHub MCP Registry](github-mcp-registry.md) — github.com/mcp · official discovery hub
+- [ChatGPT Apps Directory](chatgpt-apps-directory.md) — chatgpt.com/apps · OpenAI side

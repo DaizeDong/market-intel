@@ -1,0 +1,778 @@
+{
+  "AgricIDaniel/claude-seo": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-13T17:30:25Z",
+    "reason": "pushed_at 2026-06-13 within 12mo",
+    "repo": "AgricIDaniel/claude-seo",
+    "verdict": "PASS"
+  },
+  "Alex2Yang97/yahoo-finance-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-03-23T22:59:31Z",
+    "reason": "pushed_at 2026-03-23 within 12mo",
+    "repo": "Alex2Yang97/yahoo-finance-mcp",
+    "verdict": "PASS"
+  },
+  "ArthurHeitmann/arctic_shift": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:47:49.317725",
+    "pushed_at": "2026-06-11T19:41:28Z",
+    "reason": "pushed_at 2026-06-11 within 12mo",
+    "repo": "ArthurHeitmann/arctic_shift",
+    "verdict": "PASS"
+  },
+  "ComposioHQ/awesome-claude-skills": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-05-22T03:17:49Z",
+    "reason": "pushed_at 2026-05-22 within 12mo",
+    "repo": "ComposioHQ/awesome-claude-skills",
+    "verdict": "PASS"
+  },
+  "Cybrarist/Discount-Bandit": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-01T10:57:52Z",
+    "reason": "pushed_at 2026-06-01 within 12mo",
+    "repo": "Cybrarist/Discount-Bandit",
+    "verdict": "PASS"
+  },
+  "DaizeDong/shopping-aggregator": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T20:50:04Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "DaizeDong/shopping-aggregator",
+    "verdict": "PASS"
+  },
+  "EnesCinr/twitter-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2025-07-17T18:49:11Z",
+    "reason": "pushed_at 2025-07-17 within 12mo",
+    "repo": "EnesCinr/twitter-mcp",
+    "verdict": "PASS"
+  },
+  "Eronred/aso-skills": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:48:41.921449",
+    "pushed_at": "2026-05-08T15:40:40Z",
+    "reason": "pushed_at 2026-05-08 within 12mo",
+    "repo": "Eronred/aso-skills",
+    "verdict": "PASS"
+  },
+  "Future-House/paper-qa": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-11T18:43:29Z",
+    "reason": "pushed_at 2026-06-11 within 12mo",
+    "repo": "Future-House/paper-qa",
+    "verdict": "PASS"
+  },
+  "GridfireAI/reddit-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2025-03-25T18:38:38Z",
+    "reason": "pushed_at 2025-03-25 is ~14mo old (>12mo)",
+    "repo": "GridfireAI/reddit-mcp",
+    "verdict": "WARN"
+  },
+  "Imbad0202/academic-research-skills": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:48:41.921449",
+    "pushed_at": "2026-06-17T00:16:45Z",
+    "reason": "pushed_at 2026-06-17 within 12mo",
+    "repo": "Imbad0202/academic-research-skills",
+    "verdict": "PASS"
+  },
+  "Infatoshi/x-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-03-24T09:16:39Z",
+    "reason": "pushed_at 2026-03-24 within 12mo",
+    "repo": "Infatoshi/x-mcp",
+    "verdict": "PASS"
+  },
+  "Kaliiiiiiiiii-Vinyzu/patchright": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T20:37:44Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "Kaliiiiiiiiii-Vinyzu/patchright",
+    "verdict": "PASS"
+  },
+  "MFYDev/ghost-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-04-27T03:50:34Z",
+    "reason": "pushed_at 2026-04-27 within 12mo",
+    "repo": "MFYDev/ghost-mcp",
+    "verdict": "PASS"
+  },
+  "MarshalX/atproto": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-14T22:34:00Z",
+    "reason": "pushed_at 2026-06-14 within 12mo",
+    "repo": "MarshalX/atproto",
+    "verdict": "PASS"
+  },
+  "MendleM/Pipepost": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-04-16T21:00:18Z",
+    "reason": "pushed_at 2026-04-16 within 12mo",
+    "repo": "MendleM/Pipepost",
+    "verdict": "PASS"
+  },
+  "MiguelAlvRed/mobile-store-scraper-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2025-12-14T21:27:46Z",
+    "reason": "pushed_at 2025-12-14 within 12mo",
+    "repo": "MiguelAlvRed/mobile-store-scraper-mcp",
+    "verdict": "PASS"
+  },
+  "NanmiCoder/MediaCrawler": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T12:40:47Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "NanmiCoder/MediaCrawler",
+    "verdict": "PASS"
+  },
+  "ScrapeGraphAI/Scrapegraph-ai": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-15T14:03:01Z",
+    "reason": "pushed_at 2026-06-15 within 12mo",
+    "repo": "ScrapeGraphAI/Scrapegraph-ai",
+    "verdict": "PASS"
+  },
+  "Skyvern-AI/skyvern": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-17T04:45:08Z",
+    "reason": "pushed_at 2026-06-17 within 12mo",
+    "repo": "Skyvern-AI/skyvern",
+    "verdict": "PASS"
+  },
+  "WordPress/mcp-adapter": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T20:44:55Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "WordPress/mcp-adapter",
+    "verdict": "PASS"
+  },
+  "adhikasp/mcp-twikit": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2025-03-14T14:35:31Z",
+    "reason": "pushed_at 2025-03-14 is ~15mo old (>12mo)",
+    "repo": "adhikasp/mcp-twikit",
+    "verdict": "WARN"
+  },
+  "ahonn/mcp-server-gsc": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-02-19T18:33:41Z",
+    "reason": "pushed_at 2026-02-19 within 12mo",
+    "repo": "ahonn/mcp-server-gsc",
+    "verdict": "PASS"
+  },
+  "alirezarezvani/claude-skills": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-12T05:59:36Z",
+    "reason": "pushed_at 2026-06-12 within 12mo",
+    "repo": "alirezarezvani/claude-skills",
+    "verdict": "PASS"
+  },
+  "alpacahq/alpaca-mcp-server": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-05T11:20:14Z",
+    "reason": "pushed_at 2026-06-05 within 12mo",
+    "repo": "alpacahq/alpaca-mcp-server",
+    "verdict": "PASS"
+  },
+  "apify/crawlee": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T22:52:27Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "apify/crawlee",
+    "verdict": "PASS"
+  },
+  "blazickjp/arxiv-mcp-server": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-05-18T18:00:11Z",
+    "reason": "pushed_at 2026-05-18 within 12mo",
+    "repo": "blazickjp/arxiv-mcp-server",
+    "verdict": "PASS"
+  },
+  "blockscout/mcp-server": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-17T04:46:28Z",
+    "reason": "pushed_at 2026-06-17 within 12mo",
+    "repo": "blockscout/mcp-server",
+    "verdict": "PASS"
+  },
+  "brightdata/brightdata-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-14T08:50:44Z",
+    "reason": "pushed_at 2026-06-14 within 12mo",
+    "repo": "brightdata/brightdata-mcp",
+    "verdict": "PASS"
+  },
+  "browser-use/browser-use": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-15T08:24:43Z",
+    "reason": "pushed_at 2026-06-15 within 12mo",
+    "repo": "browser-use/browser-use",
+    "verdict": "PASS"
+  },
+  "browserbase/stagehand": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-17T00:40:14Z",
+    "reason": "pushed_at 2026-06-17 within 12mo",
+    "repo": "browserbase/stagehand",
+    "verdict": "PASS"
+  },
+  "ccxt/ccxt": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T17:30:58Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "ccxt/ccxt",
+    "verdict": "PASS"
+  },
+  "cfdude/mcp-finnhub": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-03-17T15:46:45Z",
+    "reason": "pushed_at 2026-03-17 within 12mo",
+    "repo": "cfdude/mcp-finnhub",
+    "verdict": "PASS"
+  },
+  "claude-world/trend-pulse": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-04-13T00:03:17Z",
+    "reason": "pushed_at 2026-04-13 within 12mo",
+    "repo": "claude-world/trend-pulse",
+    "verdict": "PASS"
+  },
+  "contentful/contentful-mcp-server": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-17T00:05:31Z",
+    "reason": "pushed_at 2026-06-17 within 12mo",
+    "repo": "contentful/contentful-mcp-server",
+    "verdict": "PASS"
+  },
+  "coreyhaines31/marketingskills": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-15T17:24:59Z",
+    "reason": "pushed_at 2026-06-15 within 12mo",
+    "repo": "coreyhaines31/marketingskills",
+    "verdict": "PASS"
+  },
+  "cosjef/Keepa_MCP": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-02-11T17:23:28Z",
+    "reason": "pushed_at 2026-02-11 within 12mo",
+    "repo": "cosjef/Keepa_MCP",
+    "verdict": "PASS"
+  },
+  "cullenwatson/StaffSpy": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2025-06-17T05:02:47Z",
+    "reason": "pushed_at 2025-06-17 within 12mo",
+    "repo": "cullenwatson/StaffSpy",
+    "verdict": "PASS"
+  },
+  "d60/twikit": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-03-10T10:19:44Z",
+    "reason": "pushed_at 2026-03-10 within 12mo",
+    "repo": "d60/twikit",
+    "verdict": "PASS"
+  },
+  "daijro/camoufox": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T06:42:39Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "daijro/camoufox",
+    "verdict": "PASS"
+  },
+  "dancolta/subscope": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-03T13:18:25Z",
+    "reason": "pushed_at 2026-06-03 within 12mo",
+    "repo": "dancolta/subscope",
+    "verdict": "PASS"
+  },
+  "dataabc/weibo-crawler": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-05-10T14:27:25Z",
+    "reason": "pushed_at 2026-05-10 within 12mo",
+    "repo": "dataabc/weibo-crawler",
+    "verdict": "PASS"
+  },
+  "dataforseo/mcp-server-typescript": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-08T13:36:12Z",
+    "reason": "pushed_at 2026-06-08 within 12mo",
+    "repo": "dataforseo/mcp-server-typescript",
+    "verdict": "PASS"
+  },
+  "davidteather/TikTok-Api": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-05-19T23:44:44Z",
+    "reason": "pushed_at 2026-05-19 within 12mo",
+    "repo": "davidteather/TikTok-Api",
+    "verdict": "PASS"
+  },
+  "deedy5/ddgs": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-05-23T21:32:02Z",
+    "reason": "pushed_at 2026-05-23 within 12mo",
+    "repo": "deedy5/ddgs",
+    "verdict": "PASS"
+  },
+  "directus/mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-02-04T20:05:50Z",
+    "reason": "pushed_at 2026-02-04 within 12mo",
+    "repo": "directus/mcp",
+    "verdict": "PASS"
+  },
+  "elyxlz/discord-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2025-06-30T14:58:04Z",
+    "reason": "pushed_at 2025-06-30 within 12mo",
+    "repo": "elyxlz/discord-mcp",
+    "verdict": "PASS"
+  },
+  "ericosiu/ai-marketing-skills": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-14T16:08:10Z",
+    "reason": "pushed_at 2026-06-14 within 12mo",
+    "repo": "ericosiu/ai-marketing-skills",
+    "verdict": "PASS"
+  },
+  "erithwik/mcp-hn": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2025-07-14T02:15:28Z",
+    "reason": "pushed_at 2025-07-14 within 12mo",
+    "repo": "erithwik/mcp-hn",
+    "verdict": "PASS"
+  },
+  "facundoolano/app-store-scraper": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2025-07-27T18:09:47Z",
+    "reason": "pushed_at 2025-07-27 within 12mo",
+    "repo": "facundoolano/app-store-scraper",
+    "verdict": "PASS"
+  },
+  "facundoolano/google-play-scraper": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-05-31T16:01:35Z",
+    "reason": "pushed_at 2026-05-31 within 12mo",
+    "repo": "facundoolano/google-play-scraper",
+    "verdict": "PASS"
+  },
+  "firecrawl/firecrawl": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-17T02:34:07Z",
+    "reason": "pushed_at 2026-06-17 within 12mo",
+    "repo": "firecrawl/firecrawl",
+    "verdict": "PASS"
+  },
+  "flack0x/trendspyg": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-15T12:14:45Z",
+    "reason": "pushed_at 2026-06-15 within 12mo",
+    "repo": "flack0x/trendspyg",
+    "verdict": "PASS"
+  },
+  "github/github-mcp-server": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T20:11:36Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "github/github-mcp-server",
+    "verdict": "PASS"
+  },
+  "gitroomhq/postiz-agent": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-02T08:39:51Z",
+    "reason": "pushed_at 2026-06-02 within 12mo",
+    "repo": "gitroomhq/postiz-agent",
+    "verdict": "PASS"
+  },
+  "gitroomhq/postiz-app": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-12T06:22:11Z",
+    "reason": "pushed_at 2026-06-12 within 12mo",
+    "repo": "gitroomhq/postiz-app",
+    "verdict": "PASS"
+  },
+  "gosom/google-maps-scraper": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-14T06:07:52Z",
+    "reason": "pushed_at 2026-06-14 within 12mo",
+    "repo": "gosom/google-maps-scraper",
+    "verdict": "PASS"
+  },
+  "halcy/Mastodon.py": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-05-28T10:01:53Z",
+    "reason": "pushed_at 2026-05-28 within 12mo",
+    "repo": "halcy/Mastodon.py",
+    "verdict": "PASS"
+  },
+  "hummingbot/hummingbot": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T19:43:52Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "hummingbot/hummingbot",
+    "verdict": "PASS"
+  },
+  "hummingbot/mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-03-23T17:29:00Z",
+    "reason": "pushed_at 2026-03-23 within 12mo",
+    "repo": "hummingbot/mcp",
+    "verdict": "PASS"
+  },
+  "indranilbanerjee/digital-marketing-pro": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T19:53:35Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "indranilbanerjee/digital-marketing-pro",
+    "verdict": "PASS"
+  },
+  "inovector/mixpost": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-03-16T10:06:38Z",
+    "reason": "pushed_at 2026-03-16 within 12mo",
+    "repo": "inovector/mixpost",
+    "verdict": "PASS"
+  },
+  "instaloader/instaloader": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-04-15T19:26:35Z",
+    "reason": "pushed_at 2026-04-15 within 12mo",
+    "repo": "instaloader/instaloader",
+    "verdict": "PASS"
+  },
+  "ishwarjha/claude-marketing-research-skill": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-03-07T09:44:24Z",
+    "reason": "pushed_at 2026-03-07 within 12mo",
+    "repo": "ishwarjha/claude-marketing-research-skill",
+    "verdict": "PASS"
+  },
+  "jaipandya/producthunt-mcp-server": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2025-04-19T02:32:28Z",
+    "reason": "pushed_at 2025-04-19 is ~13mo old (>12mo)",
+    "repo": "jaipandya/producthunt-mcp-server",
+    "verdict": "WARN"
+  },
+  "jmanek/google-news-trends-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-03-29T18:10:10Z",
+    "reason": "pushed_at 2026-03-29 within 12mo",
+    "repo": "jmanek/google-news-trends-mcp",
+    "verdict": "PASS"
+  },
+  "jo-inc/camofox-browser": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T09:16:43Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "jo-inc/camofox-browser",
+    "verdict": "PASS"
+  },
+  "joeyism/linkedin_scraper": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-04-10T02:46:05Z",
+    "reason": "pushed_at 2026-04-10 within 12mo",
+    "repo": "joeyism/linkedin_scraper",
+    "verdict": "PASS"
+  },
+  "karanb192/reddit-mcp-buddy": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-05-26T18:37:28Z",
+    "reason": "pushed_at 2026-05-26 within 12mo",
+    "repo": "karanb192/reddit-mcp-buddy",
+    "verdict": "PASS"
+  },
+  "karpathy/arxiv-sanity-lite": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2023-06-19T16:23:02Z",
+    "reason": "pushed_at 2023-06-19 is ~35mo old (>12mo)",
+    "repo": "karpathy/arxiv-sanity-lite",
+    "verdict": "WARN"
+  },
+  "king-of-the-grackles/reddit-research-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-04-21T06:08:41Z",
+    "reason": "pushed_at 2026-04-21 within 12mo",
+    "repo": "king-of-the-grackles/reddit-research-mcp",
+    "verdict": "PASS"
+  },
+  "kukapay/funding-rates-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2025-04-21T08:32:58Z",
+    "reason": "pushed_at 2025-04-21 is ~13mo old (>12mo)",
+    "repo": "kukapay/funding-rates-mcp",
+    "verdict": "WARN"
+  },
+  "langchain-ai/social-media-agent": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-17T01:16:03Z",
+    "reason": "pushed_at 2026-06-17 within 12mo",
+    "repo": "langchain-ai/social-media-agent",
+    "verdict": "PASS"
+  },
+  "microsoft/playwright-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-10T00:14:20Z",
+    "reason": "pushed_at 2026-06-10 within 12mo",
+    "repo": "microsoft/playwright-mcp",
+    "verdict": "PASS"
+  },
+  "midodimori/stack-overflow-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2025-10-13T13:33:43Z",
+    "reason": "pushed_at 2025-10-13 within 12mo",
+    "repo": "midodimori/stack-overflow-mcp",
+    "verdict": "PASS"
+  },
+  "mnemox-ai/idea-reality-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-04-14T06:58:53Z",
+    "reason": "pushed_at 2026-04-14 within 12mo",
+    "repo": "mnemox-ai/idea-reality-mcp",
+    "verdict": "PASS"
+  },
+  "omkarcloud/amazon-scraper": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-15T08:36:15Z",
+    "reason": "pushed_at 2026-06-15 within 12mo",
+    "repo": "omkarcloud/amazon-scraper",
+    "verdict": "PASS"
+  },
+  "omkarcloud/botasaurus": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-03-18T07:44:07Z",
+    "reason": "pushed_at 2026-03-18 within 12mo",
+    "repo": "omkarcloud/botasaurus",
+    "verdict": "PASS"
+  },
+  "omkarcloud/google-maps-scraper": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-03T08:10:39Z",
+    "reason": "pushed_at 2026-06-03 within 12mo",
+    "repo": "omkarcloud/google-maps-scraper",
+    "verdict": "PASS"
+  },
+  "openags/paper-search-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-05-18T01:47:48Z",
+    "reason": "pushed_at 2026-05-18 within 12mo",
+    "repo": "openags/paper-search-mcp",
+    "verdict": "PASS"
+  },
+  "praw-dev/praw": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-15T18:20:20Z",
+    "reason": "pushed_at 2026-06-15 within 12mo",
+    "repo": "praw-dev/praw",
+    "verdict": "PASS"
+  },
+  "respectlytics/respectaso": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-07T21:03:27Z",
+    "reason": "pushed_at 2026-06-07 within 12mo",
+    "repo": "respectlytics/respectaso",
+    "verdict": "PASS"
+  },
+  "sdil87/trendspy": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2024-12-25T14:52:05Z",
+    "reason": "pushed_at 2024-12-25 is ~17mo old (>12mo)",
+    "repo": "sdil87/trendspy",
+    "verdict": "WARN"
+  },
+  "searxng/searxng": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T13:36:18Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "searxng/searxng",
+    "verdict": "PASS"
+  },
+  "steel-dev/steel-browser": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-09T14:06:14Z",
+    "reason": "pushed_at 2026-06-09 within 12mo",
+    "repo": "steel-dev/steel-browser",
+    "verdict": "PASS"
+  },
+  "stefanoamorelli/fred-mcp-server": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-05-16T15:13:47Z",
+    "reason": "pushed_at 2026-05-16 within 12mo",
+    "repo": "stefanoamorelli/fred-mcp-server",
+    "verdict": "PASS"
+  },
+  "stefanoamorelli/sec-edgar-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T23:07:15Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "stefanoamorelli/sec-edgar-mcp",
+    "verdict": "PASS"
+  },
+  "stickerdaniel/linkedin-mcp-server": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-15T01:28:34Z",
+    "reason": "pushed_at 2026-06-15 within 12mo",
+    "repo": "stickerdaniel/linkedin-mcp-server",
+    "verdict": "PASS"
+  },
+  "subzeroid/instagrapi": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T16:59:30Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "subzeroid/instagrapi",
+    "verdict": "PASS"
+  },
+  "towfiqi/serpbear": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-05-14T07:30:56Z",
+    "reason": "pushed_at 2026-05-14 within 12mo",
+    "repo": "towfiqi/serpbear",
+    "verdict": "PASS"
+  },
+  "ultrafunkamsterdam/nodriver": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-05-13T13:58:15Z",
+    "reason": "pushed_at 2026-05-13 within 12mo",
+    "repo": "ultrafunkamsterdam/nodriver",
+    "verdict": "PASS"
+  },
+  "unclecode/crawl4ai": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-04T06:19:50Z",
+    "reason": "pushed_at 2026-06-04 within 12mo",
+    "repo": "unclecode/crawl4ai",
+    "verdict": "PASS"
+  },
+  "vercel-labs/agent-browser": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T18:02:29Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "vercel-labs/agent-browser",
+    "verdict": "PASS"
+  },
+  "vladkens/twscrape": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T00:42:39Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "vladkens/twscrape",
+    "verdict": "PASS"
+  },
+  "webflow/mcp-server": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-09T05:00:48Z",
+    "reason": "pushed_at 2026-06-09 within 12mo",
+    "repo": "webflow/mcp-server",
+    "verdict": "PASS"
+  },
+  "xpzouying/xiaohongshu-mcp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-15T10:45:48Z",
+    "reason": "pushed_at 2026-06-15 within 12mo",
+    "repo": "xpzouying/xiaohongshu-mcp",
+    "verdict": "PASS"
+  },
+  "yt-dlp/yt-dlp": {
+    "archived": false,
+    "checked_at": "2026-06-17T04:46:23.658027",
+    "pushed_at": "2026-06-16T02:00:53Z",
+    "reason": "pushed_at 2026-06-16 within 12mo",
+    "repo": "yt-dlp/yt-dlp",
+    "verdict": "PASS"
+  }
+}

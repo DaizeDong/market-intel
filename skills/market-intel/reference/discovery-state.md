@@ -10,6 +10,44 @@ Format: `[YYYY-MM-DD] @source: <one-line> <repo-or-url>`.
 
 <!-- e.g. [2026-06-20] @jxnl: new instructor-mcp wraps eval harness over MCP https://github.com/... -->
 
+### 2026-06-17 sweep — HOLD list (verified, awaiting human eyeballs)
+
+| candidate | domain | reason for HOLD |
+|---|---|---|
+| BigGo Search MCP (Funmula-Corp/BigGo-MCP-Server) | ecommerce-arbitrage | Repo dormant 13.5 months (v0.2.0 on 2025-04-30, no commits since). APAC marketplace coverage (Shopee/Taobao/AliExpress) is confirmed and the only such MCP, but staleness needs a human call: test cert signup still issues working keys before relying. **Caught by gh-api check that 3-lens LLM verify alone missed (P4 lesson).** |
+
+### 2026-06-17 sweep — Watch list (39 candidates demoted on adversarial verify)
+
+These passed Discovery but failed at least one of the 3-lens verify (existence/freshness/top-pick-impact).
+Keep tracking — re-evaluate next sweep if upstream activity resumes or top-pick changes.
+
+**Refuted on top-pick-impact (marginal vs current top):**
+- `the-convocation/twitter-scraper` (x-twitter) — Node port, no top-pick impact
+- `Altimis/Scweet` (x-twitter) — 3rd-tier scraper, dupe of twscrape's row
+- `nodriver` (web-scraping) — async CDP, overlaps Patchright
+- `scrapegraph-ai` (web-scraping) — NL extraction, covered by Firecrawl/Crawl4AI
+- `Apify Amazon Scraper actor` (ecommerce-arbitrage) — overlaps Rainforest/Oxylabs
+- `tinyfish-io/agentql-mcp` (ecommerce-arbitrage) — semantic-selector ergonomics, doesn't fix Keepa gap
+- `shopify-dev/storefront-mcp` (ecommerce-arbitrage) — no price history; DTC has low arbitrage spreads
+- `dexpaprika-mcp` (crypto-defi) — overlaps GeckoTerminal/CoinGecko
+- `Hyperliquid Python SDK` (crypto-defi) — single-venue, ccxt covers multi-venue
+- `heurist-mesh-mcp-server` (crypto-defi) — wrapper-over-wrappers
+- `Keywords Everywhere MCP` (seo-keywords) — DataForSEO dominates this slot
+- (plus ~20 more — see full sweep output for the complete list)
+
+**Refuted on freshness:**
+- `rebrowser-patches` (web-scraping) — 13 months stale
+- `brianellin/bsky-mcp-server` (reddit-community) — dormant since Apr 2025
+- `financial-datasets/mcp-server` (finance-markets) — >12 months stale
+- `Serper MCP variants` (seo-keywords) — both candidates stale
+
+## P2 trigger fired 2026-06-17
+
+`feedback-bump.py` detected ≥3 distinct domains with `barrier_found` outcome in the 90-day
+window — the ROADMAP `transport: brokerage` trigger is now ACTIVE, not reserved. See
+`companion-config-spec.md` §3.1 (brokerage enum value lands in spec v1.3) and
+`domains/web-scraping.md` for the activated brokerage entries.
+
 ## Twitter watchlist
 
 Curated set of X/Twitter accounts polled weekly during Discovery to surface new MCPs,
