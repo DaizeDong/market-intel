@@ -149,7 +149,7 @@ Hard rules applied during synthesis (see [SKILL.md](skills/market-intel/SKILL.md
 
 ## Keeping it current
 
-The matrix decays — APIs go paid, tools get acquired, prices move. The [refresh protocol](skills/market-intel/reference/refresh-protocol.md) re-sweeps each domain (one subagent per domain → structured diff → incremental shard edits → `CHANGELOG.md` + version bump). Default cadence quarterly; monthly for fast-moving domains (x-twitter, web-scraping, social-publishing, crypto-defi). Trigger manually with `刷新工具库` / `refresh the market-intel source matrix`, or wire a scheduled headless run (see [ROADMAP](ROADMAP.md)).
+The matrix decays — APIs go paid, tools get acquired, prices move. The [refresh protocol](skills/market-intel/reference/refresh-protocol.md) re-sweeps each domain (one subagent per domain → structured diff → incremental shard edits → `CHANGELOG.md` + version bump). **Default cadence is monthly** (v0.17.0); **weekly** for the fast-moving set (`crypto-defi`, `browser-automation`, `frontier-research`, `mcp-ecosystem`); **quarterly** is reserved for the Horizon scan (cross-domain new-territory discovery). Trigger manually with `刷新工具库` / `refresh the market-intel source matrix`, or wire a scheduled headless run (see [ROADMAP](ROADMAP.md)).
 
 ---
 

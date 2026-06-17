@@ -133,7 +133,7 @@ shard](skills/market-intel/reference/domains/consumer-price-compare.md) 路由�
 
 ## 保持更新
 
-矩阵会过时——API 转付费、工具被收购、价格变动。[刷新协议](skills/market-intel/reference/refresh-protocol.md) 会对每个方向重新扫一遍（每方向一个子任务 → 结构化 diff → 增量改分片 → `CHANGELOG.md` + 升版本）。默认每季度；快变方向（x-twitter、web-scraping、social-publishing、crypto-defi）每月。手动触发说 `刷新工具库`，或接一个定时 headless 运行（见 [ROADMAP](ROADMAP.md)）。
+矩阵会过时——API 转付费、工具被收购、价格变动。[刷新协议](skills/market-intel/reference/refresh-protocol.md) 会对每个方向重新扫一遍（每方向一个子任务 → 结构化 diff → 增量改分片 → `CHANGELOG.md` + 升版本）。**默认每月**(v0.17.0 起);**周扫**用于快变方向(`crypto-defi`、`browser-automation`、`frontier-research`、`mcp-ecosystem`);**季扫**保留给 Horizon scan 跨域趋势扫描。手动触发说 `刷新工具库`，或接一个定时 headless 运行（见 [ROADMAP](ROADMAP.md)）。
 
 ---
 
