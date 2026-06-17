@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Domains](https://img.shields.io/badge/Source%20Matrix-15%20domains-green?style=flat)](skills/market-intel/reference/sources-index.md)
 [![Tool docs](https://img.shields.io/badge/Tool%20docs-per--tool%20how--to-blue?style=flat)](skills/market-intel/reference/tools/index.md)
-[![Version](https://img.shields.io/badge/version-0.24.0-purple?style=flat)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.25.0-purple?style=flat)](CHANGELOG.md)
 [![Sister skill](https://img.shields.io/badge/sister-shopping--aggregator-yellow?style=flat)](https://github.com/DaizeDong/shopping-aggregator)
 
 [English](README.md) | [中文版](README_CN.md)
@@ -76,6 +76,20 @@ claude mcp add -s user arxiv 'uvx arxiv-mcp-server'
 接着说: `调研一下 AI agent 工具生态的趋势`。skill 会 fan-out 子任务用这三个源 —— 社区信号 + 趋势 + 论文 —— 出一份带引用的报告。无 key,无注册,30 秒出第一条发现。
 
 之后,看下面 60 秒演示了解**专用 MCP**(付费 X 数据、Bright Data、Keepa 等)—— 那些才是 skill 真正设计的高质量路线。
+
+---
+
+## 装完之后 —— 该读哪个?
+
+按目的选一条:
+
+| 你想做的… | 打开这个 |
+|---|---|
+| **直接用 skill**(让它自动触发跑研究) | 啥也不用读 —— skill 已加载,直接打研究问题。 |
+| **装第一个专用 MCP**(比如真 X 数据源 / 金融 API) | `skills/market-intel/reference/install-guide.md` —— L0 装机机制;然后 `skills/market-intel/reference/tools/<slug>.md` 看你从下面源矩阵挑的那个工具。 |
+| **建私有 companion config repo** 跨机持久化你的安装状态 + 密钥(>1 工具时推荐) | `skills/market-intel/reference/companion-config-repo.md` —— 概述 + 教程。然后 `companion-config-spec.md`(正式契约)和 `companion-config-hardening.md`(首次推送**前**做 GitHub 端锁定)。 |
+
+大多数人先走路径 2,工具/机器累积到 >1 后再走路径 3。
 
 ---
 
