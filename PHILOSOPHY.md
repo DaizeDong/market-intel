@@ -134,6 +134,27 @@ P5 hard limit:
 判 P5 是否被违反的命令: 一行 grep —— `grep -E "(import|load|from|require).*(discover|feedback-bump|l0_verify|verify_matrix|workflow_helpers)" SKILL.md`。
 任何命中都是 P5 违反。每次 refresh sweep cleanup pass 跑一次。
 
+### P5 amendment — config-side post-sweep automation (2026-06-17)
+
+`market-intel-config/scripts/config-bridge.py` is **allowed** to represent user identity
+(open signup pages, capture keys, configure tools) under these conditions:
+
+1. It runs in the **companion-config repo**, not the skill repo. The skill seam is
+   unchanged.
+2. **No silent batch identity actions.** Every tool that requires user identity
+   (signup / OAuth / key paste) **MUST** get explicit per-tool `y/N` consent in the
+   running session before any browser open or key capture.
+3. Tools that need NO user identity (public no-key MCPs: HN, GDELT, arXiv, etc.)
+   MAY be auto-configured without prompt — those carry no identity risk.
+4. **No auto-accept of paid plans.** Anything that incurs cost stays in
+   `pending_registrations.md` with a manual flag.
+5. All identity actions logged to `metrics/config-bridge.audit.jsonl` (when, what tool,
+   what action taken, user-consent y/N).
+
+This amendment widens P5 by one specific case (post-sweep config-bridge in the
+**companion repo**) without softening the skill-repo limit. The grep check above is
+unchanged: SKILL.md still must never import refresh-side scripts.
+
 ---
 
 ## The generative test · 生成式检验

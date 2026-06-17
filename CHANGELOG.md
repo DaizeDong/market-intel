@@ -1,5 +1,75 @@
 # Changelog
 
+## [0.24.0] — 2026-06-17
+
+Auto-configure new tools after a sweep. Closes the manual gap where ADDed tools required
+4-8 steps × N tools of human work on the config side.
+
+### New machinery
+
+- **`tools/sidecar_from_changelog.py`** (skill side): parses top CHANGELOG entry +
+  resolves each ADD/REPLACE slug against `tools/<slug>.md` + emits
+  `metrics/sweep-<version>.json` with structured fields (slug, domain, route, tier,
+  transport_hint, repo_url, signup_url, env_vars, install_cmd, auto_configurable_hint,
+  doc_path). Stdlib only.
+- **`market-intel-config/scripts/config-bridge.py`** (config side): consumes the
+  sidecar and configures each tool via uniform "try → pending" flow:
+  1. Scaffold templates (always safe local writes)
+  2. Register in `registry.json` with v1.3 SHOULD/MUST judgment fields populated
+  3. Attempt configure: pip install / claude mcp add / apply.py + verify
+  4. If env_vars non-empty OR install fails → append to `pending_registrations.md`
+     with reason
+  - Modes: `--sweep PATH [--dry-run] [--yes]` for batch, `--register SLUG` for
+    interactive browser-assisted handoff, `--list-pending`, `--clear-pending`.
+- **`release.ps1` step 5b** (NEW): auto-runs sidecar generation; includes the
+  sidecar JSON in the release commit. Post-push prompt offers a config-bridge
+  dry-run before the user runs the real config-bridge apply.
+
+### PHILOSOPHY P5 amendment
+
+P5 hard limit explicitly widens to allow **companion-repo** config-bridge to represent
+user identity (open signup pages, capture keys), under 5 rules:
+1. Runs in `market-intel-config` repo only, not skill repo
+2. Every identity action gets explicit per-tool y/N consent in the running session
+3. Public no-key tools (HN, GDELT, arXiv) MAY auto-configure (no identity risk)
+4. No auto-accept of paid plans — those stay in pending with manual flag
+5. All identity actions logged to `metrics/config-bridge.audit.jsonl`
+
+The skill-repo grep check is unchanged: SKILL.md still must never import refresh-side
+scripts. P5 amendment is one specific, audited carve-out.
+
+### Smoke test (v0.20.0 replay)
+
+`tools/sidecar_from_changelog.py --version 0.20.0` → wrote
+`metrics/sweep-0.20.0.json` with **11 adds resolved + 4 replaces + 4 unresolved**
+(unresolved are REPLACE-only entries with no tool doc, expected).
+
+`config-bridge.py --sweep ../market-intel/metrics/sweep-0.20.0.json --dry-run` →
+summary: 0 auto-configured (all ADDs in v0.20.0 had non-mechanical install_cmds —
+"see github URL" placeholders), 1 needs_signup (Instantly.ai), 1 needs manual
+`claude mcp add`, 9 flagged as "unrecognized install_cmd" → pending. **Correct
+behavior** — v0.20.0 ADDs were research catalogs (mcp-ecosystem) + paid SaaS
+(Instantly), not auto-installable MCPs. Honest pending log > silent false success.
+
+### Files touched
+
+- `PHILOSOPHY.md` (+P5 amendment §)
+- `tools/sidecar_from_changelog.py` (NEW)
+- `tools/release.ps1` (+step 5b sidecar gen + post-push config-bridge offer)
+- `CHANGELOG.md`, `.claude-plugin/plugin.json` (this entry + version bump)
+- `metrics/sweep-0.20.0.json` (NEW, test artifact)
+
+### What this gives you next sweep
+
+After a sweep lands (`release.ps1 -Version 0.24.x`):
+1. Sidecar JSON auto-generated + committed
+2. release.ps1 offers config-bridge dry-run before exit
+3. You run `python scripts/config-bridge.py --sweep <path>` once for batch config
+4. For each pending tool, run `--register <slug>` interactively when ready
+5. `pending_registrations.md` is the canonical "what I still need to configure" list
+
+Estimated savings on a 12-add sweep: ~30-60 manual mouse-clicks → 5-10 y/N prompts.
+
 ## [0.23.0] — 2026-06-17
 
 Project structure cleanup pass driven by 4-fork audit (structure / docs / scripts / process).
