@@ -313,6 +313,27 @@ get buried.
 7. **Skill `metrics/live-runs.jsonl`** — keep all entries; this is the feedback ledger and
    the refresh consumes it. Don't compress.
 
+### Downstream: companion-config sync (skip if no companion repo)
+
+When this skill is paired with a `market-intel-config` repo (per-machine inventory of
+installed + keyed tools), the matrix changes from the sweep need to be reconciled
+downstream — otherwise the config repo accumulates orphan secrets, dead MCP entries,
+and broken `installed:true` flags.
+
+After the sweep, run **`python scripts/sync-check.py`** in the config repo. It reports
+six drift buckets (A: matrix has it / config doesn't · B: config points to a missing
+skill doc / renamed-or-deleted · C: config points to a tombstoned doc · D: orphan secret
+· E: orphan MCP · F: `installed:true` with no secret file). Per-bucket action is in the
+config repo's `runbooks/sync-with-skill.md`.
+
+Key invariant: the link between the two repos is the config registry's
+`matrix_slug` field == the skill's `tools/<slug>.md` filename. If you rename a tool in
+the skill, you MUST update `matrix_slug` everywhere that pointed to the old name.
+
+This downstream sync is a separate concern from the cleanup pass above (cleanup =
+inside the skill; sync = skill→config drift) and should be done in the same session so
+the CHANGELOG can record both.
+
 ### What NOT to cut
 
 - Per-tool docs (`tools/<slug>.md`) regardless of count — they're load-on-demand.
@@ -330,6 +351,11 @@ In the sweep CHANGELOG entry, the cleanup pass gets its own section:
 - Merged: <a> → <b>
 - Compressed: CHANGELOG pre-<version>
 - PII stripped from: <N> READMEs
+
+### Downstream config sync (when companion repo present)
+- sync-check buckets cleared: B=<n>, C=<n>, D=<n>, E=<n>, F=<n>
+- Renames: <old> → <new>
+- Tombstoned in config: <slug> (code D-xxx)
 ```
 
 ## Trigger
