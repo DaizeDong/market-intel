@@ -17,6 +17,12 @@ Before running the release script, ensure all of these are true:
 - **Working tree clean**: `git status` shows no staged or unstaged changes.
 - **CHANGELOG entry pre-authored**: the top entry under `# Changelog` must be
   `## [<version>] - <today YYYY-MM-DD>` (ASCII `-` or em-dash both accepted).
+  - **Tip**: don't draft from scratch. Run
+    `python tools/changelog_draft.py --since v<prev>` (or `--since HEAD~N`
+    if no tags). It uses `claude -p` to draft an entry from `git log` + `git
+    diff --stat` matching the house style. **Output is a draft — review,
+    edit, paste into CHANGELOG.md, then commit.** Per
+    `runbooks/agent-in-scripts.md` Side B doctrine.
 - **`tools/verify_matrix.py` passes locally**: the deterministic matrix gate is green.
 - **`market-intel-config/scripts/sync-check.py` has no B-G drift**: bucket A
   (matrix-has-it, config-doesn't) is intentional skips and tolerated; B through G must
