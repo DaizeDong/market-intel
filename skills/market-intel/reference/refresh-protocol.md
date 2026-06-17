@@ -92,7 +92,7 @@ of its cadence tier.
 按「覆盖什么 / 怎么查 / 信号质量」三栏组织。每个域至少覆盖 A/B/C 三大类发现源（注册中心、GitHub、社区）；
 能替代付费的免费方案（route ④/③）要专门跑 D 类。
 
-**A. MCP 注册中心**（覆盖：现成可即插即用的 MCP server）
+**A. MCP 注册中心**（覆盖：现成可即插即用的 MCP server）—— 完整发现源 + 轮询节奏见 `domains/mcp-ecosystem.md`（meta-domain）。下表是 A 类最常用入口子集；新注册中心 / 新 IDE marketplace 出现时只更新 mcp-ecosystem shard，不必散到 13 个域。
 | 发现源 | 怎么查 | 信号质量 |
 |---|---|---|
 | smithery.ai | 按域关键词搜 + 看「新上架 / 安装量排序」 | 中。安装量是弱采用度信号，但有刷量；很多是套壳 |
@@ -125,6 +125,34 @@ of its cadence tier.
 |---|---|---|
 | GitHub Releases / CHANGELOG | 现有首选 + 候选仓库的 release 频率与最近一条 | 高。维护节奏的硬证据，停更/加速一眼可见 |
 | 官方 pricing / blog | 抓官网定价页 + 更新日志（验证价，不信 subagent 记忆） | 高（L1）。**barrier-route 漂移的权威来源**（API 转付费、免费层砍量） |
+
+**E. 高信号面 (auto-pollable)**（覆盖：单次 HTTP / RSS 即可拉到的高 S/N 候选源——v0.17.0 weekly tier 的主力）
+
+A–D 多需关键词组合 + 翻页 + 人读。E 类不同：**一次 HTTP/RSS 调用就能拿到结构化结果**，每条结果就是一个候选
+线索，零运营成本。理想搭档 = Cadence 的 weekly 轻量扫（不全量 verify，只往 `discovery-state.md` 的 inbox
+追加候选，留给月度 sweep 复核）。每个候选记录到 inbox 用统一格式：`{discovered_at, surface, name, url,
+signal(stars/score/points/dl-growth/upload-date), one_line_pitch}`，让月度 sweep 按 signal 排序处理。
+
+| 发现源 | 怎么查 | 阈值 | 信号质量 |
+|---|---|---|---|
+| **E1. PulseMCP newsletter RSS** | RSS：`https://www.pulsemcp.com/feed.xml`（若 404 退回 `https://www.pulsemcp.com/` 找 `<link rel="alternate" type="application/rss+xml">`；URL 未在 curl 下成功验证，**首次跑须人工确认**）| 任何新条目（已人工策展）| **最高**。已经过 PulseMCP 团队人工筛，每 token 的 MCP 发现密度最高；几乎无噪。Weekly 轮询。<br>**候选日志**：把每条 newsletter 提到的 MCP 单独写一行进 `discovery-state.md` inbox，标 `surface=E1` + 摘自哪期 |
+| **E2. GitHub Search velocity API** | `gh api 'search/repositories?q=created:>YYYY-MM-DD+stars:>50+topic:mcp-server'`；并行重复 `topic:claude-skill`、`topic:llm-agent` | **≥50 star 且 <90 天龄** | **高**。捕「天生即火」型仓库——纯靠 github.com/trending 看不到（trending 偏向已有粉丝基础的作者发新仓时短暂上榜）。每次 refresh sweep（含 weekly）都跑。<br>**候选日志**：每仓库一行 `surface=E2`，记录 `created_at + stars + repo` 三元组，月度 sweep 再 gh api 复核 star 真实性（防刷量） |
+| **E3. HF Spaces trending JSON** | HTTP GET：`https://huggingface.co/api/spaces?sort=trendingScore&limit=50`（JSON，无须鉴权）| `trendingScore > X`（初轮经验校准；建议从前 10% 切，跑 2 轮后定阈值）| **中高**。常在 GitHub trending **之前** 抓到新 agent demo / tool wrapper——HF demo 上线门槛比开源发布低。Weekly during hot-sweep。<br>**候选日志**：每 Space 一行 `surface=E3` + `trendingScore` + `task tag` + author |
+| **E4. npm download velocity API** | 候选 npm 包：`https://api.npmjs.org/downloads/range/last-week/<pkg>` + `last-month/<pkg>`，算 WoW 增长比 | **WoW ≥2x 且周下载绝对值 ≥500** | **高**（远强于 star）。下载量＝真实安装动作，比 star 抗刷量、抗营销得多。每次 refresh sweep。<br>**候选日志**：每包一行 `surface=E4` + `weekly_dl + WoW_ratio + npm_url`，触发条件后直接进 month-sweep 的必复检列表 |
+| **E5. Show HN / Launch HN scan** | Algolia HN API：`https://hn.algolia.com/api/v1/search_by_date?tags=show_hn&query=mcp+OR+agent+OR+scraper`（按时间排序，无需鉴权）| `points ≥ 30` **或** 顶层有实质讨论串（≥10 评论且非营销号）| **高**。Show HN 是**工具优先**的展示窗口（不是 think-piece），往往在 release 后 24–72h 出现，HN 评论区天然去炒作。Weekly during hot-sweep。<br>**候选日志**：每帖一行 `surface=E5` + `points + comment_count + repo/site_url`（HN 帖子里附的链接） |
+| **E6. AI YouTube early-demo handles** | YouTube 每频道 RSS：`https://www.youtube.com/feeds/videos.xml?channel_id=<UCID>`；订阅 4 个频道：Matthew Berman、AI Explained、Cole Medin、AI Coffee Break（首次跑需各自抓 UCID）| 任何提到 MCP / 新 agent / 新工具的新视频 | **中高**。这几位常在重要 release 后 24h 内出 demo——**「有人真试过」的最快信号**，能补 HN/Reddit 还没消化的真空期。Manual digest weekly。<br>**候选日志**：每视频一行 `surface=E6` + 频道 + `published_at` + 视频里点名的工具列表 |
+
+> **Polling automation note**：E1–E5 全部是**单次 HTTP / RSS 调用**，E6 是**每频道一次 RSS**——零运营成本、
+> 无需浏览器自动化、无登录态、无速率限制风险（HN/npm/HF/GitHub 均公开匿名可用）。这正是 v0.17.0 引入的
+> weekly 轻量扫节奏的理想匹配：一个 ~50 行的 cron 脚本即可把 6 个面全拉一遍，输出统一格式直接 append 进
+> `discovery-state.md` 的 inbox section。月度全量 sweep 再从 inbox 按 signal 排序消费——把 weekly 的「发现」
+> 与 monthly 的「核实」彻底解耦，发现端不再受 subagent 预算约束。
+
+**F. 中文发现源（CN surfaces）**——A–E 主扫英文圈，会系统性漏掉国产生态（DeepSeek 工具圈 / 即梦 / 可灵 /
+MiniMax / 抖音电商 / 小红书 / Qwen ecosystem）。每轮 sweep 按 `discovery-cn.md` 跑一遍 CN 源（即刻 / 36Kr AI /
+量子位 / 极客公园 / 十字路口播客；小红书 + DeepSeek 群仅 Horizon 季度扫）；候选写入 `volatile/discovery-state.md`
+的 **CN candidates** 子段，每条同时记录中文原名 + 最近的英文等价物/GitHub 链接以便与主候选池 dedup。完整清
+单、polling 方式、入选准则、CN-only 必跑域见 `discovery-cn.md`。
 
 ### D2. 多模态盲扫策略（multi-angle blind scan）
 
