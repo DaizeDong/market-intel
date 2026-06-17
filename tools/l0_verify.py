@@ -155,12 +155,27 @@ def _reverdict_github(entry: dict) -> dict:
             "reason": f"pushed_at {pa[:10]} within {STALE_MONTHS}mo"}
 
 def _check_github(url: str) -> dict:
-    m = re.match(r"https?://github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)", url)
-    if not m:
-        return {"verdict": "UNCERTAIN",
-                "evidence": "URL is not github.com/<owner>/<repo>",
-                "details": {"url": url}}
-    owner, repo = m.group(1), m.group(2)
+    # URL forms Discovery agents are known to write (E1 fix, edges fork 2026-06-17):
+    #   https://github.com/owner/repo
+    #   https://github.com/owner/repo.git
+    #   https://github.com/owner/repo/blob/main/X.py
+    #   https://github.com/owner/repo/tree/dev
+    #   https://github.com/owner/repo/issues/123
+    #   https://github.com/owner/repo/ (trailing slash)
+    #   git@github.com:owner/repo.git (SSH)
+    # All must collapse to {owner, repo} → 'repos/owner/repo' for gh api.
+    ssh_m = re.match(r"git@github\.com:([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)", url)
+    if ssh_m:
+        owner, repo = ssh_m.group(1), ssh_m.group(2)
+    else:
+        m = re.match(r"https?://github\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+)", url)
+        if not m:
+            return {"verdict": "UNCERTAIN",
+                    "evidence": "URL is not github.com/<owner>/<repo>",
+                    "details": {"url": url}}
+        owner, repo = m.group(1), m.group(2)
+    # Strip path/fragment/.git etc. from repo segment.
+    repo = repo.split("?")[0].split("#")[0].rstrip("/")
     if repo.endswith(".git"): repo = repo[:-4]
     slug = f"{owner}/{repo}"
 
@@ -244,7 +259,33 @@ def _check_web(url: str, registry: bool = False) -> dict:
                 else {"ok": False, "expires": None, "reason": "skipped"})
 
         if status is not None and 200 <= status < 300:
-            verdict, reason = "PASS", f"HTTP {status}"
+            # E3 (edges fork 2026-06-17): body content sniff — 200 OK does not mean alive.
+            # Pages can return 200 with "maintenance" / "domain parking" / "coming soon".
+            # Attempt cheap GET of first ~2KB; flag if known dead-page keywords appear.
+            try:
+                r_body = requests.get(url, headers=headers, timeout=HTTP_TIMEOUT,
+                                      allow_redirects=True, stream=True)
+                first_chunk = r_body.raw.read(2048, decode_content=True).decode(
+                    "utf-8", errors="replace").lower()
+                r_body.close()
+                # Distinctive substrings for dead/maintenance pages; restrictive enough not
+                # to false-positive on real product pages that mention these words in nav/footer.
+                dead_signals = [
+                    "site is under maintenance",
+                    "scheduled maintenance",
+                    "service is currently down",
+                    "this domain is for sale",
+                    "domain parking",
+                    "buy this domain",
+                    "coming soon, stay tuned",
+                ]
+                hit = next((s for s in dead_signals if s in first_chunk), None)
+                if hit:
+                    verdict, reason = "UNCERTAIN", f"HTTP {status} but body signals '{hit}'"
+                else:
+                    verdict, reason = "PASS", f"HTTP {status}"
+            except requests.exceptions.RequestException:
+                verdict, reason = "PASS", f"HTTP {status} (body sniff skipped)"
         elif status in (301, 302, 307, 308):
             verdict, reason = "UNCERTAIN", f"redirect chain unresolved ({status})"
         elif status == 404:
