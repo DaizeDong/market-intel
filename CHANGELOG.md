@@ -1,5 +1,83 @@
 # Changelog
 
+## [0.22.0] — 2026-06-17
+
+Defensive fixes + UX scaffolds + P5 hard limit. **Final code-side iteration before pivoting
+to real research-run usage** — 4-fork meta-audit (UX + P5 seam drift + real-run drought +
+adversarial edges) converged on "stop optimizing, use the system."
+
+### Edge fixes (E1-E3)
+
+- **E1 — L0 github URL path sanitization** (`tools/l0_verify.py`): `_check_github` now
+  strips `/blob/`, `/tree/`, `/issues/`, `?`-fragments, trailing `/`, `.git`, and accepts
+  SSH form `git@github.com:owner/repo.git`. Discovery agents write these forms in real
+  output; previously would have 404'd on first hit. Tested with `arctic_shift/blob/...`
+  and `git@github.com:SaseQ/discord-mcp.git` — both correctly resolve.
+- **E2 — feedback-bump.py BOM tolerance**: confirmed already `utf-8-sig` in v0.19.0; no
+  change needed.
+- **E3 — L0 web body content sniff**: 200 OK alone doesn't mean alive. New code reads
+  first ~2KB and flags 7 distinctive dead-page substrings ("site is under maintenance",
+  "domain parking", "buy this domain", etc.) → UNCERTAIN. Self-test 7/7 still passes.
+
+### P5 hard limit (PHILOSOPHY.md)
+
+seam-drift fork warned "PASS-but-fragile" — refresh infrastructure (~2000 LOC) is 7x larger
+than the SKILL.md seam (~270 LOC). To prevent silent drift toward "another deep-research
+clone," PHILOSOPHY.md now codifies a hard limit:
+
+1. `tools/*.py` and `scripts/*.py` only run during refresh (sweep), never on user query
+2. User research queries SHOULD use `deep-research` / `research-lit`; direct fan-out only
+   when a specific commercial MCP is connected
+3. EVAL gate (future) refresh-only
+4. shard-as-view compiler (future) markdown-render-only
+5. Any new code on user-query path requires explicit PHILOSOPHY.md revision — "never
+   quietly violated"
+
+Plus a one-line grep check for the limit, runnable during every cleanup pass.
+
+### UX scaffolds (UX1, UX2)
+
+- **README Quick Start** — 3-MCP bootstrap pack (mcp-hn + gdelt + arxiv, all free no-key)
+  for first-time users to trigger real research in 3 minutes without signups. Addresses
+  UX fork's #1 finding: "首次响应卡在多步安装泥潭, 30 分钟 install 训练营."
+- **CONTRIBUTING.md** (NEW) — single-page guide covering the 3 contribution patterns
+  (add tool / update tool / propose framework change), 4-file sync rule, verify_matrix
+  gate doctrine, C4 death-code conventions, naming rule, and a "where to read first"
+  ordered guide. Addresses UX fork's #2: "矩阵贡献者无入口."
+
+SKILL.md TL;DR restructure deferred — bigger surgery, higher judgment cost, defer until
+real-run data validates direction.
+
+### Real-run drought — the meta-finding
+
+`metrics/live-runs.jsonl` audit: 31 entries × 100% concentrated on 2 days, 0 entries from
+real research runs (all are dev meta-observations during setup). Step -1 is empty rotation,
+EVAL bet prerequisite (real outcome distribution) is unmet. The brokerage P2 trigger was
+fired by setup-noise, not genuine user-facing D-PRICE events.
+
+**Next step is NOT more optimization** — it's invoking `调研一下 <真实商业课题>` for an
+actual research task and letting the skill write the FIRST real `live-runs.jsonl` entries.
+Without this, EVAL gate / shard-as-view / cross-model verify are all designed for a feedback
+loop that doesn't exist.
+
+### Files touched
+
+- `tools/l0_verify.py` (E1 + E3, self-test 7/7 preserved)
+- `PHILOSOPHY.md` (P5 hard limit)
+- `README.md` (Quick Start section)
+- `CONTRIBUTING.md` (NEW)
+- `CHANGELOG.md`, `.claude-plugin/plugin.json` (this entry + version bump)
+
+### Net
+
+- Defensive fixes against 3 high-probability edge cases (E1 esp. — Discovery agents WILL
+  write these forms)
+- P5 anti-drift codified as machine-checkable rule
+- UX delta: bootstrap pack lowers cold-start friction; CONTRIBUTING removes new-contributor
+  guess work
+- Honest signal: optimization loop hit diminishing returns; next iteration depends on real-run
+  data the system doesn't have yet
+
 ## [0.21.0] — 2026-06-17
 
 Batches X + Y from the 6-fork optimization review. **Quality-preserving** efficiency wins
