@@ -37,9 +37,10 @@ python tools/verify_matrix.py
 This runs 7 layered checks: STRUCT / TOOLS / REPO / STAR / **GHACTIVE** / FRESH / DOCCOVER /
 REGISTRY / METH / COVER / CHURN+DELETE / CONST. Any BLOCK = fix it; WARN = explain it in the PR.
 
-Of particular note: **GHACTIVE** does `gh api repos/<o>/<r>` on every github.com URL you cite.
-404 → BLOCK, archived → BLOCK, >12 months stale → WARN. If you're citing a stale repo, mark it
-explicitly as `D-STALE` in its row (death-code doctrine — see `refresh-protocol.md` §C4).
+Of particular note: **GHACTIVE** is the deterministic activity gate. Full spec lives in
+`tools/verify_matrix.py` module docstring (canonical). Short version: every github.com URL
+in any shard gets a real `gh api` check; 404 / archived / >12mo stale all gate the PR. If
+you're knowingly citing a stale repo, mark it `D-STALE` in its row.
 
 ### Companion-config side (only if you're also installing the tool)
 
@@ -52,14 +53,9 @@ documents the tool; the companion-config tracks YOUR install state.
 
 - **Update**: edit the row + the tool doc. Bump `## Last verified: YYYY-MM`. Note in PR what
   changed (capability, pricing, repo URL).
-- **Remove**: per refresh-protocol C4 doctrine, do **NOT** silently delete. Mark the doc
-  `⚠ Avoid (dead, D-<code>)` with one of:
-  - `D-404` provider gone
-  - `D-PRICE` was free, now paid
-  - `D-STALE` unmaintained
-  - `D-TOS` ToS forbids
-  - `D-SUPERSEDED` replaced by another tool (name the successor)
-
+- **Remove**: do **NOT** silently delete. Mark the doc `⚠ Avoid (dead, D-<code>)`. The
+  5 death codes (D-404 / D-PRICE / D-STALE / D-TOS / D-SUPERSEDED) and per-code action
+  are documented canonically in `skills/market-intel/reference/refresh-protocol.md` §C4.
   Tombstoning preserves the row + a downstream signal for the next refresh sweep. Silent
   deletion breaks the monotonic-evolution guarantee (P3 in `PHILOSOPHY.md`).
 
