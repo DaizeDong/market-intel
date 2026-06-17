@@ -20,7 +20,15 @@ shard(s) in `domains/`. Do not read shards you didn't match.
 | ready-skills | "is there a ready skill for marketing/SEO/research" | coreyhaines31/marketingskills | `domains/ready-skills.md` |
 | **browser-automation** | API too costly/walled, want real-browser "act like human", free | playwright MCP + browser-use/crawl4ai | `domains/browser-automation.md` |
 | **consumer-price-compare** | "I'm buying X — find me the cheapest", coupon stack, 历史价, 比价, 凑单 | DaizeDong/shopping-aggregator (sister skill — delegates here) | `domains/consumer-price-compare.md` |
-| [mcp-ecosystem](domains/mcp-ecosystem.md) | meta-domain: where MCPs come from | (not a research target — feeds Discovery D1) | `domains/mcp-ecosystem.md` |
+### Meta-domains — NOT for triage (read by refresh-protocol Discovery only)
+
+These are infrastructure shards, not research targets. Triage logic MUST NOT route a user's
+research query here — they describe **where new tools come from**, not what data a topic needs.
+Listed for refresh-protocol Discovery D1 to consume.
+
+| meta-domain | purpose | shard |
+|---|---|---|
+| [mcp-ecosystem](domains/mcp-ecosystem.md) | where MCPs come from (registries, GitHub topic velocity, IDE markets, MCP Discord) — read by every Discovery sweep | `domains/mcp-ecosystem.md` |
 
 ### Reserved placeholders (v0.18.1) — domains the audit predicts will materialize in 2026-2027
 

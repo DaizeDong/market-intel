@@ -87,6 +87,19 @@ of its cadence tier.
 发现阶段读 `domains/<domain>.md` 拿到该域的**现有首选 + 现有条目 + 各条目的 barrier route（①②③④）**，
 作为对比基线；下面所有「替代升级」裁决都是相对这个基线做的。
 
+**Discovery agent MANDATORY reads (修正自 2026-06-17 prompt-bug)**: 每个 Discovery agent 在 fan-out 时
+MUST 读这 5 个文件,而不仅仅是它自己的 domain shard:
+
+1. `sources-index.md` — 矩阵地图,知道域间分工
+2. `domains/<this-agent-domain>.md` — 自己域的现状基线
+3. `refresh-protocol.md` D1-D5(本节及以下) — 发现规则
+4. **`discovery-cn.md`** — 中文源(没有它,所有 Discovery agent 都看不见 CN 工具生态)
+5. **`domains/mcp-ecosystem.md`** — 元域(MCP 来源汇总,避 15 个 agent 各自重派 MCP 注册中心)
+
+历史 lesson: 2026-06-17 sweep 的 16 个 Discovery agents 因为 prompt 写了 "Read these THREE files only",
+直接锁死了第 4-5 项 → CN 工具 0 命中,mcp-ecosystem 元域形同虚设。本错误已修复,任何未来的 Discovery
+workflow script MUST 包含上述 5 项 reads。
+
 ### D1. 发现源清单（discovery surfaces）
 
 按「覆盖什么 / 怎么查 / 信号质量」三栏组织。每个域至少覆盖 A/B/C 三大类发现源（注册中心、GitHub、社区）；
@@ -221,6 +234,43 @@ MiniMax / 抖音电商 / 小红书 / Qwen ecosystem）。每轮 sweep 按 `disco
 裁决产物交给核实/差分阶段：ADD/REPLACE 经独立核实后才落 shard；REPLACE 还需同步改 `sources-index.md` 的
 top pick 并在 CHANGELOG 写明「why replaced」。WATCH/SKIP 不动 shard，但维护在 refresh-protocol 旁的
 `volatile/discovery-state.md`（watchlist + reject log，带发现日期），让后续运行不重复造轮子、也能追踪成势。
+
+### D5b. Verify 管道结构（2026-06-17 修正,从 3-LLM-lens → L0 deterministic + L1 单 lens）
+
+**问题历史**: 2026-06-17 sweep 用 3 个 LLM lens (existence / freshness / top_pick_impact),BigGo 的
+13.5mo stale URL **三票全过**。同 model 同 cutoff 的 3 票投票相关性高,本质 ≈ 1.3 票。砍掉这设计。
+
+**新管道**:
+
+```
+candidate → L0 deterministic → (PASS / BLOCK / UNCERTAIN)
+                              ↓
+                        L1 single LLM lens (top-pick-impact only)
+                              ↓
+                        verdict: LAND / HOLD / BLOCK
+```
+
+**L0 deterministic check** (实现: `tools/l0_verify.py`,见 PHILOSOPHY §P4):
+- URL 类型自动分流: github / web / npm / pypi / web-registry
+- github: gh api repos/<o>/<r> — 404→BLOCK,archived→BLOCK,>12mo→BLOCK,else→PASS
+- web: HTTP HEAD + DNS + cert — 200→PASS,404→BLOCK,403 anti-bot + DNS+cert 健康→PASS,5xx/timeout→UNCERTAIN
+- npm/pypi: registry API — time.modified ≤12mo + 未 deprecated→PASS
+- web-registry (github.com/mcp, chatgpt.com/apps 等元页): anti-bot 403 + DNS+cert→PASS(此类注册页本身就 anti-bot,内容用其他证据)
+
+**L1 single LLM lens** (top-pick-impact ONLY):
+- 跳过若 L0=BLOCK
+- 判: 这候选真能在 `domains/<domain>.md` 现状基础上**移动 top pick 的指针**吗?边际 → refuted
+- prompt 默认 refuted unless positively confirm,但**仅在 LLM 必要时介入**
+
+**Verdict 合成**:
+- L0=BLOCK → final=BLOCK
+- L0=PASS + L1=confirmed → final=LAND
+- L0=PASS + L1=refuted/uncertain → final=HOLD
+- L0=UNCERTAIN + L1=confirmed → final=HOLD (don't auto-land on weak L0)
+- L0=UNCERTAIN + L1=refuted → final=HOLD
+
+**节省**: 18 个候选 18 LLM calls(单 lens),vs 旧版 18×3=54 calls。约 50% token,质量严于(BigGo 类 case
+不再漏)。验证回放报告:`metrics/r1-safety-replay-2026-06-17.md`。
 
 ### D6. 发现阶段返回的候选单结构（structured candidate unit）
 
@@ -359,7 +409,12 @@ get buried.
    still references them as live, fix to "Mode B fallback only".
 3. **CHANGELOG bloat** — once a major doctrinal pivot lands (e.g. Mode B → Mode A,
    spec v1 → v2), compress all pre-pivot entries to a single summary paragraph. Keep
-   only entries from the current doctrinal era as full text.
+   only entries from the current doctrinal era as full text. **Half-year archive
+   convention (added 2026-06-17 ops audit):** at each Cleanup pass, if `CHANGELOG.md` is
+   older than 6 months in any entry, move entries older than 6mo into
+   `CHANGELOG.archive/YYYY-Hn.md` and keep a one-line link in the main file. Prevents
+   the main file from passing ~5000 lines where GitHub's renderer gets slow + Discovery
+   agents have to load too much history. Hard cap on main file: 24 months of entries.
 4. **PII drift in committed READMEs** — grep `tools/*/README.md` for email patterns,
    phone numbers, real usernames. Per spec §4.3 these belong in
    `secrets/_credentials.env` + `secrets/_account-info.env`, not in committed docs.
@@ -370,7 +425,12 @@ get buried.
 6. **Per-tool docs with `## Last verified` >9mo old** — covered by the STALE gate, but
    the cleanup pass should triage: re-verify, deprecate, or tombstone (`⚠ Avoid (dead)`).
 7. **Skill `metrics/live-runs.jsonl`** — keep all entries; this is the feedback ledger and
-   the refresh consumes it. Don't compress.
+   the refresh consumes it. Don't compress. **Year-rollover convention (added 2026-06-17
+   ops audit):** at the first Cleanup pass each January, freeze last year's entries into
+   `metrics/live-runs.<YYYY>.jsonl` and start a fresh `live-runs.jsonl`. Step -1 looks at
+   `live-runs.jsonl` first (default 90-day window); historical year files are read only
+   when `--since` predates the current file's earliest entry. Prevents Step -1 scan cost
+   from creeping past 0.5s at 500+ entry sizes.
 8. **Auto-advance `## Last verified` from real runs** (v0.17.0) — at the END of cleanup
    pass, for every slug that appears in `live-runs.jsonl` since last refresh with
    `outcome: "verified"`, advance its `tools/<slug>.md` `## Last verified: YYYY-MM`
