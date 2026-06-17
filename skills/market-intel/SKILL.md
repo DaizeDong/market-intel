@@ -268,11 +268,22 @@ first (a source flagged `dead` in real use gets auto-nominated for the C4 deleti
   auth + usage + 踩坑. **Never read the whole `tools/` directory** (that breaks progressive loading
   — the whole point of per-tool docs is on-demand, one-at-a-time loading). The shard decides *which*
   tool; the tool doc is the *how-to*.
-- Read `reference/install-guide.md` (L0 install mechanics: prerequisites, MCP transport, secret
-  hygiene, Windows) when setting up any source. It points down to L1 (`pricing-install.md`, per
-  domain) and L2 (`tools/<slug>.md`, per tool).
-- Read `reference/volatile/pricing-install.md` only when actually guiding an install — prices and
-  commands there are time-stamped and may be stale; verify against the official site before use.
+- **Install docs are 3-tiered** (L0 / L1 / L2) — read top-down only when you actually need that
+  level of detail:
+  - **L0** = `reference/install-guide.md` — universal mechanics (prerequisites, MCP transport
+    choice on Windows, secret hygiene, BOM rules, Python install target). Read when bootstrapping
+    a fresh machine or onboarding any new tool category.
+  - **L1** = `reference/volatile/pricing-install.md` — per-domain, time-stamped exact commands +
+    current prices. Read when actually guiding an install for a specific domain. **Prices rot —
+    re-verify the live site before quoting.**
+  - **L2** = `reference/tools/<slug>.md` (judgment) and optionally `reference/tools/<slug>.auto.md`
+    (mechanical, spec §11.1 split). Read for the specific tool you're about to install/use. The
+    `.auto.md` sibling, when present, holds install command + auth + pricing snapshot — that's the
+    file to consult for "exactly what to type". The bare `<slug>.md` always exists; `.auto.md`
+    is opt-in per tool.
+  When a user asks "how do I install X", the right read order is **L2 first** (the auto.md if
+  present, else slug.md "Install" section), fall back to **L1** for time-stamped exact commands,
+  and only reach **L0** if a generic mechanic is unclear (PATH issue, BOM, env target).
 
 ## Maintenance
 
