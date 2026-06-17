@@ -7,11 +7,26 @@ months). Re-run this protocol periodically to keep `domains/`, `volatile/pricing
 
 ## Cadence
 
-- **Default: quarterly** (every ~3 months) full sweep.
-- **Faster (monthly)** for volatile domains: x-twitter, web-scraping, social-publishing, crypto-defi,
-  browser-automation (fast-moving OSS repos + frequent API-policy and pricing changes).
-- Also refresh opportunistically whenever you hit a dead/changed tool during a real research run —
-  fix that one shard immediately.
+**v0.17.0 overhaul** — the old "quarterly default" was a v0 residue from when the matrix had
+~30 entries. With 155+ tool docs and a `live-runs.jsonl` feedback loop, the default is now
+**monthly**. Quarterly is reserved for the broad horizon scan.
+
+- **Weekly** (light pass, Discovery angles ①②④ only — i.e. just discover-new, no full
+  re-verify, no shard rewrite): `crypto-defi`, `browser-automation`, `frontier-research`,
+  and the new meta-domain `mcp-ecosystem`. These move on a sub-week timescale (patchright →
+  camoufox → nodriver reactive-detection turnover happened inside 4 weeks; new MCP releases
+  daily). Weekly pass writes to `discovery-state.md` candidate inbox; full Verify & Diff
+  defers to the monthly sweep.
+- **Monthly** (full sweep): everything else. Was quarterly pre-v0.17.0.
+- **Quarterly**: only the **Horizon scan H1-H4** (cross-domain trend / new-territory /
+  new-research-angle discovery). Per-domain monthly already catches new tools in known
+  domains; horizon-scan is the place to catch new *categories* of work.
+- **Opportunistic**: a dead/changed tool encountered in a real run → fix that shard
+  immediately, log to `live-runs.jsonl`, do not wait for the cadence.
+
+If `live-runs.jsonl` flags a domain as `hot` in Step -1 of a sweep, that domain's
+Discovery budget for the sweep is **doubled** (more angles, more candidates) regardless
+of its cadence tier.
 
 ## Procedure (full sweep)
 
@@ -20,6 +35,22 @@ months). Re-run this protocol periodically to keep `domains/`, `volatile/pricing
 
 > 发现阶段的完整规则见下方 **「Discovery phase（前沿发现 + 质量筛选）」** 一节。它产出一个
 > 「候选池（candidate pool）」，核实/差分阶段只处理通过准入门槛的候选 + 旧条目复检。
+
+-1. **Step -1 — 消费 `metrics/live-runs.jsonl`（必跑，v0.17.0 起）。** 在 Horizon scan 之前,先读
+    `metrics/live-runs.jsonl` 自上次 refresh 以来的所有条目（按 `ts` 过滤;首次跑取最近 90 天）,按
+    `outcome` 分桶:
+
+    | outcome | 含义 | 该轮的处置 |
+    |---|---|---|
+    | `dead` | 真实使用中工具死了 | 该工具所在 domain 升级为 **hot**(本轮 Discovery 预算 ×2);该工具该轮必复检,八成进入 C4 墓碑 |
+    | `barrier_found` | 命中新付费墙/captcha/反爬 | 该 domain 升级为 hot;启动 D-PRICE / D-TOS / D-CAPTCHA 评估;考察是否到达"第 3 次同档 D-PRICE → 触发 ROADMAP brokerage transport"(P2 触发条件) |
+    | `coverage_gap` | 用户问题用现有矩阵答不上 | 该 domain 升级为 hot;Discovery 时显式带"为什么这个 gap 没被现存工具覆盖"角度 |
+    | `price_mismatch` | shard 排名/价格与真实不符 | 该工具该轮必复检 + 改 shard,但**该 domain 不一定升 hot**(可能是缓慢漂移) |
+    | `verified` | 工具被真实使用且工作 | **cleanup pass 阶段自动把对应 `tools/<slug>.md` 的 `## Last verified` 推进到当月** —— "诚实原则"下,真用过即算复检,STALE 闸门豁免 |
+    | `user_correction` (非 null) | 用户人工修正 | 最高权重信号,直接覆盖任何 shard 推断,该条目复检时 quote 用户原话 |
+
+    输出: hot-domains 清单(本轮 Discovery 这些 domain 的角度数 + 候选数翻倍)、必复检 slug 列表、
+    cleanup-auto-bump 清单。**此步是后续所有步骤的优先级输入**,不是装饰。
 
 0. **跑 Horizon scan**（全量扫必跑）：按下方 Horizon scan 规则做跨域趋势扫描，找**已有 13 域之外**的新
    territory / 新工具品类 / 新调研角度，产出新角度提案清单（FOLD 项并入下一步；NEW-DOMAIN/NEW-SKILL 进 PR）。
@@ -312,6 +343,13 @@ get buried.
    the cleanup pass should triage: re-verify, deprecate, or tombstone (`⚠ Avoid (dead)`).
 7. **Skill `metrics/live-runs.jsonl`** — keep all entries; this is the feedback ledger and
    the refresh consumes it. Don't compress.
+8. **Auto-advance `## Last verified` from real runs** (v0.17.0) — at the END of cleanup
+   pass, for every slug that appears in `live-runs.jsonl` since last refresh with
+   `outcome: "verified"`, advance its `tools/<slug>.md` `## Last verified: YYYY-MM`
+   line to the current month. Rationale: truthful "I just used it and it worked" is
+   stronger evidence than a scheduled re-check; the STALE gate WARN on >9mo unchecked
+   docs is exempted for these. Record the auto-bumped slug list in the sweep's
+   CHANGELOG entry under "Auto-verified from live-runs".
 
 ### Downstream: companion-config sync (skip if no companion repo)
 
