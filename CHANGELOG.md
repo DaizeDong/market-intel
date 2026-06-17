@@ -1,5 +1,97 @@
 # Changelog
 
+## [0.21.0] — 2026-06-17
+
+Batches X + Y from the 6-fork optimization review. **Quality-preserving** efficiency wins
+plus bug fixes plus 5-year ops伏笔. R1 verified safe via 18-candidate replay workflow
+before landing (0 real regressions; 2 anti-bot edge cases fixed in L0 design first).
+
+### B1 — Discovery prompt bug (CN sources + mcp-ecosystem were locked out)
+
+The 2026-06-17 sweep's Discovery agents had a prompt that said "Read these THREE files
+only" → discovery-cn.md + mcp-ecosystem.md were mechanically excluded from every agent's
+context. 0 CN tools surfaced, mcp-ecosystem element was unread despite existing.
+**Fix:** `refresh-protocol.md` D1 prelude now mandates 5 reads (sources-index + own
+domain + protocol D1-D5 + discovery-cn + mcp-ecosystem). Every future workflow script
+MUST include these per the prelude.
+
+### R1 — Verify pipeline collapsed from 3-LLM-lens to L0 deterministic + L1 single lens
+
+The 3-LLM lens (existence / freshness / top-pick-impact) was redundant: same model,
+same cutoff, votes correlated. BigGo's 13.5mo stale URL passed all 3. Replaced with:
+- **L0 deterministic** (`tools/l0_verify.py`, 473 lines, self-tested 7/7): gh-api +
+  HTTP + DNS + cert + npm/pypi registry per URL type. Anti-bot 403 with healthy DNS+cert
+  → PASS, not BLOCK (protects live SaaS like Publora). Web-registry mode handles known
+  registry pages (chatgpt.com/apps, github.com/mcp).
+- **L1 single LLM lens** (top-pick-impact only): only judges actual top-pick movement,
+  skipped if L0=BLOCK.
+
+**Replay verification** (`metrics/r1-safety-replay-2026-06-17.md`): 18 candidates
+(15 LAND + 1 HOLD + 2 known-stale) replayed through new pipeline. 0 real regressions
+(4 false-positives were already-landed entries — L1 correctly refused re-landing).
+3 actual improvements (BigGo, arxiv-sanity-lite, kukapay/funding-rates all correctly
+BLOCKed at L0 where the old 3-lens missed them).
+
+**Saving**: 18 candidates × 3 lens = 54 LLM calls → 18 LLM calls + 18 deterministic checks.
+~50% workflow tokens / ~27% wall-clock at no quality loss.
+
+### R2 + R3 — workflow_helpers.md
+
+- **PREAMBLE constant** (~520 tokens, prompt-cache-safe): shared fixed-text prefix for
+  Discovery agents. Anthropic prompt cache deduplicates → 16 agents × 144k input savings
+  per sweep.
+- **retryAgent() wrapper**: handles schema-validation retries + typed failure tagging.
+  Honest finding: backoff-with-sleep is NOT possible in workflow scripts (no setTimeout
+  in deterministic runtime). Real rate-limit fix remains BATCH_SIZE=4.
+
+### O1–O4 — 5-year伏笔 (5-minute setup each)
+
+- `~/.claude/scripts/cleanup-workflows.ps1` — 30d hot / 30-90 gzip / >90 prune
+- CHANGELOG half-year archive convention written into cleanup pass (24mo main file cap)
+- `metrics/live-runs.YYYY.jsonl` year-rollover written into cleanup pass
+- GITHUB_TOKEN check: confirmed `gh api` already uses gh auth's 5000/hour limit
+
+### D1 — tools/<slug>.md naming规则化
+
+SHOULD rule added to spec §3.1: pure tool name unless owner is needed for disambiguation.
+- `arctic_shift.md` (unique brand) — no owner prefix
+- `saseq-discord-mcp.md` (`discord-mcp.md` already taken by elyxlz) — owner needed
+- `antigravity-awesome-skills.md` (unique brand, sickn33's fork) — no owner prefix.
+  Existing index.md link fixed; missing file created.
+
+### D2 — v1.2 judgment fields REQUIRED-on-new-entries
+
+`evidence_url` + `ban_risk` + `model_tier` are MUST on entries added after v1.3. Existing
+entries don't backfill (P3 monotonic — forward discipline > tokens spent rewriting history).
+
+### D3 — mcp-ecosystem moved out of triage
+
+`sources-index.md` now has a separate "Meta-domains — NOT for triage" section.
+`SKILL.md` Step 1 adds explicit "skip meta-domains during triage" rule. Prevents future
+agents/users from accidentally routing research queries into infrastructure shards.
+
+### Companion-config-spec → v1.3 (no change from v0.20.0 — brokerage active)
+
+### Files touched
+
+- `tools/l0_verify.py` (NEW, 473 lines, 7/7 self-test)
+- `tools/workflow_helpers.md` (NEW, 216 lines, R2+R3 doctrine)
+- `tools/antigravity-awesome-skills.md` (NEW, was broken link in index.md)
+- `~/.claude/scripts/cleanup-workflows.ps1` (NEW, ops伏笔)
+- `reference/refresh-protocol.md` (5-mandatory-reads, D5b new pipeline doctrine, cleanup pass §2 + §7 updates)
+- `reference/companion-config-spec.md` (slug naming rule + v1.2 fields REQUIRED-on-new)
+- `reference/sources-index.md` (meta-domain separation)
+- `skills/market-intel/SKILL.md` (Step 1 skip-meta rule)
+- `reference/tools/index.md` (antigravity link fix)
+
+### Net
+
+- Token efficiency: ~50% per sweep (R1 only; R2 adds further savings when next sweep uses PREAMBLE).
+- Quality: strictly improved (L0 catches what LLM 3-lens missed; L0 self-test passing on 7 representative URL types).
+- Discovery coverage: CN sources + mcp-ecosystem unlocked.
+- Operational: 4 伏笔 land before they hurt.
+- Spec hygiene: naming规则化 + new-entry field MUSTs + meta-domain separation.
+
 ## [0.20.0] — 2026-06-17
 
 **Full refresh sweep landed.** First end-to-end execution of the v0.17–v0.19 pipeline

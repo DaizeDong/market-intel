@@ -63,6 +63,14 @@
     "repo": "Eronred/aso-skills",
     "verdict": "PASS"
   },
+  "Funmula-Corp/BigGo-MCP-Server": {
+    "archived": false,
+    "checked_at": "2026-06-17T05:28:15.799813",
+    "pushed_at": "2025-04-30T09:35:06Z",
+    "reason": "stale: pushed_at=2025-04-30 (~13mo)",
+    "repo": "Funmula-Corp/BigGo-MCP-Server",
+    "verdict": "BLOCK"
+  },
   "Future-House/paper-qa": {
     "archived": false,
     "checked_at": "2026-06-17T04:46:23.658027",
