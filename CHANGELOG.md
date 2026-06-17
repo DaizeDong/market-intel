@@ -1,5 +1,79 @@
 # Changelog
 
+## [0.26.0] — 2026-06-17
+
+First `claude -p` integrations + the doctrine that draws the line. Up to now
+every script in this repo has been 100% deterministic (gh-api, HTTP, regex,
+file IO). This release adds LLM helpers in two places where they save real
+human time — and explicit rules about where they CAN'T go.
+
+### NEW machinery — Side B (draft helpers, never gates)
+
+- **`tools/changelog_draft.py`** (~340 LOC, stdlib + subprocess): drafts a
+  CHANGELOG entry by piping `git log` + `git diff --stat` + previous CHANGELOG
+  entry (for house-style) to `claude -p`. **Output is a draft to stdout/file
+  — never auto-writes to CHANGELOG.md.** Footer reminds user to review per
+  PHILOSOPHY P4. CLI: `python tools/changelog_draft.py --since v<prev>` or
+  `--since HEAD~N`.
+- **`tools/incident_helper.py`** (~370 LOC, stdlib + subprocess):
+  semi-automatically fills the 6-step `runbooks/fix-broken-tool.md` runbook.
+  Accepts NL description OR structured flags, extracts via `claude -p`,
+  produces all 6 artifacts (live-runs JSON / D-code / shard FROM-TO / commit
+  message). `--apply` opt-in per step; default is dry-print only.
+
+### NEW doctrine
+
+- **`runbooks/agent-in-scripts.md`** (~180 lines): defines the three sides:
+  - **Side A — fail-closed gates (LLM FORBIDDEN)**: `verify_matrix.py`,
+    `l0_verify.py`, `check_doc_drift.py` fail-level checks, `check_p5_drift.py`,
+    `sync-check.py` 7 buckets, `sidecar_from_changelog.py` primary slug match.
+    P4 violation to add LLM here — model talks past the gate.
+  - **Side B — draft & helper scripts (LLM ALLOWED)**: this release's two new
+    scripts plus future drafts. Output is reviewed by human before any effect.
+  - **Side C — soft warn-level alerts (LLM TOLERATED)**: PHILOSOPHY-amendment
+    stale alerts, ambiguous outcome classification, README narrative-vs-reality
+    fork. Never blocks; human decides.
+- Three questions to ask before adding LLM to any script:
+  1. Does it block anything? (yes → no)
+  2. Is output applied directly or reviewed first? (direct → no)
+  3. Could hallucination cause silent matrix degradation? (yes → no)
+
+### release.md
+
+Added "Tip" pointing at `changelog_draft.py` for first-time CHANGELOG drafting.
+`release.ps1` itself stays deterministic — no LLM call inside the gate
+sequence per Side A doctrine.
+
+### Invocation pattern (canonical)
+
+For Python scripts:
+
+```python
+result = subprocess.run(
+    ["claude", "-p", "--output-format", "text"],
+    input=prompt, capture_output=True, text=True, encoding="utf-8", timeout=120,
+)
+```
+
+Piping the prompt via stdin avoids Windows CMD's 8191-char arg limit. Confirmed
+working on prompts up to ~5KB in both helpers.
+
+### What this prevents
+
+Without the doctrine, the slippery slope is "let's have verify_matrix use
+claude -p to be smarter about ambiguous repos" → LLM hallucinates a stale
+URL "looks fine" → matrix silently degrades, gate has been talked past. The
+doctrine makes that conversation short: verify_matrix is Side A, the answer
+is no.
+
+### Files touched
+
+- `tools/changelog_draft.py` (NEW)
+- `tools/incident_helper.py` (NEW)
+- `runbooks/agent-in-scripts.md` (NEW)
+- `runbooks/release.md` (+changelog_draft tip)
+- `CHANGELOG.md`, `.claude-plugin/plugin.json` (this entry + version bump)
+
 ## [0.25.0] — 2026-06-17
 
 Doc-drift gate + entropy doctrine. Closes the silent failure mode where
