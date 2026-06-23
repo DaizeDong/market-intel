@@ -45,3 +45,5 @@ Minimal flow: find the actor (e.g. an Amazon-product or tweet-scraper actor) →
 **Recommended pattern**: pin a known actor ID and call it directly over open-ended store search (faster, fewer tools, predictable cost).
 
 An actor run is **async** (start run → poll status → read dataset) — not an instant return; budget for the poll latency.
+
+## Last verified: 2026-06

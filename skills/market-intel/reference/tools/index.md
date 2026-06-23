@@ -31,6 +31,7 @@ directory** — that breaks progressive loading. Install mechanics overview: `re
 - ★ [Bright Data](brightdata.md) — ② · strongest barrier-breaker, free 5k/mo no card
 - [DataForSEO](dataforseo.md) — ② · cheap large-scale SERP/keywords/backlinks
 - [Apify](apify.md) — ② · 3000+ prebuilt scraper actors
+- [Apify (auto)](apify.auto.md) — ② · mechanical install/auth/usage companion to apify.md
 - [Patchright](patchright.md) — ④ · undetected-Playwright, passes Cloudflare/DataDome (free)
 - [crawl4ai](crawl4ai.md) — ③ · zero-cost self-host LLM crawler (primary doc under browser-automation)
 
@@ -49,6 +50,7 @@ directory** — that breaks progressive loading. Install mechanics overview: `re
 - ★ [SEC EDGAR MCP](sec-edgar-mcp.md) — ① · free no-key 13M+ filings, XBRL, insider
 - ★ [FRED MCP](fred-mcp.md) — ① · free 800k+ macro series
 - [Polygon.io](polygon.md) — ① · realtime + 20yr history + WebSocket
+- [Polygon.io (auto)](polygon.auto.md) — ① · mechanical install/auth/usage/pricing companion to polygon.md
 - [Finnhub](finnhub.md) — ① · fundamentals + alt-data sentiment, free 60/min
 - [Twelve Data](twelve-data.md) — ① · multi-asset realtime, free 800/day
 - [Financial Modeling Prep](fmp.md) — ① · financials/valuation, free 250/day
@@ -180,6 +182,7 @@ directory** — that breaks progressive loading. Install mechanics overview: `re
 - [weibo-crawler](weibo-crawler.md) — ④ · 微博 user/post crawler
 - [agent-browser](agent-browser.md) — ④ · token-efficient Rust browser-agent CLI (.claude-plugin)
 - [camofox-browser](camofox-browser.md) — ④ · fingerprint-spoofing browser on Camoufox (free)
+- [botasaurus](botasaurus.md) — ④ · anti-detection Python scraping framework (omkarcloud scrapers' base)
 
 ## ready-skills
 - ★ [coreyhaines31/marketingskills](marketingskills.md) — — · ~40 install-and-go marketing skills
