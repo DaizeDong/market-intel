@@ -1,10 +1,10 @@
 {
  "note": "Authoritative machine-readable tool registry. Every market-intel tool (repo + SaaS + lib) appears here exactly once. The gate (REGISTRY check) enforces registry <-> tools/index.md <-> tools/*.md three-way consistency, so NO tool — including non-GitHub SaaS — can lose its doc or fall out of tracking. Adding/removing a tool is an atomic op across shard + index + doc + this registry (refresh-protocol R1). Regenerate via the snippet in CHANGELOG 0.10.2.",
- "count": 151,
+ "count": 168,
  "by_kind": {
-  "repo": 89,
-  "saas": 59,
-  "lib": 3
+  "repo": 96,
+  "saas": 68,
+  "lib": 4
  },
  "tools": [
   {
@@ -1213,6 +1213,142 @@
    "kind": "repo",
    "repo": "Infatoshi/x-mcp",
    "domain": "x-twitter",
+   "top_pick": false
+  },
+  {
+   "slug": "academic-research-skills",
+   "name": "Imbad0202/academic-research-skills",
+   "kind": "repo",
+   "repo": "Imbad0202/academic-research-skills",
+   "domain": "ready-skills",
+   "top_pick": false
+  },
+  {
+   "slug": "antigravity-awesome-skills",
+   "name": "sickn33/antigravity-awesome-skills",
+   "kind": "repo",
+   "repo": "sickn33/antigravity-awesome-skills",
+   "domain": "ready-skills",
+   "top_pick": false
+  },
+  {
+   "slug": "apify.auto",
+   "name": "Apify — auto (install/auth/usage companion)",
+   "kind": "saas",
+   "repo": null,
+   "domain": "web-scraping",
+   "top_pick": false
+  },
+  {
+   "slug": "arctic-shift",
+   "name": "ArthurHeitmann/arctic_shift",
+   "kind": "repo",
+   "repo": "ArthurHeitmann/arctic_shift",
+   "domain": "reddit-community",
+   "top_pick": false
+  },
+  {
+   "slug": "aso-skills",
+   "name": "Eronred/aso-skills",
+   "kind": "repo",
+   "repo": "Eronred/aso-skills",
+   "domain": "ready-skills",
+   "top_pick": false
+  },
+  {
+   "slug": "barker",
+   "name": "Barker (barker.money)",
+   "kind": "saas",
+   "repo": null,
+   "domain": "crypto-defi",
+   "top_pick": false
+  },
+  {
+   "slug": "botasaurus",
+   "name": "omkarcloud/botasaurus",
+   "kind": "lib",
+   "repo": "omkarcloud/botasaurus",
+   "domain": "browser-automation",
+   "top_pick": false
+  },
+  {
+   "slug": "chatgpt-apps-directory",
+   "name": "ChatGPT Apps Directory (chatgpt.com/apps)",
+   "kind": "saas",
+   "repo": null,
+   "domain": "mcp-ecosystem",
+   "top_pick": false
+  },
+  {
+   "slug": "github-mcp-registry",
+   "name": "GitHub MCP Registry (github.com/mcp)",
+   "kind": "saas",
+   "repo": null,
+   "domain": "mcp-ecosystem",
+   "top_pick": false
+  },
+  {
+   "slug": "gtm-agents",
+   "name": "gtmagents/gtm-agents",
+   "kind": "repo",
+   "repo": "gtmagents/gtm-agents",
+   "domain": "ready-skills",
+   "top_pick": false
+  },
+  {
+   "slug": "instantly-mcp",
+   "name": "Instantly.ai MCP (official hosted)",
+   "kind": "saas",
+   "repo": null,
+   "domain": "leadgen-crm",
+   "top_pick": false
+  },
+  {
+   "slug": "lmarena",
+   "name": "LMArena (arena.ai)",
+   "kind": "saas",
+   "repo": null,
+   "domain": "frontier-research",
+   "top_pick": false
+  },
+  {
+   "slug": "openbb-mcp",
+   "name": "OpenBB-finance/OpenBB MCP",
+   "kind": "repo",
+   "repo": "OpenBB-finance/OpenBB",
+   "domain": "finance-markets",
+   "top_pick": false
+  },
+  {
+   "slug": "outscraper-google-maps",
+   "name": "Outscraper Google Maps",
+   "kind": "saas",
+   "repo": null,
+   "domain": "leadgen-crm",
+   "top_pick": false
+  },
+  {
+   "slug": "polygon.auto",
+   "name": "Polygon (Massive) — auto (install/auth/usage companion)",
+   "kind": "saas",
+   "repo": null,
+   "domain": "finance-markets",
+   "top_pick": false
+  },
+  {
+   "slug": "saseq-discord-mcp",
+   "name": "SaseQ/discord-mcp",
+   "kind": "repo",
+   "repo": "SaseQ/discord-mcp",
+   "domain": "reddit-community",
+   "top_pick": false
+  },
+  {
+   "slug": "stackexchange",
+   "name": "Stack Exchange API (raw REST)",
+   "kind": "saas",
+   "repo": null,
+   "domain": "reddit-community",
    "top_pick": false
   }
  ]
