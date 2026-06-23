@@ -23,3 +23,6 @@ metrics/l0-cache.json
 # Python bytecode
 __pycache__/
 *.pyc
+
+# Console availability snapshot — TTL probe state, no git history
+metrics/availability-cache.json
