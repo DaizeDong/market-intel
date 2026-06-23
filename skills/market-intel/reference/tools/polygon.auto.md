@@ -44,3 +44,5 @@ Minimal patterns:
 - Realtime: open a WebSocket subscription for live trades on a symbol (paid realtime tier only)
 
 Free-tier batch hint: 5 req/min means a tight loop trips 429 immediately. Insert ≥12s sleep between calls or pre-batch ticker lists into single endpoints where supported.
+
+## Last verified: 2026-06
