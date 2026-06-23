@@ -357,12 +357,22 @@ def probe_companion():
         if t.get("slug"):
             by_slug.setdefault(t["slug"], t)
     # does a secret file exist for this slug? (presence only — never read contents)
+    # Secrets are named by the CONFIG slug; the matrix carries a different (often -mcp-suffixed)
+    # slug. Map config slug -> matrix_slug so a key credits the matrix-side tool too — otherwise
+    # an already-keyed tool reads as needs-key purely from a suffix mismatch. Skip _-prefixed
+    # account/credential files (not per-tool secrets).
     secrets_dir = os.path.join(path, "secrets")
     have_secret = set()
+    slug_to_matrix = {t["slug"]: t.get("matrix_slug") for t in reg.get("tools", []) or []
+                      if isinstance(t, dict) and t.get("slug")}
     if os.path.isdir(secrets_dir):
         for fn in os.listdir(secrets_dir):
-            if fn.endswith(".env"):
-                have_secret.add(fn[:-4])
+            if fn.endswith(".env") and not fn.startswith("_"):
+                cfg_slug = fn[:-4]
+                have_secret.add(cfg_slug)
+                ms = slug_to_matrix.get(cfg_slug)
+                if ms:
+                    have_secret.add(ms)
     return {"present": True, "path": path, "tools": by_slug, "have_secret": sorted(have_secret),
             "schema_version": reg.get("schema_version")}
 
