@@ -95,7 +95,8 @@ if os.path.isdir(TOOLS_DIR):
         tools_idx = ""
     else:
         tools_idx = read(TOOLS_INDEX)
-    idx_slugs = set(re.findall(r"\(([a-z0-9][a-z0-9-]*)\.md\)", tools_idx))
+    # allow a dot inside the slug so companion "auto" docs (e.g. apify.auto.md) are extractable
+    idx_slugs = set(re.findall(r"\(([a-z0-9][a-z0-9.-]*?)\.md\)", tools_idx))
     fs_slugs = {f[:-3] for f in os.listdir(TOOLS_DIR) if f.endswith(".md") and f != "index.md"}
     miss_docs = idx_slugs - fs_slugs
     orphan_docs = fs_slugs - idx_slugs
@@ -115,7 +116,11 @@ all_text = ("\n".join(shard_text.values()) + "\n" + (read(PRICING) if os.path.ex
 # HIGH-CONFIDENCE repos (404 → hard BLOCK): explicit github.com URLs + star-annotated slugs.
 # Strip a trailing ".git" — a `git clone https://github.com/o/r.git` URL is the same repo as o/r;
 # without this the literal "o/r.git" token 404s on the API (false positive).
-def _strip_git(r): return r[:-4] if r.endswith(".git") else r
+# Also strip trailing sentence punctuation the slug regex greedily swallows ("OpenBB-finance/OpenBB."
+# at end of a sentence captures the period) — that lone dot 404s on the API (false positive).
+def _strip_git(r):
+    r = r.rstrip("./,);:")          # drop trailing sentence punctuation (incl. a stray ".")
+    return r[:-4] if r.endswith(".git") else r
 repo_set = {_strip_git(r) for r in REPO_RE.findall(all_text)}
 repo_set |= {_strip_git(m.group(1)) for m in STAR_LINE_RE.finditer(all_text)}
 repos = sorted(r for r in repo_set if not r.endswith(".md") and r.count("/") == 1 and "github.com" not in r)
