@@ -25,6 +25,8 @@ From the disconfirmation subagent. For arbitrage/investing also list **execution
 search was run and found nothing — not proof of no risk.
 
 ## Coverage gaps
+- **Tool coverage:** invoked <N> / <M> available in scope (per domain + total) at scale `<scan|standard|deep|exhaustive>`. Makes "comprehensive" verifiable, not asserted.
+- **Uncovered tools (explicit gaps, not silent skips):** <tool — reason: cold-mcp / missing-key / unreachable>
 - **Not covered / insufficient data:** <dimensions that returned empty/failed>
 - **Configure for deeper data:** "<domain> would be stronger with <source> — install via
   `claude mcp add ...` (then reconnect)."
