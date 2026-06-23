@@ -59,16 +59,35 @@ section above.
 only. NEVER route a user research query to them. If a topic's only match is a meta-domain, the
 topic is not in market-intel's scope (route to plain web search instead).
 
-Pick a depth budget and hold to its hard caps:
+**Pick an invocation SCALE explicitly.** The single biggest failure mode here is
+**under-calling** — too few tools, too few query angles → incomplete intel. The user may name
+a tier or give numbers; **when in doubt for any genuine research ask, default to `deep`, not
+`standard`** (reserve `standard`/`scan` for quick scoped checks).
 
-| depth | max subagents | max rounds | max verifiers | use when |
+| scale | domains | tools / domain | query angles / tool | stop condition |
 |---|---|---|---|---|
-| quick | 3 | 1 | 1 | scoped question, one domain |
-| standard (default) | 6 | 2 | 3 | typical multi-angle research |
-| deep | 12 | 3 | 5 | explicit "comprehensive / thorough / 全面" |
+| `scan` | 1 top | 1 top tool | 1 | fixed |
+| `standard` | routed | 2–3 | 2 | fixed |
+| `deep` (default for research / "comprehensive / 全面") | all relevant | **ALL available in domain** | 3+ | cross-checked to ≥2 independent sources |
+| `exhaustive` | all relevant | **ALL available, no omission** | multi-angle until saturated | **SATURATION** — stop only when newly-called tools add no new facts |
 
-When unsure, default to `standard`. Maintain a running count; **when a cap is hit, stop fanning
-out and move to synthesis.** Never let "comprehensive" mean unbounded.
+Numeric override (user may specify directly): `scale = {domains: all|N, tools_per_domain: all|N,
+queries_per_tool: M, stop: saturate|fixed}`.
+
+**Three iron rules (`deep` & `exhaustive`):**
+1. **No sampling.** Every *available* tool in a routed domain MUST be called — never a subset.
+   A tool you cannot reach (cold MCP / missing key) is an **explicit gap** in the report, never
+   a silent skip. (This is the "失败 = 显式 gap" guardrail applied to coverage.)
+2. **Saturate, don't fixed-stop.** At `exhaustive`, keep fanning out across domains/tools until
+   additional calls yield no new facts. "Comprehensive" means coverage-saturated — not "I hit N
+   subagents." Use the combiner layer (Step 5) so wide fan-out doesn't blow context.
+3. **Report coverage.** Every run states `tools invoked / tools available in scope` (per domain
+   + total) and lists uncovered tools — so "comprehensive" is **verifiable, not asserted**.
+
+**Absolute ceiling (cost guard, NOT a low default):** a hard cap of ~40 tool-calls / ~6 rounds
+per run prevents true runaway (P5: no *infinite* fan-out). If `exhaustive` would exceed it,
+surface the projected scope + the uncovered remainder as an **explicit gap** — never silently
+truncate. Raising the ceiling is a deliberate, stated choice, not a default.
 
 ### Step 2 — Detect available sources (do NOT guess by tool name)
 
