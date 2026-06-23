@@ -19,7 +19,9 @@ unusual options flow, 股票/期权/基本面. (Tools only — not investment ad
 juggling with OpenBB MCP** (single endpoint for all of them). Pro → Massive (ex-Polygon). Execution
 → Alpaca (paper trading first, MCP holds key + enforces risk policy).
 
-**Dead/avoid:** IEX Cloud (shut down 2024-08). Alpha Vantage free = 25/day (worst). "Free realtime"
-is usually 15-min delayed. Auto-trading MUST have guardrails + small test sizing.
+**Dead/avoid:** **IEX Cloud** — officially retired **2024-08-31** (announced 2024-05-31; <2% of IEX
+revenue, loss-making); migrate to Intrinio (their referral), SEC EDGAR, Finnhub, or Massive. Alpha
+Vantage free = 25/day (worst free tier in class). "Free realtime" is usually 15-min delayed.
+Auto-trading MUST have guardrails + small test sizing.
 
 **Install guidance:** `reference/volatile/pricing-install.md` → finance-markets.

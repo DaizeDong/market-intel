@@ -30,5 +30,14 @@ post/write at scale. See `browser-automation.md` for the general browser route.
 **Install guidance:** see `reference/volatile/pricing-install.md` → x-twitter. Remember a freshly
 added MCP needs session reconnect before use.
 
-**Avoid (dead):** official free API, snscrape (停更), public Nitter, elizaOS/agent-twitter-client
-(原仓库下架，只剩 fork) — flag as L5/unavailable if relied on.
+**Avoid (dead):** (all verified 2026-06)
+- **X official FREE API** — never offered usable read/search (write-only ~1,500 posts/mo); X moved to
+  default pay-per-use **2026-02** and **closed the free tier to new signups**. The free read capability
+  the matrix wants is effectively dead — use twikit ④ or twitterapi.io ② instead.
+- **snscrape** (`JustAnotherArchivist/snscrape`) — **dead for X specifically**: dev paused ~2023, the
+  X HTML/JSON endpoints it used are gone (repo still exists, non-X modules may work). Successor =
+  twscrape / twikit. Flag L5 if a plan relies on it for X.
+- **Public Nitter instances** — public ecosystem **collapsed late-2024** after X's mandatory-auth +
+  rate-limits; nitter.net decommissioned. Self-hosting still works but now needs real X session
+  tokens. Treat public-instance scraping as unavailable; use Twiiit only to find a flaky live one.
+- elizaOS/agent-twitter-client (原仓库下架，只剩 fork) — flag as L5/unavailable if relied on.

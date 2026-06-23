@@ -27,7 +27,15 @@ real need to browser-scrape. For 中文社区 (微博/抖音/B站/知乎/贴吧)
 **arctic_shift** (route ③, free, monthly refresh) — live API picks (reddit-mcp-buddy, GridfireAI)
 cover current data only.
 
-**Watch:** Reddit API tightening — GummySearch shuts down 2026-11. Prefer official-API routes over
-unauthorized scrapers. Discord/Quora scraping = ToS gray zone.
+**Watch:** Reddit API tightening — prefer official-API routes over unauthorized scrapers.
+Discord/Quora scraping = ToS gray zone.
+
+**Avoid (dead/dying):** **GummySearch** — phased shutdown after it could not reach a compliant Reddit
+Data API license (verified gh/official 2026-06): commercial close **2025-11-30** (stopped new
+signups/renewals), legacy subscribers wind down through 2026, **full shutdown + data deletion
+2026-12-01**. As of 2026-06 it serves only legacy paid subscribers — do not start anything on it. Its
+free, keyless successor is **`dancolta/subscope`** (route ④, in this shard; active 2026-06, MIT,
+self-bills as an open-source GummySearch/Syften/F5Bot alternative) — RSS-only, so a monitoring tool,
+not a historical backfill.
 
 **Install guidance:** `reference/volatile/pricing-install.md` → reddit-community.
