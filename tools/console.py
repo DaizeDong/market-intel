@@ -213,6 +213,12 @@ PY_IMPORTS = {
     "google-play-scraper": "google_play_scraper",
     "ddgs": "ddgs",
     "patchright": "patchright",
+    # activation (self-evolve R1): free-first lib routes, each live-verified installed +
+    # its keyless capability confirmed (SEC raw endpoint UA-only, yfinance keyless) —
+    # console was under-reporting these as cold though P1 free-first makes them usable.
+    "sec-edgar-mcp": "edgar",       # edgartools installed; SEC EDGAR public API keyless (UA only)
+    "openbb-mcp": "openbb",         # openbb installed (aggregates ~100 providers incl keyless)
+    "yahoo-finance-mcp": "yfinance",  # yfinance installed, fully keyless
 }
 
 # Keyless web-APIs: reachable without install OR key OR MCP. We do NOT block on these — mark
@@ -223,6 +229,8 @@ KEYLESS_WEB = {
     "arxiv-sanity-lite", "papers-with-code", "connected-papers-researchrabbit",
     "ai-lab-blogs", "ai-news-roundups", "lmarena", "github-mcp-registry",
     "chatgpt-apps-directory",
+    # activation (self-evolve R1): keyless endpoints live-verified HTTP 200 (no key, UA only)
+    "coingecko-mcp", "blockscout-mcp", "barker", "mcp-hn",
 }
 
 # Tools that are really "a skill you invoke", not an installable/connectable source. Treated as
