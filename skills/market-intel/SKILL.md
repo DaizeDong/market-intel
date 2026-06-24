@@ -101,6 +101,27 @@ as the primary signal. Also note which research skills exist (`research-lit`, `d
 If you must parse `~/.claude.json` directly, read it as UTF-8 (it contains non-ASCII paths;
 default GBK decode crashes on Windows). Prefer `claude mcp list` / `claude mcp get` over raw JSON.
 
+#### Step 2b — Task-time availability gate (classify each relevant tool AT THIS MOMENT)
+
+Detection isn't a yes/no list — it's a per-tool **state** decided *now*, for *this theme's*
+routed tools only. Using query-side signals only (`claude mcp list` + companion-config presence —
+**never** import a refresh/ops script; that breaks the P5 seam), sort each relevant tool into one
+of three buckets:
+
+| bucket | query-side signal (this moment) | what the run does with it |
+|---|---|---|
+| **available-now** | `claude mcp list` shows `✓ Connected`, **or** keyless/no-auth (GDELT, CoinGecko, SEC EDGAR), **or** a local lib already installed, **or** companion `registry.json` marks it `installed:true` + a matching `mcp_server_name` is Connected | fan out to it at the chosen SCALE (Step 4) |
+| **configurable-with-setup** | not connected now, but a free/cheap activation path exists — companion repo has the tool but it's not applied, or `activation-recipes.md` lists a free-key/free-tier/install-no-key recipe for its slug | **do NOT call it this turn** (a fresh MCP only connects after `/mcp` restart). Surface a JIT, theme-tied config suggestion in the report (Step 4 + Coverage-gaps) |
+| **hard-gap** | only a paid/enterprise tier unlocks it, or it's tombstoned (`D-404`/`D-PRICE`/`D-TOS`/dead repo per the shard / companion `deprecation_code`) | note as an explicit gap; suggest only if the theme genuinely needs the paid depth, flagged as paid |
+
+This is **warn-level guidance, never a fail-closed gate** (Side A/B/C): the classifier informs
+fan-out and what to recommend — it never refuses to run or silently drops a relevant tool. A tool
+you can't reach right now is always an **explicit gap**, never a silent skip (iron rule 1). The
+companion `registry.json` (`installed`, `tier`, `transport`, `mcp_server_name`, `health_last`) is
+the authoritative "what the user has" read here; `claude mcp list` is the authoritative "what is
+live right now." When they disagree, live state wins for *can-I-call-it-now*, and the registry tier
+informs *is-it-free-to-activate*.
+
 ### Step 3 — Select sources + guide install (non-blocking)
 
 For each triaged domain, read only its shard: `reference/domains/<domain>.md`. Pick the best
@@ -209,9 +230,11 @@ useful. Users without a companion repo just install MCPs ad-hoc via `claude mcp 
 the durable ops state. The companion pattern is the recommended, audit-friendly way; the
 skill's flow degrades gracefully when it's absent.
 
-### Step 4 — Delegate execution
+### Step 4 — Delegate execution (to available-now tools only) + JIT-surface the rest
 
-Hand the selected sources + sub-questions to the heavy harness:
+Fan out **only to the `available-now` bucket** from Step 2b, at the chosen SCALE. Do not waste a
+subagent on a tool that isn't live this turn — it would just fail. Hand the selected
+available-now sources + sub-questions to the heavy harness:
 
 - Mixed/general or when a connected commercial MCP exists → fan out subagents (Agent tool), one
   per sub-question, **each told to load its target MCP via ToolSearch first** (subagents inherit
@@ -224,6 +247,25 @@ Require every subagent to return a **structured evidence unit**, not free prose:
 with a length cap per field. The main agent reduces these units — it does **not** read raw page
 dumps. If fan-out exceeds ~5, insert a combiner layer (each combiner merges 3–4 workers) so the
 main context never holds N long reports.
+
+#### JIT config-gap surfacing — recommend configuration at task-time, driven by the theme
+
+For every relevant tool that Step 2b put in `configurable-with-setup` (or a theme-critical
+`hard-gap`), **do not silently skip it**. Configuration is recommended *at task-time, driven by the
+theme* — not pre-done. For each, emit a one-line, **theme-specific** suggestion that names the
+concrete thing the missing tool would deepen, the cost class, and the exact activation path. Read
+the tool's recipe in `reference/activation-recipes.md` (and its `tools/<slug>.md` only if you need
+tier/gotcha detail) to fill the path. Template:
+
+> "To deepen **<this theme aspect>**, configure **<tool>** (<free-key | free-tier | install-no-key
+> | paid $X>) — `python tools/console.py connect <slug>` (canonical, resolves by slug), or see
+> `reference/activation-recipes.md` for the key source; then `/mcp` reconnect (won't help this turn)."
+
+Examples: an X-sentiment theme with `x-twitter` dark → "configure twikit (install-no-key) to add
+real X founder/crypto discourse"; a macro-backdrop theme without FRED → "configure FRED MCP
+(free-key) for the rates/CPI series this thesis leans on." These lines feed straight into the
+report's **Coverage-gaps → Configure for deeper data** block (Output / `report-template.md`) — so
+the gate's output is a concrete, theme-tied next step the user can act on, never a buried omission.
 
 ## Quality guardrails (HARD rules — apply during synthesis)
 
@@ -260,8 +302,9 @@ main context never holds N long reports.
 
 Synthesize per `reference/report-template.md`: snapshot date, executive summary, per-domain
 findings with tiered+dated+confidence-tagged claims, cross-verification verdicts, disagreement
-matrix, risks & counter-evidence, explicit coverage gaps + "configure source X for deeper data",
-full source list.
+matrix, risks & counter-evidence, explicit coverage gaps + the Step 2b/Step 4 JIT
+"configure source X to deepen <theme aspect>" suggestions (available-now vs
+configurable-with-setup vs hard-gap), full source list.
 
 ## Close the feedback loop (Step 5 — write what you observed)
 
