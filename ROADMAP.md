@@ -1,5 +1,7 @@
 # Roadmap
 
+Current: **v0.26.0**
+
 ## v0.1.0 (alpha) — foundation
 
 - Thin orchestration layer: triage → detect (`claude mcp list`) → guide install → delegate.

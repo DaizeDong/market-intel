@@ -74,6 +74,13 @@ is no.
 - `runbooks/release.md` (+changelog_draft tip)
 - `CHANGELOG.md`, `.claude-plugin/plugin.json` (this entry + version bump)
 
+### Docs
+
+- docs: unify repo structure (Skill Repo Spec v1) — philosophy-first README section
+  order, standardized top-block badges (type → license → feature → languages → roadmap),
+  bilingual 1:1 EN/CN sync, `Languages` section + anchor, and `ROADMAP.md` current-version
+  marker. No functional version bump.
+
 ## [0.25.0] — 2026-06-17
 
 Doc-drift gate + entropy doctrine. Closes the silent failure mode where

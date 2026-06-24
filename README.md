@@ -1,19 +1,19 @@
 # market-intel
 
-A thin orchestration skill for commercial/market research. It triages your topic, finds the right specialized data source (and helps you install it), then hands the heavy lifting to the research harness you already have — instead of reinventing it.
+Triage a commercial topic across 15 data domains, auto-detect the right specialized source, then delegate the heavy research to the harness you already have.
 
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-orange?style=flat)](https://docs.anthropic.com/en/docs/claude-code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Domains](https://img.shields.io/badge/Source%20Matrix-15%20domains-green?style=flat)](skills/market-intel/reference/sources-index.md)
-[![Tool docs](https://img.shields.io/badge/Tool%20docs-per--tool%20how--to-blue?style=flat)](skills/market-intel/reference/tools/index.md)
-[![Version](https://img.shields.io/badge/version-0.26.0-purple?style=flat)](CHANGELOG.md)
-[![Sister skill](https://img.shields.io/badge/sister-shopping--aggregator-yellow?style=flat)](https://github.com/DaizeDong/shopping-aggregator)
+[![Source Matrix](https://img.shields.io/badge/Source%20Matrix-15%20domains-green?style=flat)](skills/market-intel/reference/sources-index.md)
+[![Tool docs](https://img.shields.io/badge/Tool%20docs-per--tool%20how--to-green?style=flat)](skills/market-intel/reference/tools/index.md)
+[![Languages](https://img.shields.io/badge/Languages-EN%20%2F%20CN-blue?style=flat)](#languages)
+[![Roadmap](https://img.shields.io/badge/Roadmap-v0.26.0-purple?style=flat)](ROADMAP.md)
 
 [English](README.md) | [中文版](README_CN.md)
 
 ---
 
-## ⭐ Read this first: the design philosophy
+## ⭐ Read this first — the design philosophy
 
 market-intel is built on one principle — **root-cause design, not incremental patching.** When
 something is wrong, we change the assumption underneath it, not the symptom on top. That single idea
@@ -84,9 +84,7 @@ After this, the [60-second tour](#60-second-tour) below explains the **specializ
 (paid X data, Bright Data, Keepa, etc.) — these unlock the high-quality routes the skill is
 really designed for.
 
----
-
-## Now what? — installed it, what do I read first?
+### Now what? — installed it, what do I read first?
 
 Three different "next steps" depending on intent. Pick one:
 
@@ -130,21 +128,9 @@ Each will fan out subagents, surface evidence with citations, and end with a "ga
 
 ---
 
-## Sister skill — consumer-side specialization
+## Skills at a glance
 
-For **consumer shopping price comparison** (Amazon / eBay / Walmart / Target / Taobao / JD price
-compare + Keepa / Camelcamelcamel / 慢慢买 history + Capital One Shopping / Karma / 购物党
-coupons + Honey 2026 trust event), market-intel defers to its sister skill:
-**[`shopping-aggregator`](https://github.com/DaizeDong/shopping-aggregator)**. market-intel
-handles broad commercial research + seller-side ecommerce-arbitrage; shopping-aggregator handles
-the consumer buy decision. Both skills can coexist — see [`consumer-price-compare`
-shard](skills/market-intel/reference/domains/consumer-price-compare.md) for the routing logic.
-
-```
-/plugin install github:DaizeDong/shopping-aggregator
-```
-
-## The source matrix (15 domains)
+### The source matrix (15 domains)
 
 The knowledge asset. Each domain shard names the best tool, its **barrier route**, how to detect it, and what to install. Thin index → load only the domain(s) you need. Each tool also has a **per-tool how-to doc** under [`reference/tools/`](skills/market-intel/reference/tools/index.md) (install + auth + usage + 踩坑), reached on-demand via the thin tool index.
 
@@ -170,6 +156,46 @@ The knowledge asset. Each domain shard names the best tool, its **barrier route*
 
 Three install levels: [`install-guide.md`](skills/market-intel/reference/install-guide.md) (L0 mechanics) → [`pricing-install.md`](skills/market-intel/reference/volatile/pricing-install.md) (L1 per-domain commands + prices, `last_verified`-stamped) → [`tools/<slug>.md`](skills/market-intel/reference/tools/index.md) (L2 per-tool). Verify volatile prices against the official site before quoting.
 
+### Sister skill — consumer-side specialization
+
+For **consumer shopping price comparison** (Amazon / eBay / Walmart / Target / Taobao / JD price
+compare + Keepa / Camelcamelcamel / 慢慢买 history + Capital One Shopping / Karma / 购物党
+coupons + Honey 2026 trust event), market-intel defers to its sister skill:
+**[`shopping-aggregator`](https://github.com/DaizeDong/shopping-aggregator)**. market-intel
+handles broad commercial research + seller-side ecommerce-arbitrage; shopping-aggregator handles
+the consumer buy decision. Both skills can coexist — see [`consumer-price-compare`
+shard](skills/market-intel/reference/domains/consumer-price-compare.md) for the routing logic.
+
+```
+/plugin install github:DaizeDong/shopping-aggregator
+```
+
+---
+
+## How to invoke
+
+It auto-activates on phrases like `市场调研`, `competitor analysis`, `research this market`,
+`find arbitrage opportunities`, `X/Twitter sentiment`, `SEO intel`, `product trends`,
+`调研这个市场`, `竞品分析`, `找套利机会`, `X/推特舆情`, `SEO 情报`, `产品趋势`. To refresh the
+source matrix, say `刷新工具库` / `refresh the market-intel source matrix`.
+
+It deliberately steps aside for single-fact lookups or general web reports (use plain search /
+`deep-research`) and defers academic literature to `research-lit`.
+
+---
+
+## Example output
+
+A finished run is snapshot-dated, tier-tagged, and built from **structured evidence units**
+(`claim · source · quote · tier · date · confidence`) rather than raw page dumps:
+
+- Decision-grade claims carry ≥2 independent sources, each tagged confidence high/medium/low.
+- A disagreement matrix surfaces conflicts instead of averaging them.
+- A mandatory **Risks & counter-evidence** section (a reverse-search subagent hunts scam/failure/risk).
+- An explicit **"configure source X for deeper data"** gap list where coverage fell back to web.
+
+See the [60-second tour](#60-second-tour) for the step-by-step of what produces this.
+
 ---
 
 ## Quality guardrails
@@ -186,16 +212,27 @@ Hard rules applied during synthesis (see [SKILL.md](skills/market-intel/SKILL.md
 
 ---
 
-## Keeping it current
+## Limitations
 
-The matrix decays — APIs go paid, tools get acquired, prices move. The [refresh protocol](skills/market-intel/reference/refresh-protocol.md) re-sweeps each domain (one subagent per domain → structured diff → incremental shard edits → `CHANGELOG.md` + version bump). **Default cadence is monthly** (v0.17.0); **weekly** for the fast-moving set (`crypto-defi`, `browser-automation`, `frontier-research`, `mcp-ecosystem`); **quarterly** is reserved for the Horizon scan (cross-domain new-territory discovery). Trigger manually with `刷新工具库` / `refresh the market-intel source matrix`, or wire a scheduled headless run (see [ROADMAP](ROADMAP.md)).
+- **The matrix decays** — APIs go paid, tools get acquired, prices move. The [refresh protocol](skills/market-intel/reference/refresh-protocol.md) re-sweeps each domain (one subagent per domain → structured diff → incremental shard edits → `CHANGELOG.md` + version bump). **Default cadence is monthly** (v0.17.0); **weekly** for the fast-moving set (`crypto-defi`, `browser-automation`, `frontier-research`, `mcp-ecosystem`); **quarterly** is reserved for the Horizon scan (cross-domain new-territory discovery). Trigger manually with `刷新工具库` / `refresh the market-intel source matrix`, or wire a scheduled headless run (see [ROADMAP](ROADMAP.md)).
+- **Web fallback is honest, not magic** — if no specialized MCP is connected, the skill says so and flags the gap rather than pretending the web answer is as deep.
+- **No reinvented engine** — the fan-out/verify/synthesize depth is delegated to `deep-research` / `research-lit`; market-intel is the routing + detection + guardrail seam, not a research engine of its own.
+
+This skill is the product of a 12-subagent tool survey followed by a 5-subagent adversarial design review. The review killed the original "build another full deep-research" plan (it would have been a clone with a trigger conflict), proved that `claude mcp add` doesn't take effect until a session reconnect, and forced in the citation-verification gate, source tiers, and disconfirmation mandate.
 
 ---
 
-## Design notes
+## Languages
 
-This skill is the product of a 12-subagent tool survey followed by a 5-subagent adversarial design review. The review killed the original "build another full deep-research" plan (it would have been a clone with a trigger conflict), proved that `claude mcp add` doesn't take effect until a session reconnect, and forced in the citation-verification gate, source tiers, and disconfirmation mandate. See [ROADMAP.md](ROADMAP.md) for what's next.
+English (`README.md`, authoritative) · 中文 ([`README_CN.md`](README_CN.md)).
 
-## Contributing
+---
 
-Want to add a tool, fix a broken entry, or propose a new domain? See [CONTRIBUTING.md](CONTRIBUTING.md) — single-page guide covering the 3 contribution patterns, the 4-file sync rule, and the verification gates your PR has to pass.
+## Roadmap · Contributing · License
+
+See [ROADMAP.md](ROADMAP.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [LICENSE](LICENSE) (MIT).
+
+Want to add a tool, fix a broken entry, or propose a new domain? [CONTRIBUTING.md](CONTRIBUTING.md)
+is a single-page guide covering the 3 contribution patterns, the 4-file sync rule, and the
+verification gates your PR has to pass. Deeper design docs: [PHILOSOPHY.md](PHILOSOPHY.md) ·
+[CONSTITUTION.md](CONSTITUTION.md) · [EVOLUTION.md](EVOLUTION.md).
