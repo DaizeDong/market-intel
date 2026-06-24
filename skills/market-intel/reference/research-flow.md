@@ -103,8 +103,8 @@ skip**. Emit a one-line, theme-specific suggestion naming what the missing tool 
 cost class, and the exact activation path (from `reference/activation-recipes.md`):
 
 > "To deepen **<this theme aspect>**, configure **<tool>** (<free-key | free-tier | install-no-key |
-> paid $X>) — via `reference/activation-recipes.md` (recipe <id>) or `python tools/console.py connect
-> <slug>`, then `/mcp` reconnect (won't help this turn)."
+> paid $X>) — `python tools/console.py connect <slug>` (canonical, resolves by slug), or see
+> `reference/activation-recipes.md` for the key source; then `/mcp` reconnect (won't help this turn)."
 
 Configuration is recommended **at task-time, driven by the theme** — not pre-done. These lines feed
 the report's Coverage-gaps → "Configure for deeper data" block (`reference/report-template.md`).
