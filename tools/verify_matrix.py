@@ -6,6 +6,7 @@ Exit 0 = matrix may land; exit non-zero = BLOCK (caller must not commit/push). F
 check can't be performed (e.g. GitHub API unreachable), that's a BLOCK, not a pass.
 
 Checks (the real failure modes of an unattended LLM refresh):
+  ROUTE    (C2) a Default pick may not silently downgrade free/④③ → paid ①② without a CHANGELOG reason
   STRUCT   every domain in sources-index.md has a shard file, and vice versa
   TOOLS    tools/index.md <-> tools/*.md coverage (missing doc = BLOCK, orphan doc = WARN)
   REGISTRY tools/registry.json <-> index <-> docs 3-way (covers non-repo SaaS too; mismatch = BLOCK)
@@ -18,6 +19,10 @@ Checks (the real failure modes of an unattended LLM refresh):
   DOCCOVER (WARN) a github repo in a LIVE (non-tombstone) shard row with no per-tool doc (anti-lost-tracking)
   METH     SKILL.md still contains the 8 numbered guardrails, L1/L5 tiers, and ①②③④ route legend
   COVER    vs git main baseline: total source rows didn't drop >10%, no shard lost >30% of its rows
+  PRICE    (WARN soft-launch) a CHANGED price line in pricing-install.md must carry an official URL +
+           fetch date in the same diff hunk (C5); flip PRICE_BLOCK=True to enforce after one cycle
+  AUDIT    (WARN) new source rows added with no independent cross-model audit line in the CHANGELOG
+           (`AUDIT: <model> verdict=<pass|hold>`) — P4 editor!=verifier; WARN-tier launch, BLOCK later
   CONST    CONSTITUTION.md exists and was not modified by this run (scope guard)
 
 Usage: python tools/verify_matrix.py [--no-net] [--base main]
@@ -61,6 +66,8 @@ def git_show(ref, relpath):
         return ""
 
 REPO_RE = re.compile(r"github\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)")
+# canonical bare owner/name slug (registry `repo` field for kind=repo tools)
+SLUG_FMT = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 # repo token must be IMMEDIATELY before the (NNk★) annotation (only **/spaces between) —
 # prevents pairing a star with a prose token or an adjacent repo on the same line.
 STAR_LINE_RE = re.compile(r"([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)\*{0,2}\s*\((\d+(?:\.\d+)?)k★\)")
@@ -378,9 +385,35 @@ if os.path.isdir(TOOLS_DIR) and 'fs_slugs' in dir():
         if no_doc: block("REGISTRY", f"registry lists tools with no doc file: {sorted(no_doc)}")
         if no_idx: block("REGISTRY", f"registry lists tools missing from index.md: {sorted(no_idx)}")
         if no_reg: block("REGISTRY", f"tool docs missing from registry (it is authoritative — add them): {sorted(no_reg)}")
+        valid_domains = fs_domains  # the authoritative shard set (STRUCT block, computed above)
         for t in reg.get("tools", []):
-            if not t.get("domain"):
-                warn("REGISTRY", f"{t.get('slug')} has no domain in registry")
+            slug = t.get("slug")
+            domain = t.get("domain")
+            if not domain:
+                warn("REGISTRY", f"{slug} has no domain in registry")
+            elif domain not in valid_domains:
+                block("REGISTRY", f"{slug}: domain '{domain}' is not a real shard (valid: {sorted(valid_domains)})")
+
+        # repo field validation (kind=repo only): the authoritative repo slug must be a
+        # well-formed owner/name AND actually appear as a github.com URL in that tool's own doc.
+        # The REPO/GHACTIVE existence gates scan the markdown (REPO_RE over all_text), NEVER the
+        # registry field, so a refresh could mutate registry.json's canonical repo to a typo/
+        # hallucination while the doc URL stays correct — registry lies, gate stays green. This
+        # closes that drift. saas/lib (repo=None) are untouched.
+        for t in reg.get("tools", []):
+            if t.get("kind") != "repo":
+                continue
+            slug, repo = t.get("slug"), t.get("repo")
+            if not repo:
+                block("REGISTRY", f"{slug} is kind=repo but has no repo slug")
+                continue
+            if not SLUG_FMT.match(repo):
+                block("REGISTRY", f"{slug}: registry repo '{repo}' is not a well-formed owner/name slug")
+                continue
+            doc_slugs = {_strip_git(r).lower() for r in REPO_RE.findall(tool_docs_text.get(slug, ""))}
+            if repo.lower() not in doc_slugs:
+                block("REGISTRY", f"{slug}: registry repo '{repo}' does not match any github.com URL "
+                                  f"in tools/{slug}.md (registry-doc drift)")
 
 # ---- METH ----
 skill = read(SKILLMD)
@@ -416,6 +449,7 @@ def git_diff(relpath):
 DEATH_CODES = ("D-404", "D-STALE", "D-PRICE", "D-TOS", "D-SUPERSEDED")
 changelog_added = "\n".join(l[1:] for l in git_diff("CHANGELOG.md").splitlines()
                             if l.startswith("+") and not l.startswith("+++"))
+genuinely_added_any = []   # AUDIT (P4): names of source rows that are NEW this sweep (not edits)
 for d in fs_domains:
     rel = f"skills/market-intel/reference/domains/{d}.md"
     diff = git_diff(rel)
@@ -436,6 +470,10 @@ for d in fs_domains:
         s = line.lstrip("+-").strip()
         return s.startswith("|") and "---" not in s and not re.search(r"\|\s*(source|repo|tool|name)\s*\|", s, re.I)
     added_names = {_row_name(l) for l in added if _is_src_row(l)}
+    removed_names = {_row_name(l) for l in removed if _is_src_row(l)}
+    # an added table row whose source-name was NOT already present (removed line) = a genuinely NEW
+    # source row (mirror of genuinely_removed). Edits show as remove+add of the same name -> excluded.
+    genuinely_added_any += [n for n in added_names if n and n not in removed_names]
     # a removed table row whose source-name still appears in an added row = MODIFICATION, not a
     # deletion (git diff shows an edited line as remove+add). Only a name that's GONE is a real delete.
     genuinely_removed = [l for l in removed if _is_src_row(l) and _row_name(l) and _row_name(l) not in added_names]
@@ -444,6 +482,96 @@ for d in fs_domains:
         if not any(c in changelog_added or c in added_text for c in DEATH_CODES):
             block("DELETE", f"{d}: source row(s) removed without a death-code (C4: "
                             f"D-404/D-STALE/D-PRICE/D-TOS/D-SUPERSEDED) in CHANGELOG or an Avoid(dead) line")
+
+    # ---- ROUTE (C2: a Default pick may not silently downgrade free/④③ -> paid ①②) ----
+    # A route downgrade is a MODIFICATION (the source name is present on BOTH the removed and added
+    # sides of the diff), NOT a deletion — so it lives at LOOP level as a sibling of DELETE, never
+    # nested under `if genuinely_removed:` (genuinely_removed is empty for a modification, so the
+    # check would silently never fire). Escape hatch: an intent-bearing CHANGELOG/row reason. We key
+    # on the MAX route glyph per side (a row can list several barrier routes; the best one is what a
+    # user gets), mirroring how DELETE keys on specific DEATH_CODES, not common prose words.
+    GLYPH_RANK = {"④": 4, "③": 3, "②": 2, "①": 1}
+    ROUTE_REASON = ("why paid", "paid because", "免费替代", "free route unavailable",
+                    "no free route", "free route blocked", "free route gone")
+    def _route_glyphs(line):
+        return [GLYPH_RANK[g] for g in line if g in GLYPH_RANK]
+    added_by_name = {}
+    for l in added:
+        if _is_src_row(l):
+            added_by_name.setdefault(_row_name(l), l)
+    for rl in removed:
+        if not _is_src_row(rl):
+            continue
+        name = _row_name(rl)
+        al = added_by_name.get(name)
+        if not name or not al:                        # only MODIFICATIONS (name in both sides)
+            continue
+        rem_routes, add_routes = _route_glyphs(rl), _route_glyphs(al)
+        if not rem_routes or not add_routes:
+            continue
+        if max(rem_routes) >= 3 and max(add_routes) <= 2:   # ④/③ -> ①/② downgrade
+            if not any(c in changelog_added or c in al for c in ROUTE_REASON):
+                block("ROUTE", f"{d}: '{name}' route downgraded free/④③ -> paid ①② without a "
+                               f"CHANGELOG reason (C2) — add why (route/why paid) or revert")
+
+# ---- AUDIT (P4: editor != verifier — new source rows need an independent cross-model attestation) ----
+# EVOLUTION.md openly admits a P4 violation: the same headless LLM both edits AND verifies a refresh.
+# This makes the mechanical/existence half gate-checked the same way DELETE gate-checks a death-code:
+# a genuinely-NEW source row (mirror of genuinely_removed) requires a CHANGELOG attestation line
+# `AUDIT: <model> verdict=<pass|hold>` written by a fresh zero-context reviewer of a DIFFERENT model.
+# WARN-tier this cycle (advisory) — flips to BLOCK once the cross-model review step is routine.
+AUDIT_RE = re.compile(r"^\s*AUDIT:\s*\S+\s+verdict=(pass|hold)\b", re.IGNORECASE)
+if genuinely_added_any:
+    if not any(AUDIT_RE.match(l) for l in changelog_added.splitlines()):
+        _names = ", ".join(sorted(set(genuinely_added_any))[:8])
+        warn("AUDIT", f"{len(genuinely_added_any)} new source row(s) added ({_names}) without an "
+                      f"independent cross-model audit attestation in CHANGELOG (expected a line "
+                      f"`AUDIT: <model> verdict=<pass|hold>`) — P4 editor!=verifier "
+                      f"(WARN-tier this cycle; will BLOCK once routine)")
+
+# ---- PRICE (C5: a CHANGED price line must carry an official URL + fetch date in the same hunk) ----
+# WARN-tier soft launch — flip PRICE_BLOCK=True to enforce after one populated sweep cycle. The
+# sidecar sweep JSON carries no {price,url,fetched} evidence tuple, so the robust path is a diff-hunk
+# evidence check: when a price token is ADDED to pricing-install.md, the same hunk must show an
+# official https:// URL + a fetch/verify date (C5 + the EVOLUTION.md auto-merge precondition).
+PRICE_BLOCK = False  # WARN-tier soft launch; flip to True after one populated sweep cycle
+PRICE_TOKEN_RE = re.compile(r"[$€£]\s?\d|\d+\s?(?:USD|EUR|GBP)\b|/1k\b|/mo\b|/min\b|/day\b|\bfree\s+\d", re.I)
+URL_RE = re.compile(r"https?://")
+DATE_RE = re.compile(r"\b(?:fetched|verified|last_verified)\b|\b\d{4}-\d{2}(?:-\d{2})?\b", re.I)
+pricing_rel = os.path.relpath(PRICING, ROOT).replace(os.sep, "/")
+pricing_diff = git_diff(pricing_rel) if os.path.exists(PRICING) else ""
+if pricing_diff.strip():
+    _emit_price = block if PRICE_BLOCK else warn
+    # split the diff into hunks (each starts at an @@ header); a price line's evidence may live
+    # anywhere in its own hunk, not just on the same physical line.
+    hunks, cur = [], []
+    for ln in pricing_diff.splitlines():
+        if ln.startswith("@@"):
+            if cur:
+                hunks.append(cur)
+            cur = []
+        cur.append(ln)
+    if cur:
+        hunks.append(cur)
+    for hunk in hunks:
+        hunk_added = [l[1:] for l in hunk if l.startswith("+") and not l.startswith("+++")]
+        hunk_blob = "\n".join(hunk_added)
+        hunk_has_url = bool(URL_RE.search(hunk_blob))
+        hunk_has_date = bool(DATE_RE.search(hunk_blob))
+        for al in hunk_added:
+            if not PRICE_TOKEN_RE.search(al):
+                continue
+            line_has_url = bool(URL_RE.search(al))
+            line_has_date = bool(DATE_RE.search(al))
+            has_url = line_has_url or hunk_has_url
+            has_date = line_has_date or hunk_has_date
+            if has_url and has_date:
+                continue
+            missing = []
+            if not has_url: missing.append("official URL")
+            if not has_date: missing.append("fetch date")
+            _emit_price("PRICE-EVIDENCE", f"changed price line missing {' + '.join(missing)} "
+                                          f"in the same diff hunk (C5): {al.strip()[:80]}")
 
 # ---- CONST (scope guard: automated run must not modify CONSTITUTION.md) ----
 const_path = os.path.join(ROOT, "CONSTITUTION.md")
