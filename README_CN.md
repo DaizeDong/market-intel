@@ -32,7 +32,7 @@ Claude Code 已经内置了 `deep-research`（fan-out → 抓取 → 验证 → 
 
 `market-intel` 就是补这个缺口的**瘦层**。它**只做三件别人不做的事**，其余全部委托出去：
 
-1. **分诊** —— 把商业课题映射到 14 个数据方向中的 1~N 个。
+1. **分诊** —— 把商业课题映射到 15 个数据方向中的 1~N 个。
 2. **检测 + 引导安装** —— 用 `claude mcp list`（不是靠工具名瞎猜）查哪些专业 MCP 真的连上了；关键源缺失时，直接给你那条 `claude mcp add` 命令——或打开它的**逐工具操作文档**（[`reference/tools/`](skills/market-intel/reference/tools/index.md)）查安装 + 鉴权 + 用法 + 踩坑，由[多层安装指南](skills/market-intel/reference/install-guide.md)引导。
 3. **质量护栏** —— 引用回验、源等级、多源印证、强制反方检索、显式缺口。
 
