@@ -1,19 +1,19 @@
 # market-intel
 
-一个用于商业/市场调研的**瘦编排 skill**。它负责给课题分诊、找到对的专业数据源（并帮你装上），然后把繁重的检索·验证·合成**委托**给你已有的调研引擎——而不是重造一遍。
+把商业课题在 15 个数据方向上分诊、自动检测对的专业数据源，再把繁重的检索·验证·合成委托给你已有的调研引擎。
 
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-orange?style=flat)](https://docs.anthropic.com/en/docs/claude-code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Domains](https://img.shields.io/badge/Source%20Matrix-15%20domains-green?style=flat)](skills/market-intel/reference/sources-index.md)
-[![Tool docs](https://img.shields.io/badge/Tool%20docs-per--tool%20how--to-blue?style=flat)](skills/market-intel/reference/tools/index.md)
-[![Version](https://img.shields.io/badge/version-0.26.0-purple?style=flat)](CHANGELOG.md)
-[![Sister skill](https://img.shields.io/badge/sister-shopping--aggregator-yellow?style=flat)](https://github.com/DaizeDong/shopping-aggregator)
+[![源矩阵](https://img.shields.io/badge/%E6%BA%90%E7%9F%A9%E9%98%B5-15%20%E4%B8%AA%E6%96%B9%E5%90%91-green?style=flat)](skills/market-intel/reference/sources-index.md)
+[![工具文档](https://img.shields.io/badge/%E5%B7%A5%E5%85%B7%E6%96%87%E6%A1%A3-%E9%80%90%E5%B7%A5%E5%85%B7%E6%93%8D%E4%BD%9C-green?style=flat)](skills/market-intel/reference/tools/index.md)
+[![语言](https://img.shields.io/badge/%E8%AF%AD%E8%A8%80-EN%20%2F%20CN-blue?style=flat)](#语言)
+[![Roadmap](https://img.shields.io/badge/Roadmap-v0.26.0-purple?style=flat)](ROADMAP.md)
 
 [English](README.md) | [中文版](README_CN.md)
 
 ---
 
-## ⭐ 先读这个：设计理念
+## ⭐ 先读这个 —— 设计理念
 
 market-intel 建立在一条原则上——**从根本进行设计，而非小修小补。** 出了问题，我们改的是它底下的假设，
 而不是它表面的症状。正是这一条催生了这里的每个决定：浏览器自动化被从脚注提升为一等路线（而不是"加几个
@@ -56,7 +56,7 @@ git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market
 
 ---
 
-## 快速开始 — 装免费无密钥三件套(3 分钟)
+## 快速开始 — 装免费无密钥三件套（3 分钟）
 
 不想配 API key 也想试用?先装这 3 个免费无密钥的 MCP —— 覆盖 HN / Reddit 风格社区 + 全球趋势 + AI 论文,零成本:
 
@@ -75,11 +75,9 @@ claude mcp add -s user arxiv 'uvx arxiv-mcp-server'
 
 接着说: `调研一下 AI agent 工具生态的趋势`。skill 会 fan-out 子任务用这三个源 —— 社区信号 + 趋势 + 论文 —— 出一份带引用的报告。无 key,无注册,30 秒出第一条发现。
 
-之后,看下面 60 秒演示了解**专用 MCP**(付费 X 数据、Bright Data、Keepa 等)—— 那些才是 skill 真正设计的高质量路线。
+之后,看下面 [60 秒演示](#60-秒演示)了解**专用 MCP**(付费 X 数据、Bright Data、Keepa 等)—— 那些才是 skill 真正设计的高质量路线。
 
----
-
-## 装完之后 —— 该读哪个?
+### 装完之后 —— 该读哪个?
 
 按目的选一条:
 
@@ -110,23 +108,22 @@ claude mcp add -s user arxiv 'uvx arxiv-mcp-server'
 5. **护栏** → 独立 verifier 重新 fetch 每条引用 URL；决策级结论需 ≥2 个独立源；专门的反向检索子任务去挖风险/失败案例。
 6. **报告** → 带数据快照日期、源等级标注、分歧矩阵、强制的**风险与反方证据**章节，以及显式的**"配了 X 源可更深"**缺口清单。
 
+### 拿这些当你的第一个真实查询
+
+装完上面的快速开始后，试试用一个具体课题触发 skill：
+
+- `调研一下 AI agent 工具生态最近一个月的趋势` —— 跑 趋势 + 社区 + 前沿研究
+- `compare the top 3 hosted MCP marketplaces (Smithery / Glama / PulseMCP) — coverage, pricing, signal-to-noise` —— 跑 mcp-ecosystem
+- `find me 3 underrated open-source web-scraping tools released in 2026 with > 200 stars` —— 跑 web-scraping + GitHub 星速发现
+- `who's been launching credible LLM eval skills in the last 3 months` —— 跑 ready-skills + 前沿研究
+
+每个都会 fan-out 子任务、亮出带引用的证据，最后给一份"配了 <X> 源可更深"缺口清单。如果某个查询只出网页兜底，那是 skill 在诚实地说明它的覆盖范围——见 install-guide 加一个专用 MCP 拿更深的数据。
+
 ---
 
-## 姊妹 skill — 消费侧特化
+## 速览 skill
 
-对于**消费者购物比价**（Amazon / eBay / Walmart / Target / 淘宝 / 京东 价格对比 + Keepa /
-Camelcamelcamel / 慢慢买 历史价 + Capital One Shopping / Karma / 购物党 优惠码 + Honey 2026
-信任事件），market-intel 委托给姊妹 skill：
-**[`shopping-aggregator`](https://github.com/DaizeDong/shopping-aggregator)**。market-intel
-管广义商业调研+卖家侧 ecommerce-arbitrage；shopping-aggregator 管消费者购买决策。两个 skill 可
-共存——见 [`consumer-price-compare`
-shard](skills/market-intel/reference/domains/consumer-price-compare.md) 路由逻辑。
-
-```
-/plugin install github:DaizeDong/shopping-aggregator
-```
-
-## 源矩阵（15 个方向）
+### 源矩阵（15 个方向）
 
 核心知识资产。每个方向分片标明首选工具、**信息壁垒路线**、如何检测、装什么。薄索引 → 只加载你需要的方向。每个工具还配有一份 [`reference/tools/`](skills/market-intel/reference/tools/index.md) 下的**逐工具操作文档**（安装 + 鉴权 + 用法 + 踩坑），通过薄工具索引按需加载。
 
@@ -152,6 +149,45 @@ shard](skills/market-intel/reference/domains/consumer-price-compare.md) 路由�
 
 三层安装指南：[`install-guide.md`](skills/market-intel/reference/install-guide.md)（L0 安装机制）→ [`pricing-install.md`](skills/market-intel/reference/volatile/pricing-install.md)（L1 逐方向命令 + 价格，带 `last_verified` 时间戳）→ [`tools/<slug>.md`](skills/market-intel/reference/tools/index.md)（L2 逐工具）。时效价格引用前请到官网二次核实。
 
+### 姊妹 skill — 消费侧特化
+
+对于**消费者购物比价**（Amazon / eBay / Walmart / Target / 淘宝 / 京东 价格对比 + Keepa /
+Camelcamelcamel / 慢慢买 历史价 + Capital One Shopping / Karma / 购物党 优惠码 + Honey 2026
+信任事件），market-intel 委托给姊妹 skill：
+**[`shopping-aggregator`](https://github.com/DaizeDong/shopping-aggregator)**。market-intel
+管广义商业调研+卖家侧 ecommerce-arbitrage；shopping-aggregator 管消费者购买决策。两个 skill 可
+共存——见 [`consumer-price-compare`
+shard](skills/market-intel/reference/domains/consumer-price-compare.md) 路由逻辑。
+
+```
+/plugin install github:DaizeDong/shopping-aggregator
+```
+
+---
+
+## 如何触发
+
+遇到 `市场调研`、`competitor analysis`、`research this market`、`find arbitrage opportunities`、
+`X/Twitter sentiment`、`SEO intel`、`product trends`、`调研这个市场`、`竞品分析`、`找套利机会`、
+`X/推特舆情`、`SEO 情报`、`产品趋势` 等会自动触发。要刷新源矩阵，说 `刷新工具库` /
+`refresh the market-intel source matrix`。
+
+单点查询或纯网页报告它会主动让位（用普通搜索 / `deep-research`）；学术文献交给 `research-lit`。
+
+---
+
+## 示例输出
+
+一份完成的报告带数据快照日期、源等级标注，由**结构化证据单元**（`论断·来源·原文引用·等级·日期·置信度`）
+而非原始网页堆构成：
+
+- 决策级结论带 ≥2 个独立源，每条标置信度高/中/低。
+- 分歧矩阵亮出冲突，而不是抹平它们。
+- 强制的**风险与反方证据**章节（反向检索子任务挖骗局/失败/风险）。
+- 凡回落到网页之处，给一份显式的**"配了 X 源可更深"**缺口清单。
+
+具体怎么产出这份报告，见上面的 [60 秒演示](#60-秒演示)。
+
 ---
 
 ## 质量护栏
@@ -168,16 +204,26 @@ shard](skills/market-intel/reference/domains/consumer-price-compare.md) 路由�
 
 ---
 
-## 保持更新
+## 局限
 
-矩阵会过时——API 转付费、工具被收购、价格变动。[刷新协议](skills/market-intel/reference/refresh-protocol.md) 会对每个方向重新扫一遍（每方向一个子任务 → 结构化 diff → 增量改分片 → `CHANGELOG.md` + 升版本）。**默认每月**(v0.17.0 起);**周扫**用于快变方向(`crypto-defi`、`browser-automation`、`frontier-research`、`mcp-ecosystem`);**季扫**保留给 Horizon scan 跨域趋势扫描。手动触发说 `刷新工具库`，或接一个定时 headless 运行（见 [ROADMAP](ROADMAP.md)）。
+- **矩阵会过时** —— API 转付费、工具被收购、价格变动。[刷新协议](skills/market-intel/reference/refresh-protocol.md) 会对每个方向重新扫一遍（每方向一个子任务 → 结构化 diff → 增量改分片 → `CHANGELOG.md` + 升版本）。**默认每月**(v0.17.0 起);**周扫**用于快变方向(`crypto-defi`、`browser-automation`、`frontier-research`、`mcp-ecosystem`);**季扫**保留给 Horizon scan 跨域趋势扫描。手动触发说 `刷新工具库`，或接一个定时 headless 运行（见 [ROADMAP](ROADMAP.md)）。
+- **网页兜底是诚实，不是魔法** —— 没连专用 MCP 时，skill 会如实说明并标注缺口，而不是假装网页答案一样深。
+- **不重造引擎** —— fan-out/验证/合成的深度委托给 `deep-research` / `research-lit`；market-intel 是路由 + 检测 + 护栏的接缝，不是它自己的调研引擎。
+
+本 skill 是一次 12-子任务工具调研 + 5-子任务对抗式设计评审的产物。评审推翻了最初"再造一个全栈 deep-research"的方案（那会是带触发冲突的克隆），证实了 `claude mcp add` 需重连会话才生效，并强制加入了引用回验闸门、源等级、强制反方检索。
 
 ---
 
-## 设计说明
+## 语言
 
-本 skill 是一次 12-子任务工具调研 + 5-子任务对抗式设计评审的产物。评审推翻了最初"再造一个全栈 deep-research"的方案（那会是带触发冲突的克隆），证实了 `claude mcp add` 需重连会话才生效，并强制加入了引用回验闸门、源等级、强制反方检索。后续计划见 [ROADMAP.md](ROADMAP.md)。
+English（[`README.md`](README.md)，权威版本）· 中文（`README_CN.md`）。
 
-## 贡献
+---
 
-想加一个工具、修一个挂掉的条目、或者提一个新方向?见 [CONTRIBUTING.md](CONTRIBUTING.md) —— 一页指南覆盖 3 种贡献模式、4 文件同步规则、PR 必过的验证闸门。
+## Roadmap · 贡献 · 许可
+
+见 [ROADMAP.md](ROADMAP.md) · [CONTRIBUTING.md](CONTRIBUTING.md) · [LICENSE](LICENSE)（MIT）。
+
+想加一个工具、修一个挂掉的条目、或者提一个新方向?[CONTRIBUTING.md](CONTRIBUTING.md) 是一页指南，
+覆盖 3 种贡献模式、4 文件同步规则、PR 必过的验证闸门。更深的设计文档：[PHILOSOPHY.md](PHILOSOPHY.md) ·
+[CONSTITUTION.md](CONSTITUTION.md) · [EVOLUTION.md](EVOLUTION.md)。
