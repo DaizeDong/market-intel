@@ -213,6 +213,13 @@ PY_IMPORTS = {
     "google-play-scraper": "google_play_scraper",
     "ddgs": "ddgs",
     "patchright": "patchright",
+    # free-first browser/scrape libs (no key, no cookie) — all live import-verified 2026-06-24.
+    "nodriver": "nodriver",
+    "camoufox": "camoufox",
+    # browser-use / scrapegraph-ai: the LIBRARY is keyless-importable; their AI driving needs an
+    # LLM key. Listed here so the import probe marks them available_now; config notes the key gate.
+    "browser-use": "browser_use",
+    "scrapegraph-ai": "scrapegraphai",
     # activation (self-evolve R1): free-first lib routes, each live-verified installed +
     # its keyless capability confirmed (SEC raw endpoint UA-only, yfinance keyless) —
     # console was under-reporting these as cold though P1 free-first makes them usable.
