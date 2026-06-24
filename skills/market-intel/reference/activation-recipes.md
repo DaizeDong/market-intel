@@ -1,8 +1,9 @@
 # Activation recipes — turning cold / needs-key tools into usable ones
 
-> **Why this file exists.** "A tool that can't be invoked = it doesn't exist." `tools/console.py status`
-> currently shows **37/168 available**; the rest are blocked on `needs-install`, `cold-mcp`
-> (configured-but-not-connected), or `needs-key`. This guide ranks the highest-value blockers by
+> **Why this file exists.** "A tool that can't be invoked = it doesn't exist." Run `python tools/console.py
+> status` for the LIVE available count (illustrative: ~81/168 as of 2026-06; it drifts as you configure
+> tools); the rest are blocked on `needs-install`, `cold-mcp` (configured-but-not-connected), or
+> `needs-key`. This guide ranks the highest-value blockers by
 > **value × ease-to-activate, free-first**, and gives a verified recipe for each. It does NOT fill in
 > keys for you — per the "登录/付款交接" rule, the recipe stops at "USER pastes the key"; you only
 > produce the recipe and run the keyless install steps.
