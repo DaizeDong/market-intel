@@ -34,7 +34,7 @@ Claude Code already has a `deep-research` harness (fan-out → fetch → verify 
 
 `market-intel` is the **thin layer** that fills exactly that gap. It does **only three things nothing else does**, and delegates everything else:
 
-1. **Triage** — map a commercial topic to 1–N of 14 data domains.
+1. **Triage** — map a commercial topic to 1–N of 15 data domains.
 2. **Detect + guide install** — check which specialized MCP sources are actually connected (via `claude mcp list`, not unreliable tool-name guessing), and if a key source is missing, hand you the exact `claude mcp add` command — or open its **per-tool how-to doc** ([`reference/tools/`](skills/market-intel/reference/tools/index.md)) for install + auth + usage + gotchas, guided by a multi-level [install guide](skills/market-intel/reference/install-guide.md).
 3. **Quality guardrails** — citation verification, source tiers, multi-source corroboration, mandatory disconfirmation, explicit gaps.
 
