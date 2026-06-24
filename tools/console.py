@@ -238,12 +238,23 @@ KEYLESS_WEB = {
     "chatgpt-apps-directory",
     # activation (self-evolve R1): keyless endpoints live-verified HTTP 200 (no key, UA only)
     "coingecko-mcp", "blockscout-mcp", "barker", "mcp-hn",
+    # activation R2: GDELT DOC 2.0 is a keyless public API (live-checked: responds without a
+    # key, only a 1-req/5s rate-limit notice — no auth).
+    "gdelt-mcp",
 }
 
 # Tools that are really "a skill you invoke", not an installable/connectable source. Treated as
 # available (the skill ships with the harness) with a note.
 SKILL_BACKED = {
     "research-lit-skill", "alphaxiv", "semantic-scholar", "static-blog",
+}
+
+# Tools served by a CONNECTED Claude *plugin* MCP. Plugin MCPs don't appear in `claude mcp list`
+# (only user/project-scoped servers do), so the mcp_match path can't see them — but they are
+# genuinely usable in-session. Listed here only after a live check confirmed the plugin works
+# (huggingface: hf_whoami → authenticated; playwright: in active use this session).
+PLUGIN_MCP_BACKED = {
+    "huggingface", "playwright-mcp",
 }
 
 
@@ -552,6 +563,9 @@ def compute_states(tool, snap, gh_cache):
     if avail != YES and slug in KEYLESS_WEB:
         avail = YES
         how.append("keyless web-API (assumed reachable; not pinged)")
+    if avail != YES and slug in PLUGIN_MCP_BACKED:
+        avail = YES
+        how.append("connected plugin MCP (not shown in `claude mcp list`; live-checked)")
 
     # ---- companion repo says installed (with key present) ----
     comp = comp_tools.get(slug)
