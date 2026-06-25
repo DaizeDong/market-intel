@@ -1,13 +1,6 @@
 ---
 name: market-intel
-description: >-
-  Use when a research request needs specialized COMMERCIAL data sources — X/Twitter,
-  e-commerce pricing, finance/markets, crypto, SEO/keywords, social media, news sentiment,
-  lead-gen — and benefits from picking the right MCP source (and installing it if missing)
-  before investigating. Triggers on market research, competitor analysis, product/selling
-  research, arbitrage scouting, social/X sentiment, SEO intel, trend discovery. NOT for
-  single-fact lookups or general web reports (use deep-research) or academic literature
-  (use research-lit).
+description: "Use for COMMERCIAL data (X/Twitter, e-commerce, finance, SEO, social, news) via the right MCP. Triggers: market research, competitor analysis, X sentiment, SEO, trends."
 allowed-tools: Read, Glob, Grep, Bash, Agent, Skill, WebSearch, WebFetch
 ---
 
