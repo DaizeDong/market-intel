@@ -58,6 +58,27 @@ It auto-activates on phrases like `市场调研`, `competitor analysis`, `resear
 
 ---
 
+## Config
+
+`market-intel` is **config-bearing** — it reads per-user state (keys, installed-tool registry) from a
+**separate, private** companion config repo. Repo-root contract: [CONFIG.md](CONFIG.md); authoritative
+deep spec: [`companion-config-spec.md`](skills/market-intel/reference/companion-config-spec.md) (v1.3, STABLE).
+
+- **Mount (discovery order):** `$MARKET_INTEL_CONFIG` → `~/.market-intel-config/` →
+  `~/.config/market-intel-config/`. First that exists wins; absent = runs in matrix-only mode.
+- **First time:**
+  ```bash
+  python scripts/init_config.py        # stamp a conformant skeleton (deterministic)
+  export MARKET_INTEL_CONFIG=~/.market-intel-config  # or pass --out <dir> to init
+  python scripts/verify_config.py       # doctor: PASS/FAIL, names what is missing
+  ```
+- **Switch configs (hot-swap):** point the env var at another config dir — configs are self-contained,
+  no other change needed: `export MARKET_INTEL_CONFIG=~/configs/work` ↔ `~/configs/personal`.
+- **Secrets:** Mode B — the companion repo is separate and private; `secrets/*` is gitignored and never
+  enters git; back up out-of-band.
+
+---
+
 ## Quick start — install the free no-key bootstrap pack (3 minutes)
 
 Want to try it without configuring API keys? Install these 3 free, no-key MCPs first — they cover

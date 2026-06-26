@@ -26,3 +26,20 @@ __pycache__/
 
 # Console availability snapshot — TTL probe state, no git history
 metrics/availability-cache.json
+
+# Secrets gate (config-spec E6 / Mode B) — defense in depth.
+# The companion config repo is separate & private; this block ensures that even if a
+# config/secret file is ever dropped into this skill repo, it can never enter git.
+secrets/*
+!secrets/README.md
+!secrets/.gitkeep
+*.env
+!*.env.template
+!env.template
+claude.json
+.claude.json
+*credentials*.json
+*.key
+*.pem
+!*.key.template
+!*.pem.template

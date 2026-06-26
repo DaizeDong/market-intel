@@ -56,6 +56,26 @@ git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market
 
 ---
 
+## 配置
+
+`market-intel` 是**带 config 的 skill** —— 它从一个**独立、私有**的伴随 config 仓读取每用户状态(密钥、已装工具
+注册表)。仓根契约见 [CONFIG.md](CONFIG.md);权威深规范见
+[`companion-config-spec.md`](skills/market-intel/reference/companion-config-spec.md)(v1.3, STABLE)。
+
+- **挂载(发现顺序):** `$MARKET_INTEL_CONFIG` → `~/.market-intel-config/` →
+  `~/.config/market-intel-config/`。命中第一个即用;都没有则降级为纯矩阵模式照常运行。
+- **首次配置:**
+  ```bash
+  python scripts/init_config.py        # 生成符合规范的 config 骨架(确定性)
+  export MARKET_INTEL_CONFIG=~/.market-intel-config  # 或给 init 传 --out <dir>
+  python scripts/verify_config.py       # doctor:逐项 PASS/FAIL,明确报缺什么
+  ```
+- **切换 config(即插即用):** 把环境变量指向另一个 config 目录即可 —— config 自包含,无需别的改动:
+  `export MARKET_INTEL_CONFIG=~/configs/work` ↔ `~/configs/personal`。
+- **密钥:** Mode B —— 伴随 config 仓独立私有;`secrets/*` 已 gitignore,永不入库;请用库外备份。
+
+---
+
 ## 快速开始 — 装免费无密钥三件套（3 分钟）
 
 不想配 API key 也想试用?先装这 3 个免费无密钥的 MCP —— 覆盖 HN / Reddit 风格社区 + 全球趋势 + AI 论文,零成本:
