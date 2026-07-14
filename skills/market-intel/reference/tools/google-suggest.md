@@ -23,7 +23,7 @@ None — no account, no API key, no token. No secret-hygiene concern (nothing to
 ## Usage — call examples
 ```bash
 curl "https://suggestqueries.google.com/complete/search?client=firefox&q=patio-heater+led+light+bar&hl=en&gl=us"
-# -> ["patio-heater outdoor unit", ["patio heater outdoor wiring", "...curved", "...amazon", ...]]
+# -> ["patio-heater outdoor heater", ["patio heater outdoor wiring", "...curved", "...amazon", ...]]
 ```
 ```python
 import requests
