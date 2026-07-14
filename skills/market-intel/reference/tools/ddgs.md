@@ -21,7 +21,7 @@ None — no account, no API key, no secret-hygiene concern.
 ## Usage — call examples
 ```python
 from ddgs import DDGS
-results = DDGS().text("patio-heater outdoor unit", region="us-en", max_results=20)
+results = DDGS().text("patio-heater outdoor heater", region="us-en", max_results=20)
 # each: {'title':..., 'href':..., 'body':...}
 news = DDGS().news("ev charging market", max_results=10)
 ```
