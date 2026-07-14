@@ -1,0 +1,5 @@
+# .pii-allow -- real-world identifiers this repo is ALLOWED to contain. Each needs a reason.
+# Legitimate: a vendor's PUBLIC contact address that the tool reference documents.
+# NEVER legitimate: the operator's own data.
+
+hello@twitterapi.io                   # twitterapi.io's published support address, quoted in its tool reference
