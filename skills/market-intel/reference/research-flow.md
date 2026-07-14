@@ -142,10 +142,14 @@ matrix, risks & counter-evidence, then the **Coverage-gaps** ledger — which ma
 
 ## 9. Close the loop (optional, cheap)
 
-Append one line per source actually touched to `metrics/live-runs.jsonl` (reuses guardrail verdicts;
+Append one line per source actually touched to the live-run ledger (reuses guardrail verdicts;
 near-zero extra cost). This is the highest-value error signal for the next refresh sweep — a source
-flagged `dead` in real use auto-nominates for the deletion path. If the repo isn't checked out, note
-the observations in the reply so they aren't lost.
+flagged `dead` in real use auto-nominates for the deletion path.
+
+The ledger lives OUTSIDE this repo — `~/.market-intel-config/data/metrics/live-runs.jsonl`, resolved
+by `tools/datadir.py` — because an entry records what you were actually researching. If the data dir
+does not exist, note the observations in the reply so they aren't lost; never write them into the
+repo. Shape: `metrics/live-runs.jsonl.example`.
 
 ---
 
@@ -163,5 +167,5 @@ the observations in the reply so they aren't lost.
 7. verify: 8 guardrails (citation gate, >=2 indep, tiers, no silent degrade, timestamps,
       disconfirmation, conflict matrix, failures->gaps)
 8. synthesize: report-template.md + coverage ledger (invoked/available + gate buckets + JIT)
-9. close loop: append metrics/live-runs.jsonl (optional)
+9. close loop: append the live-run ledger in the PRIVATE store (optional)
 ```
