@@ -1,0 +1,28 @@
+{
+  "_comment": [
+    "Every path in a public skill repo belongs to exactly one class (Skill Repo Spec v1 s9).",
+    "TOOL    = code, SKILL.md, reference docs, and metrics ABOUT THE SKILL. Public.",
+    "FIXTURE = tests and examples. Public, SYNTHETIC, produced by tools/make_fixtures.py.",
+    "DATA    = anything a REAL RUN produced. Never git-tracked; lives in the private companion",
+    "          config, resolved at runtime by tools/datadir.py. The repo ships only the schema.",
+    "",
+    "The line here is subtle and worth stating: metrics/ holds BOTH classes.",
+    "  history.jsonl / sweep-*.json / doc-drift-cache.json  -> TOOL. They measure the SKILL",
+    "      (domain counts, source-catalog diffs, a README hash). No real run is described.",
+    "  live-runs.jsonl                                      -> DATA. It is one line per source",
+    "      touched during a REAL research run, so it is a record of what the operator was",
+    "      actually investigating. Tool knowledge distilled FROM it (which source works, which",
+    "      route falls back) is published -- that is what reference/tools/*.md already is. The",
+    "      raw ledger is not.",
+    "Enforced by tools/data_boundary.py, in .githooks and in CI."
+  ],
+  "data": [
+    "skills/market-intel/metrics/live-runs.jsonl"
+  ],
+  "data_sealed": [
+    "metrics/live-runs.jsonl"
+  ],
+  "_sealed_note": "The repo-root ledger is the ledger's OLD home (11 entries, 2026-06-02..03). Nothing writes there any more -- both the reader (tools/feedback-bump.py) and the writer (tools/incident_helper.py) resolve through tools/datadir.py. It is declared sealed rather than deleted-and-forgotten so that re-adding it is a hard failure, not a quiet regression: .gitignore alone is advisory and `git add -f` walks straight through it.",
+  "fixture": [],
+  "_data_home": "~/.market-intel-config/data/   (override with $MARKET_INTEL_DATA_DIR)"
+}

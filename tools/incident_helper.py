@@ -42,8 +42,36 @@ except Exception:
     pass
 
 # ─── paths ───────────────────────────────────────────────────────────────────
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from datadir import resolve_data_dir, DataDirNotInitialized  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LIVE_RUNS = os.path.join(ROOT, "skills", "market-intel", "metrics", "live-runs.jsonl")
+SKILL = "market-intel"
+
+
+def live_runs_path() -> str:
+    """Where a real-run observation gets appended: the PRIVATE store, or nowhere at all.
+
+    This is the WRITER, and unlike the reader in feedback-bump.py it must never degrade quietly.
+    A writer that shrugs when the destination is missing has exactly two options, and both are the
+    bug: drop the operator's observation on the floor, or "helpfully" fall back to a path inside
+    the repo -- which is precisely how live-runs.jsonl came to sit in a public repo, one real
+    research run at a time, recording what the operator was investigating. So: raise, with
+    instructions, and let the human decide where their data lives.
+    """
+    d = resolve_data_dir(SKILL)
+    if d is None:
+        raise DataDirNotInitialized(
+            "market-intel has no private data directory, so there is nowhere to record this\n"
+            "observation. A live-run entry describes what YOU were actually researching -- it is\n"
+            "data, not tool knowledge, and it never goes back into the public repo.\n"
+            "    mkdir -p ~/.market-intel-config/data/metrics\n"
+            "    (or set MARKET_INTEL_DATA_DIR)\n"
+            "The shape is in skills/market-intel/metrics/live-runs.jsonl.example."
+        )
+    return os.path.join(str(d), "metrics", "live-runs.jsonl")
+
+
 DOMAINS_DIR = os.path.join(ROOT, "skills", "market-intel", "reference", "domains")
 SOURCES_INDEX = os.path.join(ROOT, "skills", "market-intel", "reference", "sources-index.md")
 
@@ -281,18 +309,19 @@ def _prompt_yn(question: str) -> bool:
 
 def apply_live_runs_append(entry_line: str) -> None:
     """Append a single line to live-runs.jsonl — UTF-8, no BOM, LF terminated."""
-    os.makedirs(os.path.dirname(LIVE_RUNS), exist_ok=True)
+    live_runs = live_runs_path()          # raises if uninitialized — never falls back into the repo
+    os.makedirs(os.path.dirname(live_runs), exist_ok=True)
     # Read existing content as utf-8-sig (BOM-safe), write back as utf-8.
     existing = ""
-    if os.path.exists(LIVE_RUNS):
-        with open(LIVE_RUNS, "r", encoding="utf-8-sig") as f:
+    if os.path.exists(live_runs):
+        with open(live_runs, "r", encoding="utf-8-sig") as f:
             existing = f.read()
     if existing and not existing.endswith("\n"):
         existing += "\n"
     new_content = existing + entry_line + "\n"
-    with open(LIVE_RUNS, "w", encoding="utf-8", newline="\n") as f:
+    with open(live_runs, "w", encoding="utf-8", newline="\n") as f:
         f.write(new_content)
-    print(f"  ✓ appended to {LIVE_RUNS}")
+    print(f"  ✓ appended to {live_runs}")
 
 
 def apply_shard_edit(domain: str, from_line: str, to_block: str) -> None:
