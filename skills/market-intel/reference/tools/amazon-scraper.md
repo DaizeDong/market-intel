@@ -16,7 +16,7 @@ Free Amazon scraper covering **24 Amazon sites** (.com/.co.uk/.de/.co.jp/…): s
 No API key for the scraper itself → **no secret-hygiene key concern**. At scale you'll supply your own **proxy pool** (Amazon anti-bot is strong; software is free, proxies aren't — shard). No Amazon account needed for public search/detail/review reads.
 
 ## Usage — call examples
-Library/CLI, not MCP: call its search function with a query + Amazon domain to get a result list, then its product function on an ASIN/URL for detail + reviews. Minimal flow: search `"patio-heater outdoor unit"` on `amazon.com` → take top ASINs → fetch detail+reviews per ASIN → hand the structured rows to the agent for compare/sentiment. Exact function names: read them off the live README (UNVERIFIED here — keep C1/C5, don't assume the signature).
+Library/CLI, not MCP: call its search function with a query + Amazon domain to get a result list, then its product function on an ASIN/URL for detail + reviews. Minimal flow: search `"patio-heater outdoor heater"` on `amazon.com` → take top ASINs → fetch detail+reviews per ASIN → hand the structured rows to the agent for compare/sentiment. Exact function names: read them off the live README (UNVERIFIED here — keep C1/C5, don't assume the signature).
 
 ## General experience & gotchas (踩坑)
 - **No history** — it returns the *current* snapshot only. For price/BSR/sales-rank *over time*, Keepa ① is irreplaceable; this tool can't backfill (shard).
