@@ -9,7 +9,7 @@ into a permanent matrix improvement plus a feedback-loop record, without silent 
 
 ---
 
-## 1. Log to `metrics/live-runs.jsonl`
+## 1. Log to the live-run ledger (`<data>/metrics/live-runs.jsonl`, PRIVATE store — not this repo)
 
 Append one JSON line. Schema:
 
@@ -31,7 +31,7 @@ Append one JSON line. Schema:
 
 Append with redirection — do not pretty-print, do not reorder existing lines, one line per entry.
 
-**Verify:** `tail -1 metrics/live-runs.jsonl | python -c "import json,sys; json.loads(sys.stdin.read())"` exits 0.
+**Verify:** `tail -1 "$(python tools/datadir.py --path market-intel metrics/live-runs.jsonl)" | python -c "import json,sys; json.loads(sys.stdin.read())"` exits 0.
 
 **Common mistake:** logging the outcome as `fallback_used` or `unverifiable` (legacy free-form
 strings present in older entries). Step -1's bucket table only knows the six above; anything

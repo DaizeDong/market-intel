@@ -302,10 +302,21 @@ configurable-with-setup vs hard-gap), full source list.
 ## Close the feedback loop (Step 5 — write what you observed)
 
 The refresh mechanism is open-loop unless real usage feeds back. So at the end of a real research
-run, append one line per source you actually touched to the repo's `metrics/live-runs.jsonl` (this
-reuses verdicts the guardrails above already produced — near-zero extra cost). This is the highest-
-value error signal: it tells the next refresh which matrix entries the real world just proved
-right or wrong.
+run, append one line per source you actually touched to the live-run ledger (this reuses verdicts
+the guardrails above already produced — near-zero extra cost). This is the highest-value error
+signal: it tells the next refresh which matrix entries the real world just proved right or wrong.
+
+**The ledger is NOT in this repo.** It resolves to `~/.market-intel-config/data/metrics/live-runs.jsonl`
+(or `$MARKET_INTEL_DATA_DIR`) via `tools/datadir.py`. A live-run entry records what YOU were actually
+researching — that is data, not tool knowledge, and this repo is public. It used to be git-tracked
+here, and a public repo accumulated the operator's research history one real run at a time. If the
+data dir does not exist, the tool is uninitialized: create it, or note the observations in your reply
+so they are not lost. **Never write the ledger back into the repo.** The shape is in
+`metrics/live-runs.jsonl.example`.
+
+What DOES get published is the knowledge distilled from the ledger — "this source is dead", "that
+route falls back" — which lands in `reference/tools/*.md` on the next sweep. The lesson is public;
+the research history is not.
 
 ```jsonc
 { "ts":"<UTC>", "domain":"x-twitter", "source":"d60/twikit", "route":"④",

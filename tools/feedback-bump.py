@@ -57,9 +57,30 @@ from pathlib import Path
 
 # --- paths -----------------------------------------------------------------
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from datadir import resolve_data_dir  # noqa: E402
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
-LIVE_RUNS = REPO_ROOT / "skills" / "market-intel" / "metrics" / "live-runs.jsonl"
 TOOLS_DIR = REPO_ROOT / "skills" / "market-intel" / "reference" / "tools"
+
+SKILL = "market-intel"
+
+
+def live_runs_path() -> Path | None:
+    """The live-run ledger, in the PRIVATE store. None when this skill is uninitialized.
+
+    live-runs.jsonl records what happened during REAL research runs, which means it records what
+    the operator was actually researching. It used to be git-tracked here; a public repo therefore
+    accumulated their domains of interest and their findings, one line per run, forever. So it is
+    DATA (see .dataclass.json) and it resolves outside the repo, with no in-repo fallback.
+
+    A READER may degrade gracefully: "no ledger" is not an error, it is an uninitialized tool, and
+    a sweep with no live-run feedback is simply a sweep with no live-run feedback. The WRITER
+    (incident_helper.py) must NOT degrade -- silently dropping a real observation, or worse,
+    falling back to a path inside the repo, is the whole bug this boundary exists to close.
+    """
+    d = resolve_data_dir(SKILL)
+    return None if d is None else d / "metrics" / "live-runs.jsonl"
 
 LAST_VERIFIED_RE = re.compile(r"^(## Last verified:\s*)(\d{4}-\d{2})\s*$", re.MULTILINE)
 
@@ -482,7 +503,18 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR: --since must be YYYY-MM-DD, got {args.since!r}", file=sys.stderr)
         return 64
 
-    entries = load_live_runs(LIVE_RUNS, args.since)
+    lr = live_runs_path()
+    if lr is None:
+        print("market-intel is uninitialized: no private data dir, so there is no live-run ledger")
+        print("to consume. That is the correct state for a freshly cloned public skill -- it ships")
+        print("as a tool, not as somebody's research history. Point it at your own store:")
+        print("    mkdir -p ~/.market-intel-config/data/metrics")
+        print("    (or set MARKET_INTEL_DATA_DIR)")
+        print("The shape is in skills/market-intel/metrics/live-runs.jsonl.example.")
+        print("\nStep -1 has no feedback to act on; treating this as a clean sweep.")
+        return 0
+
+    entries = load_live_runs(lr, args.since)
     buckets = bucket_entries(entries)
     report = build_report(buckets, args.since, len(entries))
 

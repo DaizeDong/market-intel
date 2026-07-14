@@ -36,8 +36,9 @@ of its cadence tier.
 > 发现阶段的完整规则见下方 **「Discovery phase（前沿发现 + 质量筛选）」** 一节。它产出一个
 > 「候选池（candidate pool）」，核实/差分阶段只处理通过准入门槛的候选 + 旧条目复检。
 
--1. **Step -1 — 消费 `metrics/live-runs.jsonl`（必跑，v0.17.0 起）。** 在 Horizon scan 之前,先读
-    `metrics/live-runs.jsonl` 自上次 refresh 以来的所有条目（按 `ts` 过滤;首次跑取最近 90 天）,按
+-1. **Step -1 — 消费 live-run 账本（必跑，v0.17.0 起）。** 账本在**私有 store**（`~/.market-intel-config/
+    data/metrics/live-runs.jsonl`，由 `tools/datadir.py` 解析），**不在本仓**：它记录你真实在调研什么，是
+    data 而非工具知识。在 Horizon scan 之前,先读账本自上次 refresh 以来的所有条目（按 `ts` 过滤;首次跑取最近 90 天）,按
     `outcome` 分桶:
 
     | outcome | 含义 | 该轮的处置 |
@@ -386,10 +387,10 @@ CHANGELOG 0.10.2）——改完工具后重跑该脚本即可保持同步，不�
 追踪链不断。**改名（rebrand，如 Polygon→Massive）不是死亡**：保留为 live、标 REBRAND，别误套死亡码。
 
 ### R4. 经验必须真实，禁止编造
-文档的「General experience & gotchas / 踩坑」只能来自：分片沉淀的真实运行教训、`metrics/live-runs.jsonl`
+文档的「General experience & gotchas / 踩坑」只能来自：分片沉淀的真实运行教训、live-run 账本（私有 store）
 反馈、或本轮实跑/实抓所得——**绝不凭模型记忆编造**（C1/C6），所有 star/价格实测带 URL。每轮 sweep 派一个
 **零上文的独立审计 subagent**（仿 `citation-audit` 模式）抽检若干文档：核对仓库存在性、star 容差、价格、
-以及 shard↔doc↔index↔pricing 四者自洽，发现即修。`metrics/live-runs.jsonl` 是经验的活水——真实调研中触到
+以及 shard↔doc↔index↔pricing 四者自洽，发现即修。live-run 账本是经验的活水——真实调研中触到
 新坑就回写一行，下轮据此把对应 `tools/<slug>.md` 的踩坑段加厚。
 
 ## Cleanup pass (mandatory every sweep)
@@ -424,10 +425,11 @@ get buried.
    merge candidates.
 6. **Per-tool docs with `## Last verified` >9mo old** — covered by the STALE gate, but
    the cleanup pass should triage: re-verify, deprecate, or tombstone (`⚠ Avoid (dead)`).
-7. **Skill `metrics/live-runs.jsonl`** — keep all entries; this is the feedback ledger and
-   the refresh consumes it. Don't compress. **Year-rollover convention (added 2026-06-17
-   ops audit):** at the first Cleanup pass each January, freeze last year's entries into
-   `metrics/live-runs.<YYYY>.jsonl` and start a fresh `live-runs.jsonl`. Step -1 looks at
+7. **The live-run ledger** (`<data>/metrics/live-runs.jsonl` in the PRIVATE store, NOT this
+   repo) — keep all entries; this is the feedback ledger and the refresh consumes it. Don't
+   compress. **Year-rollover convention (added 2026-06-17 ops audit):** at the first Cleanup
+   pass each January, freeze last year's entries into `<data>/metrics/live-runs.<YYYY>.jsonl`
+   and start a fresh `live-runs.jsonl`. Step -1 looks at
    `live-runs.jsonl` first (default 90-day window); historical year files are read only
    when `--since` predates the current file's earliest entry. Prevents Step -1 scan cost
    from creeping past 0.5s at 500+ entry sizes.
