@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.28.0] — 2026-07-15
+
+Stand up the weekly E1-E6 high-signal poller the refresh-protocol always specified but never had,
+and wire the whole market-intel automation through schedule-reminder for unified local management.
+
+### Added
+- `tools/poll_surfaces.py` — deterministic, LLM-free weekly poller for the six auto-pollable
+  high-signal surfaces (refresh-protocol.md E-tier): E1 PulseMCP RSS, E2 GitHub Search velocity
+  (`gh api`), E3 HF Spaces trending, E4 npm download velocity (watchlist), E5 Show HN (Algolia),
+  E6 AI early-demo YouTube RSS. Each surface is isolated (one down != whole poll down); candidates
+  are deduped and appended to a PRIVATE inbox the monthly sweep consumes. First live run: 5/6
+  surfaces green (E1 is Cloudflare-walled to non-browser UAs -> degrades gracefully), 27 candidates.
+- `tools/surfaces.json` — public config (URLs / channel handles / thresholds only; no secrets).
+
+### Changed
+- **Data boundary:** the poller's output is a real-run record -> written to the private data home
+  (`$MARKET_INTEL_DATA_DIR/surface-inbox.jsonl`, default `~/.market-intel-config/data/`), never into
+  this public repo. The repo ships only the poller code + schema. Reads degrade; the inbox WRITE
+  hard-fails (no repo fallback).
+- **Automation (outside this repo, noted for provenance):** the monthly `RefreshMarketIntel` job was
+  timing out at exactly 30 min (2026-07 run, exit 124) and then getting discarded for editing root
+  README files (out of scope). Fixed: 30 -> 60 min timeout, the sweep now consumes the weekly inbox
+  so discovery is lighter, an explicit "never touch root files" rule, egress moved from raw
+  discord_relay to schedule-reminder's `relay.py` (infra stream), and both jobs now push a
+  schedule-reminder heartbeat watchdog — the local replacement for the GitHub "heartbeat: no refresh"
+  issue (#2). A new weekly Windows task drives the poller.
+
 ## [0.27.0] — 2026-07-15
 
 Refresh sweep (two full Workflow passes: ledger + horizon + blind multi-angle
