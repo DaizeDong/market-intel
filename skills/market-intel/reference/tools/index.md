@@ -13,6 +13,7 @@ directory** — that breaks progressive loading. Install mechanics overview: `re
 - [twscrape](twscrape.md) — ③ · self-host X search with account rotation
 - [X official API](x-official-api.md) — ① · official read+write incl media, needs Basic $200/mo+
 - [Panniantong/Agent-Reach](agent-reach.md) — ④③ · free multi-platform read/search router (X+Reddit+YT+GitHub+Bili+XHS), zero API fees (NEW 2026-07)
+- [FxEmbed](fxembed.md) — ②③ · free zero-auth single post/thread JSON resolver (text+media+metrics), no key (NEW 2026-07)
 
 ## reddit-community
 - ★ [mcp-hn](mcp-hn.md) — ① · free no-key Hacker News top/new/ask/search/comments
@@ -93,6 +94,7 @@ directory** — that breaks progressive loading. Install mechanics overview: `re
 - [Google Suggest](google-suggest.md) — ④ · free no-key keyword-ideas/autocomplete expander
 - [respectaso](respectaso.md) — ④ · free ASO App-Store keyword research (iOS only)
 - [Auriti-Labs/geo-optimizer-skill](geo-optimizer-skill.md) — ④① · OSS GEO/AEO answer-engine optimization toolkit + MCP (NEW 2026-07)
+- [every-app/open-seo](open-seo.md) — ①③ · free OSS Semrush/Ahrefs alt (keyword/SERP/backlink/audit) w/ MCP (NEW 2026-07)
 
 ## social-publishing
 - ★ [Buffer](buffer.md) — ① · 11-platform schedule, free tier + MCP
@@ -112,6 +114,7 @@ directory** — that breaks progressive loading. Install mechanics overview: `re
 - [Mastodon.py](mastodon-py.md) — ① · official Mastodon lib, no ban
 - [postiz-agent](postiz-agent.md) — ③ · official Postiz agent front-end, 28+ platforms
 - [social-media-agent](social-media-agent.md) — ③ · source/curate/schedule agent (content pipeline)
+- [yikart/AiToEarn](aitoearn.md) — ①④ · free OSS desktop multi-publish incl. CN majors (Douyin/XHS/Kuaishou), GUI handoff (NEW 2026-07)
 
 ## content-cms
 - ★ [WordPress MCP](wordpress-mcp.md) — ① · post CRUD + publish, Application Password
