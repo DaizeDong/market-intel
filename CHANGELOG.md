@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.28.1] — 2026-07-15
+
+Surface poller tuning after the first live round.
+
+### Fixed
+- **E1 is live again.** The PulseMCP newsletter RSS is Cloudflare-walled to non-browser UAs, but
+  PulseMCP exposes a keyless directory API (`v0beta/servers`) that works with a browser UA. E1 now
+  pulls that, applies a traction filter (github stars OR package downloads), and dedups against the
+  inbox so genuinely-new notable MCP servers surface over weeks. All 6 surfaces now green.
+
+### Changed
+- **E3 calibrated:** `min_trending_score` 0 -> 40 (round-1 distribution had a natural break ~40;
+  keeps ~top 9, drops the low-signal tail). **E5 loosened:** `min_points` 30 -> 15, `min_comments`
+  10 -> 5, so a weekly poll catches Show HN launches at 24-72h before they accumulate 30 points (the
+  monthly sweep re-verifies, so over-including early is safe).
+
 ## [0.28.0] — 2026-07-15
 
 Stand up the weekly E1-E6 high-signal poller the refresh-protocol always specified but never had,

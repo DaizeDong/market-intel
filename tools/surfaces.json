@@ -1,17 +1,21 @@
 {
   "_comment": "Config for tools/poll_surfaces.py (weekly E1-E6 high-signal poller, refresh-protocol.md E-tier). Public: only URLs, channel handles, and numeric thresholds. Tune thresholds after 2-3 rounds of real inbox review (calibrate E3 trendingScore + E4 WoW to your noise tolerance).",
   "E1": {
-    "_note": "PulseMCP feed is Cloudflare-walled to non-browser UAs (403/404 on plain GET). E1 degrades gracefully; if you want it live, fetch via a browser/scraper route (Scrapling/Bright Data) out of band and drop items into the inbox manually, or update this URL once a keyless feed exists.",
-    "feeds": ["https://www.pulsemcp.com/feed.xml"]
+    "_note": "PulseMCP keyless directory API (the newsletter feed.xml is Cloudflare-walled). The v0beta endpoint needs a BROWSER user_agent (tool UAs get rate-limited/410). No created-date field -> 'what's new' = dedup vs inbox over weeks; traction filter (stars OR downloads) keeps it to notable servers.",
+    "api_url": "https://api.pulsemcp.com/v0beta/servers",
+    "count_per_page": 100,
+    "min_stars": 50,
+    "min_downloads": 1000,
+    "user_agent": "Mozilla/5.0 (market-intel surface poller)"
   },
   "E2": {
     "topics": ["mcp-server", "claude-skill", "llm-agent"],
     "min_stars": 50
   },
   "E3": {
-    "_note": "HF returns sorted by trendingScore; limit caps weekly inbox volume. Raise min_trending_score after 2-3 rounds once you see the score distribution.",
-    "limit": 20,
-    "min_trending_score": 0
+    "_note": "HF returns sorted by trendingScore; limit caps the fetch. min_trending_score=40 chosen from round-1 distribution [127,125,107,68,65,54,47,43,43,38,38,35,34,32,31,30,30,28,28,28] — natural break ~40 keeps ~top 9, cuts the 28-38 tail. Re-tune as the distribution shifts (scores are relative).",
+    "limit": 30,
+    "min_trending_score": 40
   },
   "E4": {
     "_note": "npm WoW-velocity watchlist (verification surface). Add candidate packages here as they show up in other surfaces; downloads beat stars for anti-fake signal.",
@@ -25,9 +29,10 @@
     "min_wow": 2.0
   },
   "E5": {
+    "_note": "Weekly poll catches Show HN 24-72h old, before posts accumulate 30 pts. Lowered to 15pts OR 5 comments to catch launches early — the monthly sweep re-verifies, so over-including at the weekly discovery stage is fine.",
     "query": "mcp OR agent OR scraper OR skill",
-    "min_points": 30,
-    "min_comments": 10
+    "min_points": 15,
+    "min_comments": 5
   },
   "E6": {
     "_note": "AI early-demo channels. ucid left blank -> resolved at runtime from handle and can be pasted back here once known (first-run resolution, per protocol).",
