@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.27.0] — 2026-07-15
+
+Refresh sweep (two full Workflow passes: ledger + horizon + blind multi-angle
+discovery across 16 domains + L0/L1 verify) and a fix for the pre-existing
+orphan-doc / registry debt the 2026-07-13 partial sweep left on main.
+
+### Fixed (pre-existing gate debt from 2026-07-13)
+- Wired 5 committed tool docs into `index.md` + `registry.json` (they had docs
+  but no index/registry rows -> REGISTRY BLOCK on main): agent-reach (x-twitter),
+  scrapling (web-scraping), pricebuddy (ecommerce-arbitrage), mcp-searxng
+  (web-scraping), geo-optimizer-skill (seo-keywords). registry count 168 -> 173.
+- STAR refresh: AgricIDaniel/claude-seo 8.5k -> 11.5k (gh-api 11497, pushed
+  2026-07-06) in the ready-skills shard + tool doc (>25% drift cleared).
+AUDIT: workflow-L0L1 verdict=pass — gh-api existence/freshness + top-pick-impact
+  lens (the two-pass Workflow) attested the promoted set.
+
+### Rejected / death-coded (do not re-discover)
+- run-llama/crossposter — D-STALE (last push 2025-06-02, 13.4mo > 12mo gate);
+  superseded by Postiz/AiToEarn on every axis. Not added.
+- cullenwatson/StaffSpy (leadgen-crm, existing entry) — D-STALE re-verify flag
+  (~12mo, last push 2025-06-17); kept pending a maintained-check, watch next sweep.
+
+### Discovery pool banked (`discovery-state.md` `## 2026-07-15 sweep`)
+- 48 LAND candidates (union of the two passes) + HOLD watchlist + horizon
+  proposals recorded for human promotion to shards. High-signal not-yet-promoted:
+  FxTwitter/FxEmbed, Camoufox, patchright, perp-cli, Vybe Solana MCP, AiToEarn,
+  yfinance-mcp, GrowChief, open-seo, TrendRadar.
+
+### Horizon
+- NEW-DOMAIN proposal: **prediction-markets** (Polymarket/Kalshi implied-prob) —
+  recurred two months, cleared its own promotion bar; PROPOSAL only (H2/H3 human
+  gate), not auto-created.
+- FOLD: **x402** keyless pay-per-call route -> a web-scraping + pricing-install
+  note (pending).
+- **DefiLlama** official MCP (mcp.defillama.com/mcp) is LIVE but PAID-subscription;
+  free access stays REST-no-key -> a row-note only, NOT a free REPLACE.
+
+
 ## [0.26.0] — 2026-06-17
 
 First `claude -p` integrations + the doctrine that draws the line. Up to now
