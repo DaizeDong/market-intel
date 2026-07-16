@@ -83,19 +83,38 @@ def _data_home() -> str:
 
 # ----------------------------------------------------------------------------- surfaces
 def surface_E1_pulsemcp(cfg: dict) -> list[dict]:
-    """PulseMCP newsletter RSS — human-curated, highest MCP-discovery density, near-zero noise."""
-    feeds = cfg.get("E1", {}).get("feeds", ["https://www.pulsemcp.com/feed.xml"])
+    """PulseMCP directory API — notable MCP servers (keyless JSON). Replaces the Cloudflare-walled RSS.
+
+    The old newsletter feed.xml is 403/404 to non-browser UAs (Cloudflare). PulseMCP does expose a
+    keyless directory API (v0beta/servers) — but it is picky: plain tool UAs get rate-limited/410, a
+    BROWSER UA works. The directory has no 'created' field, so 'what's new' comes from dedup against
+    the inbox over weeks; a traction filter (github stars OR package downloads) keeps it to notable
+    servers, not every directory row.
+    """
+    e1 = cfg.get("E1", {})
+    api = e1.get("api_url", "https://api.pulsemcp.com/v0beta/servers")
+    cpp = int(e1.get("count_per_page", 100))
+    min_stars = int(e1.get("min_stars", 50))
+    min_dl = int(e1.get("min_downloads", 1000))
+    ua = e1.get("user_agent", "Mozilla/5.0 (market-intel surface poller)")
+    req = urllib.request.Request(f"{api}?count_per_page={cpp}",
+                                 headers={"User-Agent": ua, "Accept": "application/json"})
+    with urllib.request.urlopen(req, timeout=20) as r:
+        data = json.loads(r.read().decode("utf-8", "replace"))
     out = []
-    for feed in feeds:
-        raw = _http_get(feed, accept="application/rss+xml, application/xml, text/xml")
-        root = ET.fromstring(raw)
-        for item in root.iter("item"):
-            title = (item.findtext("title") or "").strip()
-            link = (item.findtext("link") or "").strip()
-            if not title:
-                continue
-            out.append({"surface": "E1", "key": f"E1:{link or title}", "title": title,
-                        "url": link, "signal": "curated", "raw": {}})
+    for s in data.get("servers", []):
+        stars = s.get("github_stars") or 0
+        dl = s.get("package_download_count") or 0
+        if stars < min_stars and dl < min_dl:  # traction filter: notable, not every row
+            continue
+        name = s.get("name") or s.get("url") or ""
+        if not name:
+            continue
+        out.append({"surface": "E1", "key": f"E1:{name}", "title": name,
+                    "url": s.get("external_url") or s.get("url") or "",
+                    "signal": f"{stars}star/{dl}dl",
+                    "raw": {"stars": stars, "downloads": dl, "pkg": s.get("package_name"),
+                            "desc": (s.get("short_description") or "")[:200]}})
     return out
 
 
