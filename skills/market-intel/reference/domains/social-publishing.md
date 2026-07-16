@@ -18,6 +18,7 @@ LinkedIn free but approval wall (legal entity + vetting).
 | **langchain-ai/social-media-agent** (2.6k★) | ③ | source/curate/schedule agent w/ human-in-loop | self-host + key | content-pipeline tier above the post APIs; pairs w/ Buffer/Postiz |
 | Mixpost (OSS) | ③ self-host | 11 platforms, REST+n8n, buy-once | self-host | Lite free / Pro $269 one-time |
 | X single: EnesCinr/twitter-mcp, OpenTweet | ①/② | post+search / hosted no-dev-portal | connected | X API cost自负 / OpenTweet $11.99/mo |
+| **yikart/AiToEarn** (23.8k★) OSS | ①/④ | one-click publish to CN majors (Douyin/XHS/Kuaishou/Shipinhao/Bili) + Western, AI captions | Electron desktop app, not MCP — GUI handoff | free OSS; ⚠ CN platforms strong risk-control, publish manually not automated |
 
 **Default pick:** Multi-platform cheap + official → Buffer. Claude Code MCP-native → **Publora**
 (replaces Blotato 2026-06-17). OSS self-host → Postiz. Front-load free platforms (Bluesky/Mastodon/Threads).
