@@ -1,8 +1,8 @@
 {
  "note": "Authoritative machine-readable tool registry. Every market-intel tool (repo + SaaS + lib) appears here exactly once. The gate (REGISTRY check) enforces registry <-> tools/index.md <-> tools/*.md three-way consistency, so NO tool — including non-GitHub SaaS — can lose its doc or fall out of tracking. Adding/removing a tool is an atomic op across shard + index + doc + this registry (refresh-protocol R1). Regenerate via the snippet in CHANGELOG 0.10.2.",
- "count": 168,
+ "count": 176,
  "by_kind": {
-  "repo": 96,
+  "repo": 104,
   "saas": 68,
   "lib": 4
  },
@@ -1349,6 +1349,70 @@
    "kind": "saas",
    "repo": null,
    "domain": "reddit-community",
+   "top_pick": false
+  },
+  {
+   "slug": "agent-reach",
+   "name": "Panniantong/Agent-Reach",
+   "kind": "repo",
+   "repo": "Panniantong/Agent-Reach",
+   "domain": "x-twitter",
+   "top_pick": false
+  },
+  {
+   "slug": "scrapling",
+   "name": "D4Vinci/Scrapling",
+   "kind": "repo",
+   "repo": "D4Vinci/Scrapling",
+   "domain": "web-scraping",
+   "top_pick": false
+  },
+  {
+   "slug": "pricebuddy",
+   "name": "jez500/pricebuddy",
+   "kind": "repo",
+   "repo": "jez500/pricebuddy",
+   "domain": "ecommerce-arbitrage",
+   "top_pick": false
+  },
+  {
+   "slug": "mcp-searxng",
+   "name": "ihor-sokoliuk/mcp-searxng",
+   "kind": "repo",
+   "repo": "ihor-sokoliuk/mcp-searxng",
+   "domain": "web-scraping",
+   "top_pick": false
+  },
+  {
+   "slug": "geo-optimizer-skill",
+   "name": "Auriti-Labs/geo-optimizer-skill",
+   "kind": "repo",
+   "repo": "Auriti-Labs/geo-optimizer-skill",
+   "domain": "seo-keywords",
+   "top_pick": false
+  },
+  {
+   "slug": "fxembed",
+   "name": "FxEmbed/FxEmbed",
+   "kind": "repo",
+   "repo": "FxEmbed/FxEmbed",
+   "domain": "x-twitter",
+   "top_pick": false
+  },
+  {
+   "slug": "aitoearn",
+   "name": "yikart/AiToEarn",
+   "kind": "repo",
+   "repo": "yikart/AiToEarn",
+   "domain": "social-publishing",
+   "top_pick": false
+  },
+  {
+   "slug": "open-seo",
+   "name": "every-app/open-seo",
+   "kind": "repo",
+   "repo": "every-app/open-seo",
+   "domain": "seo-keywords",
    "top_pick": false
   }
  ]
