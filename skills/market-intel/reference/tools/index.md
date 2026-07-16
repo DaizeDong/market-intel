@@ -12,6 +12,7 @@ directory** — that breaks progressive loading. Install mechanics overview: `re
 - ★ [twikit (+ mcp-twikit)](twikit.md) — ③④ · free self-host X read+write+DM, ready MCP
 - [twscrape](twscrape.md) — ③ · self-host X search with account rotation
 - [X official API](x-official-api.md) — ① · official read+write incl media, needs Basic $200/mo+
+- [Panniantong/Agent-Reach](agent-reach.md) — ④③ · free multi-platform read/search router (X+Reddit+YT+GitHub+Bili+XHS), zero API fees (NEW 2026-07)
 
 ## reddit-community
 - ★ [mcp-hn](mcp-hn.md) — ① · free no-key Hacker News top/new/ask/search/comments
@@ -34,6 +35,8 @@ directory** — that breaks progressive loading. Install mechanics overview: `re
 - [Apify (auto)](apify.auto.md) — ② · mechanical install/auth/usage companion to apify.md
 - [Patchright](patchright.md) — ④ · undetected-Playwright, passes Cloudflare/DataDome (free)
 - [crawl4ai](crawl4ai.md) — ③ · zero-cost self-host LLM crawler (primary doc under browser-automation)
+- [D4Vinci/Scrapling](scrapling.md) — ③④ · free adaptive stealth scraper + built-in MCP, auto-Cloudflare (NEW 2026-07)
+- [ihor-sokoliuk/mcp-searxng](mcp-searxng.md) — ③ · free self-host search MCP over SearXNG, Tavily replacement (NEW 2026-07)
 
 ## ecommerce-arbitrage
 - ★ [Keepa (+ MCP)](keepa.md) — ① · irreplaceable Amazon price/BSR history curve
@@ -45,6 +48,7 @@ directory** — that breaks progressive loading. Install mechanics overview: `re
 - [Shopify Storefront MCP](shopify-storefront-mcp.md) — ① · free per-shop catalog MCP
 - [Discount-Bandit](discount-bandit.md) — ④ · self-host multi-store price tracker
 - [omkarcloud/amazon-scraper](amazon-scraper.md) — ④ · 24 Amazon sites, anti-detect browser
+- [jez500/pricebuddy](pricebuddy.md) — ④ · free self-host multi-store price tracker (NEW 2026-07)
 
 ## finance-markets
 - ★ [SEC EDGAR MCP](sec-edgar-mcp.md) — ① · free no-key 13M+ filings, XBRL, insider
@@ -88,6 +92,7 @@ directory** — that breaks progressive loading. Install mechanics overview: `re
 - [Google Trends OSS (trendspy)](trendspy.md) — ④ · Trends after pytrends archived
 - [Google Suggest](google-suggest.md) — ④ · free no-key keyword-ideas/autocomplete expander
 - [respectaso](respectaso.md) — ④ · free ASO App-Store keyword research (iOS only)
+- [Auriti-Labs/geo-optimizer-skill](geo-optimizer-skill.md) — ④① · OSS GEO/AEO answer-engine optimization toolkit + MCP (NEW 2026-07)
 
 ## social-publishing
 - ★ [Buffer](buffer.md) — ① · 11-platform schedule, free tier + MCP
