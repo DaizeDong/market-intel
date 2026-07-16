@@ -1,0 +1,41 @@
+{
+  "_comment": "Config for tools/poll_surfaces.py (weekly E1-E6 high-signal poller, refresh-protocol.md E-tier). Public: only URLs, channel handles, and numeric thresholds. Tune thresholds after 2-3 rounds of real inbox review (calibrate E3 trendingScore + E4 WoW to your noise tolerance).",
+  "E1": {
+    "_note": "PulseMCP feed is Cloudflare-walled to non-browser UAs (403/404 on plain GET). E1 degrades gracefully; if you want it live, fetch via a browser/scraper route (Scrapling/Bright Data) out of band and drop items into the inbox manually, or update this URL once a keyless feed exists.",
+    "feeds": ["https://www.pulsemcp.com/feed.xml"]
+  },
+  "E2": {
+    "topics": ["mcp-server", "claude-skill", "llm-agent"],
+    "min_stars": 50
+  },
+  "E3": {
+    "_note": "HF returns sorted by trendingScore; limit caps weekly inbox volume. Raise min_trending_score after 2-3 rounds once you see the score distribution.",
+    "limit": 20,
+    "min_trending_score": 0
+  },
+  "E4": {
+    "_note": "npm WoW-velocity watchlist (verification surface). Add candidate packages here as they show up in other surfaces; downloads beat stars for anti-fake signal.",
+    "watchlist": [
+      "@modelcontextprotocol/sdk",
+      "@browserbasehq/stagehand",
+      "crawlee",
+      "firecrawl"
+    ],
+    "min_weekly": 500,
+    "min_wow": 2.0
+  },
+  "E5": {
+    "query": "mcp OR agent OR scraper OR skill",
+    "min_points": 30,
+    "min_comments": 10
+  },
+  "E6": {
+    "_note": "AI early-demo channels. ucid left blank -> resolved at runtime from handle and can be pasted back here once known (first-run resolution, per protocol).",
+    "channels": [
+      {"name": "Matthew Berman", "handle": "MatthewBerman", "ucid": ""},
+      {"name": "AI Explained", "handle": "aiexplained-official", "ucid": ""},
+      {"name": "Cole Medin", "handle": "ColeMedin", "ucid": ""},
+      {"name": "AI Coffee Break", "handle": "AICoffeeBreak", "ucid": "UCMLtBahI5DMrt0NPvDSoIRQ"}
+    ]
+  }
+}
