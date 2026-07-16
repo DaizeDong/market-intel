@@ -1,5 +1,55 @@
 # Changelog
 
+## [0.27.0] — 2026-07-15
+
+Refresh sweep (two full Workflow passes: ledger + horizon + blind multi-angle
+discovery across 16 domains + L0/L1 verify) and a fix for the pre-existing
+orphan-doc / registry debt the 2026-07-13 partial sweep left on main.
+
+### Fixed (pre-existing gate debt from 2026-07-13)
+- Wired 5 committed tool docs into `index.md` + `registry.json` (they had docs
+  but no index/registry rows -> REGISTRY BLOCK on main): agent-reach (x-twitter),
+  scrapling (web-scraping), pricebuddy (ecommerce-arbitrage), mcp-searxng
+  (web-scraping), geo-optimizer-skill (seo-keywords). registry count 168 -> 173.
+- STAR refresh: AgricIDaniel/claude-seo 8.5k -> 11.5k (gh-api 11497, pushed
+  2026-07-06) in the ready-skills shard + tool doc (>25% drift cleared).
+AUDIT: workflow-L0L1 verdict=pass — gh-api existence/freshness + top-pick-impact
+  lens (the two-pass Workflow) attested the promoted set.
+
+### Promoted to shards (this refresh, four-file each: shard + doc + index + registry)
+- **FxEmbed** (FxEmbed/FxEmbed, 4.8k★ MIT) -> x-twitter: free zero-auth single
+  post/thread JSON resolver (②/③), fills the "read ONE post's content, no key"
+  slot between twikit and paid twitterapi.io.
+- **yikart/AiToEarn** (23.8k★ MIT) -> social-publishing: free OSS desktop
+  multi-publish covering the CN majors (Douyin/XHS/Kuaishou/Shipinhao/Bili) that
+  Buffer/Publora do not; Electron GUI handoff, not MCP (documented honestly).
+- **every-app/open-seo** (4.3k★ MIT) -> seo-keywords: free OSS Semrush/Ahrefs
+  alternative with native MCP; external-view pick vs paid DataForSEO/Ahrefs.
+- (Camoufox + patchright were already promoted on this branch in the main sweep.)
+- registry count 173 -> 176 (repo 101 -> 104). verify_matrix: PASS.
+
+### Rejected / death-coded (do not re-discover)
+- run-llama/crossposter — D-STALE (last push 2025-06-02, 13.4mo > 12mo gate);
+  superseded by Postiz/AiToEarn on every axis. Not added.
+- cullenwatson/StaffSpy (leadgen-crm, existing entry) — D-STALE re-verify flag
+  (~12mo, last push 2025-06-17); kept pending a maintained-check, watch next sweep.
+
+### Discovery pool banked (`discovery-state.md` `## 2026-07-15 sweep`)
+- 48 LAND candidates (union of the two passes) + HOLD watchlist + horizon
+  proposals recorded for human promotion to shards. Still-banked high-signal
+  (not yet promoted): perp-cli (32★, thin), Vybe Solana MCP, yfinance-mcp,
+  GrowChief (AGPL, ~9mo since push), TrendRadar (60k★, CN hot-list aggregator).
+
+### Horizon
+- NEW-DOMAIN proposal: **prediction-markets** (Polymarket/Kalshi implied-prob) —
+  recurred two months, cleared its own promotion bar; PROPOSAL only (H2/H3 human
+  gate), not auto-created.
+- FOLD: **x402** keyless pay-per-call route -> a web-scraping + pricing-install
+  note (pending).
+- **DefiLlama** official MCP (mcp.defillama.com/mcp) is LIVE but PAID-subscription;
+  free access stays REST-no-key -> a row-note only, NOT a free REPLACE.
+
+
 ## [0.26.0] — 2026-06-17
 
 First `claude -p` integrations + the doctrine that draws the line. Up to now
