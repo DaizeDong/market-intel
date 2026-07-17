@@ -68,7 +68,7 @@ def git_show(ref, relpath):
 REPO_RE = re.compile(r"github\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)")
 # canonical bare owner/name slug (registry `repo` field for kind=repo tools)
 SLUG_FMT = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
-# repo token must be IMMEDIATELY before the (NNk★) annotation (only **/spaces between) —
+# repo token must be IMMEDIATELY before the (NNk★) annotation (only **/spaces between) ,
 # prevents pairing a star with a prose token or an adjacent repo on the same line.
 STAR_LINE_RE = re.compile(r"([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)\*{0,2}\s*\((\d+(?:\.\d+)?)k★\)")
 
@@ -121,10 +121,10 @@ all_text = ("\n".join(shard_text.values()) + "\n" + (read(PRICING) if os.path.ex
             + "\n" + "\n".join(tool_docs_text.values())
             + "\n" + (read(INSTALL_GUIDE) if os.path.exists(INSTALL_GUIDE) else ""))
 # HIGH-CONFIDENCE repos (404 → hard BLOCK): explicit github.com URLs + star-annotated slugs.
-# Strip a trailing ".git" — a `git clone https://github.com/o/r.git` URL is the same repo as o/r;
+# Strip a trailing ".git", a `git clone https://github.com/o/r.git` URL is the same repo as o/r;
 # without this the literal "o/r.git" token 404s on the API (false positive).
 # Also strip trailing sentence punctuation the slug regex greedily swallows ("OpenBB-finance/OpenBB."
-# at end of a sentence captures the period) — that lone dot 404s on the API (false positive).
+# at end of a sentence captures the period), that lone dot 404s on the API (false positive).
 def _strip_git(r):
     r = r.rstrip("./,);:")          # drop trailing sentence punctuation (incl. a stray ".")
     return r[:-4] if r.endswith(".git") else r
@@ -133,7 +133,7 @@ repo_set |= {_strip_git(m.group(1)) for m in STAR_LINE_RE.finditer(all_text)}
 repos = sorted(r for r in repo_set if not r.endswith(".md") and r.count("/") == 1 and "github.com" not in r)
 
 # HEURISTIC bare slugs (404 → WARN only): unstarred slug-like tokens in table rows. Catches likely
-# hallucinations (e.g. a mistyped erithwik/mcp-hn) for human attention, but does NOT hard-block —
+# hallucinations (e.g. a mistyped erithwik/mcp-hn) for human attention, but does NOT hard-block ,
 # regex can't tell a real bare repo from prose like "10-K/Q" or an npm scope "@ryukimin/ghost-mcp".
 # The BLOCK-level existence guarantee for ALL repos is the job of the machine-readable mirror block
 # (ROADMAP Stage A root fix); this WARN is the interim visibility net, not a substitute.
@@ -164,7 +164,7 @@ else:
             if res.returncode == 0:
                 break
             if "Not Found" in (res.stderr or "") or "404" in (res.stderr or ""):
-                break                            # real 404 — don't retry, it's a hard fact
+                break                            # real 404, don't retry, it's a hard fact
             time.sleep(2 * (attempt + 1))        # transient (rate-limit/network): back off and retry
         if res.returncode != 0:
             if "Not Found" in (res.stderr or "") or "404" in (res.stderr or ""):
@@ -201,7 +201,7 @@ else:
 # ---- GHACTIVE (P4 deterministic activity gate) ----
 # WHY: LLM-judgment lenses (existence, freshness, top_pick_impact) confidently passed a candidate
 # (BigGo, 2026-06-17 sweep) whose repo was 13 months stale. PHILOSOPHY §4 demands an independent
-# deterministic source — gh api `pushed_at` + `archived`. Inviolable, not optional.
+# deterministic source, gh api `pushed_at` + `archived`. Inviolable, not optional.
 # 404                  -> BLOCK (URL fabricated or dead)
 # archived=true        -> BLOCK (formally retired upstream)
 # pushed_at >12mo old  -> WARN  (silent rot; same severity class as STALE)
@@ -246,7 +246,7 @@ else:
                 block("GHACTIVE", f"{r}: 404 not found (URL fabricated, deleted, or moved)")
             elif "rate limit" in stderr.lower() or "API rate" in stderr or "403" in stderr:
                 # Rate-limit is transient external state; per the philosophy we must not gate the
-                # gate on it. Surface as WARN and skip — re-run will pick it up.
+                # gate on it. Surface as WARN and skip, re-run will pick it up.
                 entry = {"repo": r, "pushed_at": None, "archived": None,
                          "verdict": "RATE_LIMITED", "reason": "gh api rate-limited",
                          "checked_at": _now_iso}
@@ -324,7 +324,7 @@ for m in re.finditer(r"last_verified:\s*(\d{4})-(\d{2})", all_text):
     if ym > this_month:
         block("FRESH", f"last_verified {ym} is in the future")
 # Per-tool doc freshness: every doc must carry a `Last verified: YYYY-MM`; future = BLOCK (a lie),
-# >STALE_MONTHS old = WARN (surfaced so a sweep re-verifies it — closes the silent-rot gap).
+# >STALE_MONTHS old = WARN (surfaced so a sweep re-verifies it, closes the silent-rot gap).
 stale_docs = []
 for slug, txt in tool_docs_text.items():
     fm = re.search(r"Last verified:\s*(\d{4})-(\d{2})", txt)
@@ -344,7 +344,7 @@ if stale_docs:
                   f"{' …' if len(stale_docs) > 10 else ''}")
 
 # ---- DOCCOVER (coverage net: every repo in a LIVE shard row should have a per-tool doc) ----
-# Surfaces "added a shard tool but forgot its tools/<slug>.md" — the tracking gap that TOOLS
+# Surfaces "added a shard tool but forgot its tools/<slug>.md", the tracking gap that TOOLS
 # (index<->doc) cannot see. WARN, not BLOCK: prose / cross-domain / tombstone repos would false-block.
 if tool_docs_text:
     documented = {_strip_git(r).lower() for txt in tool_docs_text.values() for r in REPO_RE.findall(txt)}
@@ -364,7 +364,7 @@ if tool_docs_text:
         warn("DOCCOVER", f"{len(undoc)} live shard repo(s) have no per-tool doc — add tools/<slug>.md "
                          f"+ an index row (or tombstone the shard row): {items}")
 
-# ---- REGISTRY (machine-readable authoritative tool list — 3-way registry<->index<->doc) ----
+# ---- REGISTRY (machine-readable authoritative tool list, 3-way registry<->index<->doc) ----
 # Brings NON-GitHub SaaS/lib tools into a deterministic tracking net (DOCCOVER only sees repos).
 # registry.json is THE list of tools; the gate enforces it equals the doc files and the index slugs,
 # so a SaaS tool can't lose its doc or fall out of the index without a hard BLOCK.
@@ -398,7 +398,7 @@ if os.path.isdir(TOOLS_DIR) and 'fs_slugs' in dir():
         # well-formed owner/name AND actually appear as a github.com URL in that tool's own doc.
         # The REPO/GHACTIVE existence gates scan the markdown (REPO_RE over all_text), NEVER the
         # registry field, so a refresh could mutate registry.json's canonical repo to a typo/
-        # hallucination while the doc URL stays correct — registry lies, gate stays green. This
+        # hallucination while the doc URL stays correct, registry lies, gate stays green. This
         # closes that drift. saas/lib (repo=None) are untouched.
         for t in reg.get("tools", []):
             if t.get("kind") != "repo":
@@ -485,7 +485,7 @@ for d in fs_domains:
 
     # ---- ROUTE (C2: a Default pick may not silently downgrade free/④③ -> paid ①②) ----
     # A route downgrade is a MODIFICATION (the source name is present on BOTH the removed and added
-    # sides of the diff), NOT a deletion — so it lives at LOOP level as a sibling of DELETE, never
+    # sides of the diff), NOT a deletion, so it lives at LOOP level as a sibling of DELETE, never
     # nested under `if genuinely_removed:` (genuinely_removed is empty for a modification, so the
     # check would silently never fire). Escape hatch: an intent-bearing CHANGELOG/row reason. We key
     # on the MAX route glyph per side (a row can list several barrier routes; the best one is what a
@@ -514,12 +514,12 @@ for d in fs_domains:
                 block("ROUTE", f"{d}: '{name}' route downgraded free/④③ -> paid ①② without a "
                                f"CHANGELOG reason (C2) — add why (route/why paid) or revert")
 
-# ---- AUDIT (P4: editor != verifier — new source rows need an independent cross-model attestation) ----
+# ---- AUDIT (P4: editor != verifier, new source rows need an independent cross-model attestation) ----
 # EVOLUTION.md openly admits a P4 violation: the same headless LLM both edits AND verifies a refresh.
 # This makes the mechanical/existence half gate-checked the same way DELETE gate-checks a death-code:
 # a genuinely-NEW source row (mirror of genuinely_removed) requires a CHANGELOG attestation line
 # `AUDIT: <model> verdict=<pass|hold>` written by a fresh zero-context reviewer of a DIFFERENT model.
-# WARN-tier this cycle (advisory) — flips to BLOCK once the cross-model review step is routine.
+# WARN-tier this cycle (advisory), flips to BLOCK once the cross-model review step is routine.
 AUDIT_RE = re.compile(r"^\s*AUDIT:\s*\S+\s+verdict=(pass|hold)\b", re.IGNORECASE)
 if genuinely_added_any:
     if not any(AUDIT_RE.match(l) for l in changelog_added.splitlines()):
@@ -530,7 +530,7 @@ if genuinely_added_any:
                       f"(WARN-tier this cycle; will BLOCK once routine)")
 
 # ---- PRICE (C5: a CHANGED price line must carry an official URL + fetch date in the same hunk) ----
-# WARN-tier soft launch — flip PRICE_BLOCK=True to enforce after one populated sweep cycle. The
+# WARN-tier soft launch, flip PRICE_BLOCK=True to enforce after one populated sweep cycle. The
 # sidecar sweep JSON carries no {price,url,fetched} evidence tuple, so the robust path is a diff-hunk
 # evidence check: when a price token is ADDED to pricing-install.md, the same hunk must show an
 # official https:// URL + a fetch/verify date (C5 + the EVOLUTION.md auto-merge precondition).

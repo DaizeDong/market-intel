@@ -39,7 +39,7 @@ from datetime import date, datetime
 from typing import Any
 
 # ---------------------------------------------------------------------------
-# Windows stdout: force UTF-8 so badge characters (—, ⭐, ①…) don't crash on
+# Windows stdout: force UTF-8 so badge characters (,, ⭐, ①…) don't crash on
 # cp1252 consoles. BOM-safe: we never emit a BOM ourselves.
 # ---------------------------------------------------------------------------
 try:
@@ -54,7 +54,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # ---------------------------------------------------------------------------
 
 # Domain shards that are *meta* (discovery surfaces, not research targets).
-# Excluded from the domain count badge — the badge counts "research-target
+# Excluded from the domain count badge, the badge counts "research-target
 # domains" (15) not all .md files (16).
 META_DOMAINS: set[str] = {"mcp-ecosystem"}
 
@@ -185,7 +185,7 @@ def get_readme_section_domain_count(readme_path: str) -> tuple[int | None, int |
         return None, None
     # EN: "## The source matrix (15 domains)"
     en = re.compile(r"^##\s+The source matrix\s*\((\d+)\s+domains?\)", re.IGNORECASE)
-    # CN: "## 源矩阵（15 个方向）" — full-width parens
+    # CN: "## 源矩阵（15 个方向）", full-width parens
     cn = re.compile(r"^##\s+源矩阵[（(](\d+)\s*个方向[)）]")
     with open(readme_path, encoding="utf-8") as f:
         for i, line in enumerate(f, start=1):
@@ -298,7 +298,7 @@ def check_warnings() -> list[dict[str, Any]]:
             sec_end = sec_start + next_h.start() if next_h else len(text)
             section = text[sec_start:sec_end]
             unchecked = len(re.findall(r"^\s*-\s*\[\s\]", section, flags=re.MULTILINE))
-            # If everything is checked, the section is functionally drained — flag for review.
+            # If everything is checked, the section is functionally drained, flag for review.
             if unchecked == 0:
                 drifts.append(_drift(
                     "warn", "ROADMAP triggered work", "at least 1 unchecked OR section refresh",

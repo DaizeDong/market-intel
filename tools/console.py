@@ -70,7 +70,7 @@ REGISTRY = os.path.join(TOOLS_DIR, "registry.json")
 TOOLS_INDEX = os.path.join(TOOLS_DIR, "index.md")
 GH_CACHE = os.path.join(ROOT, "metrics", "gh-api-cache.json")
 # Snapshot cache. metrics/gh-api-cache.json is already gitignored; we co-locate ours and add it
-# to .gitignore (see ensure_gitignore). It carries no secrets — only connected/installed booleans.
+# to .gitignore (see ensure_gitignore). It carries no secrets, only connected/installed booleans.
 AVAIL_CACHE = os.path.join(ROOT, "metrics", "availability-cache.json")
 
 # Marks for table cells
@@ -97,7 +97,7 @@ def read_json(path, default=None):
 # Slug ↔ live-signal bridge tables
 #
 # The registry has no MCP-server-name or CLI-command field, so we bridge here. These are
-# OPS-side hints, not part of the skill contract — when a guess is wrong the worst case is a
+# OPS-side hints, not part of the skill contract, when a guess is wrong the worst case is a
 # tool shows `unknown`/`cold`, never a crash and never a false "available".
 # ---------------------------------------------------------------------------
 
@@ -213,7 +213,7 @@ PY_IMPORTS = {
     "google-play-scraper": "google_play_scraper",
     "ddgs": "ddgs",
     "patchright": "patchright",
-    # free-first browser/scrape libs (no key, no cookie) — all live import-verified 2026-06-24.
+    # free-first browser/scrape libs (no key, no cookie), all live import-verified 2026-06-24.
     "nodriver": "nodriver",
     "camoufox": "camoufox",
     # browser-use / scrapegraph-ai: the LIBRARY is keyless-importable; their AI driving needs an
@@ -221,16 +221,16 @@ PY_IMPORTS = {
     "browser-use": "browser_use",
     "scrapegraph-ai": "scrapegraphai",
     # activation (self-evolve R1): free-first lib routes, each live-verified installed +
-    # its keyless capability confirmed (SEC raw endpoint UA-only, yfinance keyless) —
+    # its keyless capability confirmed (SEC raw endpoint UA-only, yfinance keyless) ,
     # console was under-reporting these as cold though P1 free-first makes them usable.
     "sec-edgar-mcp": "edgar",       # edgartools installed; SEC EDGAR public API keyless (UA only)
     "openbb-mcp": "openbb",         # openbb installed (aggregates ~100 providers incl keyless)
     "yahoo-finance-mcp": "yfinance",  # yfinance installed, fully keyless
 }
 
-# Keyless web-APIs: reachable without install OR key OR MCP. We do NOT block on these — mark
+# Keyless web-APIs: reachable without install OR key OR MCP. We do NOT block on these, mark
 # available_now=yes with a "web-assumed" note (a real reachability ping is optional and skipped
-# by default to keep the console offline-safe). Conservative list — only genuinely keyless ones.
+# by default to keep the console offline-safe). Conservative list, only genuinely keyless ones.
 KEYLESS_WEB = {
     "google-suggest", "stackexchange", "defillama", "geckoterminal",
     "arxiv-sanity-lite", "papers-with-code", "connected-papers-researchrabbit",
@@ -239,7 +239,7 @@ KEYLESS_WEB = {
     # activation (self-evolve R1): keyless endpoints live-verified HTTP 200 (no key, UA only)
     "coingecko-mcp", "blockscout-mcp", "barker", "mcp-hn",
     # activation R2: GDELT DOC 2.0 is a keyless public API (live-checked: responds without a
-    # key, only a 1-req/5s rate-limit notice — no auth).
+    # key, only a 1-req/5s rate-limit notice, no auth).
     "gdelt-mcp",
 }
 
@@ -250,7 +250,7 @@ SKILL_BACKED = {
 }
 
 # Tools served by a CONNECTED Claude *plugin* MCP. Plugin MCPs don't appear in `claude mcp list`
-# (only user/project-scoped servers do), so the mcp_match path can't see them — but they are
+# (only user/project-scoped servers do), so the mcp_match path can't see them, but they are
 # genuinely usable in-session. Listed here only after a live check confirmed the plugin works
 # (huggingface: hf_whoami → authenticated; playwright: in active use this session).
 PLUGIN_MCP_BACKED = {
@@ -276,7 +276,7 @@ def run(cmd, timeout=30):
         return 127, "", "not found"
     except subprocess.TimeoutExpired:
         return 124, "", "timeout"
-    except Exception as e:  # pragma: no cover — defensive
+    except Exception as e:  # pragma: no cover, defensive
         return 1, "", str(e)
 
 
@@ -374,9 +374,9 @@ def probe_companion():
         # also index by raw slug so either matches
         if t.get("slug"):
             by_slug.setdefault(t["slug"], t)
-    # does a secret file exist for this slug? (presence only — never read contents)
+    # does a secret file exist for this slug? (presence only, never read contents)
     # Secrets are named by the CONFIG slug; the matrix carries a different (often -mcp-suffixed)
-    # slug. Map config slug -> matrix_slug so a key credits the matrix-side tool too — otherwise
+    # slug. Map config slug -> matrix_slug so a key credits the matrix-side tool too, otherwise
     # an already-keyed tool reads as needs-key purely from a suffix mismatch. Skip _-prefixed
     # account/credential files (not per-tool secrets).
     secrets_dir = os.path.join(path, "secrets")
@@ -777,7 +777,7 @@ def cmd_tool(args, snap, source):
         for h in s["how"]:
             print(f"    · {h}")
         print()
-    # how to call — prefer the concrete local path (CLI/lib) over a generic MCP note, since many
+    # how to call, prefer the concrete local path (CLI/lib) over a generic MCP note, since many
     # lib tools also ship an optional MCP wrapper (twikit, ccxt) and the install path is the actual
     # workhorse. A pure MCP-class tool with no local path falls through to the MCP instructions.
     print("  HOW TO CALL")
