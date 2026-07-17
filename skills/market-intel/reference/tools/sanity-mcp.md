@@ -1,31 +1,31 @@
 # Tool: Sanity hosted MCP
 
 - **Domain(s):** content-cms (also: none)
-- **Barrier route:** ① · **Source tier:** L1 · **Ready MCP:** yes — hosted HTTP `https://mcp.sanity.io` (OAuth, GA)
+- **Barrier route:** ① · **Source tier:** L1 · **Ready MCP:** yes, hosted HTTP `https://mcp.sanity.io` (OAuth, GA)
 - **Cost:** free tier $0 forever (2 datasets, 20 seats); Growth $15/seat/mo [https://www.sanity.io/pricing, fetched 2026-06]
 - **Repo / Provider:** https://www.sanity.io (hosted MCP, not a self-host repo)
 - **Top pick for its domain:** yes (best headless experience)
 
 ## What it does / when to pick it
-Sanity's official hosted MCP: **40+ schema-aware tools**; it reads your project's schema and keeps its rules auto-updated, so writes respect your content types. **Decision rule:** pick this when the project is a true **headless / structured-content** CMS (multi-channel, typed content, GROQ queries) — it is the cleanest headless experience in the domain. If the backend is a plain WordPress blog, use WordPress MCP; if you just want a fully owned blog with no platform, use static (Hugo/Astro).
+Sanity's official hosted MCP: **40+ schema-aware tools**; it reads your project's schema and keeps its rules auto-updated, so writes respect your content types. **Decision rule:** pick this when the project is a true **headless / structured-content** CMS (multi-channel, typed content, GROQ queries), it is the cleanest headless experience in the domain. If the backend is a plain WordPress blog, use WordPress MCP; if you just want a fully owned blog with no platform, use static (Hugo/Astro).
 
 ## Install
 See `reference/volatile/pricing-install.md` → content-cms. Two paths: the `sanity` CLI auto-configures the MCP, **or** add the remote HTTP MCP `https://mcp.sanity.io` and complete the **OAuth** flow. HTTP transport is Windows-friendly (no local Node process). Restart / `/mcp` reconnect after adding; OAuth servers show `! Needs authentication` until you finish the browser consent.
 
 ## Auth / keys
-OAuth — no long-lived API key to paste, so there is little to leak. Authorize in the browser, grant the project, done. (No secret-hygiene clipboard dance needed here since it's OAuth, not a bearer key.) See `reference/install-guide.md` for the connect/verify mechanics.
+OAuth, no long-lived API key to paste, so there is little to leak. Authorize in the browser, grant the project, done. (No secret-hygiene clipboard dance needed here since it's OAuth, not a bearer key.) See `reference/install-guide.md` for the connect/verify mechanics.
 
-## Usage — call examples
+## Usage, call examples
 Tools cover document create/patch/publish, schema introspection, GROQ query, and dataset ops. Minimal flow: introspect schema → create a document of the right type → patch fields → publish. Because it's schema-aware, malformed-type writes are rejected up front rather than silently stored wrong.
 
 ## General experience & gotchas (踩坑)
 - **GA, schema-aware = the domain's strongest fit** for structured content; this is why it's a top pick alongside WordPress MCP.
-- Free tier = **public datasets only** (private datasets start at Growth $15/seat/mo) — research/test in a public dataset is fine, but don't assume privacy on $0.
-- OAuth scope is per-project/per-org; if you're in the wrong org the tools connect but return empty/permission errors — confirm the active project.
+- Free tier = **public datasets only** (private datasets start at Growth $15/seat/mo), research/test in a public dataset is fine, but don't assume privacy on $0.
+- OAuth scope is per-project/per-org; if you're in the wrong org the tools connect but return empty/permission errors, confirm the active project.
 - Drafts vs. published is a real distinction in Sanity (`drafts.` prefix); "I created it but it's not live" usually means you created a draft and never published.
 - **SEO命门:** if Sanity feeds a site that also syndicates, set canonical on the rendered front-end.
-- **8-step onboarding wizard before any token can issue** (confirmed 2026-06-16) — `/get-started` walks useCase → referralSource → javascriptLevel → projectType → projectName → technologies → isIntegratingExisting → isMigratingCms. Radios use `sr-only` (visually hidden) inputs under cosmetic labels; clicks must hit `label[for=...]`, not the `<input>`. Sticky page header intercepts `playwright.click` events — fall back to JS `.click()` on the label. **Project must exist before any API token can be created.**
-- **Robot Token UI is per-project**, at `/organizations/<orgId>/project/<projectId>/api/tokens`. Generate with role = `Editor` for read+write (`Viewer` = read-only, `Developer` = same+manage CORS/webhooks). Both Project ID (e.g. `a3lrf522`) and Organization ID (e.g. `obe3my3wm`) are needed when calling the API — record both in `secrets/sanity.env`.
+- **8-step onboarding wizard before any token can issue** (confirmed 2026-06-16), `/get-started` walks useCase → referralSource → javascriptLevel → projectType → projectName → technologies → isIntegratingExisting → isMigratingCms. Radios use `sr-only` (visually hidden) inputs under cosmetic labels; clicks must hit `label[for=...]`, not the `<input>`. Sticky page header intercepts `playwright.click` events, fall back to JS `.click()` on the label. **Project must exist before any API token can be created.**
+- **Robot Token UI is per-project**, at `/organizations/<orgId>/project/<projectId>/api/tokens`. Generate with role = `Editor` for read+write (`Viewer` = read-only, `Developer` = same+manage CORS/webhooks). Both Project ID (e.g. `a3lrf522`) and Organization ID (e.g. `obe3my3wm`) are needed when calling the API, record both in `secrets/sanity.env`.
 - **Free Growth Trial = 30 days**, then converts to Personal (free, public datasets only). Trial gives access to AI Assist + Comments + Scheduled drafts; if you depend on those past day 30 budget for paid Growth.
 
 ## Failure signals & fallback

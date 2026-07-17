@@ -1,4 +1,4 @@
-# Companion config repo — hardening runbook
+# Companion config repo, hardening runbook
 
 When setting up a companion config repo from scratch (see
 [`companion-config-spec.md`](companion-config-spec.md) for the structural contract), the
@@ -29,7 +29,7 @@ Apply this checklist **before** committing the first secret.
 
 ---
 
-## Step 1 — Create the repo as PRIVATE
+## Step 1, Create the repo as PRIVATE
 
 ```bash
 gh repo create <your-user>/market-intel-config \
@@ -41,21 +41,21 @@ gh repo create <your-user>/market-intel-config \
 Or via web UI: <https://github.com/new> → **Private** radio selected before pressing Create.
 
 **Verification**: visit `https://github.com/<your-user>/<repo>` while signed-out (in an
-incognito window). You should see a "Page not found" — that confirms private. If you see the
+incognito window). You should see a "Page not found", that confirms private. If you see the
 repo contents, **stop immediately and flip to private**.
 
 ---
 
-## Step 2 — Decide your secret-storage mode
+## Step 2, Decide your secret-storage mode
 
 See [`companion-config-spec.md`](companion-config-spec.md) §5.3 for the formal trade-off
 between Mode A (secrets committed) and Mode B (secrets gitignored + out-of-band backup).
-The hardening steps below are **identical for both modes** — Mode A just has a stricter
+The hardening steps below are **identical for both modes**, Mode A just has a stricter
 "any single compromise = all keys exposed" residual risk that you accept consciously.
 
 ---
 
-## Step 3 — Lock down repo-level Features
+## Step 3, Lock down repo-level Features
 
 Path: `Settings → General → Features`.
 
@@ -64,18 +64,18 @@ ALL of them:
 
 | Feature | Default | Recommended for config repo |
 |---|---|---|
-| Wikis | ✓ on | ✗ **off** — no docs surface to leak |
-| Issues | ✓ on | ✗ **off** — no need; you're the only user |
+| Wikis | ✓ on | ✗ **off**, no docs surface to leak |
+| Issues | ✓ on | ✗ **off**, no need; you're the only user |
 | Sponsorships | ✗ off | leave off |
 | Discussions | ✗ off | leave off |
-| Projects | ✓ on | ✗ **off** — no need |
+| Projects | ✓ on | ✗ **off**, no need |
 | Preserve this repository | varies | leave default |
 
 These are auto-saved on click; no Save button.
 
 ---
 
-## Step 4 — Disable Dependabot + all Code Security
+## Step 4, Disable Dependabot + all Code Security
 
 Path: `Settings → Code security`.
 
@@ -89,7 +89,7 @@ features. **Leave them all disabled**:
 - Dependabot version updates: Disabled
 - Dependabot on self-hosted runners: Disabled
 
-Rationale: this repo has no application dependencies in the conventional sense — the
+Rationale: this repo has no application dependencies in the conventional sense, the
 "dependencies" are MCP server packages that are pulled live at apply time, not pinned
 manifest files. Dependabot scanning adds zero value and surface area only.
 
@@ -100,7 +100,7 @@ those scans (especially Push Protection) would block legitimate commits.
 
 ---
 
-## Step 5 — Disable Actions entirely
+## Step 5, Disable Actions entirely
 
 Path: `Settings → Actions → General → Actions permissions`.
 
@@ -121,7 +121,7 @@ git add . && git commit -m "remove all workflows (Actions disabled at repo level
 
 ---
 
-## Step 6 — Disable Pages
+## Step 6, Disable Pages
 
 Path: `Settings → Pages`.
 
@@ -132,20 +132,20 @@ branch source could in extreme edge cases publish README content to the open web
 
 ---
 
-## Step 7 — Verify Webhooks / Deploy keys / Actions secrets are empty
+## Step 7, Verify Webhooks / Deploy keys / Actions secrets are empty
 
 Paths to check (each should show "no items" or equivalent):
 
-- `Settings → Webhooks` — no webhooks. (Some integrations auto-add these; audit periodically.)
-- `Settings → Deploy keys` — no deploy keys. (SSH keys here grant non-revocable git access.)
-- `Settings → Secrets and variables → Actions` — no Actions secrets. (Real secrets live in
+- `Settings → Webhooks`, no webhooks. (Some integrations auto-add these; audit periodically.)
+- `Settings → Deploy keys`, no deploy keys. (SSH keys here grant non-revocable git access.)
+- `Settings → Secrets and variables → Actions`, no Actions secrets. (Real secrets live in
   `secrets/<slug>.env` per the spec, not in Actions secret storage which is meant for CI.)
-- `Settings → Secrets and variables → Codespaces` — same: empty.
-- `Settings → Secrets and variables → Dependabot` — same: empty.
+- `Settings → Secrets and variables → Codespaces`, same: empty.
+- `Settings → Secrets and variables → Dependabot`, same: empty.
 
 ---
 
-## Step 8 — Verify Collaborators is empty
+## Step 8, Verify Collaborators is empty
 
 Path: `Settings → Collaborators`.
 
@@ -162,7 +162,7 @@ If you ever need to share help with this repo with someone, prefer:
 
 ---
 
-## Step 9 — Account-level Copilot data sharing opt-out
+## Step 9, Account-level Copilot data sharing opt-out
 
 Path: <https://github.com/settings/copilot/features>
 
@@ -180,7 +180,7 @@ all your repos, public + private) regardless of whether you have a Copilot subsc
 
 ---
 
-## Step 10 — Audit your installed GitHub Apps
+## Step 10, Audit your installed GitHub Apps
 
 Path: `https://github.com/<your-user>/<repo>/settings/installations`
 
@@ -204,7 +204,7 @@ For each AI / automation app, decide:
 | Linear, Slack, Notion, etc. | Usually fine; verify they don't have code read permission. |
 | Dependabot Preview / Renovate | Disabled by default for your repo if Dependabot is off (Step 4). |
 
-The "Uninstall" button at the bottom of each Configure page is **reversible** — just
+The "Uninstall" button at the bottom of each Configure page is **reversible**, just
 re-install if you change your mind. "Suspend" is a softer version that pauses access
 without removing the app.
 
@@ -214,7 +214,7 @@ the app for repos where you want it, and SILENTLY remove it from your config rep
 
 ---
 
-## Step 11 — (Optional) Branch protection
+## Step 11, (Optional) Branch protection
 
 If you ever bring in a collaborator: `Settings → Branches → Add classic branch protection
 rule` → require PR review before merge to main.
@@ -223,9 +223,9 @@ For solo use, skip.
 
 ---
 
-## Step 12 — Periodic re-audit (every 30–90 days)
+## Step 12, Periodic re-audit (every 30 to 90 days)
 
-Schedule a recurring reminder to redo Steps 7–10. New GitHub Apps may auto-install if you
+Schedule a recurring reminder to redo Steps 7 to 10. New GitHub Apps may auto-install if you
 authorize an integration somewhere else (e.g., GitHub's marketplace, third-party tool
 prompts). New webhooks may appear if you connect this repo to anything. Periodic re-audit
 catches drift.

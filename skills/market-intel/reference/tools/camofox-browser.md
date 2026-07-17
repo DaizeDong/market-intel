@@ -2,12 +2,12 @@
 
 - **Domain(s):** browser-automation (also: none)
 - **Barrier route:** ④ · **Source tier:** L2 · **Ready MCP:** no (REST API + plugin; drive over HTTP, no MCP wrapper)
-- **Cost:** free (MIT, self-host) — an optional key only gates cookie-import, not core use [github.com/jo-inc/camofox-browser, fetched 2026-06]
-- **Repo / Provider:** github.com/jo-inc/camofox-browser — `jo-inc/camofox-browser (6.5k★, gh-api 2026-06)`; license MIT, active (pushed 2026-06)
+- **Cost:** free (MIT, self-host), an optional key only gates cookie-import, not core use [github.com/jo-inc/camofox-browser, fetched 2026-06]
+- **Repo / Provider:** github.com/jo-inc/camofox-browser, `jo-inc/camofox-browser (6.5k★, gh-api 2026-06)`; license MIT, active (pushed 2026-06)
 - **Top pick for its domain:** no (an anti-fingerprint escalation, reached for only when plain playwright is blocked)
 
 ## What it does / when to pick it
-An anti-fingerprint browser that adds **C++-level fingerprint spoofing on top of the Camoufox (anti-fingerprint Firefox) base**, and wraps it behind a **REST API + plugin** so an agent can drive it over HTTP rather than embedding the library. **Decision rule:** this is an *escalation* tool, not a default — reach for it only when plain **playwright MCP** (or agent-browser/browser-use) gets fingerprint-blocked (Cloudflare/DataDome/JS-challenge walls). Among the anti-detection siblings: pick **camofox-browser** when you want a *ready HTTP server* with stronger-than-base spoofing and a plugin; pick the raw **daijro/camoufox** (9.1k★) when you want the Python library to embed; pick **nodriver** (4.3k★) for undetected-Chrome rather than Firefox; pick **patchright** when you specifically want an undetected-Playwright drop-in. For everything that *isn't* fingerprint-blocked, stay on playwright MCP — anti-fingerprint browsers are slower and heavier.
+An anti-fingerprint browser that adds **C++-level fingerprint spoofing on top of the Camoufox (anti-fingerprint Firefox) base**, and wraps it behind a **REST API + plugin** so an agent can drive it over HTTP rather than embedding the library. **Decision rule:** this is an *escalation* tool, not a default, reach for it only when plain **playwright MCP** (or agent-browser/browser-use) gets fingerprint-blocked (Cloudflare/DataDome/JS-challenge walls). Among the anti-detection siblings: pick **camofox-browser** when you want a *ready HTTP server* with stronger-than-base spoofing and a plugin; pick the raw **daijro/camoufox** (9.1k★) when you want the Python library to embed; pick **nodriver** (4.3k★) for undetected-Chrome rather than Firefox; pick **patchright** when you specifically want an undetected-Playwright drop-in. For everything that *isn't* fingerprint-blocked, stay on playwright MCP, anti-fingerprint browsers are slower and heavier.
 
 ## Install
 Self-host OSS (MIT). Runs as a local REST service you call over HTTP.
@@ -17,13 +17,13 @@ git clone https://github.com/jo-inc/camofox-browser
 # (Camoufox/Firefox base is fetched on first run)
 # then POST to its local REST endpoint to open pages / extract
 ```
-Windows note: it exposes an **HTTP REST API** locally — which is the Windows-friendly shape (no stdio `npx`/`uvx` flakiness). Confirm the Camoufox Firefox base downloads cleanly on first launch. Not an MCP, so the `claude mcp add` mechanics in `reference/install-guide.md` don't apply; free OSS so no volatile pricing row — the L1 line is `pricing-install.md` → browser-automation → Anti-detection.
+Windows note: it exposes an **HTTP REST API** locally, which is the Windows-friendly shape (no stdio `npx`/`uvx` flakiness). Confirm the Camoufox Firefox base downloads cleanly on first launch. Not an MCP, so the `claude mcp add` mechanics in `reference/install-guide.md` don't apply; free OSS so no volatile pricing row, the L1 line is `pricing-install.md` → browser-automation → Anti-detection.
 
 ## Auth / keys
-**No key for core use** — the browser, spoofing, and REST API are free and open. The only thing gated by a key is **cookie-import** (loading an existing logged-in session into the spoofed browser). Secret-hygiene: that cookie-import key and any imported session cookie are live credentials — have the user supply them via env/config, never echo them into the transcript, and never commit them.
+**No key for core use**, the browser, spoofing, and REST API are free and open. The only thing gated by a key is **cookie-import** (loading an existing logged-in session into the spoofed browser). Secret-hygiene: that cookie-import key and any imported session cookie are live credentials, have the user supply them via env/config, never echo them into the transcript, and never commit them.
 
-## Usage — call examples
-You call it over its **REST API** (endpoints per the repo README), not via MCP tool names. Conceptual minimal flow — open a fingerprint-walled URL through the spoofed browser and get rendered content:
+## Usage, call examples
+You call it over its **REST API** (endpoints per the repo README), not via MCP tool names. Conceptual minimal flow, open a fingerprint-walled URL through the spoofed browser and get rendered content:
 ```
 # conceptual; confirm exact paths in the repo README
 curl -X POST http://localhost:<port>/navigate \
@@ -34,10 +34,10 @@ curl http://localhost:<port>/content        # rendered DOM / extracted text
 Because it speaks HTTP, the agent can call it like any local REST service; the plugin is an alternative front-end.
 
 ## General experience & gotchas (踩坑)
-- **Escalation tool, not a default (shard lesson):** "if fingerprint-blocked escalate to camoufox/nodriver." Don't open with it — it's heavier and slower than playwright; use it only after a bot wall.
+- **Escalation tool, not a default (shard lesson):** "if fingerprint-blocked escalate to camoufox/nodriver." Don't open with it, it's heavier and slower than playwright; use it only after a bot wall.
 - **Free MIT, key only gates cookie-import:** don't assume you need a paid plan; the spoofing itself is free. The key requirement is narrow (cookie import).
-- **Firefox base, not Chromium:** built on Camoufox/Firefox — sites that branch on Chrome-specific behavior may render differently than your playwright (Chromium) baseline; some Chrome-only selectors/flows won't carry over.
-- **Spoofing ≠ invincibility:** strong fingerprint masking still doesn't defeat IP-reputation blocks — pair it with a residential/rotating proxy pool for scale (software free, proxies are the hidden cost, route-④ rule).
+- **Firefox base, not Chromium:** built on Camoufox/Firefox, sites that branch on Chrome-specific behavior may render differently than your playwright (Chromium) baseline; some Chrome-only selectors/flows won't carry over.
+- **Spoofing ≠ invincibility:** strong fingerprint masking still doesn't defeat IP-reputation blocks, pair it with a residential/rotating proxy pool for scale (software free, proxies are the hidden cost, route-④ rule).
 - **Thinner adoption / younger repo:** smaller community than camoufox/nodriver; pin a commit and re-check the README, as REST endpoints may change.
 
 ## Failure signals & fallback
