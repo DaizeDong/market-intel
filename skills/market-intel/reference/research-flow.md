@@ -1,25 +1,25 @@
-# Research flow — how market-intel runs a task end-to-end
+# Research flow, how market-intel runs a task end-to-end
 
 > **What this file is.** The canonical, fresh-agent runbook for a *single* market-intel research
 > task: the exact path from "here is a theme" to "here is a cited report with a verifiable coverage
 > ledger." Read this when you are handed a commercial-research theme and want to know the order of
 > operations and which real primitive to reach for at each step. It is the prose companion to
-> `SKILL.md`'s Workflow section — `SKILL.md` is the authority; this file is the orientation.
+> `SKILL.md`'s Workflow section, `SKILL.md` is the authority; this file is the orientation.
 >
 > **Scope.** One task, one shot. Watching a theme over time is an orchestration-product job (wrap
-> this in `/schedule` or `/loop`), **not** something baked into the flow — see `SKILL.md` "Recurring
+> this in `/schedule` or `/loop`), **not** something baked into the flow, see `SKILL.md` "Recurring
 > / digest use" and `PHILOSOPHY.md` P5.
 >
 > **Doctrine it obeys.** Root-cause design (`PHILOSOPHY.md`); the P5 seam (the query path here never
-> imports a refresh/ops script — it uses only query-side signals); Side A/B/C (the availability gate
+> imports a refresh/ops script, it uses only query-side signals); Side A/B/C (the availability gate
 > is *warn-level guidance*, never a fail-closed LLM gate). All primitives named below are real and
-> live in this repo — none are invented.
+> live in this repo, none are invented.
 
 ## Last verified: 2026-06
 
 ---
 
-## 0. Startup — does this skill even apply?
+## 0. Startup, does this skill even apply?
 
 Before anything, gate the request (`SKILL.md` "When to stop and delegate immediately"):
 
@@ -37,8 +37,8 @@ independent-source bar in the guardrails) and how aggressive the disconfirmation
 
 ## 2. Triage → domains
 
-Read `reference/sources-index.md` (thin, ~12 lines). Match the theme to 1–N **real** commercial
-domains. **Do not** read full domain shards yet. **Skip meta-domains** (`mcp-ecosystem`) — they are
+Read `reference/sources-index.md` (thin, ~12 lines). Match the theme to 1 to N **real** commercial
+domains. **Do not** read full domain shards yet. **Skip meta-domains** (`mcp-ecosystem`), they are
 refresh-sweep infrastructure, never a research route. Zero domain matches → not in scope; route to
 plain web search.
 
@@ -47,30 +47,30 @@ plain web search.
 The single biggest failure mode is **under-calling**. Pick a tier explicitly from the SCALE dial in
 `SKILL.md` Step 1:
 
-- `scan` — 1 top domain, 1 top tool, fixed stop (quick scoped check).
-- `standard` — routed domains, 2–3 tools each, fixed stop.
-- `deep` — **default for any genuine research / "comprehensive / 全面"** — all relevant domains, ALL
+- `scan`, 1 top domain, 1 top tool, fixed stop (quick scoped check).
+- `standard`, routed domains, 2 to 3 tools each, fixed stop.
+- `deep`, **default for any genuine research / "comprehensive / 全面"**, all relevant domains, ALL
   available tools per domain, 3+ angles, cross-checked to ≥2 independent sources.
-- `exhaustive` — all relevant, no omission, multi-angle until **saturation** (new calls add no new
+- `exhaustive`, all relevant, no omission, multi-angle until **saturation** (new calls add no new
   facts).
 
 When in doubt, default to `deep`, not `standard`. Honor the **three iron rules** (no sampling;
-saturate don't fixed-stop; report coverage) and the **~40 call / ~6 round cost ceiling** — exceeding
+saturate don't fixed-stop; report coverage) and the **~40 call / ~6 round cost ceiling**, exceeding
 it is a stated choice, and the uncovered remainder becomes an explicit gap, never a silent truncate.
 A numeric override (`{domains, tools_per_domain, queries_per_tool, stop}`) wins if the user gives one.
 
 ## 4. Detect + availability-gate (the task-time classifier)
 
-Run `claude mcp list` and parse the three-state health output — a source is usable only if it shows
+Run `claude mcp list` and parse the three-state health output, a source is usable only if it shows
 `✓ Connected`; treat `✗ Failed` / `! Needs authentication` as not available. Tool-name prefix
 matching is a cross-check only, never the primary signal (`SKILL.md` Step 2). Then check whether a
 **companion config repo** exists (discovery order: `$MARKET_INTEL_CONFIG` → `~/.market-intel-config/`
 → `~/.config/market-intel-config/`; spec: `reference/companion-config-spec.md`). If present, read its
-`registry.json` for `installed` / `tier` / `transport` / `mcp_server_name` / `health_last` — that is
+`registry.json` for `installed` / `tier` / `transport` / `mcp_server_name` / `health_last`, that is
 the authoritative "what the user has." Never read `secrets/<slug>.env`.
 
-Now run **Step 2b** — for the triaged domains' relevant tools, classify each **at this moment** into
-one of three buckets using **query-side signals only** (no refresh/ops-script import — stay
+Now run **Step 2b**, for the triaged domains' relevant tools, classify each **at this moment** into
+one of three buckets using **query-side signals only** (no refresh/ops-script import, stay
 P5-clean):
 
 | bucket | signal | action |
@@ -80,21 +80,21 @@ P5-clean):
 | **hard-gap** | only paid/enterprise unlocks it, or tombstoned (`D-404`/`D-PRICE`/`D-TOS`/dead) | explicit gap; suggest only if theme truly needs the paid depth, flagged paid |
 
 Live state wins for *can-I-call-it-now*; companion tier informs *is-it-free-to-activate*. This is
-warn-level (Side A/B/C) — it shapes fan-out and recommendations, it never refuses to run.
+warn-level (Side A/B/C), it shapes fan-out and recommendations, it never refuses to run.
 
-## 5. Fan out to available-now tools — at scale
+## 5. Fan out to available-now tools, at scale
 
 Hand the **available-now** sources + sub-questions to the heavy harness (`SKILL.md` Step 4): one
 subagent per sub-question via the Agent tool (each told to load its target MCP via ToolSearch
-first — subagents inherit MCPs only in deferred form), or `deep-research` for the web portion, or
+first, subagents inherit MCPs only in deferred form), or `deep-research` for the web portion, or
 `research-lit`'s `— sources:` detect-or-skip routing for source-routed retrieval. Prefer the free
 browser-automation route (④, playwright already connected) over paid APIs when it fits; reach for
 paid ①/② only for history the browser can't backfill, scale reliability, or compliance.
 
 Every subagent returns a **structured evidence unit**, not prose:
 `{ status, claims:[{claim, source_url, quote, source_tier, date, confidence}], coverage_notes }`,
-length-capped per field. The main agent reduces units — it never reads raw page dumps. Fan-out >5 →
-insert a combiner layer (each merges 3–4 workers) so the main context never holds N long reports.
+length-capped per field. The main agent reduces units, it never reads raw page dumps. Fan-out >5 →
+insert a combiner layer (each merges 3 to 4 workers) so the main context never holds N long reports.
 
 ## 6. JIT-surface config gaps for the rest (theme-driven, at task-time)
 
@@ -103,34 +103,34 @@ skip**. Emit a one-line, theme-specific suggestion naming what the missing tool 
 cost class, and the exact activation path (from `reference/activation-recipes.md`):
 
 > "To deepen **<this theme aspect>**, configure **<tool>** (<free-key | free-tier | install-no-key |
-> paid $X>) — `python tools/console.py connect <slug>` (canonical, resolves by slug), or see
+> paid $X>), `python tools/console.py connect <slug>` (canonical, resolves by slug), or see
 > `reference/activation-recipes.md` for the key source; then `/mcp` reconnect (won't help this turn)."
 
-Configuration is recommended **at task-time, driven by the theme** — not pre-done. These lines feed
+Configuration is recommended **at task-time, driven by the theme**, not pre-done. These lines feed
 the report's Coverage-gaps → "Configure for deeper data" block (`reference/report-template.md`).
 
 ## 7. Adversarial verify (guardrails, during synthesis)
 
 Apply the HARD guardrails in `SKILL.md` "Quality guardrails":
 
-1. **Citation gate** — an independent verifier fetches each cited URL and confirms the verbatim
+1. **Citation gate**, an independent verifier fetches each cited URL and confirms the verbatim
    value before it enters the report (`✓verified / ⚠unverifiable / ✗dead`; drop dead).
 2. **≥2 independent sources** for decision-grade claims (wire-service reprints = one source).
-3. **Source tiers** L1–L5; vendor self-claims (L3) can't be sole support for performance/profit.
-4. **No silent degradation** — fallback from a barrier source is labeled in-section.
-5. **Timestamp volatile data** — every price/rate/ranking carries `[fetched | published]`.
-6. **Disconfirmation mandate** — a dedicated reverse-search subagent (scam/failure/loss/banned/
+3. **Source tiers** L1 to L5; vendor self-claims (L3) can't be sole support for performance/profit.
+4. **No silent degradation**, fallback from a barrier source is labeled in-section.
+5. **Timestamp volatile data**, every price/rate/ranking carries `[fetched | published]`.
+6. **Disconfirmation mandate**, a dedicated reverse-search subagent (scam/failure/loss/banned/
    expired/risk/regulation); report has a "Risks & counter-evidence" section (+ execution friction
    for arbitrage).
-7. **Surface conflicts, don't average** — disagreement matrix, mark `confirmed/disputed/unresolved`.
-8. **Failures become explicit gaps** — `failed/empty` → one rewrite+retry → else list under "Not
+7. **Surface conflicts, don't average**, disagreement matrix, mark `confirmed/disputed/unresolved`.
+8. **Failures become explicit gaps**, `failed/empty` → one rewrite+retry → else list under "Not
    covered."
 
 ## 8. Synthesize with the coverage report
 
 Write per `reference/report-template.md`: snapshot date, executive summary (confidence-tagged),
 findings by domain (tiered + dated + corroborated), cross-verification verdicts, disagreement
-matrix, risks & counter-evidence, then the **Coverage-gaps** ledger — which makes "comprehensive"
+matrix, risks & counter-evidence, then the **Coverage-gaps** ledger, which makes "comprehensive"
 *verifiable, not asserted*:
 
 - tool coverage `invoked N / M available-now in scope` per domain + total, at the chosen SCALE;
@@ -143,11 +143,11 @@ matrix, risks & counter-evidence, then the **Coverage-gaps** ledger — which ma
 ## 9. Close the loop (optional, cheap)
 
 Append one line per source actually touched to the live-run ledger (reuses guardrail verdicts;
-near-zero extra cost). This is the highest-value error signal for the next refresh sweep — a source
+near-zero extra cost). This is the highest-value error signal for the next refresh sweep, a source
 flagged `dead` in real use auto-nominates for the deletion path.
 
-The ledger lives OUTSIDE this repo — `~/.market-intel-config/data/metrics/live-runs.jsonl`, resolved
-by `tools/datadir.py` — because an entry records what you were actually researching. If the data dir
+The ledger lives OUTSIDE this repo, `~/.market-intel-config/data/metrics/live-runs.jsonl`, resolved
+by `tools/datadir.py`, because an entry records what you were actually researching. If the data dir
 does not exist, note the observations in the reply so they aren't lost; never write them into the
 repo. Shape: `metrics/live-runs.jsonl.example`.
 

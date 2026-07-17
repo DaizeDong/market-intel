@@ -185,14 +185,14 @@ def extract_slug(source: str) -> str | None:
 
     known = _known_tool_slugs()
     if not known:
-        # No tools dir to match against — return the normalised form best-effort.
+        # No tools dir to match against, return the normalised form best-effort.
         return norm
 
     # 1) exact match
     if norm in known:
         return norm
 
-    # 2) prefix match — try peeling trailing `-qualifier` segments one at a time
+    # 2) prefix match, try peeling trailing `-qualifier` segments one at a time
     #    e.g. `apollo-onboarding` -> `apollo`, `buffer-turnstile` -> `buffer`,
     #    `ebay-developer-approval` -> `ebay-developer` -> `ebay`.
     parts = norm.split("-")
@@ -201,13 +201,13 @@ def extract_slug(source: str) -> str | None:
         if candidate in known:
             return candidate
 
-    # 3) suffix tolerance — `attio` matches `attio-mcp`, `hubspot` -> `hubspot-mcp`,
+    # 3) suffix tolerance, `attio` matches `attio-mcp`, `hubspot` -> `hubspot-mcp`,
     #    `ebay` -> `ebay-api`.
     for slug in known:
         if slug.startswith(norm + "-") or slug.startswith(norm + "."):
             return slug
 
-    # 4) substring fallback — unique match wins, ambiguous drops to None
+    # 4) substring fallback, unique match wins, ambiguous drops to None
     hits = [slug for slug in known if norm in slug]
     if len(hits) == 1:
         return hits[0]

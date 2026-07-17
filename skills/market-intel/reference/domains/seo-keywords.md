@@ -3,7 +3,7 @@
 **Triage signals:** keyword volume/difficulty, backlinks, competitor SEO, SERP rank tracking,
 search traffic intel, 关键词/竞品SEO/排名.
 
-> Most "pro SEO MCPs" don't charge for the MCP — they consume your underlying subscription/API
+> Most "pro SEO MCPs" don't charge for the MCP, they consume your underlying subscription/API
 > quota. Real cost = the plan tier, not the MCP.
 
 | source | route | capability | detect | cost note |
@@ -20,19 +20,19 @@ search traffic intel, 关键词/竞品SEO/排名.
 **Default pick:** Have a site → free GSC MCP first. External keyword/SERP/backlink cheap → DataForSEO
 (Sandbox first). Pro coverage + Claude-friendly → SE Ranking. Deep backlinks → Ahrefs.
 
-## ④ Browser/OSS route (free, self-host) — strong here
+## ④ Browser/OSS route (free, self-host), strong here
 | repo | route | note |
 |---|---|---|
 | **searxng/searxng** (31k★) | ④ self-host | meta-search → JSON = private SerpApi, dozens of engines |
 | **towfiqi/serpbear** (2k★) | ④ self-host | keyword rank tracker, replaces paid rank monitoring |
 | deedy5/ddgs (2.7k★) | ④ | lightweight free web search lib, no key |
-| **Google Suggest / Autocomplete** | ④ free | keyword-ideas / long-tail expander — `suggestqueries.google.com/complete/search` (no key); ⚠ undocumented endpoint, Google can throttle anytime |
+| **Google Suggest / Autocomplete** | ④ free | keyword-ideas / long-tail expander, `suggestqueries.google.com/complete/search` (no key); ⚠ undocumented endpoint, Google can throttle anytime |
 | **respectlytics/respectaso** (377★) | ④ | ASO App-Store keyword research (iTunes Search API, 30 countries); ⚠ iOS/App Store ONLY, no Google Play |
 | flack0x/trendspyg / sdil87/trendspy | ④ | Google Trends after pytrends archived |
 | playwright MCP | ④ | drive trends.google.com / SERP directly when no repo fits |
 
 **Default (free route):** self-host **SearXNG** as a private SERP API + **serpbear** for rank
-tracking — covers most paid-SERP needs at zero cost (needs proxies at high volume). Keep GSC ① for
+tracking, covers most paid-SERP needs at zero cost (needs proxies at high volume). Keep GSC ① for
 your own site's real traffic (free, irreplaceable).
 
 **Shaky (avoid for prod):** pytrends (archived, 429s), "free Ahrefs" scraper MCPs needing CAPTCHA
@@ -41,6 +41,6 @@ solvers. No official MCP: Moz, Majestic, Sitebulb.
 **Install guidance:** `reference/volatile/pricing-install.md` → seo-keywords.
 
 **Top-pick grandfather watch (set 2026-06-17 sweep):** DataForSEO has been the unchallenged top
-pick for ≥3 consecutive sweeps. PHILOSOPHY P1 generative test: *why* is DataForSEO the default —
+pick for ≥3 consecutive sweeps. PHILOSOPHY P1 generative test: *why* is DataForSEO the default ,
 is it actually the optimal point, or have we stopped questioning the framing? **Next sweep MUST**
 run an explicit "could DataForSEO be replaced" angle in Discovery, not just "what's new."

@@ -1,17 +1,17 @@
 # Domain: browser-automation (route ④, first-class)
 
 **Triage signals:** any domain where the official/resale API is paid, rate-limited, field-stripped,
-or login-walled — and you'd rather have a real browser act like a human. Often gives **better data**
+or login-walled, and you'd rather have a real browser act like a human. Often gives **better data**
 (full rendered page, logged-in view, fields APIs don't return) at **zero API cost**.
 
 **This is not a last resort.** Prefer this route when: (a) the API is expensive/quota-capped,
 (b) you need the real logged-in/rendered view, (c) a free open-source repo already covers the target.
 Trade-offs: needs a logged-in session/cookies, usually a **proxy pool at scale** (software is free,
 proxies are the hidden cost), and most platform-specific scraping **violates that platform's ToS**
-(ban risk — use throwaway accounts for write/scrape-heavy work). Verified stars/activity 2026-06-01.
+(ban risk, use throwaway accounts for write/scrape-heavy work). Verified stars/activity 2026-06-01.
 
 ## You already have: playwright MCP
-`claude mcp list` → playwright connected. It drives a real Chromium with your session — navigate,
+`claude mcp list` → playwright connected. It drives a real Chromium with your session, navigate,
 click, fill, screenshot, read rendered DOM. **Default first tool** for any bespoke "act like a
 human" task before reaching for a paid API. Add specialized repos below when playwright alone is
 too low-level or gets fingerprint-blocked.

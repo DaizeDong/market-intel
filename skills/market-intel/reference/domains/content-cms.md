@@ -14,7 +14,7 @@ headless CMS, 发博客/内容发布.
 | **directus/mcp** (79★ official) | ① | official MCP for Directus (SQL-backed headless CMS, 36k★) | connected | for SQL-backed headless stacks |
 | **webflow/mcp-server** (132★ official) | ① | Webflow CMS collections/items/publish | connected (OAuth) | fills the Webflow gap (was a rate-limit footnote only) |
 | **Pipepost** (multi-platform) | ① | Dev.to+Hashnode+Ghost+WP+Medium + social broadcast | connected | handles canonical + SEO |
-| Static blog (Hugo/Astro) + claude-blog skill | — | write MD/frontmatter → git push → Vercel deploy | skill present | zero platform fee |
+| Static blog (Hugo/Astro) + claude-blog skill |, | write MD/frontmatter → git push → Vercel deploy | skill present | zero platform fee |
 
 **Default pick:** Own controllable blog → static (Hugo/Astro + claude-blog skill + git + `/vercel:deploy`,
 zero fee). CMS backend → WordPress MCP / Sanity hosted MCP. Cross-platform syndication → Pipepost.
@@ -27,4 +27,4 @@ dedup-penalized. Rate limits: Webflow publish 1/min, Notion ~3 req/s.
 **Saturation flag (set 2026-06-17 sweep):** 10+ sources cover headless/visual/syndication routes;
 5 fresh candidates from the 2026-06-17 sweep all demoted to watch as not needle-moving. Next sweep:
 **skip full Discovery for this domain** unless a real-run `live-runs.jsonl` entry surfaces a gap
-(P6 honest boundary — don't burn Discovery budget on a saturated domain).
+(P6 honest boundary, don't burn Discovery budget on a saturated domain).

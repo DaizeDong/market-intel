@@ -1,10 +1,10 @@
-# Agent-in-scripts doctrine — where `claude -p` is allowed, where it isn't
+# Agent-in-scripts doctrine, where `claude -p` is allowed, where it isn't
 
 The market-intel scripts evolved as 100% deterministic infrastructure (gh-api,
 HTTP, regex, file IO). After v0.25 the question came up: can we make scripts
 smarter by calling `claude -p` (headless Claude Code) from inside them?
 
-**Yes — but only on the helper side, never on the gate side.** This document is
+**Yes, but only on the helper side, never on the gate side.** This document is
 the rule.
 
 ---
@@ -15,11 +15,11 @@ PHILOSOPHY P4 (实测胜于记忆, 证据胜于断言) says:
 
 > "the deepest failure mode of an LLM system is confident fabrication. Truth must
 > come from an independent deterministic source, verified by a check the model
-> cannot talk its way past — and the editor is never its own verifier."
+> cannot talk its way past, and the editor is never its own verifier."
 
 The line cuts the script population in two:
 
-### Side A — fail-closed gates · LLM FORBIDDEN
+### Side A, fail-closed gates · LLM FORBIDDEN
 
 Any script that **blocks a release, sweep, install, or commit** when it returns
 non-zero. Replacing its check with LLM judgment opens a "model talks its way
@@ -32,14 +32,14 @@ past" failure mode.
 | `tools/check_doc_drift.py` (fail-level checks) | Derived-field drift. Release gate at step 5c. |
 | `tools/check_p5_drift.py` | One-line grep for P5 violation. Cleanup-pass gate. |
 | `market-intel-config/scripts/sync-check.py` | 7-bucket drift on companion-config. Release gate at step 5. |
-| `tools/sidecar_from_changelog.py` (the primary slug-to-doc resolution) | Forms the contract config-bridge consumes. Fuzzy fallback is OK — see helper side. |
+| `tools/sidecar_from_changelog.py` (the primary slug-to-doc resolution) | Forms the contract config-bridge consumes. Fuzzy fallback is OK, see helper side. |
 
 **Rule**: these scripts MUST stay deterministic. Adding a `claude -p` call is a
 P4 violation. If you genuinely need LLM judgment in this area, build a SEPARATE
 helper that runs `BEFORE` the gate and outputs structured data; the gate then
 checks the data.
 
-### Side B — draft & helper scripts · LLM ALLOWED
+### Side B, draft & helper scripts · LLM ALLOWED
 
 Any script whose output is **reviewed by a human before it has any effect**.
 These don't gate anything; they save the human time on initial drafting.
@@ -62,7 +62,7 @@ Per PHILOSOPHY P4: this is a DRAFT, not a gate.
 
 And they MUST have an `--apply` flag (default off) for any state mutation.
 
-### Side C — soft warn-level alerts · LLM TOLERATED
+### Side C, soft warn-level alerts · LLM TOLERATED
 
 Scripts that emit only **warnings**, never blocking. LLM judgment is acceptable
 because the human decides whether to act on the warning.
@@ -77,7 +77,7 @@ release log; no decision is taken automatically.
 
 ---
 
-## The pattern — when to add LLM to a script
+## The pattern, when to add LLM to a script
 
 Ask three questions:
 
@@ -110,7 +110,7 @@ if result.returncode != 0:
 draft = result.stdout
 ```
 
-For PowerShell scripts (release.ps1 won't call LLM directly per P4 — but
+For PowerShell scripts (release.ps1 won't call LLM directly per P4, but
 ancillary helpers might):
 
 ```powershell
@@ -124,7 +124,7 @@ $draft = $prompt | claude -p --output-format text
 
 Without this doctrine, the slippery slope is:
 1. "Let's have verify_matrix use claude -p to be smarter about ambiguous repos."
-2. → LLM occasionally hallucinates that a 404 repo "looks fine" — silent drift in.
+2. → LLM occasionally hallucinates that a 404 repo "looks fine", silent drift in.
 3. → Matrix degrades; gate has been talked past.
 
 With this doctrine, that conversation is short: "verify_matrix is Side A; the
@@ -149,9 +149,9 @@ checks."
 ## When NOT to use claude -p
 
 - When the answer is in a deterministic source you already have (gh-api gives
-  pushed_at — don't ask LLM "is this repo active")
+  pushed_at, don't ask LLM "is this repo active")
 - When the answer is binary and the wrong answer breaks something (URL exists or
-  doesn't — gh-api answers definitively)
+  doesn't, gh-api answers definitively)
 - When the cost per call matters (cleanup pass already calls Claude for narrative
   freshness; don't multiply)
 - When the user can't see the output before it takes effect

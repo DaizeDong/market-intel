@@ -179,7 +179,7 @@ def parse_incident(user_text: str) -> dict:
         print(f"ERROR: failed to parse LLM JSON: {e}", file=sys.stderr)
         print(f"--- raw reply ---\n{raw}", file=sys.stderr)
         sys.exit(1)
-    # Light validation — coerce instead of erroring, surface warnings.
+    # Light validation, coerce instead of erroring, surface warnings.
     warnings = []
     if data.get("outcome") not in VALID_OUTCOMES:
         warnings.append(f"outcome={data.get('outcome')!r} not in canonical 6 — review manually")
@@ -309,7 +309,7 @@ def _prompt_yn(question: str) -> bool:
 
 def apply_live_runs_append(entry_line: str) -> None:
     """Append a single line to live-runs.jsonl — UTF-8, no BOM, LF terminated."""
-    live_runs = live_runs_path()          # raises if uninitialized — never falls back into the repo
+    live_runs = live_runs_path()          # raises if uninitialized, never falls back into the repo
     os.makedirs(os.path.dirname(live_runs), exist_ok=True)
     # Read existing content as utf-8-sig (BOM-safe), write back as utf-8.
     existing = ""
@@ -425,7 +425,7 @@ def run(struct: dict, apply: bool) -> int:
     for ln in commit_msg.splitlines():
         print(f"  {ln}")
 
-    # Apply path — strictly opt-in, per-step y/N.
+    # Apply path, strictly opt-in, per-step y/N.
     if apply:
         print("\n" + "=" * 72)
         print("APPLY MODE — each step is opt-in. Review the draft above before answering.")

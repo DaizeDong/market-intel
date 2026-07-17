@@ -3,36 +3,36 @@
 - **Domain(s):** leadgen-crm (also: none)
 - **Barrier route:** ④ · **Source tier:** L4 · **Ready MCP:** no (Python library; self-host)
 - **Cost:** free (open source). Hidden costs: a LinkedIn account (burned at risk) + optional CAPTCHA solver (CapSolver / 2Captcha, paid per solve). [github.com/cullenwatson/StaffSpy, fetched 2026-06]
-- **Repo / Provider:** github.com/cullenwatson/StaffSpy — `cullenwatson/StaffSpy (255★, gh-api 2026-06)`, WTFPL, not archived but ⚠ last push 2025-06 (~12mo stale — LinkedIn DOM/anti-bot changes may have broken it; smoke-test before relying)
-- **Top pick for its domain:** no (route-④ default is **gosom/google-maps-scraper** — LinkedIn scraping is the high-ban-rate path the shard tells you to avoid)
+- **Repo / Provider:** github.com/cullenwatson/StaffSpy, `cullenwatson/StaffSpy (255★, gh-api 2026-06)`, WTFPL, not archived but ⚠ last push 2025-06 (~12mo stale, LinkedIn DOM/anti-bot changes may have broken it; smoke-test before relying)
+- **Top pick for its domain:** no (route-④ default is **gosom/google-maps-scraper**, LinkedIn scraping is the high-ban-rate path the shard tells you to avoid)
 
 ## What it does / when to pick it
-A Python library that **fetches a company's staff roster from LinkedIn** — given a company + title +
+A Python library that **fetches a company's staff roster from LinkedIn**, given a company + title +
 location it returns employees in a Pandas DataFrame with skills, experiences, certifications, schools,
 follower/connection counts, and a guessed `potential_email`. Also scrapes individual users by id, post
 commenters, and your own connections' contact info. **Decision rule:** only pick StaffSpy when you
 specifically need *who works at company X* and no compliant source covers it. For ordinary B2B leads
 prefer **Apollo.io** (① find+enrich, no ban risk) or **gosom/google-maps-scraper** (④ low risk). This
-is the LinkedIn-cookie route the shard flags at 25–35% ban rate.
+is the LinkedIn-cookie route the shard flags at 25 to 35% ban rate.
 
 ## Install
 ```
 pip install -U "staffspy[browser]"
 ```
 Or latest from source: `pip install "git+https://github.com/cullenwatson/StaffSpy.git#egg=staffspy[browser]"`.
-Python ≥ 3.10. Library only — no MCP server, nothing added to `~/.claude.json`. See
+Python ≥ 3.10. Library only, no MCP server, nothing added to `~/.claude.json`. See
 `reference/volatile/pricing-install.md` → leadgen-crm and `reference/install-guide.md` (route-④
 self-host mechanics + throwaway-account/proxy note).
 
 ## Auth / keys
 Needs a **logged-in LinkedIn session**: either pass `username`/`password`, or omit them and a browser
 opens for a one-time manual sign-in (cookies saved to `session_file`, lasts ~a week). **Use a
-throwaway/burner account — never the user's primary LinkedIn.** Optional `solver_service`
+throwaway/burner account, never the user's primary LinkedIn.** Optional `solver_service`
 (`SolverType.CAPSOLVER` / `2CAPTCHA`) + `solver_api_key` for CAPTCHA challenges (paid). Secret hygiene:
-do not echo the LinkedIn password or solver key into the transcript; have the USER supply them — see
+do not echo the LinkedIn password or solver key into the transcript; have the USER supply them, see
 `reference/install-guide.md` (secret-handling).
 
-## Usage — call examples
+## Usage, call examples
 ```python
 from staffspy import LinkedInAccount
 account = LinkedInAccount(session_file="session.pkl", log_level=1)
@@ -44,16 +44,16 @@ Other entry points: `scrape_users([...ids])`, `scrape_comments([post_ids])`, `sc
 `scrape_connections()`.
 
 ## General experience & gotchas (踩坑)
-- **⚠ HIGHEST-ban-risk route** — LinkedIn cookie-scraping = 25–35% account ban rate (shard compliance
-  red line). Burner account only; **small batches** (`max_results` defaults low for a reason — pushing
+- **⚠ HIGHEST-ban-risk route**, LinkedIn cookie-scraping = 25 to 35% account ban rate (shard compliance
+  red line). Burner account only; **small batches** (`max_results` defaults low for a reason, pushing
   toward 1000 invites detection/throttling). The `block=True`/`connect=True` flags are account-altering
-  side effects — leave them off unless intended.
-- **Repo is ~12 months stale (last push 2025-06)** — LinkedIn changes its DOM and bot defenses often;
+  side effects, leave them off unless intended.
+- **Repo is ~12 months stale (last push 2025-06)**, LinkedIn changes its DOM and bot defenses often;
   expect possible breakage and verify a 1-row scrape works before any real run.
-- **`potential_email` is GUESSED** (e.g. first.last@domain permutations), not verified — always pass
+- **`potential_email` is GUESSED** (e.g. first.last@domain permutations), not verified, always pass
   through **Hunter.io** / **ZeroBounce** before outreach, or you'll bounce and burn sender reputation.
 - CAPTCHA walls appear under load → without a configured solver the run silently stalls/returns partial.
-- **GDPR/CCPA:** this is personal data of identified individuals — the strictest delete-request /
+- **GDPR/CCPA:** this is personal data of identified individuals, the strictest delete-request /
   lawful-basis obligations apply. The shard says: prefer Google Maps leads or Bright Data when possible.
 
 ## Failure signals & fallback

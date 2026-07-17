@@ -110,7 +110,7 @@ def main():
     print("Init config for skill '%s' (mode %s) at %s" % (skill, a.mode, out))
     print("Discovery env var: %s  (fallback %s)" % (env_var(skill), default_dir(skill)))
 
-    # registry.json — deterministic; no machine-specific content (E4/E5).
+    # registry.json, deterministic; no machine-specific content (E4/E5).
     # Top-level shape per companion-config-spec.md §3 (schema_version + tools[]).
     registry = {"schema_version": 1, "tools": []}
     write(os.path.join(out, "registry.json"),

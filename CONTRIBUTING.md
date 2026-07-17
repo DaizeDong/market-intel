@@ -3,19 +3,19 @@
 Thanks for considering a contribution. Most contributions fall into one of three patterns;
 each has a slightly different path.
 
-## Pattern 1 — Add a new tool to the source matrix
+## Pattern 1, Add a new tool to the source matrix
 
 The matrix lives in `skills/market-intel/reference/`. Adding a tool means writing
 **four** synchronized changes:
 
-1. **`reference/sources-index.md`** — only if the tool changes a domain's *top pick*. Most adds don't.
-2. **`reference/domains/<domain>.md`** — add a row to the source table. Include barrier route
+1. **`reference/sources-index.md`**, only if the tool changes a domain's *top pick*. Most adds don't.
+2. **`reference/domains/<domain>.md`**, add a row to the source table. Include barrier route
    (① official / ② resale / ③ self-host scrape / ④ browser-automation / ⑤ agent-native),
    capability, detect/install hint, and a one-line risk/cost note.
-3. **`reference/tools/<slug>.md`** — full per-tool how-to. Follow the structure of any existing
+3. **`reference/tools/<slug>.md`**, full per-tool how-to. Follow the structure of any existing
    tool doc (`reference/tools/polygon.md` is a canonical example). Required sections: Domain(s) /
    Barrier route / Source tier / What it does / Install / Auth / Usage / Gotchas / Last verified.
-4. **`reference/tools/index.md`** — add a row pointing at your new tool doc, under the right
+4. **`reference/tools/index.md`**, add a row pointing at your new tool doc, under the right
    domain section.
 
 ### Naming convention (companion-config-spec §3.1 SHOULD)
@@ -46,10 +46,10 @@ you're knowingly citing a stale repo, mark it `D-STALE` in its row.
 
 If you're personally using the new tool with the companion-config repo pattern, also follow
 `runbooks/add-new-tool.md` in the companion repo to scaffold `tools/<slug>/` template files
-and `secrets/<slug>.env`. That's separate from the matrix-side contribution — the matrix
+and `secrets/<slug>.env`. That's separate from the matrix-side contribution, the matrix
 documents the tool; the companion-config tracks YOUR install state.
 
-## Pattern 2 — Update or remove an existing tool
+## Pattern 2, Update or remove an existing tool
 
 - **Update**: edit the row + the tool doc. Bump `## Last verified: YYYY-MM`. Note in PR what
   changed (capability, pricing, repo URL).
@@ -59,10 +59,10 @@ documents the tool; the companion-config tracks YOUR install state.
   Tombstoning preserves the row + a downstream signal for the next refresh sweep. Silent
   deletion breaks the monotonic-evolution guarantee (P3 in `PHILOSOPHY.md`).
 
-## Pattern 3 — Propose a new domain or framework change
+## Pattern 3, Propose a new domain or framework change
 
 Larger contributions (new domain, new gate, new doctrine) start with an issue + a brief
-prose proposal. Read `PHILOSOPHY.md` first — every change must pass the generative test:
+prose proposal. Read `PHILOSOPHY.md` first, every change must pass the generative test:
 
 > "Does this fix the framing, or just patch a symptom?"
 
@@ -78,18 +78,18 @@ already-identified next-domain candidates with their maturity triggers.
 - Tables and one-liners over paragraphs where it conveys the same info.
 - Lead with "what it does + when to pick it"; mechanical install/auth/usage details are
   refreshable, judgment isn't.
-- Cite repo stars and pricing as `[fetched YYYY-MM]` — explicit date is the only honest stamp.
+- Cite repo stars and pricing as `[fetched YYYY-MM]`, explicit date is the only honest stamp.
 
 ## Where to start reading
 
 If you're new to the codebase, recommended order:
 
-1. `README.md` — what the skill is, who it's for, install
-2. `PHILOSOPHY.md` — the 6 principles that govern every change
-3. `skills/market-intel/SKILL.md` — the user-facing workflow
-4. `skills/market-intel/reference/sources-index.md` — domain map (one-line index)
-5. `skills/market-intel/reference/refresh-protocol.md` — how the matrix gets updated
-6. `skills/market-intel/reference/companion-config-spec.md` — only if you'll use the per-machine config pattern
+1. `README.md`, what the skill is, who it's for, install
+2. `PHILOSOPHY.md`, the 6 principles that govern every change
+3. `skills/market-intel/SKILL.md`, the user-facing workflow
+4. `skills/market-intel/reference/sources-index.md`, domain map (one-line index)
+5. `skills/market-intel/reference/refresh-protocol.md`, how the matrix gets updated
+6. `skills/market-intel/reference/companion-config-spec.md`, only if you'll use the per-machine config pattern
 7. ONE specific `reference/domains/<domain>.md` shard relevant to your contribution
 8. The CONTRIBUTING.md you're reading now
 

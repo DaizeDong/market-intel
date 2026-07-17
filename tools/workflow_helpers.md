@@ -1,30 +1,30 @@
-# workflow_helpers.md — shared helpers for market-intel refresh sweep scripts
+# workflow_helpers.md, shared helpers for market-intel refresh sweep scripts
 
 Two infrastructure helpers extracted from the 2026-06-17 sweep post-mortem. Copy these
 verbatim into any Discovery workflow JS script (the workflow runtime does not support
-`require`/`import` of sibling files — each script must be self-contained).
+`require`/`import` of sibling files, each script must be self-contained).
 
-- **R2** — `PREAMBLE` constant: shared fixed-text prefix that Anthropic prompt cache
+- **R2**, `PREAMBLE` constant: shared fixed-text prefix that Anthropic prompt cache
   deduplicates across the N Discovery agents in one sweep.
-- **R3** — `retryAgent()` wrapper: per-agent retry envelope around `agent()` with honest
+- **R3**, `retryAgent()` wrapper: per-agent retry envelope around `agent()` with honest
   notes on what cooldown mechanisms actually work inside a workflow script.
 
 ---
 
-## R2 — Prompt-cache shared preamble
+## R2, Prompt-cache shared preamble
 
 ### Why
 
 2026-06-17 sweep ran 16 Discovery agents in parallel. Each rebuilt the same situational
-prompt from scratch — barrier-route legend + D1 surface categories + verdict actions +
-schema reminder — and only the trailing `domain='${domain}'` substring differed. That
+prompt from scratch, barrier-route legend + D1 surface categories + verdict actions +
+schema reminder, and only the trailing `domain='${domain}'` substring differed. That
 duplicated ~9k tokens × 16 agents = **~144k input tokens** the prompt cache would have
 caught had the prefix been byte-identical and ≥1024 tokens long.
 
 Anthropic prompt cache rules (relevant subset):
 - Cache hits require the prefix to be **byte-identical** across requests.
-- Minimum cacheable prefix is **1024 tokens** (sonnet/opus) — under that, no cache.
-- Cache TTL is 5 min by default — a sweep finishes well within that window.
+- Minimum cacheable prefix is **1024 tokens** (sonnet/opus), under that, no cache.
+- Cache TTL is 5 min by default, a sweep finishes well within that window.
 
 ### The `PREAMBLE` constant
 
@@ -66,7 +66,7 @@ Route 4 that delivers fields normally hidden behind paid 1 is the highest-value 
 `;
 ```
 
-This block is **~520 tokens** — comfortably over the 1024-token cache floor once concatenated
+This block is **~520 tokens**, comfortably over the 1024-token cache floor once concatenated
 with the domain-specific suffix below. (We pad with the suffix; the prefix alone is just under
 the floor so caching only kicks in once the suffix is appended.)
 
@@ -103,11 +103,11 @@ function dPrompt(domain, isHot) {
 Anything that varies per agent. If it differs by one byte, the cache miss invalidates the
 whole prefix.
 
-- ❌ `domain` name — varies per agent.
-- ❌ `isHot` budget toggle — varies per agent.
-- ❌ Candidate names, URLs, or prior verdicts — only the Verify/Synthesize agents see these.
-- ❌ The current date / sweep id / batch number — varies per sweep.
-- ❌ `args.hot_domains` content — varies per sweep invocation.
+- ❌ `domain` name, varies per agent.
+- ❌ `isHot` budget toggle, varies per agent.
+- ❌ Candidate names, URLs, or prior verdicts, only the Verify/Synthesize agents see these.
+- ❌ The current date / sweep id / batch number, varies per sweep.
+- ❌ `args.hot_domains` content, varies per sweep invocation.
 - ❌ File paths that interpolate variables.
 - ✅ OK in preamble: the static legend, the surface taxonomy, the schema-output reminder,
   the hard-rule list, anything that is genuinely shared doctrine.
@@ -117,21 +117,21 @@ sweep, it belongs in `PREAMBLE`. Otherwise, it belongs in the per-agent suffix.
 
 ---
 
-## R3 — `retryAgent()` wrapper
+## R3, `retryAgent()` wrapper
 
 ### Honest assessment: what cooldown mechanisms actually work in workflow scripts
 
-The workflow runtime is **deterministic-execution** — it replays scripts from event logs.
+The workflow runtime is **deterministic-execution**, it replays scripts from event logs.
 That rules out wall-clock waits:
 
 | Mechanism | Works in workflow scripts? | Why |
 |---|---|---|
 | `setTimeout` / `setInterval` | ❌ **No** | Not in the workflow sandbox; deterministic replay forbids host-time hooks. |
-| `setImmediate` / `process.nextTick` | ❌ **No** | Same — Node-only host APIs, not exposed. |
+| `setImmediate` / `process.nextTick` | ❌ **No** | Same, Node-only host APIs, not exposed. |
 | `await new Promise(r => setTimeout(r, ms))` | ❌ **No** | The `setTimeout` reference is undefined; throws on first call. |
 | Busy-loop on `Date.now()` | ❌ **Don't** | Even if `Date.now()` returns deterministic-replay time, you'd spin the worker thread; the harness will kill long-CPU scripts. |
-| Issuing another `await agent(...)` as "poor-man's wait" | ⚠️ Burns tokens — not a real cooldown. The next `agent()` hits the same rate-limited backend immediately. |
-| Batch-size reduction (4 domains per wave, not 16) | ✅ **The real fix** — already implemented in `refresh-2026-06-17-batched-wf` (`BATCH_SIZE = 4`). |
+| Issuing another `await agent(...)` as "poor-man's wait" | ⚠️ Burns tokens, not a real cooldown. The next `agent()` hits the same rate-limited backend immediately. |
+| Batch-size reduction (4 domains per wave, not 16) | ✅ **The real fix**, already implemented in `refresh-2026-06-17-batched-wf` (`BATCH_SIZE = 4`). |
 | Per-agent retry without sleep (immediate re-call, max N) | ✅ Works, useful for **transient schema-validation failures**, NOT useful for rate-limit (the limit is still in effect). |
 
 **Conclusion**: A retry wrapper with exponential backoff is **not implementable** here. The
@@ -193,7 +193,7 @@ does not), the policy should be:
 
 The synthesis pass and the report-writer should treat `{__retry_failed: true}` as a
 **typed null**: log it to the sweep manifest as a `retry_exhausted` failure, not as
-"domain had zero candidates". This is the single most useful thing the wrapper buys — the
+"domain had zero candidates". This is the single most useful thing the wrapper buys, the
 2026-06-17 sweep-v1 spent debug time confusing "rate-limited and never got a response"
 with "agent ran and found nothing worth landing".
 
@@ -209,7 +209,7 @@ if (failedDomains.length) log(`retry_exhausted in: ${failedDomains.join(', ')}`)
 ## Recommended deployment
 
 Copy `PREAMBLE` + `retryAgent` verbatim into the top of any new refresh-sweep workflow
-script. Do not try to `import` from a sibling file — the workflow sandbox does not resolve
+script. Do not try to `import` from a sibling file, the workflow sandbox does not resolve
 relative imports. Keep this doc in sync with the constant when refresh-protocol.md D1-D5
 changes meaningfully (barrier route taxonomy, new discovery surface category, new verdict
 action). When in doubt, the source of truth is `reference/refresh-protocol.md`; this
