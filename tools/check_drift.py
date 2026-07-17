@@ -22,7 +22,7 @@ if len(rows) < 2:
 cur, prev = rows[-1], rows[-2]
 alerts = []
 
-# global free-route share: long-horizon erosion (C2 spirit — free/④ being replaced by paid)
+# global free-route share: long-horizon erosion (C2 spirit, free/④ being replaced by paid)
 base = rows[max(0, len(rows) - 7)]
 d_share = cur["global"]["free_route_share"] - base["global"]["free_route_share"]
 if d_share < -0.10:

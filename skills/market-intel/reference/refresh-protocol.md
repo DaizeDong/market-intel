@@ -1,4 +1,4 @@
-# Refresh protocol — keep the source matrix current
+# Refresh protocol, keep the source matrix current
 
 This skill's value is a curated source matrix. Tools, prices, and barriers in the commercial-data
 space move fast (every survey round found acquisitions, price changes, and dead tools within
@@ -7,11 +7,11 @@ months). Re-run this protocol periodically to keep `domains/`, `volatile/pricing
 
 ## Cadence
 
-**v0.17.0 overhaul** — the old "quarterly default" was a v0 residue from when the matrix had
+**v0.17.0 overhaul**, the old "quarterly default" was a v0 residue from when the matrix had
 ~30 entries. With 155+ tool docs and a `live-runs.jsonl` feedback loop, the default is now
 **monthly**. Quarterly is reserved for the broad horizon scan.
 
-- **Weekly** (light pass, Discovery angles ①②④ only — i.e. just discover-new, no full
+- **Weekly** (light pass, Discovery angles ①②④ only, i.e. just discover-new, no full
   re-verify, no shard rewrite): `crypto-defi`, `browser-automation`, `frontier-research`,
   and the new meta-domain `mcp-ecosystem`. These move on a sub-week timescale (patchright →
   camoufox → nodriver reactive-detection turnover happened inside 4 weeks; new MCP releases
@@ -31,12 +31,12 @@ of its cadence tier.
 ## Procedure (full sweep)
 
 每次自动运行分两阶段：**发现阶段（Discovery，找新东西）** + **核实/差分阶段（Verify & Diff，旧条目校验
-+ 落库）**。旧版协议只做后者，会停滞——必须先跑发现阶段主动挖掘更前沿的工具，再用准入门槛过滤。
++ 落库）**。旧版协议只做后者，会停滞,必须先跑发现阶段主动挖掘更前沿的工具，再用准入门槛过滤。
 
 > 发现阶段的完整规则见下方 **「Discovery phase（前沿发现 + 质量筛选）」** 一节。它产出一个
 > 「候选池（candidate pool）」，核实/差分阶段只处理通过准入门槛的候选 + 旧条目复检。
 
--1. **Step -1 — 消费 live-run 账本（必跑，v0.17.0 起）。** 账本在**私有 store**（`~/.market-intel-config/
+-1. **Step -1, 消费 live-run 账本（必跑，v0.17.0 起）。** 账本在**私有 store**（`~/.market-intel-config/
     data/metrics/live-runs.jsonl`，由 `tools/datadir.py` 解析），**不在本仓**：它记录你真实在调研什么，是
     data 而非工具知识。在 Horizon scan 之前,先读账本自上次 refresh 以来的所有条目（按 `ts` 过滤;首次跑取最近 90 天）,按
     `outcome` 分桶:
@@ -47,7 +47,7 @@ of its cadence tier.
     | `barrier_found` | 命中新付费墙/captcha/反爬 | 该 domain 升级为 hot;启动 D-PRICE / D-TOS / D-CAPTCHA 评估;考察是否到达"第 3 次同档 D-PRICE → 触发 ROADMAP brokerage transport"(P2 触发条件) |
     | `coverage_gap` | 用户问题用现有矩阵答不上 | 该 domain 升级为 hot;Discovery 时显式带"为什么这个 gap 没被现存工具覆盖"角度 |
     | `price_mismatch` | shard 排名/价格与真实不符 | 该工具该轮必复检 + 改 shard,但**该 domain 不一定升 hot**(可能是缓慢漂移) |
-    | `verified` | 工具被真实使用且工作 | **cleanup pass 阶段自动把对应 `tools/<slug>.md` 的 `## Last verified` 推进到当月** —— "诚实原则"下,真用过即算复检,STALE 闸门豁免 |
+    | `verified` | 工具被真实使用且工作 | **cleanup pass 阶段自动把对应 `tools/<slug>.md` 的 `## Last verified` 推进到当月**, "诚实原则"下,真用过即算复检,STALE 闸门豁免 |
     | `user_correction` (非 null) | 用户人工修正 | 最高权重信号,直接覆盖任何 shard 推断,该条目复检时 quote 用户原话 |
 
     输出: hot-domains 清单(本轮 Discovery 这些 domain 的角度数 + 候选数翻倍)、必复检 slug 列表、
@@ -58,7 +58,7 @@ of its cadence tier.
 1. **跑发现阶段**：按下方 Discovery phase 规则，对每个域并行盲扫多个发现源，产出候选池
    （每个候选附带：来源、score、对现有首选的「新增/替换/不收录」裁决 + 理由）。
 2. **Apply the same quality guardrails** as a normal run (verify each claimed tool exists and the
-   price against its official site — do not trust a subagent's recalled pricing).
+   price against its official site, do not trust a subagent's recalled pricing).
 3. **Incremental edit, don't rewrite**: for each domain, update only changed rows in
    `domains/<domain>.md`; move/refresh price+install lines in `volatile/pricing-install.md`; bump
    that section's `last_verified: YYYY-MM`. Update `sources-index.md` only if a domain's top pick
@@ -68,10 +68,10 @@ of its cadence tier.
    踩坑, each fact gh-api/official-site verified) and add its row to `reference/tools/index.md`. For
    every tool **deleted/tombstoned**, mark its doc `⚠ Avoid (dead)` (never silent-delete) and drop its
    index row. Touch `reference/install-guide.md` only when install *mechanics* change (a new
-   prerequisite, an HTTP/stdio transport shift) — per-tool commands live in the tool doc +
+   prerequisite, an HTTP/stdio transport shift), per-tool commands live in the tool doc +
    `pricing-install.md`, not the overview. **Also re-verify the swept domain's EXISTING docs (not just
-   changed ones) and bump each `## Last verified` only when actually re-checked** — full doctrine in
-   **§文档层防腐协议 (R1–R4)** below. The gate enforces this layer: **TOOLS** (index↔doc, BLOCK) +
+   changed ones) and bump each `## Last verified` only when actually re-checked**, full doctrine in
+   **§文档层防腐协议 (R1 to R4)** below. The gate enforces this layer: **TOOLS** (index↔doc, BLOCK) +
    **REPO/STAR** verify repos cited inside tool docs (a hallucinated doc repo 404s → BLOCK) +
    **FRESH** rejects future doc dates + **STALE** WARNs docs unchecked >9mo + **DOCCOVER** WARNs a live
    shard repo with no doc (catches lost tracking).
@@ -83,7 +83,7 @@ of its cadence tier.
 
 发现阶段的目标：**主动发现新出现的、可能比现状更前沿/更优的工具·MCP·开源仓库·技术路线**，并在它们进库
 之前用「去炒作 + 去低质」门槛过滤掉垃圾。原则一句话：**广撒网发现、严准入筛选、对比式裁决、宁缺毋滥**。
-发现阶段不直接改任何 shard——它只产出一个**候选池**交给核实/差分阶段。
+发现阶段不直接改任何 shard,它只产出一个**候选池**交给核实/差分阶段。
 
 发现阶段读 `domains/<domain>.md` 拿到该域的**现有首选 + 现有条目 + 各条目的 barrier route（①②③④）**，
 作为对比基线；下面所有「替代升级」裁决都是相对这个基线做的。
@@ -91,11 +91,11 @@ of its cadence tier.
 **Discovery agent MANDATORY reads (修正自 2026-06-17 prompt-bug)**: 每个 Discovery agent 在 fan-out 时
 MUST 读这 5 个文件,而不仅仅是它自己的 domain shard:
 
-1. `sources-index.md` — 矩阵地图,知道域间分工
-2. `domains/<this-agent-domain>.md` — 自己域的现状基线
-3. `refresh-protocol.md` D1-D5(本节及以下) — 发现规则
-4. **`discovery-cn.md`** — 中文源(没有它,所有 Discovery agent 都看不见 CN 工具生态)
-5. **`domains/mcp-ecosystem.md`** — 元域(MCP 来源汇总,避 15 个 agent 各自重派 MCP 注册中心)
+1. `sources-index.md`, 矩阵地图,知道域间分工
+2. `domains/<this-agent-domain>.md`, 自己域的现状基线
+3. `refresh-protocol.md` D1-D5(本节及以下), 发现规则
+4. **`discovery-cn.md`**, 中文源(没有它,所有 Discovery agent 都看不见 CN 工具生态)
+5. **`domains/mcp-ecosystem.md`**, 元域(MCP 来源汇总,避 15 个 agent 各自重派 MCP 注册中心)
 
 历史 lesson: 2026-06-17 sweep 的 16 个 Discovery agents 因为 prompt 写了 "Read these THREE files only",
 直接锁死了第 4-5 项 → CN 工具 0 命中,mcp-ecosystem 元域形同虚设。本错误已修复,任何未来的 Discovery
@@ -106,7 +106,7 @@ workflow script MUST 包含上述 5 项 reads。
 按「覆盖什么 / 怎么查 / 信号质量」三栏组织。每个域至少覆盖 A/B/C 三大类发现源（注册中心、GitHub、社区）；
 能替代付费的免费方案（route ④/③）要专门跑 D 类。
 
-**A. MCP 注册中心**（覆盖：现成可即插即用的 MCP server）—— 完整发现源 + 轮询节奏见 `domains/mcp-ecosystem.md`（meta-domain）。下表是 A 类最常用入口子集；新注册中心 / 新 IDE marketplace 出现时只更新 mcp-ecosystem shard，不必散到 13 个域。
+**A. MCP 注册中心**（覆盖：现成可即插即用的 MCP server）, 完整发现源 + 轮询节奏见 `domains/mcp-ecosystem.md`（meta-domain）。下表是 A 类最常用入口子集；新注册中心 / 新 IDE marketplace 出现时只更新 mcp-ecosystem shard，不必散到 13 个域。
 | 发现源 | 怎么查 | 信号质量 |
 |---|---|---|
 | smithery.ai | 按域关键词搜 + 看「新上架 / 安装量排序」 | 中。安装量是弱采用度信号，但有刷量；很多是套壳 |
@@ -129,7 +129,7 @@ workflow script MUST 包含上述 5 项 reads。
 **C. 社区讨论 / 信号面**（覆盖：真实采用、口碑、踩坑、是否炒作）
 | 发现源 | 怎么查 | 信号质量 |
 |---|---|---|
-| Hacker News | Algolia HN API 搜域关键词 + 工具名，看 points/评论质量 | 高。**评论区是去炒作的金矿**——HN 会直接拆穿 vaporware/套壳 |
+| Hacker News | Algolia HN API 搜域关键词 + 工具名，看 points/评论质量 | 高。**评论区是去炒作的金矿**,HN 会直接拆穿 vaporware/套壳 |
 | Reddit | 对应 subreddit（r/webscraping、r/SEO、r/algotrading…）搜近月帖 | 中。真实使用反馈多，也有营销号；看评论而非楼主 |
 | X / 推特 | 复用本 skill 的 x-twitter 源搜工具名 | 中低。**发现力强但炒作最重**，只当线索不当证据 |
 | Product Hunt | 按域类目看近期 launch + upvote/评论 | 中低。营销驱动，upvote 可买；只取「真有人用」的信号 |
@@ -140,9 +140,9 @@ workflow script MUST 包含上述 5 项 reads。
 | GitHub Releases / CHANGELOG | 现有首选 + 候选仓库的 release 频率与最近一条 | 高。维护节奏的硬证据，停更/加速一眼可见 |
 | 官方 pricing / blog | 抓官网定价页 + 更新日志（验证价，不信 subagent 记忆） | 高（L1）。**barrier-route 漂移的权威来源**（API 转付费、免费层砍量） |
 
-**E. 高信号面 (auto-pollable)**（覆盖：单次 HTTP / RSS 即可拉到的高 S/N 候选源——v0.17.0 weekly tier 的主力）
+**E. 高信号面 (auto-pollable)**（覆盖：单次 HTTP / RSS 即可拉到的高 S/N 候选源,v0.17.0 weekly tier 的主力）
 
-A–D 多需关键词组合 + 翻页 + 人读。E 类不同：**一次 HTTP/RSS 调用就能拿到结构化结果**，每条结果就是一个候选
+A to D 多需关键词组合 + 翻页 + 人读。E 类不同：**一次 HTTP/RSS 调用就能拿到结构化结果**，每条结果就是一个候选
 线索，零运营成本。理想搭档 = Cadence 的 weekly 轻量扫（不全量 verify，只往 `discovery-state.md` 的 inbox
 追加候选，留给月度 sweep 复核）。每个候选记录到 inbox 用统一格式：`{discovered_at, surface, name, url,
 signal(stars/score/points/dl-growth/upload-date), one_line_pitch}`，让月度 sweep 按 signal 排序处理。
@@ -150,19 +150,19 @@ signal(stars/score/points/dl-growth/upload-date), one_line_pitch}`，让月度 s
 | 发现源 | 怎么查 | 阈值 | 信号质量 |
 |---|---|---|---|
 | **E1. PulseMCP newsletter RSS** | RSS：`https://www.pulsemcp.com/feed.xml`（若 404 退回 `https://www.pulsemcp.com/` 找 `<link rel="alternate" type="application/rss+xml">`；URL 未在 curl 下成功验证，**首次跑须人工确认**）| 任何新条目（已人工策展）| **最高**。已经过 PulseMCP 团队人工筛，每 token 的 MCP 发现密度最高；几乎无噪。Weekly 轮询。<br>**候选日志**：把每条 newsletter 提到的 MCP 单独写一行进 `discovery-state.md` inbox，标 `surface=E1` + 摘自哪期 |
-| **E2. GitHub Search velocity API** | `gh api 'search/repositories?q=created:>YYYY-MM-DD+stars:>50+topic:mcp-server'`；并行重复 `topic:claude-skill`、`topic:llm-agent` | **≥50 star 且 <90 天龄** | **高**。捕「天生即火」型仓库——纯靠 github.com/trending 看不到（trending 偏向已有粉丝基础的作者发新仓时短暂上榜）。每次 refresh sweep（含 weekly）都跑。<br>**候选日志**：每仓库一行 `surface=E2`，记录 `created_at + stars + repo` 三元组，月度 sweep 再 gh api 复核 star 真实性（防刷量） |
-| **E3. HF Spaces trending JSON** | HTTP GET：`https://huggingface.co/api/spaces?sort=trendingScore&limit=50`（JSON，无须鉴权）| `trendingScore > X`（初轮经验校准；建议从前 10% 切，跑 2 轮后定阈值）| **中高**。常在 GitHub trending **之前** 抓到新 agent demo / tool wrapper——HF demo 上线门槛比开源发布低。Weekly during hot-sweep。<br>**候选日志**：每 Space 一行 `surface=E3` + `trendingScore` + `task tag` + author |
+| **E2. GitHub Search velocity API** | `gh api 'search/repositories?q=created:>YYYY-MM-DD+stars:>50+topic:mcp-server'`；并行重复 `topic:claude-skill`、`topic:llm-agent` | **≥50 star 且 <90 天龄** | **高**。捕「天生即火」型仓库,纯靠 github.com/trending 看不到（trending 偏向已有粉丝基础的作者发新仓时短暂上榜）。每次 refresh sweep（含 weekly）都跑。<br>**候选日志**：每仓库一行 `surface=E2`，记录 `created_at + stars + repo` 三元组，月度 sweep 再 gh api 复核 star 真实性（防刷量） |
+| **E3. HF Spaces trending JSON** | HTTP GET：`https://huggingface.co/api/spaces?sort=trendingScore&limit=50`（JSON，无须鉴权）| `trendingScore > X`（初轮经验校准；建议从前 10% 切，跑 2 轮后定阈值）| **中高**。常在 GitHub trending **之前** 抓到新 agent demo / tool wrapper to HF demo 上线门槛比开源发布低。Weekly during hot-sweep。<br>**候选日志**：每 Space 一行 `surface=E3` + `trendingScore` + `task tag` + author |
 | **E4. npm download velocity API** | 候选 npm 包：`https://api.npmjs.org/downloads/range/last-week/<pkg>` + `last-month/<pkg>`，算 WoW 增长比 | **WoW ≥2x 且周下载绝对值 ≥500** | **高**（远强于 star）。下载量＝真实安装动作，比 star 抗刷量、抗营销得多。每次 refresh sweep。<br>**候选日志**：每包一行 `surface=E4` + `weekly_dl + WoW_ratio + npm_url`，触发条件后直接进 month-sweep 的必复检列表 |
-| **E5. Show HN / Launch HN scan** | Algolia HN API：`https://hn.algolia.com/api/v1/search_by_date?tags=show_hn&query=mcp+OR+agent+OR+scraper`（按时间排序，无需鉴权）| `points ≥ 30` **或** 顶层有实质讨论串（≥10 评论且非营销号）| **高**。Show HN 是**工具优先**的展示窗口（不是 think-piece），往往在 release 后 24–72h 出现，HN 评论区天然去炒作。Weekly during hot-sweep。<br>**候选日志**：每帖一行 `surface=E5` + `points + comment_count + repo/site_url`（HN 帖子里附的链接） |
-| **E6. AI YouTube early-demo handles** | YouTube 每频道 RSS：`https://www.youtube.com/feeds/videos.xml?channel_id=<UCID>`；订阅 4 个频道：Matthew Berman、AI Explained、Cole Medin、AI Coffee Break（首次跑需各自抓 UCID）| 任何提到 MCP / 新 agent / 新工具的新视频 | **中高**。这几位常在重要 release 后 24h 内出 demo——**「有人真试过」的最快信号**，能补 HN/Reddit 还没消化的真空期。Manual digest weekly。<br>**候选日志**：每视频一行 `surface=E6` + 频道 + `published_at` + 视频里点名的工具列表 |
+| **E5. Show HN / Launch HN scan** | Algolia HN API：`https://hn.algolia.com/api/v1/search_by_date?tags=show_hn&query=mcp+OR+agent+OR+scraper`（按时间排序，无需鉴权）| `points ≥ 30` **或** 顶层有实质讨论串（≥10 评论且非营销号）| **高**。Show HN 是**工具优先**的展示窗口（不是 think-piece），往往在 release 后 24 to 72h 出现，HN 评论区天然去炒作。Weekly during hot-sweep。<br>**候选日志**：每帖一行 `surface=E5` + `points + comment_count + repo/site_url`（HN 帖子里附的链接） |
+| **E6. AI YouTube early-demo handles** | YouTube 每频道 RSS：`https://www.youtube.com/feeds/videos.xml?channel_id=<UCID>`；订阅 4 个频道：Matthew Berman、AI Explained、Cole Medin、AI Coffee Break（首次跑需各自抓 UCID）| 任何提到 MCP / 新 agent / 新工具的新视频 | **中高**。这几位常在重要 release 后 24h 内出 demo,**「有人真试过」的最快信号**，能补 HN/Reddit 还没消化的真空期。Manual digest weekly。<br>**候选日志**：每视频一行 `surface=E6` + 频道 + `published_at` + 视频里点名的工具列表 |
 
-> **Polling automation note**：E1–E5 全部是**单次 HTTP / RSS 调用**，E6 是**每频道一次 RSS**——零运营成本、
+> **Polling automation note**：E1 to E5 全部是**单次 HTTP / RSS 调用**，E6 是**每频道一次 RSS**,零运营成本、
 > 无需浏览器自动化、无登录态、无速率限制风险（HN/npm/HF/GitHub 均公开匿名可用）。这正是 v0.17.0 引入的
 > weekly 轻量扫节奏的理想匹配：一个 ~50 行的 cron 脚本即可把 6 个面全拉一遍，输出统一格式直接 append 进
-> `discovery-state.md` 的 inbox section。月度全量 sweep 再从 inbox 按 signal 排序消费——把 weekly 的「发现」
+> `discovery-state.md` 的 inbox section。月度全量 sweep 再从 inbox 按 signal 排序消费,把 weekly 的「发现」
 > 与 monthly 的「核实」彻底解耦，发现端不再受 subagent 预算约束。
 
-**F. 中文发现源（CN surfaces）**——A–E 主扫英文圈，会系统性漏掉国产生态（DeepSeek 工具圈 / 即梦 / 可灵 /
+**F. 中文发现源（CN surfaces）**,A to E 主扫英文圈，会系统性漏掉国产生态（DeepSeek 工具圈 / 即梦 / 可灵 /
 MiniMax / 抖音电商 / 小红书 / Qwen ecosystem）。每轮 sweep 按 `discovery-cn.md` 跑一遍 CN 源（即刻 / 36Kr AI /
 量子位 / 极客公园 / 十字路口播客；小红书 + DeepSeek 群仅 Horizon 季度扫）；候选写入 `volatile/discovery-state.md`
 的 **CN candidates** 子段，每条同时记录中文原名 + 最近的英文等价物/GitHub 链接以便与主候选池 dedup。完整清
@@ -171,7 +171,7 @@ MiniMax / 抖音电商 / 小红书 / Qwen ecosystem）。每轮 sweep 按 `disco
 ### D2. 多模态盲扫策略（multi-angle blind scan）
 
 对**同一个域**派多个 subagent，**各自只从一个角度扫、互相不知道对方结论**（盲扫，减少互相锚定的盲区），
-最后由 combiner 去重合并。每个域的盲扫角度（按域繁忙度取 2–4 个，受 Budget 上限约束）：
+最后由 combiner 去重合并。每个域的盲扫角度（按域繁忙度取 2 to 4 个，受 Budget 上限约束）：
 
 - **角度①「注册中心视角」**：只扫 A 类（MCP 注册中心）。问：该域有哪些新上架/高安装量的 MCP？
 - **角度②「GitHub 视角」**：只扫 B 类。问：该域有哪些新建高星 / 近期高活跃 / 有现成 MCP wrapper 的仓库？
@@ -180,22 +180,22 @@ MiniMax / 抖音电商 / 小红书 / Qwen ecosystem）。每轮 sweep 按 `disco
   act-like-human 方案，能替代本域当前那个**付费**首选（点名现有 top pick 与其价格）？要求它直接对标
   现有付费源的能力缺口。
 
-盲扫纪律：每个 subagent **只准报自己角度查到的**，禁止脑补其他角度；禁止编造仓库名/star 数——所有数字
+盲扫纪律：每个 subagent **只准报自己角度查到的**，禁止脑补其他角度；禁止编造仓库名/star 数,所有数字
 必须来自 GitHub API / 注册中心页 / changelog 的**实抓**，附 URL。返回结构化候选单（见 D5）。
 
 ### D3. 评分（前沿性 × 质量，满分各维度后取加权）
 
-对每个候选打分。**前沿性与质量是两个轴，缺一不可**——只前沿不优质 = 炒作；只老牌不前沿 = 停滞。
-维度（每项 0–2 分，标注证据 URL，无证据该项记 0 并标 `unverified`）：
+对每个候选打分。**前沿性与质量是两个轴，缺一不可**,只前沿不优质 = 炒作；只老牌不前沿 = 停滞。
+维度（每项 0 to 2 分，标注证据 URL，无证据该项记 0 并标 `unverified`）：
 
 | 维度 | 0 | 1 | 2 | 反陷阱注记 |
 |---|---|---|---|---|
-| **活跃度** | 停更 >12 月 / archived | 6–12 月内有提交 | 近 3 月有 release/commit 且节奏稳 | 看**提交节奏**不只看最后一次；一次性 dump 仓库≠活跃 |
-| **采用度** | 仅作者自用 | 有少量真实用户/第三方提及 | 多个独立来源（HN/Reddit/dependents）在真实用 | **高 star ≠ 采用**——查 star 时间曲线，一夜暴涨=刷量嫌疑 |
+| **活跃度** | 停更 >12 月 / archived | 6 to 12 月内有提交 | 近 3 月有 release/commit 且节奏稳 | 看**提交节奏**不只看最后一次；一次性 dump 仓库≠活跃 |
+| **采用度** | 仅作者自用 | 有少量真实用户/第三方提及 | 多个独立来源（HN/Reddit/dependents）在真实用 | **高 star ≠ 采用**,查 star 时间曲线，一夜暴涨=刷量嫌疑 |
 | **现成 MCP** | 无、需自己包 | 有社区 MCP 但维护存疑 | 有维护良好的官方/社区 MCP | 有现成 MCP 降低接入成本，但别为「有 MCP」牺牲数据质量 |
 | **barrier 路线优劣** | 比现状更脆/更易封/更贵 | 与现状同级 | **比现状更优**（更免费/更稳/更难被封/拿到 API 藏的字段） | route ④ 免费且拿到更全字段 → 加分；纯套壳付费 API → 不加分 |
 | **成本** | 比现状贵且无新能力 | 与现状相当 | 免费或显著更便宜且能力不降 | 「免费但要自备账号+代理+承担封号」要在 risk 栏写清，不算白嫖 |
-| **是否真比现有条目更好** | 不如现有首选 | 与现有条目互补（覆盖新子能力） | 在现有首选的核心能力上**实测/有证据更强** | **这是裁决核心**——没有「比现状更好」的证据，再新也只是「新增候选」不是「替换」 |
+| **是否真比现有条目更好** | 不如现有首选 | 与现有条目互补（覆盖新子能力） | 在现有首选的核心能力上**实测/有证据更强** | **这是裁决核心**,没有「比现状更好」的证据，再新也只是「新增候选」不是「替换」 |
 
 **入池门槛**：总分需达阈值**且**「活跃度」「barrier 路线优劣」两项均 ≥1，**且**至少有 1 个独立第三方采用
 证据（采用度 ≥1）。任一不满足 → 不入池（理由记录在 reject log，避免下次重复发现同一垃圾）。
@@ -215,7 +215,7 @@ MiniMax / 抖音电商 / 小红书 / Qwen ecosystem）。每轮 sweep 按 `disco
 - **star 灌水嫌疑**：star 曲线短期陡升、star 数与 issue/PR/fork/contributor 数严重背离（高星零 issue 零 fork）、
   贡献者高度集中于单账号或新号集群。
 - **停更/弃坑**：最后提交 >12 月、archived、README 标 deprecated、或上游已迁移到别处而此仓库是旧壳。
-- **套壳工具**：只是对某付费 API 的薄包装却不揭示底层依赖/不增任何能力/不省成本——尤其当它把别人的
+- **套壳工具**：只是对某付费 API 的薄包装却不揭示底层依赖/不增任何能力/不省成本,尤其当它把别人的
   免费 OSS 重新包装后收费。套壳但**真降低接入成本或补了能力**的可保留，但要在条目里点明底层依赖。
 - **来源单一不可复核**：所有证据都来自同一发布方（L3），无 L1/L2 佐证 → 不够格做首选，最多 watchlist。
 
@@ -253,9 +253,9 @@ candidate → L0 deterministic → (PASS / BLOCK / UNCERTAIN)
 
 **L0 deterministic check** (实现: `tools/l0_verify.py`,见 PHILOSOPHY §P4):
 - URL 类型自动分流: github / web / npm / pypi / web-registry
-- github: gh api repos/<o>/<r> — 404→BLOCK,archived→BLOCK,>12mo→BLOCK,else→PASS
-- web: HTTP HEAD + DNS + cert — 200→PASS,404→BLOCK,403 anti-bot + DNS+cert 健康→PASS,5xx/timeout→UNCERTAIN
-- npm/pypi: registry API — time.modified ≤12mo + 未 deprecated→PASS
+- github: gh api repos/<o>/<r>, 404→BLOCK,archived→BLOCK,>12mo→BLOCK,else→PASS
+- web: HTTP HEAD + DNS + cert, 200→PASS,404→BLOCK,403 anti-bot + DNS+cert 健康→PASS,5xx/timeout→UNCERTAIN
+- npm/pypi: registry API, time.modified ≤12mo + 未 deprecated→PASS
 - web-registry (github.com/mcp, chatgpt.com/apps 等元页): anti-bot 403 + DNS+cert→PASS(此类注册页本身就 anti-bot,内容用其他证据)
 
 **L1 single LLM lens** (top-pick-impact ONLY):
@@ -287,9 +287,9 @@ candidate → L0 deterministic → (PASS / BLOCK / UNCERTAIN)
   vs_current_top_pick: "对比理由（REPLACE 必填能力对比证据）" }
 ```
 
-## Horizon scan（发现新角度 / 新域 —— 与时俱进，不只完善已有）
+## Horizon scan（发现新角度 / 新域, 与时俱进，不只完善已有）
 
-Discovery phase 在**已知 13 个域内**找更好的工具。但工具世界会长出**全新的域和调研角度**——新平台崛起、
+Discovery phase 在**已知 13 个域内**找更好的工具。但工具世界会长出**全新的域和调研角度**,新平台崛起、
 新一类工具出现、新的调研方法论成形、API 政策剧变打开/关闭一整条路线。只完善已有 = 框架被冻结在过去。
 Horizon scan 是 PHILOSOPHY.md **P1（改框架，不只改症状）应用到本 skill 自己的范围上**：定期问"地图本身
 是不是该长大了？"，并在适当时**新增子域 / 子 skill**。
@@ -297,14 +297,14 @@ Horizon scan 是 PHILOSOPHY.md **P1（改框架，不只改症状）应用到本
 **何时跑：** 每次全量扫（Jan/Apr/Jul/Oct）必跑；月度轻量扫做一个 10 分钟的"当月脉搏"快照即可。
 
 ### H1. 扫什么（跨域、看趋势，而非看单个工具）
-- **当月发生了什么**：本月该领域的大事件——平台 API 政策变动、重大收购、某类工具突然爆发、某条壁垒
+- **当月发生了什么**：本月该领域的大事件,平台 API 政策变动、重大收购、某类工具突然爆发、某条壁垒
   路线被打开或封死。来源：HN/Reddit 月度热帖、各大框架的 release/blog、MCP 注册中心的**新类目**。
 - **新平台 / 新数据territory**：出现了现有 13 域装不下的新数据源吗？（如一个新社交平台成气候、一种新的
   另类数据市场、一个新的内容形态）。
 - **新一类工具**：出现了**全新品类**的工具/MCP 吗？（不是"又一个 X 抓取器"，而是"一种以前不存在的能力"，
   如某种新的 agent 记忆服务、实时多模态采集、新的反检测范式）。
 - **新调研角度 / 方法论**：有没有**更新颖的"做调研"的方式**本身？（如一种新的交叉验证手段、一种新的
-  信号源、一种把多个域串起来的新工作流）——这是用户明确要的"比较新颖的调研角度"。
+  信号源、一种把多个域串起来的新工作流）,这是用户明确要的"比较新颖的调研角度"。
 
 ### H2. 决策：折叠 / 新增子域 / 新增子 skill（默认最小，门槛递增）
 对每个发现的新角度，三选一，**必须给理由**：
@@ -316,10 +316,10 @@ Horizon scan 是 PHILOSOPHY.md **P1（改框架，不只改症状）应用到本
   逻辑**，已超出"源矩阵一行"能承载的范畴（如它本身就是一套独立的多步流程）。自动运行**不得**自建新 skill，
   只能写入提案交人审。
 
-### H3. 防膨胀门槛（用 P3 约束 P1 —— 范围增长不等于腐化）
+### H3. 防膨胀门槛（用 P3 约束 P1, 范围增长不等于腐化）
 "与时俱进"绝不等于"什么新东西都加一个域"。膨胀本身就是一种退化。所以：
 - **新 ≠ 需要一个新域**：新角度先进 `volatile/discovery-state.md` 的 **new-angle watchlist**（带发现日期），
-  **至少跨 2 次扫仍持续相关**才可提名升级为新域——一次性炒作会自然过期。
+  **至少跨 2 次扫仍持续相关**才可提名升级为新域,一次性炒作会自然过期。
 - **必须过生成式检验**（PHILOSOPHY.md）："这是在改框架（真的有一块没被覆盖的territory），还是只在打补丁
   （其实塞进现有域更对）？" 倾向折叠；提名新域/新 skill 的举证责任在提名方。
 - **结构性变更永远走人审**：新增域/子 skill 是高权限结构变更，自动运行只产出**提案**（写入 watchlist +
@@ -328,25 +328,25 @@ Horizon scan 是 PHILOSOPHY.md **P1（改框架，不只改症状）应用到本
 ### H4. 产出
 Horizon scan 产出一个 **新角度提案清单**（每条：发现的角度 + 来源证据 URL + FOLD/NEW-DOMAIN/NEW-SKILL
 裁决 + 理由 + 是否已在 watchlist 复现）。FOLD 项交给正常的核实/差分阶段；NEW-DOMAIN/NEW-SKILL 项进 PR 等
-人审。无新角度时显式写"本月无新territory，已扫 H1 四类"——不留白、不假装。
+人审。无新角度时显式写"本月无新territory，已扫 H1 四类",不留白、不假装。
 
 ## Budget
 
 Treat a full sweep like a `deep` run: cap at 12 subagents, single round each, plus verification.
-Don't let a refresh balloon — it's a diff against an existing matrix, not a from-scratch survey.
+Don't let a refresh balloon, it's a diff against an existing matrix, not a from-scratch survey.
 
 **发现阶段的预算分配**：13 个域 × 多角度盲扫会爆 subagent 上限，因此**分波而非全量并行**：每波取一个
 「域 × 角度」批，受 depth 的 max-subagents 上限约束；**优先把预算给波动快的域**（x-twitter / web-scraping /
-social-publishing / crypto-defi / browser-automation，见 Cadence）和**角度④（免费替代付费）**——这两类
+social-publishing / crypto-defi / browser-automation，见 Cadence）和**角度④（免费替代付费）**,这两类
 ROI 最高。其余域每轮至少跑角度②（GitHub）+ 角度③（社区）两个角度做最小覆盖。combiner 合并候选后再进
 核实，主 agent 不读 subagent 的原始页面 dump，只读候选单。
 
-## 防退化协议（强制 —— 保证只进化不退化）
+## 防退化协议（强制, 保证只进化不退化）
 
 无人值守更新有退化风险（幻觉仓库、误删好源、填错价、丢方法论）。原则：**LLM 只提议，确定性闸门否决；
 坏更新进不了 main；护栏只增不减。** 每次自动运行必须遵守：
 
-0. **先读 `CONSTITUTION.md`（仓库根），逐条作为硬约束遵守 C1–C10。** 自动运行**不得修改**宪法/`tools/`。
+0. **先读 `CONSTITUTION.md`（仓库根），逐条作为硬约束遵守 C1 to C10。** 自动运行**不得修改**宪法/`tools/`。
 1. **只在 `refresh/<date>` 分支工作，绝不直推 main。**
 2. **事实一律 API 实测**：每个收录/改动的仓库用 `gh api repos/<o>/<r>` 核实存在 + 真实 star（写 API 返回的
    真值，标 `(NNk★)` 紧贴仓库名）；价格核官网。**禁止凭记忆**。核实不了 → 不收录（C1/C6）。
@@ -362,7 +362,7 @@ ROI 最高。其余域每轮至少跑角度②（GitHub）+ 角度③（社区�
 > 调度脚本 `a local refresh-market-intel.sh` 已实现 1/5/6 的编排骨架与 scope guard（拒绝越界改动）。
 > v1 闸门覆盖协议强制的格式（github URL + star 标注）；裸 slug 无标注的漏检由 ROADMAP 的「机读镜像块」补全。
 
-## 文档层防腐协议（anti-rot）—— 保证 L2 逐工具文档不因迭代而失效或丢追踪
+## 文档层防腐协议（anti-rot）, 保证 L2 逐工具文档不因迭代而失效或丢追踪
 
 L2 逐工具文档（`reference/tools/<slug>.md`）+ L0 `install-guide.md` 是 v0.10.0 起的一等资产。迭代最易在
 这层出三种腐化：**孤儿文档 · 静默过期 · 丢追踪**。三道防线兜底：**确定性闸门否决 + 协议强制 + 周期独立审计**。
@@ -371,26 +371,26 @@ L2 逐工具文档（`reference/tools/<slug>.md`）+ L0 `install-guide.md` 是 v
 新增一个工具 ⇒ 必须**同时**落：(a) 分片行 `domains/<域>.md`、(b) 索引行 `tools/index.md`、(c) 文档
 `tools/<slug>.md`、(d) 机读清单 `tools/registry.json` 一条 `{slug,name,kind,repo,domain,top_pick}`。
 绝不允许只改其一。闸门三网兜底：**REGISTRY**（registry↔index↔doc 三方一致，**含非仓库 SaaS**，不符即
-BLOCK——这是 SaaS 工具的确定性追踪网）+ **TOOLS**（index↔doc，缺即 BLOCK）+ **DOCCOVER**（活跃分片仓库无
+BLOCK,这是 SaaS 工具的确定性追踪网）+ **TOOLS**（index↔doc，缺即 BLOCK）+ **DOCCOVER**（活跃分片仓库无
 文档即 WARN）。`registry.json` 是工具清单的**权威来源**，由 `index.md` + 文档**派生生成**（再生成脚本见
-CHANGELOG 0.10.2）——改完工具后重跑该脚本即可保持同步，不必手编。
+CHANGELOG 0.10.2）,改完工具后重跑该脚本即可保持同步，不必手编。
 
 ### R2. 扫到一个域，复检该域的全部文档（不止变更项）
 旧步骤 3b 只更新「被改动」工具的文档，不变的会静默腐化。补足：每次 sweep 对**所扫域**的每份
-`tools/<slug>.md` 复检——`gh api` 复核仓库存活 + star、抓官网复核头条价格——**仅在真正复检后**才把
+`tools/<slug>.md` 复检,`gh api` 复核仓库存活 + star、抓官网复核头条价格,**仅在真正复检后**才把
 `## Last verified: YYYY-MM` 推进到当月。闸门 **STALE**（>9 月未检 → WARN，按最旧优先点名复检清单）+
 **FRESH**（禁未来日期，防「名新实旧」）。**禁止不复检就改日期**（C8 时间只前进 + 诚实原则）。
 
 ### R3. 死亡 = 墓碑，不是删除（保住追踪链）
 工具死亡（死亡码 D-404/D-STALE/D-PRICE/D-TOS/D-SUPERSEDED）时：分片行进 `⚠ Avoid (dead, D-xxx)` 墓碑、
-索引行去星或标注、**文档保留并在顶部加死亡横幅**（不要删文件）——死条目才不会被下一轮重新「幻觉」回来，
+索引行去星或标注、**文档保留并在顶部加死亡横幅**（不要删文件）,死条目才不会被下一轮重新「幻觉」回来，
 追踪链不断。**改名（rebrand，如 Polygon→Massive）不是死亡**：保留为 live、标 REBRAND，别误套死亡码。
 
 ### R4. 经验必须真实，禁止编造
 文档的「General experience & gotchas / 踩坑」只能来自：分片沉淀的真实运行教训、live-run 账本（私有 store）
-反馈、或本轮实跑/实抓所得——**绝不凭模型记忆编造**（C1/C6），所有 star/价格实测带 URL。每轮 sweep 派一个
+反馈、或本轮实跑/实抓所得,**绝不凭模型记忆编造**（C1/C6），所有 star/价格实测带 URL。每轮 sweep 派一个
 **零上文的独立审计 subagent**（仿 `citation-audit` 模式）抽检若干文档：核对仓库存在性、star 容差、价格、
-以及 shard↔doc↔index↔pricing 四者自洽，发现即修。live-run 账本是经验的活水——真实调研中触到
+以及 shard↔doc↔index↔pricing 四者自洽，发现即修。live-run 账本是经验的活水,真实调研中触到
 新坑就回写一行，下轮据此把对应 `tools/<slug>.md` 的踩坑段加厚。
 
 ## Cleanup pass (mandatory every sweep)
@@ -401,14 +401,14 @@ get buried.
 
 ### What to check + cut
 
-1. **One-shot session artifacts** — any runbook/doc that's clearly tied to a past session's
+1. **One-shot session artifacts**, any runbook/doc that's clearly tied to a past session's
    task list (e.g. `phase3-handoff.md`, `bucket-B-checklist.md`). If all items are
    completed → delete; if any pending → migrate the pending parts into a generic runbook
    and delete the stub.
-2. **Stale Mode-B / out-of-band-backup references** — under Mode A the OneDrive backup
+2. **Stale Mode-B / out-of-band-backup references**, under Mode A the OneDrive backup
    scripts are no-ops. They live in `scripts/legacy/` per v0.9.0 convention. If a runbook
    still references them as live, fix to "Mode B fallback only".
-3. **CHANGELOG bloat** — once a major doctrinal pivot lands (e.g. Mode B → Mode A,
+3. **CHANGELOG bloat**, once a major doctrinal pivot lands (e.g. Mode B → Mode A,
    spec v1 → v2), compress all pre-pivot entries to a single summary paragraph. Keep
    only entries from the current doctrinal era as full text. **Half-year archive
    convention (added 2026-06-17 ops audit):** at each Cleanup pass, if `CHANGELOG.md` is
@@ -416,24 +416,24 @@ get buried.
    `CHANGELOG.archive/YYYY-Hn.md` and keep a one-line link in the main file. Prevents
    the main file from passing ~5000 lines where GitHub's renderer gets slow + Discovery
    agents have to load too much history. Hard cap on main file: 24 months of entries.
-4. **PII drift in committed READMEs** — grep `tools/*/README.md` for email patterns,
+4. **PII drift in committed READMEs**, grep `tools/*/README.md` for email patterns,
    phone numbers, real usernames. Per spec §4.3 these belong in
    `secrets/_credentials.env` + `secrets/_account-info.env`, not in committed docs.
-5. **Duplicate or near-duplicate docs** — when a runbook covers one Windows gotcha or one
+5. **Duplicate or near-duplicate docs**, when a runbook covers one Windows gotcha or one
    provider quirk, ask "should this be a standalone file or a section in a larger
    runbook?" Single-purpose files <80 lines that share an audience with a sibling are
    merge candidates.
-6. **Per-tool docs with `## Last verified` >9mo old** — covered by the STALE gate, but
+6. **Per-tool docs with `## Last verified` >9mo old**, covered by the STALE gate, but
    the cleanup pass should triage: re-verify, deprecate, or tombstone (`⚠ Avoid (dead)`).
 7. **The live-run ledger** (`<data>/metrics/live-runs.jsonl` in the PRIVATE store, NOT this
-   repo) — keep all entries; this is the feedback ledger and the refresh consumes it. Don't
+   repo), keep all entries; this is the feedback ledger and the refresh consumes it. Don't
    compress. **Year-rollover convention (added 2026-06-17 ops audit):** at the first Cleanup
    pass each January, freeze last year's entries into `<data>/metrics/live-runs.<YYYY>.jsonl`
    and start a fresh `live-runs.jsonl`. Step -1 looks at
    `live-runs.jsonl` first (default 90-day window); historical year files are read only
    when `--since` predates the current file's earliest entry. Prevents Step -1 scan cost
    from creeping past 0.5s at 500+ entry sizes.
-8. **Top-level doc drift sweep** (2026-06-17 added against entropy growth) —
+8. **Top-level doc drift sweep** (2026-06-17 added against entropy growth) ,
    - **Machine-checkable**: run `python tools/check_doc_drift.py`. Fail-level drift
      blocks the sweep (must fix in this cleanup, not the next). Warn-level drift
      surfaces in the sweep report.
@@ -446,7 +446,7 @@ get buried.
      demotion to "deferred" with reason. Per P3 monotonic evolution: triggers only
      accumulate or get explicitly retired, never silently sit indefinitely.
    - Full doctrine: `runbooks/doc-sync.md`.
-8. **Auto-advance `## Last verified` from real runs** (v0.17.0) — at the END of cleanup
+8. **Auto-advance `## Last verified` from real runs** (v0.17.0), at the END of cleanup
    pass, for every slug that appears in `live-runs.jsonl` since last refresh with
    `outcome: "verified"`, advance its `tools/<slug>.md` `## Last verified: YYYY-MM`
    line to the current month. Rationale: truthful "I just used it and it worked" is
@@ -458,7 +458,7 @@ get buried.
 
 When this skill is paired with a `market-intel-config` repo (per-machine inventory of
 installed + keyed tools), the matrix changes from the sweep need to be reconciled
-downstream — otherwise the config repo accumulates orphan secrets, dead MCP entries,
+downstream, otherwise the config repo accumulates orphan secrets, dead MCP entries,
 and broken `installed:true` flags.
 
 After the sweep, run **`python scripts/sync-check.py`** in the config repo. It reports
@@ -477,9 +477,9 @@ the CHANGELOG can record both.
 
 ### What NOT to cut
 
-- Per-tool docs (`tools/<slug>.md`) regardless of count — they're load-on-demand.
-- Domain shards regardless of length — same.
-- Companion-config-* docs (overview/spec/hardening) — three distinct audiences.
+- Per-tool docs (`tools/<slug>.md`) regardless of count, they're load-on-demand.
+- Domain shards regardless of length, same.
+- Companion-config-* docs (overview/spec/hardening), three distinct audiences.
 - Active feedback ledgers (`live-runs.jsonl`, `discovery-state.md`).
 
 ### Output
@@ -499,24 +499,24 @@ In the sweep CHANGELOG entry, the cleanup pass gets its own section:
 - Tombstoned in config: <slug> (code D-xxx)
 ```
 
-## After the sweep — landing checklist (2026-06-17 added)
+## After the sweep, landing checklist (2026-06-17 added)
 
 Once the sweep produces ADD/REPLACE/WATCH/SKIP verdicts, the actual landing is a 7-step
 mechanical sequence. Skip any step and the matrix drifts:
 
-1. **Edit `domains/<X>.md`** — add/replace/tombstone rows per verdict. Replaces tombstone with
+1. **Edit `domains/<X>.md`**, add/replace/tombstone rows per verdict. Replaces tombstone with
    `⚠ Avoid (dead, D-xxx)` (see §C4 for D-codes).
-2. **Update `sources-index.md`** — only if a domain's top pick changed. Most sweeps don't touch this.
-3. **Write `tools/<slug>.md`** for each ADD — follow `tools/polygon.md` shape. Per-tool naming
+2. **Update `sources-index.md`**, only if a domain's top pick changed. Most sweeps don't touch this.
+3. **Write `tools/<slug>.md`** for each ADD, follow `tools/polygon.md` shape. Per-tool naming
    rule: `companion-config-spec.md §3.1`.
-4. **Update `tools/index.md`** — add the new row pointing at the new tool doc.
-5. **Run `python tools/verify_matrix.py`** — fail-closed gate (7 sub-gates). Any BLOCK → fix before continuing.
+4. **Update `tools/index.md`**, add the new row pointing at the new tool doc.
+5. **Run `python tools/verify_matrix.py`**, fail-closed gate (7 sub-gates). Any BLOCK → fix before continuing.
 6. **(If companion-config installed)** run `python ../market-intel-config/scripts/sync-check.py`
-   — bucket B-G must all = 0. Bucket A is intentional skips.
+, bucket B-G must all = 0. Bucket A is intentional skips.
 7. **Write CHANGELOG entry + bump `.claude-plugin/plugin.json` version + `tools/release.ps1 -Version <new>`.**
    The release script wraps commit + tag + push and aborts if step 5 or 6 fails.
 
-Discovery agents writing `git@` SSH or `/blob/` URLs is normal — `l0_verify.py` and the
+Discovery agents writing `git@` SSH or `/blob/` URLs is normal, `l0_verify.py` and the
 post-sweep `verify_matrix.py` GHACTIVE gate both sanitize them, so no extra step needed.
 
 ## Trigger

@@ -5,7 +5,7 @@
 > A newly added MCP only takes effect after session restart / `/mcp` reconnect.
 >
 > Security: never fill in or echo the user's API key. Have the USER run the `-e KEY=$VAR` form
-> themselves. Keys land in plaintext in `~/.claude.json` — warn them not to commit/screenshot it.
+> themselves. Keys land in plaintext in `~/.claude.json`, warn them not to commit/screenshot it.
 > Prefer `-s user` scope for reusable sources. Prefer HTTP-transport sources on Windows.
 
 ## x-twitter `last_verified: 2026-06`
@@ -14,18 +14,18 @@
   Official native MCP (HTTP, verified 2026-06): `claude mcp add --transport http --scope user
   twitterapi-mcp https://mcp.twitterapi.io/mcp --header "Authorization: Bearer YOUR_API_KEY"`.
   ⚠ Secret-config hygiene (lesson learned): `claude mcp add` ECHOES the header (key leaks into the
-  transcript) — for secret-bearing MCPs, edit `~/.claude.json` headers directly from clipboard
+  transcript), for secret-bearing MCPs, edit `~/.claude.json` headers directly from clipboard
   instead, and never `browser_snapshot` a dashboard page that reveals the key (use the copy button
   → clipboard pipe; verify by length only). twitterapi.io rotates only once / 24h.
-- Apify tweet actors: pay-per-result ~$0.1–0.25/1k. Apify MCP: `https://mcp.apify.com` (HTTP).
-- twscrape (self-host, free): `pip install twscrape` — needs X account cookies + proxy.
+- Apify tweet actors: pay-per-result ~$0.1 to 0.25/1k. Apify MCP: `https://mcp.apify.com` (HTTP).
+- twscrape (self-host, free): `pip install twscrape`, needs X account cookies + proxy.
 
 ## reddit-community `last_verified: 2026-06`
 - HN: `uvx mcp-hn` (free, no key) or `npx -y @smithery/cli install mcp-hn --client claude`.
 - Reddit (**top pick**): karanb192/reddit-mcp-buddy (702★): `npx -y reddit-mcp-buddy` (free; anon tier
   no creds, app-id 60/min, login 100/min). Replaces stale GridfireAI/reddit-mcp.
 - king-of-the-grackles/reddit-research-mcp (120★): hosted OAuth MCP, no creds (semantic subreddit discovery).
-- Reddit (D-SUPERSEDED fallback): GridfireAI/reddit-mcp — `uvx reddit-mcp`; create app at
+- Reddit (D-SUPERSEDED fallback): GridfireAI/reddit-mcp, `uvx reddit-mcp`; create app at
   reddit.com/prefs/apps for REDDIT_CLIENT_ID/SECRET (free). Superseded by reddit-mcp-buddy; minimal fallback only.
 - Stack Exchange: midodimori-stack-overflow-mcp (free; SE key raises 300→10k/day).
 - dancolta/subscope (10★): self-host, keyless public-RSS buyer-intent.
@@ -39,27 +39,27 @@
 - Bright Data (verified 2026-06, **hosted HTTP, Windows-friendly**): add to `~/.claude.json`
   `mcpServers.brightdata = {"type":"http","url":"https://mcp.brightdata.com/mcp?token=<API_TOKEN>"}`
   (token = Bright Data dashboard → Settings → "Users and API keys" → API keys; **free 5000 req/mo
-  Rapid, no card**). ⚠ token is shown PLAINTEXT in that table — have the user copy it, do NOT
+  Rapid, no card**). ⚠ token is shown PLAINTEXT in that table, have the user copy it, do NOT
   browser_snapshot the page; write the URL via direct .claude.json edit (NOT `claude mcp add`, which
   echoes the URL+token). Verify: `claude mcp list | grep brightdata | sed -E 's/token=[^ &]*/token=***/'`.
   Stdio alt: `npx @brightdata/mcp` with env `API_TOKEN`.
 - DataForSEO: official TS MCP github.com/dataforseo/mcp-server-typescript; $1 trial + free Sandbox, $50 min.
-- patchright: `pip install patchright` or `npm i patchright` — Kaliiiiiiiiii-Vinyzu/patchright (3.4k★,
+- patchright: `pip install patchright` or `npm i patchright`, Kaliiiiiiiiii-Vinyzu/patchright (3.4k★,
   undetected-Playwright, Apache-2.0, free).
 
 ## ecommerce-arbitrage `last_verified: 2026-06`
 - Keepa: KEEPA_API_KEY from keepa.com (€49/mo @ 20 tokens/min start). MCP: cosjef/Keepa_MCP or
   BWB03/keepa-adapter (.mcpb one-click).
 - eBay: developer.ebay.com AppID (free). Shopify Storefront MCP: `https://{shop}.myshopify.com/api/mcp` (free).
-- PriceAPI: priceapi.com — Go €99/mo (5k credits) + free 1,000-credit no-card trial (€499 = Starter tier).
-- Rainforest API: now hosted at trajectdata.com — Hobbyist $23/mo (Amazon product/offers/reviews).
+- PriceAPI: priceapi.com, Go €99/mo (5k credits) + free 1,000-credit no-card trial (€499 = Starter tier).
+- Rainforest API: now hosted at trajectdata.com, Hobbyist $23/mo (Amazon product/offers/reviews).
 
 ## finance-markets `last_verified: 2026-06`
 - SEC EDGAR: stefanoamorelli/sec-edgar-mcp (free, no key, set User-Agent).
 - FRED: stefanoamorelli/fred-mcp-server (free key at fred.stlouisfed.org).
 - Polygon.io → rebranded **Massive** (massive.com, 301 redirect; APIs/keys unchanged): free 5 req/min,
   paid $29/$79/$199. Finnhub free 60/min. Twelve Data free 800/day.
-- Alpaca: alpacahq/alpaca-mcp-server (paper trading free — use FIRST).
+- Alpaca: alpacahq/alpaca-mcp-server (paper trading free, use FIRST).
 - Alex2Yang97/yahoo-finance-mcp (306★): `uvx`/clone self-host, free no-key (⚠ yfinance scrapes
   Yahoo, not for prod).
 
@@ -70,20 +70,20 @@
   prior lowest tier (info.etherscan.com/whats-changing-in-the-free-api-tier-coverage-and-why).
   ⚠ July-2026 change drops max records returned 10k→1k (info.etherscan.com).
 - Blockscout MCP (free, 3000+ chains, no key for dev; read-only on-chain): repo blockscout/mcp-server
-  (40★, official) — install/endpoint per docs.blockscout.com/devs/mcp-server. Pro key (free) for prod throughput.
+  (40★, official), install/endpoint per docs.blockscout.com/devs/mcp-server. Pro key (free) for prod throughput.
 - Hummingbot: `claude mcp add --transport stdio hummingbot -- docker run --rm -i -e HUMMINGBOT_API_URL=http://host.docker.internal:8000 -v hummingbot_mcp:/root/.hummingbot_mcp hummingbot/hummingbot-mcp:latest`
 - ccxt: `pip install ccxt` (lib, not MCP). funding-rates-mcp: Kukapay repo.
 - CoinMarketCap: free Basic now 50 req/min + 15k credits/mo (key at pro.coinmarketcap.com).
 - Nansen: ~$49/mo annual / $69 monthly (collapsed from up to ~$999/mo).
 - DefiLlama: free no-key REST `https://api.llama.fi` + `https://yields.llama.fi`
-  (TVL/yields/stablecoins/fees); 3rd-party MCPs only — frame as REST.
+  (TVL/yields/stablecoins/fees); 3rd-party MCPs only, frame as REST.
 - Barker: free no-key REST + agent-friendly index at `https://docs.barker.money/llms.txt`
   (read this first for endpoint catalog). Stablecoin yields across 515 DeFi + 20 CEX, no MCP yet.
   Vault deposits via per-partner `BarkerEngine` ERC-4626 contract on Base/Arbitrum/ETH/BNB
   (out of scope for research; relevant only if recommending it as user's execution venue).
 
 ## seo-keywords `last_verified: 2026-06`
-- GSC: ahonn/mcp-server-gsc — `npx -y mcp-server-gsc` (free; Google OAuth/service-account JSON).
+- GSC: ahonn/mcp-server-gsc, `npx -y mcp-server-gsc` (free; Google OAuth/service-account JSON).
 - DataForSEO: see web-scraping. SE Ranking: `claude mcp add --transport http se-ranking https://api.seranking.com/mcp --header "X-Api-Key: ..."` (14d trial 100k credits).
 - Ahrefs official remote MCP `https://api.ahrefs.com/mcp/mcp` (needs Lite+ sub).
 - Semrush: Pro ~$140/mo (annual ~$117); $299 = Business tier.
@@ -105,7 +105,7 @@
 ## content-cms `last_verified: 2026-06`
 - WordPress: WordPress/mcp-adapter (1236★, official WP MCP via Abilities API; Application Password).
   Replaces stale gaupoit/wordpress-mcp + archived Automattic/wordpress-mcp.
-- Ghost: MFYDev/ghost-mcp (199★) — GHOST_URL + GHOST_ADMIN_API_KEY. Replaces dead @ryukimin/ghost-mcp (404).
+- Ghost: MFYDev/ghost-mcp (199★), GHOST_URL + GHOST_ADMIN_API_KEY. Replaces dead @ryukimin/ghost-mcp (404).
 - Sanity: `sanity` CLI auto-configures, or remote `https://mcp.sanity.io` (OAuth).
 - Notion: `https://mcp.notion.com/mcp` (OAuth). Pipepost: multi-platform OSS MCP.
 - Directus: directus/mcp (79★, official Directus MCP).
@@ -115,14 +115,14 @@
 - Apollo.io: Claude → Customize → Connectors → "Apollo.io" (OAuth). ⚠ disable model training first.
 - Hunter: `https://mcp.hunter.io/mcp` (X-API-KEY). ZeroBounce: official MCP (key).
 - HubSpot/Salesforce/Attio: official connectors/MCP (OAuth). Smartlead: npm `smartlead-mcp-server`
-  (latest 1.2.1, 2025-04) ⚠ repo archived 2025-07 — verify before use (prior "smartlead-mcp-by-leadmagic"
+  (latest 1.2.1, 2025-04) ⚠ repo archived 2025-07, verify before use (prior "smartlead-mcp-by-leadmagic"
   hint was unreliable).
 - Bright Data Crunchbase: free 5k/mo via Rapid route (source of record); brightdata.com web-MCP
-  product page is 404 — use the dashboard API-keys route, not the dead product URL.
+  product page is 404, use the dashboard API-keys route, not the dead product URL.
 
 ## trends-discovery `last_verified: 2026-06`
 - GDELT MCP: mcpbundles.com/skills/gdelt (free, no auth). Product Hunt: jaipandya/producthunt-mcp-server
-  (46★, PH token) — old `product-hunt-mcp` path is dead (404, repo stale 2025-04).
+  (46★, PH token), old `product-hunt-mcp` path is dead (404, repo stale 2025-04).
 - Trends MCP: trendsmcp.ai (25+ sources, bearer token); paid $19/1k, $49/5k, $199/25k.
   SerpApi: key, free 250/mo; Starter $25/1k.
 - Exploding Topics: Entrepreneur $39 / Investor $99 / Business $249 (⚠ trial-only, NO permanent free
@@ -140,11 +140,11 @@ Most sources are free / no-key (arXiv, HF read, OpenReview).
   read). Official HF MCP `https://huggingface.co/mcp` (HF token only for write/private/gated).
 - Semantic Scholar: Graph API `https://api.semanticscholar.org/graph/v1` (free; request a free key
   at semanticscholar.org/product/api to lift rate limits). MCP: search "semantic-scholar mcp".
-- Papers with Code: ⚠ DEAD — REST `https://paperswithcode.com/api/v1/` sunset by Meta (302-redirects
+- Papers with Code: ⚠ DEAD, REST `https://paperswithcode.com/api/v1/` sunset by Meta (302-redirects
   to huggingface.co/papers/trending). SOTA-leaderboard is now a gap.
 - OpenReview: API2 `https://api2.openreview.net` (free; openreview-py client `pip install openreview-py`).
 - GitHub: official github MCP (PAT) or REST for trending/releases/star velocity.
-- AI lab blogs / roundups: RSS where available + playwright MCP (no API) — OpenAI, Anthropic,
+- AI lab blogs / roundups: RSS where available + playwright MCP (no API), OpenAI, Anthropic,
   DeepMind, Meta AI, Mistral, Qwen, DeepSeek; AINews (smol.ai), The Batch, Import AI.
 - alphaXiv (browser) · arxiv-sanity-lite (`karpathy/arxiv-sanity-lite`, self-host free) ·
   Connected Papers / ResearchRabbit (browser, no official API → playwright MCP).
@@ -154,20 +154,20 @@ Most sources are free / no-key (arXiv, HF read, OpenReview).
 
 ## browser-automation `last_verified: 2026-06` (stars verified via GitHub API 2026-06-01)
 General frameworks (all free, self-host):
-- browser-use: `pip install browser-use` — github.com/browser-use/browser-use (96k★)
-- stagehand: `npm i @browserbasehq/stagehand` — github.com/browserbase/stagehand (23k★)
+- browser-use: `pip install browser-use`, github.com/browser-use/browser-use (96k★)
+- stagehand: `npm i @browserbasehq/stagehand`, github.com/browserbase/stagehand (23k★)
 - skyvern: github.com/Skyvern-AI/skyvern (22k★, self-host + API)
-- crawl4ai: `pip install crawl4ai` or docker — github.com/unclecode/crawl4ai (67k★)
-- crawlee: `npm i crawlee` — github.com/apify/crawlee (24k★)
-- scrapegraph-ai: `pip install scrapegraphai` — github.com/ScrapeGraphAI/Scrapegraph-ai (27k★)
-- agent-browser: native CLI, ships `.claude-plugin` — github.com/vercel-labs/agent-browser (35.6k★,
+- crawl4ai: `pip install crawl4ai` or docker, github.com/unclecode/crawl4ai (67k★)
+- crawlee: `npm i crawlee`, github.com/apify/crawlee (24k★)
+- scrapegraph-ai: `pip install scrapegraphai`, github.com/ScrapeGraphAI/Scrapegraph-ai (27k★)
+- agent-browser: native CLI, ships `.claude-plugin`, github.com/vercel-labs/agent-browser (35.6k★,
   token-efficient browser agent)
 Anti-detection: nodriver (`pip install nodriver`, 4.3k★) · camoufox (`pip install camoufox`, 9.1k★) ·
 steel-browser (github.com/steel-dev/steel-browser, 7.1k★, self-host) ·
 camofox-browser (github.com/jo-inc/camofox-browser, 6.5k★, free MIT, fingerprint spoofing on Camoufox).
-playwright MCP already connected — verify with `claude mcp list`.
+playwright MCP already connected, verify with `claude mcp list`.
 
-Platform-specific OSS repos (free; most violate platform ToS — throwaway accounts for write/scrape):
+Platform-specific OSS repos (free; most violate platform ToS, throwaway accounts for write/scrape):
 - X: d60/twikit (`pip install twikit`, 4.5k★) + MCP adhikasp/mcp-twikit
 - Instagram: subzeroid/instagrapi (`pip install instagrapi`, 6.3k★) · instaloader (`pip install instaloader`, 12.5k★, read-only)
 - LinkedIn: stickerdaniel/linkedin-mcp-server (2.1k★, ready MCP, ⚠ high ban risk) · joeyism/linkedin_scraper (4.2k★)
@@ -183,7 +183,7 @@ Platform-specific OSS repos (free; most violate platform ToS — throwaway accou
 - Dead/avoid: tomquirk/linkedin-api (404), pytrends (archived), snscrape (停更), elizaOS/agent-twitter-client (下架)
 
 ## ready-skills `last_verified: 2026-06`
-- ericosiu/ai-marketing-skills (2.6k★): `git clone` + pip + cp (NOT npx) — marketing skill pack.
+- ericosiu/ai-marketing-skills (2.6k★): `git clone` + pip + cp (NOT npx), marketing skill pack.
 - indranilbanerjee/digital-marketing-pro (133★): GitHub clone (AEO/GEO skills).
 
 ## Discovery registries (find more)

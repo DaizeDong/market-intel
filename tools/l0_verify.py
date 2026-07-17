@@ -29,7 +29,7 @@ from urllib.parse import urlparse
 
 import requests
 
-# BOM-safe Windows stdout — matches verify_matrix.py / discover.py convention
+# BOM-safe Windows stdout, matches verify_matrix.py / discover.py convention
 if sys.platform == "win32" and hasattr(sys.stdout, "buffer"):
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
@@ -235,7 +235,7 @@ def _check_web(url: str, registry: bool = False) -> dict:
             status = r.status_code
             last_modified = r.headers.get("Last-Modified")
             final_url = r.url
-            if status in (403, 405, 501):  # retry with GET — some servers misreport HEAD
+            if status in (403, 405, 501):  # retry with GET, some servers misreport HEAD
                 try:
                     r = requests.get(url, headers=headers, timeout=HTTP_TIMEOUT,
                                      allow_redirects=True, stream=True)
@@ -259,7 +259,7 @@ def _check_web(url: str, registry: bool = False) -> dict:
                 else {"ok": False, "expires": None, "reason": "skipped"})
 
         if status is not None and 200 <= status < 300:
-            # E3 (edges fork 2026-06-17): body content sniff — 200 OK does not mean alive.
+            # E3 (edges fork 2026-06-17): body content sniff, 200 OK does not mean alive.
             # Pages can return 200 with "maintenance" / "domain parking" / "coming soon".
             # Attempt cheap GET of first ~2KB; flag if known dead-page keywords appear.
             try:

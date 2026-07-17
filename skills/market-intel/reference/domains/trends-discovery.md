@@ -20,7 +20,7 @@ opportunity, news sentiment, alt-data signals, 趋势/选题/产品机会/舆情
 
 **Default pick:** Trends → Trends MCP (or SerpApi for clean JSON, pytrends if free-but-shaky).
 Products → Product Hunt MCP + idea-reality-MCP. News/sentiment → GDELT MCP (free) + Finnhub.
-Selling → Trends MCP (TikTok leads Amazon 2–4 weeks = opportunity window).
+Selling → Trends MCP (TikTok leads Amazon 2 to 4 weeks = opportunity window).
 
 **④ Browser/OSS route:** Trends → flack0x/trendspyg or sdil87/trendspy (pytrends archived). App
 stores → facundoolano/google-play-scraper (2.9k★) + app-store-scraper (free, no key). TikTok/抖音

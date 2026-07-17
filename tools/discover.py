@@ -78,7 +78,7 @@ NPM_WOW_RATIO_MIN = 2.0   # weekly DL >= 2x last-month average
 NPM_WEEKLY_MIN = 500       # absolute floor on weekly downloads
 
 # E6: YouTube channel IDs (UCID, "UC..." 24-char). Filling these requires reading
-# each channel's About page or yt-dlp probing — not done from memory. Leave as
+# each channel's About page or yt-dlp probing, not done from memory. Leave as
 # TODO placeholders until the user (or a follow-up agent) verifies them.
 YOUTUBE_CHANNELS = [
     # (handle, UCID)
@@ -88,7 +88,7 @@ YOUTUBE_CHANNELS = [
     ("AI Coffee Break", "TODO_UCID_AI_COFFEE_BREAK"), # TODO: fill in
 ]
 
-# E1: PulseMCP RSS — URL not curl-verified per refresh-protocol footnote.
+# E1: PulseMCP RSS, URL not curl-verified per refresh-protocol footnote.
 # If feed.xml 404s, we fall back to scraping the homepage for an <link rel="alternate">.
 PULSEMCP_FEED = "https://www.pulsemcp.com/feed.xml"
 PULSEMCP_HOME = "https://www.pulsemcp.com/"
@@ -276,7 +276,7 @@ def channel_e4_npm(since: dt.date) -> list[dict]:
         mo = requests.get(f"https://api.npmjs.org/downloads/range/last-month/{enc}",
                           headers=headers, timeout=HTTP_TIMEOUT)
         if wk.status_code != 200 or mo.status_code != 200:
-            # Single-pkg miss is not fatal — log and continue.
+            # Single-pkg miss is not fatal, log and continue.
             print(f"  [E4] {pkg}: skipped (week={wk.status_code} month={mo.status_code})",
                   file=sys.stderr)
             continue
@@ -465,7 +465,7 @@ def _append_to_inbox(out_path: str, block: str) -> None:
     marker = "## Inbox"
     idx = body.find(marker)
     if idx < 0:
-        # No inbox section yet — append one at end.
+        # No inbox section yet, append one at end.
         new = body.rstrip() + f"\n\n## Inbox\n\n{block}\n"
     else:
         # Find end of the inbox heading line + intro paragraph: insert after the

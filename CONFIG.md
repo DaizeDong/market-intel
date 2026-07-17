@@ -1,4 +1,4 @@
-# market-intel — Config
+# market-intel, Config
 
 `market-intel` is **config-bearing**: it reads per-user / per-machine state (API keys, the
 installed-tool registry, endpoints) from a **separate, private companion config repo** that you
@@ -6,24 +6,24 @@ create and keep out of this repo. Secrets never live here.
 
 This file is the repo-root config contract (config-spec **E1**). The **authoritative, versioned
 deep spec** is [`skills/market-intel/reference/companion-config-spec.md`](skills/market-intel/reference/companion-config-spec.md)
-(currently **v1.3, STABLE**) — when this summary and the spec ever disagree, **the spec wins**.
+(currently **v1.3, STABLE**), when this summary and the spec ever disagree, **the spec wins**.
 Overview + tutorial: [`companion-config-repo.md`](skills/market-intel/reference/companion-config-repo.md);
 GitHub-side lockdown to run **before** the first secret: [`companion-config-hardening.md`](skills/market-intel/reference/companion-config-hardening.md).
 
-## Discovery convention (how the skill finds your config) — E2
+## Discovery convention (how the skill finds your config), E2
 
 The skill probes these paths in order; the first that exists is the active companion repo
 (spec §1):
 
-1. `$MARKET_INTEL_CONFIG` — environment variable (highest priority, location-independent).
-2. `~/.market-intel-config/` — dotfile-in-home, universal fallback.
-3. `~/.config/market-intel-config/` — XDG-style fallback (Linux/macOS).
+1. `$MARKET_INTEL_CONFIG`, environment variable (highest priority, location-independent).
+2. `~/.market-intel-config/`, dotfile-in-home, universal fallback.
+3. `~/.config/market-intel-config/`, XDG-style fallback (Linux/macOS).
 
-If none resolves, the skill **degrades to matrix-only mode and keeps working** — the companion
+If none resolves, the skill **degrades to matrix-only mode and keeps working**, the companion
 repo is always optional, never a hard crash. (The bundled `scripts/` also accept
 `$MARKET_INTEL_CONFIG_DIR` as a convenience alias for path 1.)
 
-## Schema — `registry.json` (E1)
+## Schema, `registry.json` (E1)
 
 Machine-readable index at the companion-repo root. Full field reference: spec §3. Top-level shape:
 
@@ -69,13 +69,13 @@ Apply/verify contracts: spec §6 / §7.
     └── <slug>.env                # OPTIONAL (real values, never committed)
 ```
 
-## Secrets — Mode B (E6)
+## Secrets, Mode B (E6)
 
 The companion config repo is **separate and private** (reference deployment:
-`DaizeDong/market-intel-config`). `secrets/*` is **gitignored** — real values never enter git;
+`DaizeDong/market-intel-config`). `secrets/*` is **gitignored**, real values never enter git;
 back them up out-of-band. Neither this skill repo nor the config repo ever echoes secret values.
 
-## First-time setup (E3) — succeeds on the first try
+## First-time setup (E3), succeeds on the first try
 
 ```bash
 # 1. Stamp a conformant, empty config skeleton (deterministic — E4):
@@ -88,10 +88,10 @@ export MARKET_INTEL_CONFIG=~/.market-intel-config
 python scripts/verify_config.py          # doctor: PASS/FAIL per check, names what is missing
 ```
 
-## Switching between two configs (hot-swap) — E5
+## Switching between two configs (hot-swap), E5
 
 A config dir is self-contained (no hardcoded paths). Keep as many as you like and switch by
-repointing the env var — no other change:
+repointing the env var, no other change:
 
 ```bash
 export MARKET_INTEL_CONFIG=~/configs/work       # config A
@@ -99,5 +99,5 @@ export MARKET_INTEL_CONFIG=~/configs/personal   # config B — same skill, diffe
 ```
 
 Verify the swap: `python scripts/init_config.py --out ~/configs/work` and `--out ~/configs/personal`,
-run `verify_config.py` against each, then flip `$MARKET_INTEL_CONFIG` between them — both must
+run `verify_config.py` against each, then flip `$MARKET_INTEL_CONFIG` between them, both must
 verify READY.

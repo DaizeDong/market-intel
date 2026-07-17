@@ -1,6 +1,6 @@
 # Companion config repo (recommended ops-state backing)
 
-market-intel is the **matrix** — which tools exist, where they live, how to install them. The
+market-intel is the **matrix**, which tools exist, where they live, how to install them. The
 matrix is **public** and **shared**. But once a user actually starts installing tools and
 acquiring API keys, they accumulate per-machine **operational state**:
 
@@ -40,7 +40,7 @@ If you want the absolute smallest companion repo that the spec accepts:
     └── .gitkeep
 ```
 
-That's it — empty `tools[]` plus empty `tools/` dir is a valid v1-conformant companion
+That's it, empty `tools[]` plus empty `tools/` dir is a valid v1-conformant companion
 repo. Spec §2 only requires `registry.json` + `tools/` to exist; `secrets/` becomes
 required when you add your first tool. Skills consuming this repo will detect it via the
 discovery convention (§1) and treat it as "no tools installed yet".
@@ -58,11 +58,11 @@ The user keeps two repos (locations are entirely up to them):
 
 - **The matrix** (this public repo, cloned wherever).
 - **The companion config repo** (a separate, **private** repo that holds the user's per-machine
-  ops state — installed-tools registry, JSON templates, gitignored secrets, scripts).
+  ops state, installed-tools registry, JSON templates, gitignored secrets, scripts).
 
 The companion config repo is **per-user / per-organization**: each user creates their own
 private repo on their own Git host (GitHub, GitLab, Codeberg, self-hosted, or no remote at
-all). There is no shared canonical companion repo — by design — because the contents are by
+all). There is no shared canonical companion repo, by design, because the contents are by
 nature personal.
 
 ## Discovery convention (used by SKILL.md Step 3)
@@ -70,9 +70,9 @@ nature personal.
 The skill probes for a companion repo in this order; the first that resolves is used:
 
 1. **`$MARKET_INTEL_CONFIG`** env var (set in the user's shell rc / profile / OS-level env).
-   This is the **recommended** way — explicit, location-independent.
-2. **`~/.market-intel-config/`** — dotfile-in-home fallback (works on all OSes uniformly).
-3. **`~/.config/market-intel-config/`** — XDG-style fallback (Linux/macOS).
+   This is the **recommended** way, explicit, location-independent.
+2. **`~/.market-intel-config/`**, dotfile-in-home fallback (works on all OSes uniformly).
+3. **`~/.config/market-intel-config/`**, XDG-style fallback (Linux/macOS).
 
 The user picks. There is no required filesystem location.
 
@@ -80,7 +80,7 @@ If no companion repo is found, the skill degrades to "matrix-only" mode and just
 `claude mcp list` to see what's available, with no awareness of per-tool tier / quota /
 rotation info.
 
-## Repo structure (memorize the shape — it's identical across users)
+## Repo structure (memorize the shape, it's identical across users)
 
 ```
 <companion-config-repo>/
@@ -125,13 +125,13 @@ rotation info.
     └── uv-path.md               # Windows uvx PATH gotcha
 ```
 
-## File formats — one worked example, full spec elsewhere
+## File formats, one worked example, full spec elsewhere
 
 The normative shape of every file (template syntax, JSON schema, gitignore patterns, BOM
 requirement) is in [`companion-config-spec.md`](companion-config-spec.md) §4. Don't
 paraphrase it here. One worked example to ground the idea:
 
-**`tools/finnhub/claude.json.template`** — stdio MCP with `<UPPER_SNAKE_CASE>` placeholders
+**`tools/finnhub/claude.json.template`**, stdio MCP with `<UPPER_SNAKE_CASE>` placeholders
 that get substituted from `secrets/finnhub.env` at apply time:
 
 ```json
@@ -150,7 +150,7 @@ that get substituted from `secrets/finnhub.env` at apply time:
 }
 ```
 
-**`tools/finnhub/env.template`** — KEY=VALUE skeleton with empty values; real values in
+**`tools/finnhub/env.template`**, KEY=VALUE skeleton with empty values; real values in
 `secrets/finnhub.env`:
 
 ```bash
@@ -172,7 +172,7 @@ For HTTP-bearer, token-in-URL, SSE, and key-free shapes, see spec §4.1 table.
 operational state into the matrix would:
 
 - Bloat clones for users who just want to read the matrix.
-- Create awkward decisions about "which tools should be visible in the index" — your installed
+- Create awkward decisions about "which tools should be visible in the index", your installed
   set ≠ everyone else's.
 - Tempt users to commit secrets to the matrix repo by mistake.
 - Force a coupling between matrix updates and personal install state.
@@ -238,15 +238,15 @@ git diff --cached --name-only | grep -E "\.env$" | grep -v "\.template$" \
 
 The spec recognizes two valid ways to store the actual secret values:
 
-- **Mode A** — secrets `*.env` files **committed** alongside templates in the (private)
+- **Mode A**, secrets `*.env` files **committed** alongside templates in the (private)
   repo. Single source of truth, `git clone` is the full backup + bootstrap. Appropriate
   when the repo is genuinely private and all keys are data-API tier from providers NOT in
   GitHub's Secret Scanning Partnership (most read-only data APIs qualify: Tavily, Etherscan,
   FRED, Finnhub, CoinGecko, etc.).
-- **Mode B** — secrets `*.env` files **gitignored**; real values backed up via cloud-storage
+- **Mode B**, secrets `*.env` files **gitignored**; real values backed up via cloud-storage
   sync, encrypted USB, or a dedicated secret-management tool. Appropriate when keys come
   from partnership providers (OpenAI `sk-`, Anthropic `sk-ant-`, AWS `AKIA`, Stripe
-  `sk_live_`, GitHub `ghp_`, Slack `xox`, etc.) — those WILL be auto-revoked by GitHub
+  `sk_live_`, GitHub `ghp_`, Slack `xox`, etc.), those WILL be auto-revoked by GitHub
   Secret Scanning even in private repos.
 
 Either mode is conformant; see [`companion-config-spec.md`](companion-config-spec.md) §5.3
@@ -256,7 +256,7 @@ for the full trade-off analysis.
 
 A leaked API key in a **public** repo is harvested by bots within seconds. Even **private
 repos can leak** through forks, OAuth-token compromises, accidental visibility flips, and
-cached mirrors — but for low-stakes data-API keys the residual risk is acceptable in
+cached mirrors, but for low-stakes data-API keys the residual risk is acceptable in
 exchange for the simpler workflow. Mitigations:
 
 - The repo is **private**.
@@ -268,7 +268,7 @@ exchange for the simpler workflow. Mitigations:
 ### Defense-in-depth posture under Mode B
 
 - **`secrets/` is gitignored** (primary defense).
-- Optional **CI gate** scans for typical key patterns on every push (defense in depth) —
+- Optional **CI gate** scans for typical key patterns on every push (defense in depth) ,
   recommended when the repo has multiple contributors.
 - The repo itself is **private** (third layer).
 - Real secrets live on **local filesystem + an out-of-band backup** (cloud sync, encrypted

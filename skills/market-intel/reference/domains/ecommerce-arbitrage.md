@@ -5,7 +5,7 @@ arbitrage, cross-platform price compare, 选品/比价/套利.
 
 | source | route | capability | detect | risk |
 |---|---|---|---|---|
-| **Keepa** (+ Keepa MCP cosjef/BWB03) | ① official | **price history curve + BSR/sales history + Buy Box/stock** — irreplaceable | connected + KEEPA_API_KEY | low; €49/mo+ scales with tokens |
+| **Keepa** (+ Keepa MCP cosjef/BWB03) | ① official | **price history curve + BSR/sales history + Buy Box/stock**, irreplaceable | connected + KEEPA_API_KEY | low; €49/mo+ scales with tokens |
 | Amazon SP-API (private app) | ① official | your own cost/fees → profit calc | OAuth | private self-use = no dev fee |
 | Rainforest API (now trajectdata.com) | ② resale | real-time ASIN, Buy Box detection | connected | history weaker than Keepa; Hobbyist $23/mo |
 | eBay Browse/Finding API | ① official | item price, discounts, lowest-price compare | AppID | free, official |
@@ -18,16 +18,16 @@ Cross-platform compare → PriceAPI, plus free official eBay/Shopify Storefront 
 ## ④ Browser/OSS route (free, self-host)
 | repo | route | note |
 |---|---|---|
-| **Cybrarist/Discount-Bandit** (697★) | ④ self-host | multi-store price tracker (Amazon/AliExpress/eBay) — **self-built Keepa**: it records history from your deploy day |
+| **Cybrarist/Discount-Bandit** (697★) | ④ self-host | multi-store price tracker (Amazon/AliExpress/eBay), **self-built Keepa**: it records history from your deploy day |
 | omkarcloud/amazon-scraper (220★) | ④ | 24 Amazon sites, search/detail/reviews, built-in anti-detect browser |
 | playwright MCP | ④ | bespoke price/stock checks on any store, real rendered page |
 
-**Key limit vs Keepa:** browser route **cannot backfill historical price/BSR** — it only accrues
+**Key limit vs Keepa:** browser route **cannot backfill historical price/BSR**, it only accrues
 from when you start recording. For deep price history Keepa ① is still irreplaceable. Use the OSS
 route for live prices + self-built tracking; pay for Keepa only when you need years of history.
 
 **No usable API (human-only, can't automate):** Helium 10, CamelCamelCamel. Sales numbers from
-any tool are *estimates* — cross-check, differences can be multiples. Amazon anti-bot is strong →
+any tool are *estimates*, cross-check, differences can be multiples. Amazon anti-bot is strong →
 proxies needed at scale (software free, proxies aren't).
 
 **Install guidance:** `reference/volatile/pricing-install.md` → ecommerce-arbitrage.

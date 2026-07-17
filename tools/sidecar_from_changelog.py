@@ -68,8 +68,8 @@ METRICS_DIR = REPO_ROOT / "metrics"
 # CHANGELOG parsing                                                           #
 # --------------------------------------------------------------------------- #
 
-# `## [0.20.0] — 2026-06-17` or `## [0.20.0] - 2026-06-17`
-# We tolerate em-dash (—), en-dash (–), hyphen (-), and any amount of surrounding ws.
+# `## [0.20.0], 2026-06-17` or `## [0.20.0] - 2026-06-17`
+# We tolerate em-dash (,), en-dash (,), hyphen (-), and any amount of surrounding ws.
 _HEADING_RE = re.compile(
     r"^##\s*\[(?P<ver>[^\]]+)\]\s*[—–-]\s*(?P<date>\d{4}-\d{2}-\d{2})\s*$",
     re.MULTILINE,
@@ -102,7 +102,7 @@ def _find_entry(text: str, version: str) -> Optional[tuple[str, str, Optional[st
 # Slug extraction from CHANGELOG body                                         #
 # --------------------------------------------------------------------------- #
 
-# Backtick-quoted slugs — the dominant form in v0.20+ entries
+# Backtick-quoted slugs, the dominant form in v0.20+ entries
 _BACKTICK_RE = re.compile(r"`([^`]+)`")
 
 # Stale-marker suffix that appears next to old slugs in REPLACE lines,
@@ -110,7 +110,7 @@ _BACKTICK_RE = re.compile(r"`([^`]+)`")
 _STALE_SUFFIX_RE = re.compile(r"\s*\(D-[A-Z]+\)\s*$")
 
 # Heading detectors for the "Adds" and "Replaces" sub-blocks. The format
-# drifts across releases — we look for multiple shapes.
+# drifts across releases, we look for multiple shapes.
 _ADDS_HEADERS = (
     re.compile(r"^\*\*Adds(?:\s*\(\d+\))?:\*\*", re.MULTILINE),
     re.compile(r"^Adds(?:\s*\(\d+\))?:", re.MULTILINE),
@@ -152,7 +152,7 @@ def _isolate_block(text: str) -> str:
     # Stop at the next `**<Word>` bold-bullet sibling heading. We search by
     # regex so we tolerate `**Replaces (4):**`, `**HOLD (1):**`, etc. The
     # caller already sliced AFTER our own opening bullet, so any match here
-    # is a sibling — cut at the first one.
+    # is a sibling, cut at the first one.
     sibling_re = re.compile(r"(?m)^\*\*[A-Z][A-Za-z ]+(?:\s*\(\d+\))?:\*\*")
     m = sibling_re.search(text)
     if m and m.start() < cut:
@@ -303,7 +303,7 @@ def _resolve_slug(raw: str) -> tuple[Optional[str], Optional[Path]]:
             return cand, stems[cand]
 
     # Last-resort fuzzy. We require the stem to CONTAIN a candidate (not the
-    # reverse — `polygon` ⊂ `polygon-io-mcp-polygon` would otherwise match
+    # reverse, `polygon` ⊂ `polygon-io-mcp-polygon` would otherwise match
     # `polygon.md` to a slashed slug that explicitly named a different repo).
     # Also require the candidate length ≥ 6 chars so we don't false-match on
     # tiny tokens like `mcp`, `ai`.
@@ -328,7 +328,7 @@ def _resolve_slug(raw: str) -> tuple[Optional[str], Optional[Path]]:
 # Tool doc field extraction                                                   #
 # --------------------------------------------------------------------------- #
 
-# Bullet label form is `**Label:**` — colon goes BEFORE the closing `**`.
+# Bullet label form is `**Label:**`, colon goes BEFORE the closing `**`.
 # We absorb the bold close marker after the colon so the captured value
 # starts with the human-meaningful text, not stray asterisks.
 _DOMAIN_RE = re.compile(
@@ -353,10 +353,10 @@ _COST_RE = re.compile(
     re.IGNORECASE,
 )
 
-# GitHub repo URL — first occurrence
+# GitHub repo URL, first occurrence
 _GH_URL_RE = re.compile(r"https?://github\.com/[A-Za-z0-9_./-]+")
 
-# Other plausible repo URL (gitlab, codeberg etc.) — fallback
+# Other plausible repo URL (gitlab, codeberg etc.), fallback
 _GENERIC_REPO_RE = re.compile(r"https?://(?:gitlab|codeberg|bitbucket|sourcehut)\.[^\s)\]]+")
 
 # Signup / dashboard URL hints inside the Auth section
@@ -546,7 +546,7 @@ def _has_friction_signal(auth_text: Optional[str], full_text: str) -> bool:
         r"\bself-bot\b",
         r"\buser session\b",
     ]
-    # Negation veto — phrases that explicitly say a friction layer is absent.
+    # Negation veto, phrases that explicitly say a friction layer is absent.
     neg_re = re.compile(
         r"\b(?:no|without|zero|don'?t need(?:s)?|not required)\s+(?:\w+\s+)?"
         r"(?:oauth|captcha|key|account|login|signup|sign-up|card)\b",
@@ -585,7 +585,7 @@ def _summarize_tool_doc(path: Path) -> dict:
     """
     text = path.read_text(encoding="utf-8-sig")
 
-    # Top-of-file bullet block — most fields live in the first ~10 bullets.
+    # Top-of-file bullet block, most fields live in the first ~10 bullets.
     head = text[:2000]  # bullets are always near the top
 
     domain = None
@@ -774,7 +774,7 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     # Exit 2 only when there's something to emit but NOTHING resolved. If the
     # CHANGELOG entry simply has no Adds/Replaces (e.g. a pure refactor
-    # release), that's not a failure — just an empty sidecar.
+    # release), that's not a failure, just an empty sidecar.
     total_slug_attempts = n_adds + 2 * n_replaces
     if total_slug_attempts > 0 and n_unresolved == total_slug_attempts:
         print(
@@ -799,7 +799,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         )
         return 0
 
-    # Real write — ensure metrics/ exists, then atomic write.
+    # Real write, ensure metrics/ exists, then atomic write.
     out_path.parent.mkdir(parents=True, exist_ok=True)
     serialized = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
     out_path.write_text(serialized, encoding="utf-8")
