@@ -1,0 +1,2 @@
+# CLI tools (changelog_draft, incident_helper) draft via the shared llmcall chain.
+llmcall @ git+https://github.com/DaizeDong/llmcall.git
