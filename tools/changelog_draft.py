@@ -243,28 +243,25 @@ def build_prompt(
 # Claude invocation                                                           #
 # --------------------------------------------------------------------------- #
 
+from llmcall import call as _llmcall  # noqa: E402
+
+
 def find_claude_cli() -> Optional[str]:
-    """Locate the `claude` CLI on PATH."""
-    return shutil.which("claude")
+    """Preflight: is ANY llmcall provider (codex/cc/claude) reachable? Returns the first found, else
+    None (the draft now runs through the codex -> cc -> claude chain, not claude alone)."""
+    for name in ("codex", "cc", "claude"):
+        p = shutil.which(name)
+        if p:
+            return p
+    return None
 
 
 def run_claude(prompt: str) -> tuple[int, str, str]:
-    """Invoke `claude -p --output-format text` with the prompt on stdin.
-
-    Why stdin: prompts are typically several KB (full previous CHANGELOG entry +
-    git log + diff stats). Passing on the command line risks OS arg-length
-    limits (especially on Windows, where CMD has a 8191-char ceiling). stdin
-    sidesteps this entirely.
-    """
-    proc = subprocess.run(
-        ["claude", "-p", "--output-format", "text"],
-        input=prompt,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
-    return proc.returncode, proc.stdout, proc.stderr
+    """Draft the entry via the shared llmcall chain (codex -> cc -> claude; read-only, one-shot). The
+    (rc, stdout, stderr) shape is preserved so main() is unchanged: rc 0 + text on success, nonzero +
+    error on total failure. The prompt (several KB) goes on stdin inside llmcall, dodging arg limits."""
+    r = _llmcall(prompt)
+    return (0, r.text, "") if r else (2, "", r.error or "llmcall chain failed")
 
 
 # --------------------------------------------------------------------------- #

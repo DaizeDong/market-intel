@@ -30,10 +30,10 @@ import argparse
 import datetime as dt
 import json
 import os
-import shutil
-import subprocess
 import sys
 from typing import Optional
+
+from llmcall import call as _llmcall
 
 # ─── stdout UTF-8 safety (Windows) ───────────────────────────────────────────
 try:
@@ -99,33 +99,14 @@ D_CODE_EXPLANATIONS = {
 
 # ─── LLM bridge ──────────────────────────────────────────────────────────────
 def _run_claude(prompt: str, stdin_payload: Optional[str] = None, timeout: int = 180) -> str:
-    """Invoke `claude -p <prompt>`; optionally pipe extra context via stdin.
-
-    Returns stdout text on success, raises RuntimeError on non-zero exit.
-    Uses argument-form for the prompt (clearer) and stdin only for bulk context
-    (e.g. a shard file's contents) so the prompt stays auditable in process lists.
-    """
-    if not shutil.which("claude"):
-        print("ERROR: `claude` CLI not on PATH — install it or fix PATH", file=sys.stderr)
-        sys.exit(3)
-    cmd = ["claude", "-p", prompt]
-    try:
-        proc = subprocess.run(
-            cmd,
-            input=stdin_payload if stdin_payload is not None else "",
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=timeout,
-        )
-    except subprocess.TimeoutExpired:
-        raise RuntimeError(f"claude -p timed out after {timeout}s")
-    if proc.returncode != 0:
-        raise RuntimeError(
-            f"claude -p exited {proc.returncode}: {proc.stderr.strip()[:400]}"
-        )
-    return proc.stdout.strip()
+    """Parse via the shared llmcall chain (codex -> cc -> claude; read-only, one-shot). Extra bulk
+    context is folded into the prompt (llmcall takes a single prompt on stdin). Returns text on
+    success, raises RuntimeError if the whole chain failed."""
+    full = f"{prompt}\n\n{stdin_payload}" if stdin_payload else prompt
+    r = _llmcall(full, timeout=timeout)
+    if not r:
+        raise RuntimeError(f"llmcall chain failed: {r.error}")
+    return r.text.strip()
 
 
 def _extract_json(text: str) -> dict:
