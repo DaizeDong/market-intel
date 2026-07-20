@@ -109,24 +109,10 @@ def _run_claude(prompt: str, stdin_payload: Optional[str] = None, timeout: int =
     return r.text.strip()
 
 
-def _extract_json(text: str) -> dict:
-    """LLMs sometimes wrap JSON in ```json ... ``` fences or add prose. Strip and parse."""
-    s = text.strip()
-    # Strip code fences if present.
-    if s.startswith("```"):
-        # Drop first fence line.
-        lines = s.splitlines()
-        if lines and lines[0].startswith("```"):
-            lines = lines[1:]
-        if lines and lines[-1].startswith("```"):
-            lines = lines[:-1]
-        s = "\n".join(lines).strip()
-    # Find first { ... } block.
-    start = s.find("{")
-    end = s.rfind("}")
-    if start == -1 or end == -1 or end <= start:
-        raise ValueError(f"no JSON object found in LLM reply: {text[:300]}")
-    return json.loads(s[start:end + 1])
+# The incident struct must carry these five fields. Declaring only the keys (no enum) hands llmcall
+# the JSON extraction + a same-provider retry on a malformed reply, while the lenient VALID_* coercion
+# below is preserved (llmcall does not reject an out-of-vocab outcome/domain; parse_incident warns).
+_INCIDENT_SCHEMA = {"type": "object", "required": ["slug", "outcome", "detail", "domain", "d_code"]}
 
 
 # ─── step 2: parse the incident into structure ───────────────────────────────
@@ -149,17 +135,13 @@ def parse_incident(user_text: str) -> dict:
         "\"d_code\":\"D-404\"}\n\n"
         f"Incident description: {user_text}"
     )
-    try:
-        raw = _run_claude(prompt)
-    except RuntimeError as e:
-        print(f"ERROR: {e}", file=sys.stderr)
-        sys.exit(2)
-    try:
-        data = _extract_json(raw)
-    except Exception as e:
-        print(f"ERROR: failed to parse LLM JSON: {e}", file=sys.stderr)
-        print(f"--- raw reply ---\n{raw}", file=sys.stderr)
+    r = _llmcall(prompt, schema=_INCIDENT_SCHEMA, timeout=180)
+    if not r:
+        # covers both a dead chain and a reply that never validated (llmcall already retried once)
+        print(f"ERROR: failed to parse incident (chain/schema failed): {r.error}", file=sys.stderr)
+        print(f"--- last reply ---\n{r.text}", file=sys.stderr)
         sys.exit(1)
+    data = r.data
     # Light validation, coerce instead of erroring, surface warnings.
     warnings = []
     if data.get("outcome") not in VALID_OUTCOMES:
