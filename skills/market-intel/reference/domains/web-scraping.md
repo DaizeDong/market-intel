@@ -8,7 +8,7 @@ built-in WebSearch returns title+url only. Layer specialists on top.
 
 | source | route | capability | detect | note |
 |---|---|---|---|---|
-| **Tavily** / **Exa** | ② | search layer (semantic, date/domain filter) | mcp list / skill `exa-search` | Tavily AgentRank #1; Exa good for "recent" |
+| **Tavily** / **Exa** | ② | search layer (semantic, date/domain filter) | mcp list / skill `exa-search` | Tavily AgentRank #1; Exa good for "recent". ⚠ Tavily free tier caps at 1,000 credits/mo, a 401 usually means an expired/quota-exhausted key, not an outage; rotate the key first (confirmed live+active 2026-07-22, not dead) |
 | **Firecrawl** | ② | JS-render scrape, crawl, JSON extract | skill `firecrawl` present | hosted stealth strong; self-host weak vs WAF |
 | **Bright Data** | ② | Web Unlocker, beats Cloudflare/DataDome/CAPTCHA; unlocks Amazon/Taobao/Reddit | hosted HTTP MCP (verified 2026-06) | strongest barrier-breaker; **free 5k/mo Rapid, no card** |
 | DataForSEO | ② | cheap large-scale SERP | connected | ~$0.0006/query, 1/10 of SerpApi |

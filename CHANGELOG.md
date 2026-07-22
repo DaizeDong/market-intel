@@ -1,5 +1,137 @@
 # Changelog
 
+## [0.29.0], 2026-07-22
+
+Scheduled monthly refresh, July trigger month so this is a FULL 13-domain sweep + quarterly Horizon
+scan. Step -1 ledger consumed first (`~/.market-intel-config/data/metrics/live-runs.jsonl`, 49
+entries since last refresh); weekly E1-E6 surface inbox triaged (4 GitHub candidates gh-api
+verified, rest low-signal HF/YouTube noise, ignored per protocol). 12 parallel Discovery subagents
+(one per domain-group) + 1 Horizon-scan agent, each reading the 5 mandatory files before scanning.
+
+AUDIT: independent-subagent-per-domain verdict=pass (each domain's ADD/REPLACE verdict was produced
+by a blind-scanning subagent that read only its own domain's baseline + the 5 mandatory shared
+files, gh-api-verified every star/date cited; this refresh's main agent then synthesized without
+re-deriving numbers from memory, matching the editor!=verifier split P4 asks for).
+
+### Step -1, live-run ledger triage (all resolved this sweep)
+- `PA-API 5.0 retirement` (ecommerce-arbitrage, flagged `dead`): **false alarm, mixup between two
+  different Amazon APIs.** PA-API (Associates/affiliate) is deprecating 2026-05-15 -> Creators API
+  (10 sales/30d gate); the shard's SP-API row (sellers, private-app OAuth) is a different product
+  entirely and unaffected. Verified both claims directly against `webservices.amazon.com` and
+  `developer-docs.amazon` (L1). Added a disambiguation note to the SP-API row so this doesn't
+  recur.
+- `shard top OSS picks outranked` (ecommerce-arbitrage, `price_mismatch`): **confirmed real gap.**
+  `jez500/pricebuddy` (1026 stars) already had a tool doc + index + registry row from a prior
+  sweep's gate-debt fix, but never got a shard table row -> added as the new top OSS pick.
+  `clucraft/PriceGhost` and `DAILtech/PriceDive` (the ledger's other two candidates) are actually
+  stale (5.5mo and 9.5mo since push respectively, contradicting the ledger's "active"/"fresh"
+  framing) -> correctly left out.
+- `reddit-mcp-buddy` (`dead`): **confirmed still broken, not transient.** Live-tested across 6
+  subreddits today, all forbidden. Root cause: Reddit is 403-blocking the anon JSON API since
+  2026-06-03 (upstream issue karanb192/reddit-mcp-buddy#58), fix PR #60 open/unmerged 6+ weeks.
+  Shard updated: anon tier flagged non-functional, `reddit-research-mcp` elevated to co-top-pick
+  until the upstream fix lands.
+- `tavily-mcp` (`dead`, 401s): **false alarm, key/quota issue not an outage.** Free tier caps at
+  1,000 credits/mo; repo is active (2240 stars, pushed today), open PR adds multi-key failover
+  specifically for this failure mode. Shard note added; not touched as a source.
+- `duckduckgo-mcp` (`dead`, hangs): **was real, already fixed upstream.** DuckDuckGo tightened
+  bot-detection against the library's TLS fingerprint (issue #46, matches ledger date exactly);
+  patched in v0.5.0 (2026-07-01, a week after the ledger flag). Not a matrix entry (`ddgs`/SearXNG
+  are the actual shard picks), no shard edit needed.
+- `google-news-trends` (`dead`, tool absent in subagent): **confirmed a subagent-MCP-loading wiring
+  issue**, not a dead tool (`jmanek/google-news-trends-mcp` itself is 89 stars, pushed 2026-07-15,
+  healthy). Flagged as an infra bug for the harness, not a matrix change.
+
+### Added (this sweep, four-file where a new tool warranted it)
+- **crypto-defi**: Base MCP (`base/skills`, official Coinbase) was WATCH pending a wireable
+  endpoint, now confirmed live at `mcp.base.org` with shipped skill plugins (Morpho/Moonwell/
+  Aerodrome/Uniswap/Bankr/Avantis/Virtuals) -> promoted. Coinbase Agentic Wallet MCP
+  (`@coinbase/payments-mcp`) added as a new execution/payment primitive (x402 pay-per-call).
+- **ecommerce-arbitrage**: `jez500/pricebuddy` (1026 stars) added as the new OSS top pick, see
+  Step -1 above.
+- **browser-automation**: `Kaliiiiiiiiii-Vinyzu/patchright` (3.9k stars) added to the Anti-detection
+  table, a real doc/shard gap (`reference/tools/patchright.md` existed but had no shard row).
+- **trends-discovery**: `appreply-co/mcp-appstore` (62 stars) added, a dual-store (Google Play + App
+  Store) ASO MCP that consolidates the shard's existing split npm-lib pair.
+- **content-cms**: `microcmsio/microcms-mcp-server` and `kontent-ai/mcp-server` added as minor
+  JP-market/niche rows, resolving two "unverified" watchlist items (both confirmed real + actively
+  maintained but thin adoption, 21 and 9 stars).
+- **finance-markets**: community wrapper `erikmaday/unusual-whales-mcp` (73 stars) noted alongside
+  the existing paid Unusual Whales MCP row (lowers integration friction, same underlying data).
+- **social-publishing**: Ayrshare row updated to note its new official Claude Code plugin.
+
+### Rejected / death-coded (do not re-discover)
+- **`storyblok/mcp-server`**, D-404-equivalent: official repo confirmed **archived**, resolves the
+  prior "Storyblok MCP unverified" watchlist item negatively. Moved to reject log.
+- **`JesusRS1/stock-trade-finance-api`** (this week's E2 inbox candidate, 91->142 stars):
+  **security red flag, hard reject.** Its newest commit added an unused npm dependency
+  `ioredis-xyz` (a typosquat of `ioredis`, published by a throwaway-looking account, not imported
+  anywhere in the source). Its 1,027 forks show a bot-pattern fork farm (repeating account names,
+  ~3min creation cadence, zero pushes) -> the star growth this candidate was surfaced on is
+  explained by the farm, not organic adoption. Logged to reject log with an explicit "do not
+  re-surface even if stars keep climbing" note.
+- `Cesarjoquin/Marketing-Skills` (ready-skills, 145 stars): star:fork ratio inverted and extreme
+  (1233 forks vs 145 stars), same fork-farming signature as the existing
+  `zubair-trabzada/ai-marketing-claude` reject.
+- 4 low-signal x-twitter candidates (fluyeporlaweb/mcp-x-intelligence, farukkolip/xtapdown-mcp,
+  veezeehq/veezee-mcp, poloniki/purefeed-mcp) and 3 off-domain/thin reddit-community candidates
+  (19-84/redd-archiver, Kymo-MCP/mcpcan, Arindam200/reddit-mcp) rejected, see discovery-state.md.
+
+### Discovery pool banked (`discovery-state.md`, full 13-domain sweep)
+Watchlist refreshed with current gh-api star counts for every existing entry (largest movers:
+`browser-act/skills` +107% in 7wk with a contributor-concentration flag; `AgriciDaniel/claude-blog`
++42% in a month, active, lean-ADD next cycle; `CloakHQ/CloakBrowser` +26%, closed-binary trust
+concern persists) plus ~20 new candidates from this sweep's blind scans (`feder-cr/invisible_
+playwright`, `germondai/trawl`, `nando0x/ProspectOS`, `zwldarren/akshare-one-mcp`, `TipRanks/mcp`,
+and others), each with a verdict + reasoning. No REPLACE verdicts landed this sweep (no candidate
+cleared the "beats the existing top pick's core capability" bar anywhere).
+
+### Horizon scan (quarterly, July trigger month)
+- **Prediction markets (Polymarket/Kalshi/Meta's new "Arena") now clears the NEW-DOMAIN bar** on
+  its 2nd sighting: Kalshi in talks at a $40B valuation (8x growth in under a year, $17.9B monthly
+  turnover), Polymarket at $15B, Meta directing a standalone competing app (NYT/Bloomberg/NPR,
+  2026-06-23/24), and >=3 actively-maintained MCPs with commits inside the last 2 weeks
+  (`caiovicentino/polymarket-mcp-server` 597 stars/45 tools, `OctagonAI/octagon-mcp-server` 143
+  stars, `9crusher/mcp-server-kalshi`, `JamesANZ/prediction-market-mcp`). Doesn't fit any existing
+  13 domains (not securities, not on-chain DeFi, not a trend feed). **Per C9/H3 this is a PROPOSAL
+  ONLY** -> not landed as a new shard this run, surfaced here + in the PR description for human
+  approval.
+- 7 other new-angle watchlist items hit their 2nd sighting this cycle (X API re-tier now
+  source-verified, agent-memory-as-capability strengthening, MCP deployment shape shift landing
+  this week, x402 ecosystem exploding, agentic-commerce checkout channel had a material reversal
+  -- OpenAI killed in-chat Instant Checkout) -- all FOLD, no other NEW-DOMAIN candidates.
+- Placeholder-domain check: `regulatory-watch` still below threshold (EU AI Act *code*-compliance
+  scanners found, but that's a different sub-niche than the placeholder's SEC/legislative-tracker
+  scope). Other 5 placeholders not re-searched this cycle (budget), carried to next quarterly scan.
+
+### Known gate limitation (flagged for human review, not fixed by this run)
+`tools/verify_matrix.py`'s STAR check and its DELETE (C4) heuristic contradict each other for any
+row whose star-count annotation lives inside the markdown table's identity cell (e.g. `**repo**
+(4.3k star)`): correcting a stale star count changes that cell's text, which the DELETE heuristic
+reads as "old row removed + new row added" and demands a death-code for a edit that deleted
+nothing. `every-app/open-seo`'s star annotation is stale (4.3k shown, 6.8k actual per gh-api
+2026-07-22, confirmed via `git stash` test that this BLOCK pre-exists on unmodified main) but is
+left uncorrected this run since automation cannot edit `tools/` to fix the heuristic and
+fabricating a death-code for a non-deletion would violate C1/C6. Left every other star-count fix
+this sweep as a trailing parenthetical note in the row's note column (not the identity cell)
+specifically to avoid tripping this same false positive; recommend the gate maintainer split the
+STAR-annotation regex out of the DELETE row-identity key.
+
+### Cleanup (mandatory per-sweep)
+- `tools/dash_guard.py --fix` applied: 22 prose en/em dashes introduced by this sweep's own edits,
+  corrected before landing (repo convention: no en/em dashes in prose).
+- `tools/check_doc_drift.py`: 3 FAIL, all root-level README version/domain-count badges, explicitly
+  out of scope for automated runs per this sweep's hard rules (human step at PR-merge).
+- `python tools/pii_guard.py`: clean, no PII in any changed file.
+- No CHANGELOG archive rollover needed (file still under the 6-month/24-month caps).
+- No `live-runs.jsonl` compression (feedback ledger, kept in full per protocol).
+
+### Verify gate
+`python tools/verify_matrix.py --base main`: 200 source rows, 109 repos checked (100 PASS / 9 WARN
+GHACTIVE), STRUCT/TOOLS/REGISTRY/REPO/FRESH/METH/COVER/PRICE all PASS. 1 pre-existing BLOCK
+(`every-app/open-seo` STAR, see "Known gate limitation" above, confirmed present on unmodified
+main via `git stash`, not introduced by this sweep). CONST: CONSTITUTION.md unmodified.
+
 ## [0.28.1], 2026-07-15
 
 Surface poller tuning after the first live round.
