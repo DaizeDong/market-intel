@@ -500,7 +500,7 @@ BLOCKed at L0 where the old 3-lens missed them).
 
 ### O1 to O4, 5-year伏笔 (5-minute setup each)
 
-- `a local cleanup-workflows script`, 30d hot / 30-90 gzip / >90 prune
+- a local `cleanup-workflows` script, 30d hot / 30-90 gzip / >90 prune
 - CHANGELOG half-year archive convention written into cleanup pass (24mo main file cap)
 - `metrics/live-runs.YYYY.jsonl` year-rollover written into cleanup pass
 - GITHUB_TOKEN check: confirmed `gh api` already uses gh auth's 5000/hour limit
@@ -531,7 +531,7 @@ agents/users from accidentally routing research queries into infrastructure shar
 - `tools/l0_verify.py` (NEW, 473 lines, 7/7 self-test)
 - `tools/workflow_helpers.md` (NEW, 216 lines, R2+R3 doctrine)
 - `tools/antigravity-awesome-skills.md` (NEW, was broken link in index.md)
-- `a local cleanup-workflows script` (NEW, ops伏笔)
+- a local `cleanup-workflows` script (NEW, ops伏笔)
 - `reference/refresh-protocol.md` (5-mandatory-reads, D5b new pipeline doctrine, cleanup pass §2 + §7 updates)
 - `reference/companion-config-spec.md` (slug naming rule + v1.2 fields REQUIRED-on-new)
 - `reference/sources-index.md` (meta-domain separation)
