@@ -15,7 +15,7 @@ search traffic intel, 关键词/竞品SEO/排名.
 | SE Ranking MCP | ① | 160+ tools + 7 ready Claude Skills | connected + key | best pro-tier value, 14d trial 100k credits |
 | SerpApi MCP | ② | multi-engine SERP, Trends | connected + key | free **250/mo** (was ~100); Starter $25/1k; pricey at scale |
 | Google Ads Keyword Planner | ① free | real search volume + CPC | Google Ads dev token | free; easier via DataForSEO wrapper |
-| **every-app/open-seo** (4.3k★) OSS | ①/③ self-host | keyword research/SERP/backlink/site-audit, MCP-native | connected MCP or self-host UI | free OSS; external-view pick vs paid DataForSEO/Ahrefs; GSC MCP still first for own-site |
+| **every-app/open-seo** (6.8k★) OSS | ①/③ self-host | keyword research/SERP/backlink/site-audit, MCP-native | connected MCP or self-host UI | free OSS; external-view pick vs paid DataForSEO/Ahrefs; GSC MCP still first for own-site |
 
 **Default pick:** Have a site → free GSC MCP first. External keyword/SERP/backlink cheap → DataForSEO
 (Sandbox first). Pro coverage + Claude-friendly → SE Ranking. Deep backlinks → Ahrefs.
