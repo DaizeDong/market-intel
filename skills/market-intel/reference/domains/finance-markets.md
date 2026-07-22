@@ -12,7 +12,7 @@ unusual options flow, 股票/期权/基本面. (Tools only, not investment advic
 | **Alex2Yang97/yahoo-finance-mcp** (306★) | ④ | free no-key price/fundamentals/options/news | `uvx` self-host | the only **free, no-key** route here; ⚠ yfinance scrapes Yahoo, not for prod/algo, IP-ban prone |
 | Finnhub / Twelve Data | ① | fundamentals + alt-data / multi-asset realtime | connected + key | best free tiers (60/min, 800/day) |
 | Financial Modeling Prep | ① | financials/valuation | key | free 250/day |
-| Unusual Whales MCP | ① | options flow, dark pool, congress trades | connected + paid token | differentiated arb signals |
+| Unusual Whales MCP | ① | options flow, dark pool, congress trades | connected + paid token | differentiated arb signals; community wrapper **erikmaday/unusual-whales-mcp** (73★) lowers client-integration friction over rolling your own, same paid data source underneath |
 | Alpaca / Tradier MCP | ① official | trade execution (paper first!) | connected | put risk guardrails in front |
 
 **Default pick:** Free start → SEC EDGAR + FRED + Finnhub free tier; **collapse the free-tier
