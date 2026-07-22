@@ -18,7 +18,7 @@ account+proxy+login-wall cost.
 | Apify tweet actors | ② resale | bulk historical, trends | apify MCP connected | pay-per-result |
 | Bright Data X API/datasets | ② resale | enterprise, 22M+ historical | bright-data MCP | ~10x pricier, best SLA |
 | **vladkens/twscrape** (2.5k★) | ③ scrape | search/users/followers, account rotation | python lib installed | needs X cookies+proxy, ban risk; very active (2026-06), pin the `vladkens/` repo |
-| **d60/twikit** (4.5k★) + adhikasp/mcp-twikit (235★) | ③/④ self-host | read+write, search, DM, no API key | connected MCP or python lib | free; cookie/login, ban risk, ready MCP but ⚠ mcp-twikit stale (2025-03); the lib is the maintained part |
+| **d60/twikit** (4.5k★) + adhikasp/mcp-twikit (235★) | ③/④ self-host | read+write, search, DM, no API key | connected MCP or python lib | free; cookie/login, ban risk. ⚠ twikit itself hasn't been pushed since 2026-03 (4.5mo, 4.6k★ at last gh-api check) and mcp-twikit since 2025-03 (16+mo), functionally re-test against current X before next `## Last verified` bump, no fresher free③④ alternative surfaced this sweep |
 | playwright MCP + browser-use | ④ browser | act-like-human: logged-in search, scrape rendered view | playwright connected | free, real session, best for fields API hides |
 | Infatoshi/x-mcp, DataWhisker | ① official | full read+write incl. media | connected + X dev creds | needs Basic $200/mo+ |
 | **FxEmbed** (4.8k★) fka FxTwitter | ② free / ③ self-host | resolve ONE post/thread as JSON (text+media+metrics), no key | plain GET, no `claude mcp` entry | read-one only (no search); public-instance uptime + ToS gray, self-host on CF Workers to own it |
