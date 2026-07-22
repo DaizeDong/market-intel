@@ -176,7 +176,7 @@ one of five categories. Walk these in order:
 | `✗ Failed` with env var error in logs | required env var missing from `mcpServers.<name>.env` | re-check `tools/<slug>/env.template` against `secrets/<slug>.env`; common miss: `_STORAGE_DIR` paths that need pre-creating |
 | `✓ Connected` but actual tool calls fail | provider subscription gate (free tier read-only, etc.) | check provider dashboard for plan + quota; `functional-test.py`-style JSON-RPC ping catches this where `claude mcp list` doesn't |
 
-If still stuck, the active session's `the Claude log dir/` directory has per-MCP stderr capture ,
+If still stuck, the active session's Claude log directory has per-MCP stderr capture ,
 search for the server name in the most recent log file.
 
 ## Verify an install (always do this after adding)

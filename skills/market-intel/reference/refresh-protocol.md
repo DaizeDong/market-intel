@@ -359,7 +359,7 @@ ROI 最高。其余域每轮至少跑角度②（GitHub）+ 角度③（社区�
 6. **全绿才落地**：写 CHANGELOG + 升 version + commit 到分支 + push + `gh pr create`（**开 PR，不自动 merge**）
    + Discord 通知人审。合并后由 `tools/deploy_skill.sh` 同步到生效版 skill（先在 main 上重跑闸门才部署）。
 
-> 调度脚本 `a local refresh-market-intel.sh` 已实现 1/5/6 的编排骨架与 scope guard（拒绝越界改动）。
+> 本地调度脚本 `refresh-market-intel.sh` 已实现 1/5/6 的编排骨架与 scope guard（拒绝越界改动）。
 > v1 闸门覆盖协议强制的格式（github URL + star 标注）；裸 slug 无标注的漏检由 ROADMAP 的「机读镜像块」补全。
 
 ## 文档层防腐协议（anti-rot）, 保证 L2 逐工具文档不因迭代而失效或丢追踪
@@ -522,4 +522,4 @@ post-sweep `verify_matrix.py` GHACTIVE gate both sanitize them, so no extra step
 ## Trigger
 
 - Manual: ask "refresh the market-intel source matrix" / "刷新工具库".
-- Scheduled: Windows Task `RefreshMarketIntel` (monthly) runs `a local refresh-market-intel.sh`.
+- Scheduled: Windows Task `RefreshMarketIntel` (monthly) runs a local `refresh-market-intel.sh`.
