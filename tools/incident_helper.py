@@ -379,7 +379,7 @@ def run(struct: dict, apply: bool) -> int:
 
     # Step 5.
     print(f"\n[Step 5] Config-side check (skip if no companion repo):")
-    print(f"  python C:\\Users\\<username>\\CodesSelf\\market-intel-config\\scripts\\sync-check.py")
+    print(f"  python C:\\Users\\<username>\\CodesClaude\\market-intel-config\\scripts\\sync-check.py")
     print(f"  Expect: slug `{slug}` surfaces in bucket C; follow §C action per d_code.")
 
     # Step 6.
