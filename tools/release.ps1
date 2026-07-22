@@ -32,7 +32,7 @@ $ErrorActionPreference = "Stop"
 
 # --- locate repo root (this script lives at <repo>/tools/release.ps1) ---
 $RepoRoot   = Split-Path -Parent $PSScriptRoot
-$ConfigRepo = "C:\Users\<username>\CodesSelf\market-intel-config"
+$ConfigRepo = "C:\Users\<username>\CodesClaude\market-intel-config"
 $Today      = Get-Date -Format "yyyy-MM-dd"
 $Tag        = "v$Version"
 

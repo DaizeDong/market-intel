@@ -2,7 +2,7 @@
 # Sync the repo's skill into the live Claude Code skill dir — ONLY after a refresh PR is merged
 # to main and the verify gate is green. Run manually (or from a post-merge hook) after merging.
 set -euo pipefail
-REPO="$HOME/CodesSelf/market-intel"
+REPO="$HOME/CodesClaude/market-intel"
 LIVE="$HOME/.claude/skills/market-intel"
 
 cd "$REPO"
