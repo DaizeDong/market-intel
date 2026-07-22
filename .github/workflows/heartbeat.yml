@@ -29,7 +29,7 @@ jobs:
             echo "No refresh commit found for $MONTH — opening heartbeat issue."
             gh issue create -R "$GITHUB_REPOSITORY" \
               --title "heartbeat: no market-intel refresh in $MONTH" \
-              --body "The scheduled monthly refresh produced no commit to the source matrix this month. Likely the local machine was off, or the run failed. Please check the local refresh log and re-run \`refresh-market-intel.sh\` manually if needed." \
+              --body "The scheduled monthly refresh produced no commit to the source matrix this month. Likely the local machine was off, or the run failed. Please check your local refresh log and re-run the refresh script manually if needed." \
               || echo "issue create failed"
           else
             echo "Refresh activity detected for $MONTH ($HITS commit(s)) — healthy."

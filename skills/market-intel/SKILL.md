@@ -33,7 +33,7 @@ Before doing anything, decide if this skill even applies:
 
 > **Recurring / digest use:** this skill is one-shot by design. To watch a topic over time, wrap it
 > in a user-owned `/schedule` routine (or `/loop`), the routine owns cadence, watchlist, and
-> delivery (`the notifier` / the `feishu-notify` skill); market-intel just runs
+> delivery (a notifier of your choice / the `feishu-notify` skill); market-intel just runs
 > its normal workflow on each fire and emits its standard report. Do **not** build
 > monitoring/distribution *into* the skill, that's an orchestration-product job, not the seam this
 > skill owns (`PHILOSOPHY.md` P5).
