@@ -2,8 +2,8 @@
 
 - **Domain(s):** seo-keywords
 - **Barrier route:** ①/③ · **Source tier:** L2 · **Ready MCP:** **yes**, the repo ships MCP support (topics include `mcp` and `google-search-console-mcp`), so Claude can drive keyword/SERP/audit queries as connected tools rather than screen-scraping a SaaS UI.
-- **Cost:** free, open-source (self-host; the only cost is any third-party data source you plug in) [github.com/every-app/open-seo, gh-api fetched 2026-07-15]
-- **Repo / Provider:** `every-app/open-seo (4.3k★, gh-api 2026-07-15)`, not archived, pushed 2026-07-15, ~504 forks, TypeScript. Site openseo.so. Self-described "open source alternative to Semrush and Ahrefs." Topics: keyword-research, backlink-analysis, site-audit, seo-tools.
+- **Cost:** free, open-source (self-host; the only cost is any third-party data source you plug in) [github.com/every-app/open-seo, gh-api fetched 2026-07-22]
+- **Repo / Provider:** `every-app/open-seo (6.8k★, gh-api 2026-07-22)`, not archived, pushed 2026-07-21, TypeScript. Site openseo.so. Self-described "open source alternative to Semrush and Ahrefs." Topics: keyword-research, backlink-analysis, site-audit, seo-tools.
 - **Top pick for its domain:** no (free **Google Search Console MCP** stays the first pick for *your own site's* real data. open-seo is the strongest **free OSS** option for the *external* keyword/SERP/backlink/audit work that otherwise pushes you to paid DataForSEO/Ahrefs/Semrush)
 
 ## What it does / when to pick it
@@ -33,4 +33,4 @@ Prefer the MCP path for agent use so results come back structured instead of scr
 ## Failure signals & fallback
 Failure looks like empty/low-confidence keyword or backlink data (a source not configured), an MCP that will not connect, or a crawl/audit that times out on a large site. **Fallbacks: (1)** verify the underlying data source keys are set; **(2)** for first-party data, fall back to the free **GSC MCP**; **(3)** for vendor-grade external data at scale, step up to paid **DataForSEO** (①).
 
-## Last verified: 2026-07
+## Last verified: 2026-07 (re-checked 2026-07-22: star count refreshed 4.3k→6.8k, still active)
