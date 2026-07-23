@@ -17,6 +17,8 @@ new token monitoring, 加密/链上/套利.
 | **ccxt** (lib) |, | unified 100+ exchanges, spread monitor | python lib | base for cross-exchange logic |
 | **Hummingbot** (+ MCP) | execution | CEX/DEX arb, AMM arbitrage strategy | docker MCP | run actual arbitrage; needs VPS |
 | **vooi-app/mcp** (active 2026-06) | ① | perp/DEX-aggregator MCP, funding-rate divergence + cross-venue spreads; hosted endpoint `perps-api.vooi.io/mcp` | hosted MCP, MIT | replaces `kukapay/funding-rates-mcp` (D-STALE since 2025-04); pre-vetted live alt confirmed in earlier shard footnote |
+| **Base MCP** (`base/skills`, official Coinbase) | ① OAuth, non-custodial | first-party Base DeFi execution layer, official skill plugins for Morpho/Moonwell/Aerodrome/Uniswap/Bankr/Avantis/Virtuals | hosted `mcp.base.org`, OAuth 2.1 | **NEW 2026-07**: was WATCH pending a wireable endpoint (legacy `base-mcp-legacy` archived), now confirmed live with a real hosted endpoint + shipped skill plugins |
+| **Coinbase Agentic Wallet MCP** (`@coinbase/payments-mcp`) | ① official | gives any MCP agent a spendable on-chain wallet + x402 pay-per-call | `npx @coinbase/payments-mcp` | **NEW 2026-07**: execution/payment primitive, complements (not replaces) read-only CoinGecko/ccxt; pairs with Base MCP + Hummingbot for the execution layer |
 
 **Default pick:** Monitor spreads → CoinGecko MCP + ccxt + **vooi-app/mcp** (funding-rate divergence). On-chain analysis →
 Etherscan MCP + GeckoTerminal (+ **Blockscout MCP** free for chains Etherscan dropped from free tier).

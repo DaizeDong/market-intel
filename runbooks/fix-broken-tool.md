@@ -106,12 +106,12 @@ ahead of the shard. Touch it only when the shard's default actually moved.
 ## 5. (If companion-config installed) update config side
 
 Skip this step entirely if there is no companion `market-intel-config` repo on this machine
-(check with `ls C:\Users\<username>\CodesSelf\market-intel-config`, if absent, jump to Step 6).
+(check with `ls C:\Users\<username>\CodesClaude\market-intel-config`, if absent, jump to Step 6).
 
 When present, run the drift checker from the config repo:
 
 ```
-python C:\Users\<username>\CodesSelf\market-intel-config\scripts\sync-check.py
+python C:\Users\<username>\CodesClaude\market-intel-config\scripts\sync-check.py
 ```
 
 The tombstone you just added in Step 3 will surface in **bucket C** ("Config points to a
@@ -180,7 +180,7 @@ funding rates, so **no edit**. Skip.
 **Step 5, companion-config:**
 
 ```
-$ python C:\Users\<username>\CodesSelf\market-intel-config\scripts\sync-check.py
+$ python C:\Users\<username>\CodesClaude\market-intel-config\scripts\sync-check.py
 Bucket C: 1 entry
   - kukapay-funding-rates-mcp → D-SUPERSEDED (successor: vooi-app-mcp)
 ```
