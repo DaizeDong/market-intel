@@ -463,9 +463,18 @@ for d in fs_domains:
         block("CHURN", f"{d}: {int(churn*100)}% of lines changed (>40%) — looks like a rewrite, not an "
                        f"incremental edit (C7); route to human review")
     def _row_name(line):
-        # first cell of a markdown table row = the source identity; strip markdown emphasis
+        # first cell of a markdown table row = the source identity; strip markdown emphasis AND the
+        # volatile (NNk★) star annotation. A star-count refresh is an EDIT of an existing source, not
+        # a delete+add of a different one, so it must NOT change the row's identity -- otherwise fixing
+        # a stale star (required by the STAR check) trips the DELETE check (C4), the two contradicting
+        # each other on any star fix living in the identity cell. The STAR check still verifies the
+        # number independently; identity is the repo/tool name, never its (volatile) star count.
         cells = [c.strip() for c in line.lstrip("+-").strip().strip("|").split("|")]
-        return re.sub(r"[*`]", "", cells[0]).strip().lower() if cells else ""
+        if not cells:
+            return ""
+        name = re.sub(r"[*`]", "", cells[0])
+        name = re.sub(r"\(\d+(?:\.\d+)?k★\)", "", name)
+        return name.strip().lower()
     def _is_src_row(line):
         s = line.lstrip("+-").strip()
         return s.startswith("|") and "---" not in s and not re.search(r"\|\s*(source|repo|tool|name)\s*\|", s, re.I)
