@@ -311,21 +311,48 @@ def main() -> int:
     which = [s.strip() for s in (args.only.split(",") if args.only else SURFACES.keys())]
     stamp = _now().isoformat()
     all_new, summary = [], []
+
+    # Each surface is a single independent HTTP/gh call -> pure IO, and per-surface isolation already
+    # means one failing surface never sinks the poll. Fetch all surfaces in PARALLEL, then do the
+    # order-sensitive post-processing (cross-surface seen_keys dedup, all_new order, summary order)
+    # SERIALLY in `which` order below -> byte-for-byte the same result as the old serial loop, just
+    # with the round-trips overlapped. raw[name] holds either the candidate list or the exception.
+    raw: dict = {}
+    _pollable = [n for n in which if SURFACES.get(n)]
+    _workers = max(1, min(6, len(_pollable)))
+    if _workers <= 1:
+        for name in _pollable:
+            try:
+                raw[name] = SURFACES[name](cfg, args.since_days)
+            except Exception as e:  # captured, re-surfaced in `which` order below
+                raw[name] = e
+    else:
+        import concurrent.futures as _cf
+        with _cf.ThreadPoolExecutor(max_workers=_workers) as _ex:
+            _fut = {_ex.submit(SURFACES[n], cfg, args.since_days): n for n in _pollable}
+            for _f in _cf.as_completed(_fut):
+                n = _fut[_f]
+                try:
+                    raw[n] = _f.result()
+                except Exception as e:
+                    raw[n] = e
+
     for name in which:
         fn = SURFACES.get(name)
         if not fn:
             summary.append((name, "ERR", "unknown surface"))
             continue
-        try:
-            cands = fn(cfg, args.since_days)
-            fresh = [c for c in cands if c["key"] not in seen_keys]
-            for c in fresh:
-                c["discovered_at"] = stamp
-                seen_keys.add(c["key"])
-            all_new.extend(fresh)
-            summary.append((name, "OK", f"{len(fresh)} new / {len(cands)} seen"))
-        except Exception as e:  # per-surface isolation: one down != whole poll down
-            summary.append((name, "DEGRADED", str(e)[:120]))
+        r = raw.get(name)
+        if isinstance(r, Exception):  # per-surface isolation: one down != whole poll down
+            summary.append((name, "DEGRADED", str(r)[:120]))
+            continue
+        cands = r
+        fresh = [c for c in cands if c["key"] not in seen_keys]
+        for c in fresh:
+            c["discovered_at"] = stamp
+            seen_keys.add(c["key"])
+        all_new.extend(fresh)
+        summary.append((name, "OK", f"{len(fresh)} new / {len(cands)} seen"))
 
     # write (hard-fail on write error; never a repo fallback)
     if not args.dry_run and all_new:
