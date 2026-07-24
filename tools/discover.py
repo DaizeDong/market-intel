@@ -268,8 +268,10 @@ def channel_e4_npm(since: dt.date) -> list[dict]:
     """
     del since  # signature uniformity
     headers = {"User-Agent": UA, "Accept": "application/json"}
-    out: list[dict] = []
-    for pkg in NPM_PACKAGES:
+
+    def _one(pkg):
+        # Two independent npm HTTP calls per package -> pure IO. Returns (record_or_None, log_or_None);
+        # the caller emits both SERIALLY in NPM_PACKAGES order so output stays deterministic.
         enc = urllib.parse.quote(pkg, safe="@/")
         wk = requests.get(f"https://api.npmjs.org/downloads/range/last-week/{enc}",
                           headers=headers, timeout=HTTP_TIMEOUT)
@@ -277,23 +279,38 @@ def channel_e4_npm(since: dt.date) -> list[dict]:
                           headers=headers, timeout=HTTP_TIMEOUT)
         if wk.status_code != 200 or mo.status_code != 200:
             # Single-pkg miss is not fatal, log and continue.
-            print(f"  [E4] {pkg}: skipped (week={wk.status_code} month={mo.status_code})",
-                  file=sys.stderr)
-            continue
+            return None, f"  [E4] {pkg}: skipped (week={wk.status_code} month={mo.status_code})"
         wk_total = sum(d.get("downloads", 0) for d in wk.json().get("downloads", []))
         mo_total = sum(d.get("downloads", 0) for d in mo.json().get("downloads", []))
         mo_weekly_avg = (mo_total * 7 / 30) if mo_total else 0
         ratio = (wk_total / mo_weekly_avg) if mo_weekly_avg else float("inf") if wk_total else 0
         if wk_total < NPM_WEEKLY_MIN or ratio < NPM_WOW_RATIO_MIN:
-            continue
-        out.append({
+            return None, None
+        return {
             "discovered_at": _today(),
             "surface": "E4",
             "name": pkg,
             "url": f"https://www.npmjs.com/package/{pkg}",
             "signal": f"weekly:{wk_total} WoW:{ratio:.1f}x",
             "one_line_pitch": f"npm download velocity surge ({wk_total}/wk, {ratio:.1f}x last-month avg)",
-        })
+        }, None
+
+    # Each package is independent IO; fetch them in parallel. pool.map preserves input order, so the
+    # serial emit below yields byte-for-byte the same output (and stderr log lines) as the old loop.
+    pkgs = list(NPM_PACKAGES)
+    workers = max(1, min(8, len(pkgs)))
+    if workers <= 1:
+        results = [_one(p) for p in pkgs]
+    else:
+        with cf.ThreadPoolExecutor(max_workers=workers) as pool:
+            results = list(pool.map(_one, pkgs))
+
+    out: list[dict] = []
+    for rec, log in results:
+        if log:
+            print(log, file=sys.stderr)
+        if rec is not None:
+            out.append(rec)
     return out
 
 
