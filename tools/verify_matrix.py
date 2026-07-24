@@ -150,38 +150,71 @@ for txt in shard_text.values():
                and not o[:1].isdigit():          # skip "10-K/Q"-style prose
                 warn_slugs.add(tok)
 
+# ---- combined parallel GitHub fetch (feeds REPO + STAR + GHACTIVE) ----
+# WHY: REPO and GHACTIVE each hit `gh api repos/<r>` SEPARATELY (2 calls/repo), and the
+# per-repo network round-trip dominated wall-clock (109 repos ~= 70s serial). Fetch once
+# per repo, in PARALLEL, into repo_api; every block/warn/cache DECISION below stays SERIAL
+# over the sorted repo list, so message order and each gate's error semantics are byte-for-byte
+# unchanged (REPO/STAR = fail-closed on transient; GHACTIVE = fail-open, WARN on rate-limit).
+# The fetch returns a normalized dict, ok=True -> stars/archived/pushed_at; ok=False -> err in
+# {404, transient, unparseable} with stderr carried for the message text. Retry mirrors the
+# original REPO loop (3 attempts, back off on transient, 404 decided at once).
+def _fetch_repo_api(r):
+    import time
+    res = None
+    for attempt in range(3):
+        res = subprocess.run(
+            ["gh", "api", f"repos/{r}", "--jq", "{s:.stargazers_count,a:.archived,p:.pushed_at}"],
+            capture_output=True, text=True, encoding="utf-8")
+        if res.returncode == 0:
+            break
+        if "Not Found" in (res.stderr or "") or "404" in (res.stderr or ""):
+            break                                # real 404, don't retry, it's a hard fact
+        time.sleep(2 * (attempt + 1))            # transient (rate-limit/network): back off and retry
+    stderr = res.stderr or ""
+    if res.returncode != 0:
+        if "Not Found" in stderr or "404" in stderr:
+            return {"ok": False, "err": "404", "stderr": stderr}
+        return {"ok": False, "err": "transient", "stderr": stderr}
+    try:
+        d = json.loads(res.stdout)
+        return {"ok": True, "stars": d.get("s"), "archived": bool(d.get("a")), "pushed_at": d.get("p")}
+    except Exception:
+        return {"ok": False, "err": "unparseable", "stderr": stderr}
+
+repo_api = {}
+if not NO_NET:
+    import concurrent.futures as _cf
+    _to_fetch = sorted(set(repos) | set(warn_slugs))
+    _workers = max(1, min(8, len(_to_fetch)))
+    if _workers <= 1:
+        for _r in _to_fetch:
+            repo_api[_r] = _fetch_repo_api(_r)
+    else:
+        with _cf.ThreadPoolExecutor(max_workers=_workers) as _ex:
+            for _r, _out in zip(_to_fetch, _ex.map(_fetch_repo_api, _to_fetch)):
+                repo_api[_r] = _out
+
 # ---- REPO + STAR (fail-closed) ----
 repo_stars = {}
 if NO_NET:
     warn("REPO", "skipped GitHub verification (--no-net)")
 else:
-    import time
     for r in repos:
-        res = None
-        for attempt in range(3):                 # retry transient errors; 404 is decided immediately
-            res = subprocess.run(["gh", "api", f"repos/{r}", "--jq", "{s:.stargazers_count,a:.archived}"],
-                                 capture_output=True, text=True, encoding="utf-8")
-            if res.returncode == 0:
-                break
-            if "Not Found" in (res.stderr or "") or "404" in (res.stderr or ""):
-                break                            # real 404, don't retry, it's a hard fact
-            time.sleep(2 * (attempt + 1))        # transient (rate-limit/network): back off and retry
-        if res.returncode != 0:
-            if "Not Found" in (res.stderr or "") or "404" in (res.stderr or ""):
+        a = repo_api.get(r) or {"ok": False, "err": "transient", "stderr": "not fetched"}
+        if not a["ok"]:
+            if a["err"] == "404":
                 block("REPO", f"{r} does not exist (404) — hallucinated or dead repo")
+            elif a["err"] == "unparseable":
+                block("REPO", f"{r} returned unparseable API response")
             else:
-                block("REPO", f"{r} could not be verified after retries (fail-closed): {res.stderr.strip()[:80]}")
+                block("REPO", f"{r} could not be verified after retries (fail-closed): {a['stderr'].strip()[:80]}")
             continue
-        try:
-            d = json.loads(res.stdout)
-            repo_stars[r] = d["s"]
-        except Exception:
-            block("REPO", f"{r} returned unparseable API response")
+        repo_stars[r] = a["stars"]
     # heuristic bare slugs: verify but only WARN (avoid false-blocking prose / npm scopes)
     for r in sorted(warn_slugs):
-        res = subprocess.run(["gh", "api", f"repos/{r}", "--jq", ".full_name"],
-                             capture_output=True, text=True, encoding="utf-8")
-        if res.returncode != 0 and ("Not Found" in (res.stderr or "") or "404" in (res.stderr or "")):
+        a = repo_api.get(r)
+        if a and not a["ok"] and a["err"] == "404":
             warn("REPO?", f"{r} not found on GitHub — if it's a repo it may be hallucinated/mistyped; "
                           f"if prose/npm-scope, ignore (mirror block will disambiguate)")
     # STAR tolerance on lines pairing a repo with an (NNk★)
@@ -235,15 +268,20 @@ else:
             if age <= GH_CACHE_MAX_AGE_DAYS and c.get("verdict") != "RATE_LIMITED":
                 ghactive_results.append(c)
                 continue
-        res = subprocess.run(
-            ["gh", "api", f"repos/{r}", "--jq", "{pushed_at:.pushed_at,archived:.archived}"],
-            capture_output=True, text=True, encoding="utf-8")
-        if res.returncode != 0:
-            stderr = (res.stderr or "")
-            if "Not Found" in stderr or "404" in stderr:
+        # Read the combined fetch (repo_api) instead of a second gh call. Verdict/cache/message
+        # logic is unchanged: only the network round-trip moved to the parallel phase above.
+        a = repo_api.get(r) or {"ok": False, "err": "transient", "stderr": ""}
+        if not a["ok"]:
+            stderr = a.get("stderr") or ""
+            if a["err"] == "404":
                 entry = {"repo": r, "pushed_at": None, "archived": None,
                          "verdict": "BLOCK", "reason": "404 not found", "checked_at": _now_iso}
                 block("GHACTIVE", f"{r}: 404 not found (URL fabricated, deleted, or moved)")
+            elif a["err"] == "unparseable":
+                entry = {"repo": r, "pushed_at": None, "archived": None,
+                         "verdict": "RATE_LIMITED", "reason": "unparseable response",
+                         "checked_at": _now_iso}
+                warn("GHACTIVE", f"{r}: unparseable activity response")
             elif "rate limit" in stderr.lower() or "API rate" in stderr or "403" in stderr:
                 # Rate-limit is transient external state; per the philosophy we must not gate the
                 # gate on it. Surface as WARN and skip, re-run will pick it up.
@@ -261,18 +299,8 @@ else:
             ghactive_results.append(entry)
             gh_cache[r] = entry
             continue
-        try:
-            d = json.loads(res.stdout)
-            pushed_at = d.get("pushed_at")
-            archived = bool(d.get("archived"))
-        except Exception:
-            entry = {"repo": r, "pushed_at": None, "archived": None,
-                     "verdict": "RATE_LIMITED", "reason": "unparseable response",
-                     "checked_at": _now_iso}
-            warn("GHACTIVE", f"{r}: unparseable activity response")
-            ghactive_results.append(entry)
-            gh_cache[r] = entry
-            continue
+        pushed_at = a["pushed_at"]
+        archived = bool(a["archived"])
         if archived:
             entry = {"repo": r, "pushed_at": pushed_at, "archived": True,
                      "verdict": "BLOCK", "reason": "archived upstream", "checked_at": _now_iso}
