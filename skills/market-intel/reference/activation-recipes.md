@@ -150,7 +150,7 @@ WebFetch (no JS, your IP) + WebSearch (title+url only) are weak floors. Layer th
 - **Unlocks:** LLM-friendly crawler with built-in anti-bot (handles many Cloudflare/Akamai cases) at
   **zero API cost**. `needs-install` today.
 - **Class:** install-no-key (LLM key only if you opt into LLM-extraction). Apache-2.0, `unclecode/crawl4ai`.
-- **Steps:** `pip install crawl4ai && crawl4ai-setup`, **or** the Docker image (exposes a ready MCP ,
+- **Steps:** `pip install crawl4ai && crawl4ai-setup`, **or** the Docker image (exposes a ready MCP,
   preferred on Windows). `pricing-install.md → web-scraping`.
 
 ### W5 · DataForSEO, cheap bulk SERP
@@ -237,7 +237,7 @@ GDELT, app/play-store scrapers, Trends MCP already usable.
   `localhost:8080/search?q=...&format=json` from playwright/Bash. Pair with **serpbear**
   (`towfiqi/serpbear`, install-no-key) for rank tracking.
 
-> **Real cost is the underlying sub, not the MCP:** Ahrefs / Semrush MCPs consume your paid plan ,
+> **Real cost is the underlying sub, not the MCP:** Ahrefs / Semrush MCPs consume your paid plan,
 > no meaningful free API tier (Ahrefs needs Lite+; Semrush entry Pro ~$140/mo). `verify-before-signup`
 > for any "free Ahrefs" claim.
 
@@ -249,7 +249,7 @@ The whole domain is dark. Two cheap ways in:
 
 ### L1 · Hunter.io
 - **Unlocks:** email finder + verifier + light enrichment, the precise-email specialist. `needs-key`.
-- **Class:** free-tier, free **50 credits/mo** (confirmed 25 searches + 50 verifies/mo) *(verified ,
+- **Class:** free-tier, free **50 credits/mo** (confirmed 25 searches + 50 verifies/mo) *(verified,
   `tools/hunter.md`)*. **hunter.io** → API keys at `/api-keys`. **Gotcha:** Google-OAuth signup fails
   unless first+last name are typed before clicking "Sign up with Google".
 - **Steps:** hosted HTTP MCP `mcp.hunter.io/mcp`, header `X-API-KEY: <key>` (USER pastes; do NOT
@@ -261,7 +261,7 @@ The whole domain is dark. Two cheap ways in:
   **apollo.io** native Claude connector (OAuth). **⚠ Turn OFF Claude model training before connecting.**
 
 ### L3 · ZeroBounce, verify slot
-- **Class:** free-tier, **100 free verifications/mo** (business-domain signup) *(verified ,
+- **Class:** free-tier, **100 free verifications/mo** (business-domain signup) *(verified,
   `tools/zerobounce.md`)*. **zerobounce.net**. Official MCP (key).
 
 ### L4 · gosom/google-maps-scraper, free local B2B leads
@@ -301,7 +301,7 @@ The whole domain is dark. Two cheap ways in:
 
 ### SP1 · Buffer
 - **Unlocks:** schedule/publish across ~11 platforms. `needs-key`.
-- **Class:** free-tier, **API + hosted MCP work on the Free plan** (launched 2026-05-27) *(verified ,
+- **Class:** free-tier, **API + hosted MCP work on the Free plan** (launched 2026-05-27) *(verified,
   `tools/buffer.md`)*. **buffer.com**. The only official aggregator whose API+MCP work free.
 - **Steps:** key from Buffer dashboard → official MCP → `/mcp`. Front-load free platforms
   (Bluesky/Mastodon/Threads) directly via `atproto` / `Mastodon.py` (install-no-key, already usable).

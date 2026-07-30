@@ -268,7 +268,7 @@ exchange for the simpler workflow. Mitigations:
 ### Defense-in-depth posture under Mode B
 
 - **`secrets/` is gitignored** (primary defense).
-- Optional **CI gate** scans for typical key patterns on every push (defense in depth) ,
+- Optional **CI gate** scans for typical key patterns on every push (defense in depth),
   recommended when the repo has multiple contributors.
 - The repo itself is **private** (third layer).
 - Real secrets live on **local filesystem + an out-of-band backup** (cloud sync, encrypted

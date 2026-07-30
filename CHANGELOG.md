@@ -216,7 +216,7 @@ AUDIT: workflow-L0L1 verdict=pass, gh-api existence/freshness + top-pick-impact
   GrowChief (AGPL, ~9mo since push), TrendRadar (60k★, CN hot-list aggregator).
 
 ### Horizon
-- NEW-DOMAIN proposal: **prediction-markets** (Polymarket/Kalshi implied-prob) ,
+- NEW-DOMAIN proposal: **prediction-markets** (Polymarket/Kalshi implied-prob):
   recurred two months, cleared its own promotion bar; PROPOSAL only (H2/H3 human
   gate), not auto-created.
 - FOLD: **x402** keyless pay-per-call route -> a web-scraping + pricing-install
@@ -415,7 +415,7 @@ scripts. P5 amendment is one specific, audited carve-out.
 (unresolved are REPLACE-only entries with no tool doc, expected).
 
 `config-bridge.py --sweep ../market-intel/metrics/sweep-0.20.0.json --dry-run` →
-summary: 0 auto-configured (all ADDs in v0.20.0 had non-mechanical install_cmds ,
+summary: 0 auto-configured (all ADDs in v0.20.0 had non-mechanical install_cmds,
 "see github URL" placeholders), 1 needs_signup (Instantly.ai), 1 needs manual
 `claude mcp add`, 9 flagged as "unrecognized install_cmd" → pending. **Correct
 behavior**, v0.20.0 ADDs were research catalogs (mcp-ecosystem) + paid SaaS
@@ -505,7 +505,7 @@ real research-run usage.
 - 4 forks flagged 18 items; landed 11 high-ROI items; deferred 7 (SKILL.md TL;DR restructure,
   feedback-bump.py rename, workflow_helpers.md relocation, CHANGELOG bulk archive,
   canonical-sweep workflow script, refresh-protocol编号总览, health-dashboard).
-- The deferred items are correctly classified as "lower ROI than just using the system" ,
+- The deferred items are correctly classified as "lower ROI than just using the system";
   see structure fork + real-run drought fork.
 
 ## [0.22.0], 2026-06-17
@@ -720,7 +720,7 @@ PHILOSOPHY fork audited the sweep against the 6 principles. **PASS** on P2/P3/P5
   all demoted). **Fix:** explicit saturation flag, next sweep skips Discovery here
   unless `live-runs.jsonl` surfaces a gap.
 - **§2 (P1, grandfathered top pick):** seo-keywords never questions whether
-  DataForSEO should remain top pick. **Fix:** "top-pick grandfather watch" added ,
+  DataForSEO should remain top pick. **Fix:** "top-pick grandfather watch" added;
   next sweep MUST run a "could DataForSEO be replaced" angle.
 
 ### Landed files
@@ -1184,7 +1184,7 @@ Closes the last tracking gap: **non-GitHub SaaS tools** (59 of 151) now have a d
   index.md + the docs (not hand-written), so it can't drift.
 - **Gate (`tools/verify_matrix.py`), new REGISTRY check (BLOCK)**: enforces `registry.json` ↔
   `tools/index.md` ↔ `tools/*.md` three-way consistency. Because SaaS tools are listed in the
-  registry by slug, they can no longer lose their doc or fall out of the index without a hard BLOCK ,
+  registry by slug, they can no longer lose their doc or fall out of the index without a hard BLOCK,
   the gap the repo-based DOCCOVER net couldn't see. Validated: dropping a SaaS tool (twitterapi.io)
   from the registry → BLOCK.
 - **Refresh protocol R1** upgraded to a **4-file atomic op** (shard + index + doc + registry); the
@@ -1341,7 +1341,7 @@ Hardened the skill from real-run experience (patio-heaters research + tool confi
 user is faster and safer:
 
 - **Secret-handling HARD rules in SKILL.md Step 3** (we leaked keys 3×, now prevented for others):
-  never `browser_snapshot` a page that shows a key (dashboards/rotation pages render it plaintext ,
+  never `browser_snapshot` a page that shows a key (dashboards/rotation pages render it plaintext,
   confirmed on twitterapi.io + Bright Data); get keys via the page's copy button → clipboard →
   direct `~/.claude.json` edit; **do NOT `claude mcp add` for secret-bearing MCPs** (it echoes the
   header/URL); mask tokens in `claude mcp list` output; respect rotation cooldowns; a clean key =

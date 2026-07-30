@@ -15,7 +15,7 @@ free/mo), **ZoomInfo** only if the org already pays for it (the $15k+/yr floor m
 research). For most market-intel runs, Apollo + Hunter beats paying ZoomInfo.
 
 ## Install
-Lusha exposes an MCP via API key (paid plan generally required for API). Add as a key-bearing source ,
+Lusha exposes an MCP via API key (paid plan generally required for API). Add as a key-bearing source,
 **user** supplies the key, or edit `~/.claude.json` from clipboard; never `claude mcp add` with the key
 inline. Prefer HTTP transport on Windows. Exact current command:
 `reference/volatile/pricing-install.md#leadgen-crm`; L0 mechanics: `reference/install-guide.md`.

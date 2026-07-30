@@ -14,7 +14,7 @@ new token monitoring, 加密/链上/套利.
 | Moralis / Covalent (GoldRush) | ① | multi-chain wallet/portfolio normalized | connected + key | 100+ chains normalized |
 | Nansen | ① | smart-money labels, token god mode | connected + key | unique labels; now affordable ~$49/mo annual (collapsed from up to ~$999/mo) |
 | GeckoTerminal API | ① | DEX OHLCV history to 1s, liquidity | via CoinGecko MCP | beats DexScreener (which has no history) |
-| **ccxt** (lib) |, | unified 100+ exchanges, spread monitor | python lib | base for cross-exchange logic |
+| **ccxt** (lib) | n/a | unified 100+ exchanges, spread monitor | python lib | base for cross-exchange logic |
 | **Hummingbot** (+ MCP) | execution | CEX/DEX arb, AMM arbitrage strategy | docker MCP | run actual arbitrage; needs VPS |
 | **vooi-app/mcp** (active 2026-06) | ① | perp/DEX-aggregator MCP, funding-rate divergence + cross-venue spreads; hosted endpoint `perps-api.vooi.io/mcp` | hosted MCP, MIT | replaces `kukapay/funding-rates-mcp` (D-STALE since 2025-04); pre-vetted live alt confirmed in earlier shard footnote |
 | **Base MCP** (`base/skills`, official Coinbase) | ① OAuth, non-custodial | first-party Base DeFi execution layer, official skill plugins for Morpho/Moonwell/Aerodrome/Uniswap/Bankr/Avantis/Virtuals | hosted `mcp.base.org`, OAuth 2.1 | **NEW 2026-07**: was WATCH pending a wireable endpoint (legacy `base-mcp-legacy` archived), now confirmed live with a real hosted endpoint + shipped skill plugins |

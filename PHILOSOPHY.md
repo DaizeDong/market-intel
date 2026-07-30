@@ -3,7 +3,7 @@
 > **设计理念, 从根本进行设计，而非小修小补**
 
 This is the organizing principle of market-intel. Every feature, every guardrail, every refactor in
-this repo exists because of the six principles below. They are not after-the-fact rationalizations ,
+this repo exists because of the six principles below. They are not after-the-fact rationalizations,
 they are the lens that produced each decision, and the test every future change must pass.
 
 > 这是 market-intel 的统领原则。本仓库里的每个功能、每道护栏、每次重构，都源于下面六条。它们不是事后

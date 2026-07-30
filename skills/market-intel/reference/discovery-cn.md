@@ -15,7 +15,7 @@ in `refresh-protocol.md` §Cadence (weekly hot-domains pulse / monthly full swee
 ### 1. 即刻 (jike.app), builder pulse, strongest "shipping THIS week" signal
 
 - **URL**: https://web.okjike.com (web) · iOS/Android app
-- **Polling**: no official RSS or public API; web app is auth-walled. Manual-digest only ,
+- **Polling**: no official RSS or public API; web app is auth-walled. Manual-digest only,
   during a sweep, browse the **AI / 工具圈 / DeepSeek 顶级** topic feeds and the "热门" tab,
   skim 1 to 2 weeks back. A logged-in playwright session can scrape topic feeds if signal warrants
   automation; until then treat as manual.
@@ -46,7 +46,7 @@ in `refresh-protocol.md` §Cadence (weekly hot-domains pulse / monthly full swee
 - **Signal type**: model releases, tool roundups, benchmark comparisons. Their "盘点" / "实测"
   posts are the closest CN equivalent to a HN tool comparison thread.
 - **Cadence**: monthly; bump to weekly if a hot domain has open Chinese-vendor coverage gaps.
-- **Candidate criterion**: a "实测" or "盘点" post that names ≥2 tools and gives a verdict ,
+- **Candidate criterion**: a "实测" or "盘点" post that names ≥2 tools and gives a verdict,
   use as a multi-tool entry point, not single-tool gospel.
 
 ### 4. Geekpark (极客公园), news + interviews + 极客早知道 digest

@@ -11,7 +11,7 @@
 | **king-of-the-grackles/reddit-research-mcp** (120★) | ① official | semantic subreddit discovery (ChromaDB, 20k+ subs) beyond Reddit's 250-result cap; citation-backed, hosted OAuth needs no creds | hosted OAuth, no creds | confirmed working 2026-07-22 (219★ at last gh-api check); **currently the only no-cred Reddit route that works**, given buddy's anon-tier outage above, elevated to co-top-pick until #58/#60 resolve |
 | dancolta/subscope (10★) | ④ | keyless public-RSS buyer-intent scoring, local SQLite (post-GummySearch) | self-host | thin adoption (10★), niche |
 | Apify (Quora/forums/Reddit monitor) | ② resale | Quora, forums, brand monitor + sentiment | apify MCP | pay-per-use; SSE deprecated, use HTTP |
-| midodimori stack-overflow-mcp | ① free | SE search/answers | connected + SE key (raises 300→10k/day) |, |
+| midodimori stack-overflow-mcp | ① free | SE search/answers | connected + SE key (raises 300→10k/day) | none |
 | **ArthurHeitmann/arctic_shift** (1.1k★) | ③ archive | Pushshift successor: bulk historical Reddit dumps + JSON API + hosted web UI (arctic-shift.photon-reddit.com); monthly dump refresh | self-host or use hosted UI | active 2026-06, MIT-style, **solo maintainer** (bus-factor risk worth flagging) |
 | **SaseQ/discord-mcp** (356★) | ① bot-token | Bot-token Discord MCP (JDA-based, Docker) for own/admin servers, ToS-compliant | bot token + `docker run :8085/mcp` | MIT, active 2026-04 |
 | elyxlz/discord-mcp | ④ browser | read/scrape via your user session | self-host | ⚠ violates Discord ToS, ban risk, prefer SaseQ/discord-mcp for own servers |

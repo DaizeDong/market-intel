@@ -41,6 +41,6 @@ solvers. No official MCP: Moz, Majestic, Sitebulb.
 **Install guidance:** `reference/volatile/pricing-install.md` → seo-keywords.
 
 **Top-pick grandfather watch (set 2026-06-17 sweep):** DataForSEO has been the unchallenged top
-pick for ≥3 consecutive sweeps. PHILOSOPHY P1 generative test: *why* is DataForSEO the default ,
-is it actually the optimal point, or have we stopped questioning the framing? **Next sweep MUST**
+pick for ≥3 consecutive sweeps. PHILOSOPHY P1 generative test: *why* is DataForSEO the default? Is
+it actually the optimal point, or have we stopped questioning the framing? **Next sweep MUST**
 run an explicit "could DataForSEO be replaced" angle in Discovery, not just "what's new."
