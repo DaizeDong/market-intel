@@ -7,7 +7,7 @@ Triage a commercial topic across 15 data domains, auto-detect the right speciali
 [![Source Matrix](https://img.shields.io/badge/Source%20Matrix-15%20domains-green?style=flat)](skills/market-intel/reference/sources-index.md)
 [![Tool docs](https://img.shields.io/badge/Tool%20docs-per--tool%20how--to-green?style=flat)](skills/market-intel/reference/tools/index.md)
 [![Languages](https://img.shields.io/badge/Languages-EN%20%2F%20CN-blue?style=flat)](#languages)
-[![Roadmap](https://img.shields.io/badge/Roadmap-v0.26.0-purple?style=flat)](ROADMAP.md)
+[![Roadmap](https://img.shields.io/badge/Roadmap-v0.29.0-purple?style=flat)](ROADMAP.md)
 
 [English](README.md) | [中文版](README_CN.md)
 

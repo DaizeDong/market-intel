@@ -7,7 +7,7 @@
 [![源矩阵](https://img.shields.io/badge/%E6%BA%90%E7%9F%A9%E9%98%B5-15%20%E4%B8%AA%E6%96%B9%E5%90%91-green?style=flat)](skills/market-intel/reference/sources-index.md)
 [![工具文档](https://img.shields.io/badge/%E5%B7%A5%E5%85%B7%E6%96%87%E6%A1%A3-%E9%80%90%E5%B7%A5%E5%85%B7%E6%93%8D%E4%BD%9C-green?style=flat)](skills/market-intel/reference/tools/index.md)
 [![语言](https://img.shields.io/badge/%E8%AF%AD%E8%A8%80-EN%20%2F%20CN-blue?style=flat)](#语言)
-[![Roadmap](https://img.shields.io/badge/Roadmap-v0.26.0-purple?style=flat)](ROADMAP.md)
+[![Roadmap](https://img.shields.io/badge/Roadmap-v0.29.0-purple?style=flat)](ROADMAP.md)
 
 [English](README.md) | [中文版](README_CN.md)
 

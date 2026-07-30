@@ -1,6 +1,6 @@
 # Roadmap
 
-Current: **v0.26.0**
+Current: **v0.29.0**
 
 ## v0.1.0 (alpha), foundation
 
