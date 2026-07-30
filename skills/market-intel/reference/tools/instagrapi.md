@@ -36,7 +36,7 @@ cl.user_info_by_username("nasa")                # read a profile
   proxy, and human-like pacing; never run it on a real/valuable account (shard ④-route warning).
 - **Reuse the saved session**, repeated fresh logins from a datacenter IP is the fastest way to a
   challenge/checkpoint/ban. Pin one device+proxy per account.
-- IG silently shadow-limits: a call can "succeed" yet the post gets zero reach or is removed later ,
+- IG silently shadow-limits: a call can "succeed" yet the post gets zero reach or is removed later,
   don't treat HTTP 200 as confirmed delivery.
 - Private-API endpoints break when Instagram changes things; keep the lib updated (it's actively
   patched, which is exactly why it's the pick over staler IG libs).

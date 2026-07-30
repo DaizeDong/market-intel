@@ -73,7 +73,7 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 - [Covalent / GoldRush](covalent.md), ① · multi-chain normalized data
 - [Nansen](nansen.md), ① · smart-money labels, token god mode
 - [GeckoTerminal API](geckoterminal.md), ① · DEX OHLCV history to 1s
-- ★ [ccxt](ccxt.md), , · unified 100+ exchange lib, spread monitor
+- ★ [ccxt](ccxt.md),, · unified 100+ exchange lib, spread monitor
 - [Hummingbot (+ MCP)](hummingbot.md), ① · CEX/DEX arbitrage execution
 - [funding-rates-mcp](funding-rates-mcp.md), ① · cross-exchange funding divergence
 - [DefiLlama API](defillama.md), ① · free no-key TVL/yields/stablecoins/fees REST
@@ -124,7 +124,7 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 - [Strapi 5 MCP](strapi-mcp.md), ① · token-scoped per content type
 - [Notion hosted MCP](notion-mcp.md), ① · Notion markdown as CMS
 - [Pipepost](pipepost.md), ① · Dev.to+Hashnode+Ghost+WP+Medium syndication
-- ★ [Static blog (Hugo/Astro)](static-blog.md), , · MD → git push → Vercel, zero fee
+- ★ [Static blog (Hugo/Astro)](static-blog.md),, · MD → git push → Vercel, zero fee
 - [directus/mcp](directus-mcp.md), ① · official Directus MCP (SQL-backed headless CMS)
 - [webflow/mcp-server](webflow-mcp.md), ① · official Webflow CMS MCP
 
@@ -170,7 +170,7 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 - [alphaXiv](alphaxiv.md), ③④ · community comments + LLM summaries (skill alphaxiv)
 - [arxiv-sanity-lite](arxiv-sanity-lite.md), ③ · self-host recommender, free (D-STALE, last push 2023, still runs)
 - [Connected Papers / ResearchRabbit](connected-papers-researchrabbit.md), ④ · citation-graph explore
-- [research-lit skill](research-lit-skill.md), , · delegate deep multi-paper synthesis
+- [research-lit skill](research-lit-skill.md),, · delegate deep multi-paper synthesis
 - [paper-search-mcp](paper-search-mcp.md), ① · multi-venue (arXiv+PubMed+bioRxiv) paper search
 - [paper-qa (PaperQA2)](paper-qa.md), ④ · grounded full-text PDF deep-research w/ citations
 
@@ -193,18 +193,18 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 - [botasaurus](botasaurus.md), ④ · anti-detection Python scraping framework (omkarcloud scrapers' base)
 
 ## ready-skills
-- ★ [coreyhaines31/marketingskills](marketingskills.md), , · ~40 install-and-go marketing skills
-- [Anthropic Marketing plugin](anthropic-marketing-plugin.md), , · /competitive-brief, /seo-audit
-- ★ [AgricIDaniel/claude-seo](claude-seo.md), , · strongest SEO plugin, 25 sub-skills
-- ★ [claude-marketing-research-skill](claude-marketing-research-skill.md), , · 6-stage market research (shard default for packaged research pipeline)
-- [alirezarezvani/claude-skills](alirezarezvani-claude-skills.md), , · mega bundle 338 skills
-- [ComposioHQ/awesome-claude-skills](awesome-claude-skills.md), , · discovery catalog (D-SUPERSEDED by sickn33/antigravity-awesome-skills 2026-06-17)
-- ★ [sickn33/antigravity-awesome-skills](antigravity-awesome-skills.md), , · active replacement catalog (40k★, 1d-old)
-- [ericosiu/ai-marketing-skills](ai-marketing-skills.md), , · business-ops/sales/revenue skills (fills the gap)
-- [digital-marketing-pro](digital-marketing-pro.md), , · AEO/GEO answer-engine optimization
-- ★ [Imbad0202/academic-research-skills](academic-research-skills.md), , · full academic-research pipeline (planning → lit review → peer review)
-- [gtmagents/gtm-agents](gtm-agents.md), , · 67 plugins / 92 agents / 52 skills for sales-driven GTM
-- [Eronred/aso-skills](aso-skills.md), , · 40+ App Store Optimization skills (iOS + Google Play)
+- ★ [coreyhaines31/marketingskills](marketingskills.md),, · ~40 install-and-go marketing skills
+- [Anthropic Marketing plugin](anthropic-marketing-plugin.md),, · /competitive-brief, /seo-audit
+- ★ [AgricIDaniel/claude-seo](claude-seo.md),, · strongest SEO plugin, 25 sub-skills
+- ★ [claude-marketing-research-skill](claude-marketing-research-skill.md),, · 6-stage market research (shard default for packaged research pipeline)
+- [alirezarezvani/claude-skills](alirezarezvani-claude-skills.md),, · mega bundle 338 skills
+- [ComposioHQ/awesome-claude-skills](awesome-claude-skills.md),, · discovery catalog (D-SUPERSEDED by sickn33/antigravity-awesome-skills 2026-06-17)
+- ★ [sickn33/antigravity-awesome-skills](antigravity-awesome-skills.md),, · active replacement catalog (40k★, 1d-old)
+- [ericosiu/ai-marketing-skills](ai-marketing-skills.md),, · business-ops/sales/revenue skills (fills the gap)
+- [digital-marketing-pro](digital-marketing-pro.md),, · AEO/GEO answer-engine optimization
+- ★ [Imbad0202/academic-research-skills](academic-research-skills.md),, · full academic-research pipeline (planning → lit review → peer review)
+- [gtmagents/gtm-agents](gtm-agents.md),, · 67 plugins / 92 agents / 52 skills for sales-driven GTM
+- [Eronred/aso-skills](aso-skills.md),, · 40+ App Store Optimization skills (iOS + Google Play)
 
 ## reddit-community
 - ★ [ArthurHeitmann/arctic_shift](arctic-shift.md), historical Reddit · monthly dumps + JSON API + hosted UI

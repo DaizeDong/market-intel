@@ -29,7 +29,7 @@ GTM/sales → gtm-agents. Mobile App Store Optimization → aso-skills. Discover
 market-intel itself handles seller-side ecommerce-arbitrage, see `ecommerce-arbitrage.md`).
 
 **Judgment:** marketing/SEO/content/research = rich, install直用; consumer shopping was a gap
-**until 2026-06** (no native SKILL.md existed; bundles all targeted seller/marketing tools) ,
+**until 2026-06** (no native SKILL.md existed; bundles all targeted seller/marketing tools),
 shopping-aggregator was authored to fill exactly that gap. business-ops深度 + seller-side
 arbitrage = still scarce, still assemble MCPs. Every skill's ceiling = which data MCPs you
 connect, the skill is a shell; the work moved to MCP wiring + auth.
