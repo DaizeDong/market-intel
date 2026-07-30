@@ -16,7 +16,7 @@ headless CMS, 发博客/内容发布.
 | microcmsio/microcms-mcp-server (21★ official) | ① | JP-market headless CMS MCP | connected | thin adoption but actively maintained; niche JP-market pick, not a top-pick change |
 | kontent-ai/mcp-server (9★ official) | ① | Kontent.ai headless CMS MCP | connected | thin adoption but actively maintained; niche pick, not a top-pick change |
 | **Pipepost** (multi-platform) | ① | Dev.to+Hashnode+Ghost+WP+Medium + social broadcast | connected | handles canonical + SEO |
-| Static blog (Hugo/Astro) + claude-blog skill |, | write MD/frontmatter → git push → Vercel deploy | skill present | zero platform fee |
+| Static blog (Hugo/Astro) + claude-blog skill | n/a | write MD/frontmatter → git push → Vercel deploy | skill present | zero platform fee |
 
 **Default pick:** Own controllable blog → static (Hugo/Astro + claude-blog skill + git + `/vercel:deploy`,
 zero fee). CMS backend → WordPress MCP / Sanity hosted MCP. Cross-platform syndication → Pipepost.

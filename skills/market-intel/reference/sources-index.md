@@ -60,5 +60,5 @@ Barrier-route legend (see each shard for detail):
 
 Death-code legend (`⚠ Avoid (dead, D-xxx)` tombstones): D-404 / D-TOS / D-PRICE / D-STALE
 / D-SUPERSEDED. **Canonical semantics + per-code action**: `refresh-protocol.md` §C4
-(skill side) and `runbooks/sync-with-skill.md` §C (config side). Don't paraphrase here ,
+(skill side) and `runbooks/sync-with-skill.md` §C (config side). Don't paraphrase here,
 2026-06-17 cleanup confirmed it had drifted across 4 files.

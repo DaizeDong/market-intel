@@ -433,7 +433,7 @@ get buried.
    `live-runs.jsonl` first (default 90-day window); historical year files are read only
    when `--since` predates the current file's earliest entry. Prevents Step -1 scan cost
    from creeping past 0.5s at 500+ entry sizes.
-8. **Top-level doc drift sweep** (2026-06-17 added against entropy growth) ,
+8. **Top-level doc drift sweep** (2026-06-17 added against entropy growth)
    - **Machine-checkable**: run `python tools/check_doc_drift.py`. Fail-level drift
      blocks the sweep (must fix in this cleanup, not the next). Warn-level drift
      surfaces in the sweep report.

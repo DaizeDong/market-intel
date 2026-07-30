@@ -42,7 +42,7 @@ source. Minimal read: search contacts by `lifecyclestage=lead` created this week
 
 ## Failure signals & fallback
 "Needs authentication" in `claude mcp list` (OAuth expired) → re-auth. 429 = rate-limited, batch and
-retry with backoff. If the team's CRM is **not** HubSpot, fall back to the matching official MCP ,
+retry with backoff. If the team's CRM is **not** HubSpot, fall back to the matching official MCP,
 **Salesforce** or **Attio** (same route ①, same read/write/log-activity capability).
 
 ## Last verified: 2026-06

@@ -97,7 +97,7 @@ default GBK decode crashes on Windows). Prefer `claude mcp list` / `claude mcp g
 #### Step 2b, Task-time availability gate (classify each relevant tool AT THIS MOMENT)
 
 Detection isn't a yes/no list, it's a per-tool **state** decided *now*, for *this theme's*
-routed tools only. Using query-side signals only (`claude mcp list` + companion-config presence ,
+routed tools only. Using query-side signals only (`claude mcp list` + companion-config presence, and
 **never** import a refresh/ops script; that breaks the P5 seam), sort each relevant tool into one
 of three buckets:
 
@@ -131,7 +131,7 @@ If the topic clearly depends on a source that is missing or not connected:
 
 > "This topic depends on <source> (e.g. real X tweet data). Recommend installing it:
 > `claude mcp add -s user <...>` (exact command + cost in `reference/volatile/pricing-install.md`).
-> **Note: a newly added MCP only takes effect after you restart the session or `/mcp` reconnect ,
+> **Note: a newly added MCP only takes effect after you restart the session or `/mcp` reconnect;
 > it will NOT work this turn.** For now I'll proceed with a fallback source and flag the gap."
 
 Never block on install. Prefer HTTP-transport sources on Windows (no local Node/uv needed; stdio
@@ -346,7 +346,7 @@ first (a source flagged `dead` in real use gets auto-nominated for the C4 deleti
     choice on Windows, secret hygiene, BOM rules, Python install target). Read when bootstrapping
     a fresh machine or onboarding any new tool category.
   - **L1** = `reference/volatile/pricing-install.md`, per-domain, time-stamped exact commands +
-    current prices. Read when actually guiding an install for a specific domain. **Prices rot ,
+    current prices. Read when actually guiding an install for a specific domain. **Prices rot;
     re-verify the live site before quoting.**
   - **L2** = `reference/tools/<slug>.md` (judgment) and optionally `reference/tools/<slug>.auto.md`
     (mechanical, spec §11.1 split). Read for the specific tool you're about to install/use. The

@@ -8,7 +8,7 @@
 
 ## What it does / when to pick it
 Scrapes Google Maps business listings → **name, phone, website, and email** (+ address, category,
-ratings). **Decision rule: this is the shard's default free pick for local-business B2B leads** ,
+ratings). **Decision rule: this is the shard's default free pick for local-business B2B leads**,
 reach for it first on the ④ route. The killer point: it is **far lower legal/ban risk than LinkedIn
 scraping** (Maps data is public business info, no login session burned). Pick it over joeyism/
 linkedin_scraper ④ (25 to 35% ban rate) whenever the leads are local businesses; pick Apollo ① only when

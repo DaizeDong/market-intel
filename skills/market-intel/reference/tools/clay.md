@@ -32,7 +32,7 @@ read back enriched rows (email, title, LinkedIn, firmographics). Minimal: push 5
 "find work email" waterfall → pull the resolved emails + which provider supplied each.
 
 ## General experience & gotchas (踩坑)
-- **Cost trap:** every step in the waterfall can bill a provider credit even on a miss-then-hit chain ,
+- **Cost trap:** every step in the waterfall can bill a provider credit even on a miss-then-hit chain,
   a single "enriched row" may have cost 2 to 3 provider lookups. Watch credit burn on large tables.
 - Clay's strength (150+ providers) is wasted if you only need one source, you're paying for
   orchestration you don't use. The shard is explicit: "best for existing Clay teams."

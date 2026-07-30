@@ -23,7 +23,7 @@ Exact command + token notes: `reference/volatile/pricing-install.md#frontier-res
 ## Auth / keys
 None for read (Daily Papers, public models/datasets). For write/private/gated content, get an HF token
 at huggingface.co/settings/tokens (free account). Secret hygiene if you add a token: edit `~/.claude.json`
-from clipboard, never `claude mcp add` with the header inline, never `browser_snapshot` the token page ,
+from clipboard, never `claude mcp add` with the header inline, never `browser_snapshot` the token page,
 see `reference/install-guide.md`.
 
 ## Usage, call examples
