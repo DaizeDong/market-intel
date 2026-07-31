@@ -3,7 +3,7 @@
 - **Domain(s):** seo-keywords
 - **Barrier route:** ①/③ · **Source tier:** L2 · **Ready MCP:** **yes**, the repo ships MCP support (topics include `mcp` and `google-search-console-mcp`), so Claude can drive keyword/SERP/audit queries as connected tools rather than screen-scraping a SaaS UI.
 - **Cost:** free, open-source (self-host; the only cost is any third-party data source you plug in) [github.com/every-app/open-seo, gh-api fetched 2026-07-22]
-- **Repo / Provider:** `every-app/open-seo (6.8k★, gh-api 2026-07-22)`, not archived, pushed 2026-07-21, TypeScript. Site openseo.so. Self-described "open source alternative to Semrush and Ahrefs." Topics: keyword-research, backlink-analysis, site-audit, seo-tools.
+- **Repo / Provider:** `every-app/open-seo (9.8k★, gh-api 2026-07-31)`, not archived, pushed 2026-07-21, TypeScript. Site openseo.so. Self-described "open source alternative to Semrush and Ahrefs." Topics: keyword-research, backlink-analysis, site-audit, seo-tools.
 - **Top pick for its domain:** no (free **Google Search Console MCP** stays the first pick for *your own site's* real data. open-seo is the strongest **free OSS** option for the *external* keyword/SERP/backlink/audit work that otherwise pushes you to paid DataForSEO/Ahrefs/Semrush)
 
 ## What it does / when to pick it
