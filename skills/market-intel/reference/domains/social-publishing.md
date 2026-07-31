@@ -33,7 +33,7 @@ ToS → use throwaway accounts; write/post is far more ban-prone than read. Veri
 |---|---|---|---|
 | X | d60/twikit (4.5k★) + adhikasp/mcp-twikit | ③/④ | read+write+DM, ready MCP, free |
 | Instagram | subzeroid/instagrapi (6.3k★) | ③ | post图文/Reels/comment/DM, most active |
-| LinkedIn | stickerdaniel/linkedin-mcp-server (2.2k★) | ④ | ready MCP; ⚠ highest ban risk, small acct |
+| LinkedIn | stickerdaniel/linkedin-mcp-server (3.0k★) | ④ | ready MCP; ⚠ highest ban risk, small acct |
 | TikTok | davidteather/TikTok-Api (6.4k★) | ④ | Playwright-signed, scrape+search |
 | 小红书 | **xpzouying/xiaohongshu-mcp (14k★)** | ④ | browser + ready MCP, **can post notes** |
 | 中文多平台 | NanmiCoder/MediaCrawler (50k★) | ④ | Playwright, 小红书/抖音/B站/微博/快手/知乎/贴吧 |

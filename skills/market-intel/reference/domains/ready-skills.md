@@ -14,7 +14,7 @@ want to assemble MCPs from scratch, 现成的营销/调研 skill.
 | **Anthropic official Marketing plugin** | official plugin | /competitive-brief, /seo-audit, /campaign-plan; connects HubSpot/Ahrefs/Klaviyo | claude.com/plugins/marketing |
 | **AgricIDaniel/claude-seo** (11.5k★) | plugin | strongest SEO, 25 sub-skills + 18 agents, offline | `/plugin marketplace add AgricIDaniel/claude-seo` |
 | **ishwarjha/claude-marketing-research-skill** | packaged skill | 6-stage market research workflow (competitor→product→persona→positioning) | GitHub |
-| alirezarezvani/claude-skills (17.6k★) | mega bundle | 338 skills incl market-research, c-level, finance | `/plugin marketplace add alirezarezvani/claude-skills` |
+| alirezarezvani/claude-skills (23.5k★) | mega bundle | 338 skills incl market-research, c-level, finance | `/plugin marketplace add alirezarezvani/claude-skills` |
 | **sickn33/antigravity-awesome-skills** (40k★, active 2026-06) | catalog | broader multi-platform installable awesome-skills catalog | GitHub | **replaces ComposioHQ/awesome-claude-skills** (less-maintained); 40k★, last push 1d ago |
 | **Imbad0202/academic-research-skills** (32.2k★) | skill bundle | full academic-research pipeline: planning → lit review → methodology → drafting → peer review (v3.12.1 on 2026-06-15) | `/plugin marketplace add Imbad0202/academic-research-skills` |
 | **gtmagents/gtm-agents** (279★) | agents bundle | GTM agents: 67 plugins / 92 agents / 52 skills (sales pipeline, lead gen, cold-email personalization), Apache-2.0 | GitHub |

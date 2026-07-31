@@ -3,7 +3,7 @@
 - **Domain(s):** social-publishing (also: leadgen-crm)
 - **Barrier route:** ④ · **Source tier:** L4 · **Ready MCP:** yes (ready-to-run MCP server)
 - **Cost:** free (OSS), cost is the account you'll burn + proxies
-- **Repo / Provider:** github.com/stickerdaniel/linkedin-mcp-server, `stickerdaniel/linkedin-mcp-server (2.2k★, gh-api 2026-06)` (Apache-2.0; actively maintained, last push 2026-06)
+- **Repo / Provider:** github.com/stickerdaniel/linkedin-mcp-server, `stickerdaniel/linkedin-mcp-server (3.0k★, gh-api 2026-07-31)` (Apache-2.0; actively maintained, last push 2026-06)
 - **Top pick for its domain:** no
 
 ## What it does / when to pick it
