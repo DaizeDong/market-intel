@@ -102,9 +102,10 @@ For every `configurable-with-setup` (and any theme-critical `hard-gap`) tool: **
 skip**. Emit a one-line, theme-specific suggestion naming what the missing tool would deepen, its
 cost class, and the exact activation path (from `reference/activation-recipes.md`):
 
-> "To deepen **<this theme aspect>**, configure **<tool>** (<free-key | free-tier | install-no-key |
-> paid $X>), `python tools/console.py connect <slug>` (canonical, resolves by slug), or see
-> `reference/activation-recipes.md` for the key source; then `/mcp` reconnect (won't help this turn)."
+**Copy the canonical wording from [`report-template.md`](./report-template.md)** ("configure for
+deeper data"); it is not restated here, because a template line living in three files drifts in three
+directions. It names the tool, its cost tier, the `console.py connect <slug>` command, the key
+source, and that a reconnect will not help the current turn.
 
 Configuration is recommended **at task-time, driven by the theme**, not pre-done. These lines feed
 the report's Coverage-gaps → "Configure for deeper data" block (`reference/report-template.md`).
