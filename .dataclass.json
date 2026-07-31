@@ -14,8 +14,18 @@
     "      actually investigating. Tool knowledge distilled FROM it (which source works, which",
     "      route falls back) is published -- that is what reference/tools/*.md already is. The",
     "      raw ledger is not.",
-    "Enforced by tools/data_boundary.py, in .githooks and in CI."
+    "Enforced by tools/data_boundary.py, in .githooks and in CI.",
+    "",
+    "`tool` is not a fourth class. It is the per-path allowlist for check 4, which fails any tracked",
+    "file that WEARS the shape of real-run output (a jsonl under metrics/, a runs/ tree, a dated file",
+    "under an output dir, a live-ledger filename, a database). TOOL is the default class and needs no",
+    "entry -- except exactly here, where a TOOL file is shaped like a ledger and has to be argued for",
+    "in the diff rather than in a paragraph."
   ],
+  "tool": [
+    "metrics/history.jsonl"
+  ],
+  "_tool_note": "One row per REFRESH PERIOD, not per run: domain/source counts and the free-route share, keyed by period and git sha. It measures the catalog, it names no subject and no query, and reference/tools/*.md is generated from it. It matches the check-4 metrics-ledger shape only because it is a jsonl under metrics/, which is precisely the shape the sibling DATA ledger has -- so it is enumerated instead of exempted by category.",
   "data": [
     "skills/market-intel/metrics/live-runs.jsonl"
   ],
