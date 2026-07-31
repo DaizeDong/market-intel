@@ -12,8 +12,9 @@ between monthly runs.
 
 DATA BOUNDARY (Skill Repo Spec s9): this file is TOOL (public code). Its OUTPUT is a record of what
 surfaced during a real run -> it is written to the PRIVATE data home, never into the public repo.
-  inbox default: $MARKET_INTEL_DATA_DIR/surface-inbox.jsonl
-                 else ~/.market-intel-config/data/surface-inbox.jsonl
+  inbox default: <tools/datadir.py resolution>/surface-inbox.jsonl
+                 ($MARKET_INTEL_DATA_DIR -> $MARKET_INTEL_CONFIG/data -> ~/.market-intel-config/data)
+  print it with: python tools/datadir.py --path market-intel surface-inbox.jsonl
 Reads may degrade (a surface down -> warn + continue); the inbox WRITE hard-fails (never a repo
 fallback). One candidate per JSONL line: {surface, key, title, url, signal, discovered_at, raw}.
 
@@ -41,6 +42,10 @@ from datetime import datetime, timedelta, timezone
 UA = "market-intel-surface-poller/1.0 (+https://github.com/DaizeDong/market-intel)"
 HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(HERE, "surfaces.json")
+SKILL = "market-intel"
+
+sys.path.insert(0, HERE)
+from datadir import resolve_data_dir  # noqa: E402
 
 
 # ----------------------------------------------------------------------------- helpers
@@ -75,10 +80,15 @@ def _load_config() -> dict:
 
 
 def _data_home() -> str:
-    d = os.environ.get("MARKET_INTEL_DATA_DIR")
-    if d:
-        return d
-    return os.path.join(os.path.expanduser("~"), ".market-intel-config", "data")
+    """The private data home, resolved by tools/datadir.py -- the ONE resolver, not a copy of it.
+
+    This used to re-implement the discovery order in four lines, and the copy went stale: it knew
+    only $MARKET_INTEL_DATA_DIR and the ~/.market-intel-config/data dotfile, so once the companion
+    repo was pinned elsewhere with $MARKET_INTEL_CONFIG this writer kept appending to a directory
+    nothing else read any more. A second ledger that nobody consumes is indistinguishable from
+    losing the observation, which is exactly what the write-side hard-fail rule exists to prevent.
+    """
+    return str(resolve_data_dir(SKILL, create=True))
 
 
 # ----------------------------------------------------------------------------- surfaces
