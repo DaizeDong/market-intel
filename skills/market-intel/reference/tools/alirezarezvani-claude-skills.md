@@ -3,7 +3,7 @@
 - **Domain(s):** ready-skills (also: none)
 - **Barrier route:**, (skill mega-bundle; no data barrier of its own) · **Source tier:** L2 · **Ready MCP:** no, installs as a *plugin marketplace* of skills
 - **Cost:** free (MIT) [github.com/alirezarezvani/claude-skills, gh-api 2026-06]
-- **Repo / Provider:** github.com/alirezarezvani/claude-skills, `alirezarezvani/claude-skills (17.6k★, gh-api 2026-06)`; active (pushed 2026-06-07, not archived, MIT)
+- **Repo / Provider:** github.com/alirezarezvani/claude-skills, `alirezarezvani/claude-skills (23.5k★, gh-api 2026-07-31)`; active (pushed 2026-06-07, not archived, MIT)
 - **Top pick for its domain:** no (huge, but breadth-over-depth; reach for the focused bundles first)
 
 ## What it does / when to pick it
