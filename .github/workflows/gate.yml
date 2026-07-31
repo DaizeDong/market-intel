@@ -4,7 +4,22 @@ name: gate
 # the editor is never its own verifier). Set this as a REQUIRED status check in branch protection
 # to make a red gate block merge. Auto-merge stays OFF until Stage A's root fix + cross-model audit
 # land (see EVOLUTION.md preconditions).
+#
+# WHY THERE IS A push TRIGGER. Until 2026-07-31 this fired only on pull_request and
+# workflow_dispatch. A pull request gets opened here for exactly one thing, the scheduled
+# source-matrix refresh, so measured on 2026-07-31: main had advanced 88 times along its first
+# parent, 82 of those were direct pushes and 6 were merges, and only 3 of the 6 came through a
+# GitHub PR. The gate had therefore run on 3 of 88 advances. Every tooling change, every guard
+# change and every doc change went in ungated, which is to say the gate was covering the one path
+# that was already the most careful and none of the ones that were not.
+#
+# A required status check, which the header below still recommends, would not have closed that
+# either: a required check gates a MERGE, and 82 of those 88 advances never merged anything, they
+# were pushed. The trigger has to match how the repo is really used, and it is really used by
+# pushing to main.
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -23,11 +38,39 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Resolve the diff baseline
+        id: baseline
+        run: |
+          # COVER, CHURN and PRICE and CONST are DIFF checks. On a pull_request the baseline is main,
+          # which is a different commit, so they compare something. On a push to main, main IS the
+          # commit under test: --base main would resolve to HEAD, every diff would come back empty,
+          # and those four checks would report green while having examined nothing. That is a
+          # disarmed gate wearing a passing badge, which is the exact failure this repo keeps
+          # relearning, so the baseline is chosen per event instead of assumed.
+          #
+          # github.event.before is the previous tip of main, and it is PROBED, never trusted: it is
+          # all zeroes on a branch's first push, and after a force push it can name a commit that no
+          # longer exists in this clone. Each fallback is narrower than the last, and the chosen ref
+          # is echoed so a run can never leave you guessing what it compared against.
+          if [ "${{ github.event_name }}" = "push" ]; then
+            cand="${{ github.event.before }}"
+            if [ -n "$cand" ] && git cat-file -e "$cand^{commit}" 2>/dev/null; then
+              base="$cand"
+            elif git rev-parse -q --verify "HEAD~1^{commit}" >/dev/null; then
+              base="$(git rev-parse HEAD~1)"
+            else
+              base=HEAD
+            fi
+          else
+            base=main
+          fi
+          echo "ref=$base" >> "$GITHUB_OUTPUT"
+          echo "event=${{ github.event_name }} baseline=$base"
       - name: Run anti-regression gate
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # public repo: gh api repos/* needs only read
           PYTHONIOENCODING: utf-8
-        run: python tools/verify_matrix.py --base main | tee gate-output.log
+        run: python tools/verify_matrix.py --base "${{ steps.baseline.outputs.ref }}" | tee gate-output.log
       - name: Upload gate log
         if: always()
         uses: actions/upload-artifact@v4

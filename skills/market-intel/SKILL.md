@@ -47,7 +47,7 @@ one-line-per-domain index, ~12 lines). Match the topic to 1 to N of the **real**
 read the full domain shards yet.** If the topic maps to zero commercial domains, delegate per the
 section above.
 
-**Skip meta-domains during triage.** `sources-index.md` lists "Meta-domains" (currently:
+**Skip meta-domains during triage.** `reference/sources-index.md` lists "Meta-domains" (currently:
 `mcp-ecosystem`), these are infrastructure shards consumed by the refresh sweep's Discovery phase
 only. NEVER route a user research query to them. If a topic's only match is a meta-domain, the
 topic is not in market-intel's scope (route to plain web search instead).
@@ -104,7 +104,7 @@ of three buckets:
 | bucket | query-side signal (this moment) | what the run does with it |
 |---|---|---|
 | **available-now** | `claude mcp list` shows `✓ Connected`, **or** keyless/no-auth (GDELT, CoinGecko, SEC EDGAR), **or** a local lib already installed, **or** companion `registry.json` marks it `installed:true` + a matching `mcp_server_name` is Connected | fan out to it at the chosen SCALE (Step 4) |
-| **configurable-with-setup** | not connected now, but a free/cheap activation path exists, companion repo has the tool but it's not applied, or `activation-recipes.md` lists a free-key/free-tier/install-no-key recipe for its slug | **do NOT call it this turn** (a fresh MCP only connects after `/mcp` restart). Surface a JIT, theme-tied config suggestion in the report (Step 4 + Coverage-gaps) |
+| **configurable-with-setup** | not connected now, but a free/cheap activation path exists, companion repo has the tool but it's not applied, or `reference/activation-recipes.md` lists a free-key/free-tier/install-no-key recipe for its slug | **do NOT call it this turn** (a fresh MCP only connects after `/mcp` restart). Surface a JIT, theme-tied config suggestion in the report (Step 4 + Coverage-gaps) |
 | **hard-gap** | only a paid/enterprise tier unlocks it, or it's tombstoned (`D-404`/`D-PRICE`/`D-TOS`/dead repo per the shard / companion `deprecation_code`) | note as an explicit gap; suggest only if the theme genuinely needs the paid depth, flagged as paid |
 
 This is **warn-level guidance, never a fail-closed gate** (Side A/B/C): the classifier informs
@@ -243,8 +243,8 @@ For every relevant tool that Step 2b put in `configurable-with-setup` (or a them
 `hard-gap`), **do not silently skip it**. Configuration is recommended *at task-time, driven by the
 theme*, not pre-done. For each, emit a one-line, **theme-specific** suggestion that names the
 concrete thing the missing tool would deepen, the cost class, and the exact activation path. Read
-the tool's recipe in `reference/activation-recipes.md` (and its `tools/<slug>.md` only if you need
-tier/gotcha detail) to fill the path. Template:
+the tool's recipe in `reference/activation-recipes.md` (and its `reference/tools/<slug>.md` only if
+you need tier/gotcha detail) to fill the path. Template:
 
 **The wording is owned by [`reference/report-template.md`](./reference/report-template.md)** ("configure
 for deeper data"), so it is not restated here: copy it from there. It names the tool, its cost tier,
@@ -255,7 +255,7 @@ directions.
 Examples: an X-sentiment theme with `x-twitter` dark → "configure twikit (install-no-key) to add
 real X founder/crypto discourse"; a macro-backdrop theme without FRED → "configure FRED MCP
 (free-key) for the rates/CPI series this thesis leans on." These lines feed straight into the
-report's **Coverage-gaps → Configure for deeper data** block (Output / `report-template.md`), so
+report's **Coverage-gaps → Configure for deeper data** block (Output / `reference/report-template.md`), so
 the gate's output is a concrete, theme-tied next step the user can act on, never a buried omission.
 
 ## Quality guardrails (HARD rules, apply during synthesis)
@@ -323,9 +323,8 @@ the research history is not.
   "user_correction": null }   // set when the user manually corrected an entry — highest-weight truth
 ```
 
-If you can't write the file (e.g. the repo isn't checked out), note the observations in your reply
-so they aren't lost. The refresh then reads these to prioritise which domains/sources to re-verify
-first (a source flagged `dead` in real use gets auto-nominated for the C4 deletion path next sweep).
+The refresh then reads these to prioritise which domains/sources to re-verify first (a source
+flagged `dead` in real use gets auto-nominated for the C4 deletion path next sweep).
 
 ## Progressive loading rules
 
