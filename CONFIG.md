@@ -23,6 +23,25 @@ If none resolves, the skill **degrades to matrix-only mode and keeps working**, 
 repo is always optional, never a hard crash. (The bundled `scripts/` also accept
 `$MARKET_INTEL_CONFIG_DIR` as a convenience alias for path 1.)
 
+### Config and data are two different directories
+
+`tools/datadir.py` resolves real-run **output** to `~/.market-intel-config/data/`, which is the
+same dotfile path as discovery fallback 2. Those two roles must not land in one directory: the
+companion config is a **git repo** (the setup walkthrough has you `git init` it), so letting the
+data home sit inside it puts real-run output inside a git worktree, which is exactly the leak
+class the data boundary exists to stop. `.gitignore` does not settle it, it is advisory and
+`git add -f` walks straight through.
+
+Keep them apart, in either direction:
+
+* put the companion repo somewhere else and pin it with `$MARKET_INTEL_CONFIG` (leaving the
+  dotfile path free to be the plain, non-repo data home), or
+* leave the companion repo at the dotfile path and move the data home with
+  `$MARKET_INTEL_DATA_DIR`.
+
+`fleet_check`'s `databoundary` row fails for as long as the resolved data dir is inside any git
+worktree, so it will tell you if these ever collapse back together.
+
 ## Schema, `registry.json` (E1)
 
 Machine-readable index at the companion-repo root. Full field reference: spec §3. Top-level shape:
