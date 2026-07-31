@@ -140,21 +140,17 @@ Never block on install. Prefer HTTP-transport sources on Windows (no local Node/
 #### Secret-handling hygiene, HARD rules (learned the hard way; real runs leaked keys 3×)
 Configuring the tool yourself is fine and often expected, but a key must **never leak into the
 transcript** (it may sync to the user's cloud backup). Follow exactly:
-- **NEVER `browser_snapshot` a page that displays a key.** Provider dashboards and post-rotation
-  pages render the API key in **plaintext in the DOM** → the snapshot captures it. (Confirmed on
-  twitterapi.io rotation page AND Bright Data's API-keys table.) Instead: have the user click the
-  page's **copy button**, then read the OS clipboard (`powershell Get-Clipboard`) and pipe it;
-  verify by **length only**, never print the value.
-- **For secret-bearing MCPs, do NOT use `claude mcp add`**, it **echoes the `--header`/URL (with
-  the key) to stdout**. Edit `~/.claude.json` directly: a tiny python script reads the clipboard and
-  writes `mcpServers.<name>.headers.Authorization` (or the token-in-URL), with no echo.
-- **Mask tokens when verifying**: token-in-URL servers print the token in `claude mcp list` → pipe
-  through `sed -E 's/token=[^ &]*/token=***/'`.
-- **Rotation cooldowns**: if a key leaks, rotate it, but check the provider's cooldown (e.g.
-  twitterapi.io = once/24h). A truly transcript-clean key = the **user** rotates from their own
-  browser, not the agent.
-- Keys land plaintext in `~/.claude.json`, never commit/screenshot it. **The skill holds the
-  procedure, not the key.**
+Four prohibitions, absolute. **The procedure that satisfies them lives in
+[`reference/install-guide.md`](./reference/install-guide.md); read it before touching a key.**
+- **NEVER `browser_snapshot` a page that displays a key**, provider dashboards render it plaintext
+  in the DOM and the snapshot captures it.
+- **NEVER `claude mcp add` for a secret-bearing MCP**, it echoes the header/URL to stdout.
+- **NEVER print or verify a key by value**, length only; mask token-in-URL output before showing it.
+- **NEVER rotate on the user's behalf** as a cleanup, a transcript-clean key is one the user rotated
+  from their own browser.
+
+Keys land plaintext in `~/.claude.json`, never commit or screenshot it. **The skill holds the
+procedure, not the key.**
 
 #### Where the user's keys + install state live: the COMPANION CONFIG REPO
 
@@ -250,9 +246,11 @@ concrete thing the missing tool would deepen, the cost class, and the exact acti
 the tool's recipe in `reference/activation-recipes.md` (and its `tools/<slug>.md` only if you need
 tier/gotcha detail) to fill the path. Template:
 
-> "To deepen **<this theme aspect>**, configure **<tool>** (<free-key | free-tier | install-no-key
-> | paid $X>), `python tools/console.py connect <slug>` (canonical, resolves by slug), or see
-> `reference/activation-recipes.md` for the key source; then `/mcp` reconnect (won't help this turn)."
+**The wording is owned by [`reference/report-template.md`](./reference/report-template.md)** ("configure
+for deeper data"), so it is not restated here: copy it from there. It names the tool, its cost tier,
+the `console.py connect <slug>` command, where the key comes from, and that a reconnect will not help
+the current turn. One canonical copy, because a line that appears in three files drifts in three
+directions.
 
 Examples: an X-sentiment theme with `x-twitter` dark → "configure twikit (install-no-key) to add
 real X founder/crypto discourse"; a macro-backdrop theme without FRED → "configure FRED MCP
