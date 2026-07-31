@@ -110,6 +110,45 @@ decision that follows.
 
 ---
 
+## P7, Load budget is a design constraint · 加载预算是设计约束
+
+**SKILL.md is paid for on every single invocation. Reference docs are paid for only when read.**
+That asymmetry is why progressive loading exists, and it dictates where a sentence belongs:
+
+- **SKILL.md carries the RULE and its test.** Imperative, checkable, short enough to be read to the end.
+- **References carry the procedure, the rationale, and the war-story.**
+- **The same sentence never appears in both.** A rule with its evidence pasted underneath is two
+  copies that will drift, and the copy a future reader trusts is whichever one they opened.
+
+**The failure mode feels like diligence at the time**: you learn something expensive, you write the
+rule, and you paste the justification beside it so nobody weakens it later. Measured here, the
+secret-handling procedure existed in full in both SKILL.md and `install-guide.md`, and one
+"configure for deeper data" template line lived in **three** files at once.
+
+**Two questions settle every placement:**
+1. Delete the reference. Is SKILL.md still *correct and actionable*? If no, too much was moved out.
+2. Delete the SKILL.md paragraph. Is the rule still *enforceable*? If yes, it was rationale and
+   belongs in the reference.
+
+**Corollary: fewer files is not the goal.** A directory of small, densely specific docs is healthy
+when each is loaded only by the run that needs it. **Count what a run loads, not what the repo
+contains.**
+
+**The tell:** a fleet-wide audit found one shape recurring, the **war-story / gotcha compendium**,
+and each announced itself in its own opening line ("the rules above already encode the fix, this
+section explains why"). **A section that describes itself as explaining where the rules above came
+from is, by definition, a reference.** Move it, leave an ID index, lose nothing enforceable.
+
+**The inverse tell:** a small skill whose every run needs every line is *correctly* monolithic.
+Rationale STAYS always-loaded when it states the invariant whose violation is the exact bug the skill
+exists to fix, or when it is a troubleshooting branch of the main flow rather than an appendix. **Do
+not refactor for tidiness; measure, and be willing to conclude "this one is already right".**
+
+**Mechanism, per P2:** `tools/load_budget.py` measures always-loaded lines and the cross-file prose
+overlap (word shingles, code/tables/links excluded so structured repetition is not punished) and
+BLOCKs over threshold. Its known limit: it compares SKILL.md against references, so
+reference-to-reference duplication is invisible to it and stays a human judgement.
+
 ## P5 hard limit · 接缝硬边界(2026-06-17 added against drift)
 
 P5 守护"委托深度,守住接缝",但 v0.17-v0.21 这一连串往 `tools/` 加了 ~2000 行刷新基础设施
