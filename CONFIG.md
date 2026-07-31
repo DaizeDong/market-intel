@@ -23,24 +23,45 @@ If none resolves, the skill **degrades to matrix-only mode and keeps working**, 
 repo is always optional, never a hard crash. (The bundled `scripts/` also accept
 `$MARKET_INTEL_CONFIG_DIR` as a convenience alias for path 1.)
 
-### Config and data are two different directories
+### Where real-run output goes: the private companion repo, versioned
 
-`tools/datadir.py` resolves real-run **output** to `~/.market-intel-config/data/`, which is the
-same dotfile path as discovery fallback 2. Those two roles must not land in one directory: the
-companion config is a **git repo** (the setup walkthrough has you `git init` it), so letting the
-data home sit inside it puts real-run output inside a git worktree, which is exactly the leak
-class the data boundary exists to stop. `.gitignore` does not settle it, it is advisory and
-`git add -f` walks straight through.
+`tools/datadir.py` resolves real-run **output** to `data/` inside your companion config repo. It
+follows the same pointer this page already describes:
 
-Keep them apart, in either direction:
+1. `$MARKET_INTEL_DATA_DIR`, an explicit override.
+2. `$MARKET_INTEL_CONFIG` (or `$MARKET_INTEL_CONFIG_DIR`), the companion repo: `data/` under it
+   when that exists, the repo root otherwise.
+3. `~/.market-intel-config/data/`, the companion repo at its default dotfile path.
+4. `~/.market-intel-data/`, standalone.
+5. None, meaning the tool is **uninitialized**, which is the correct state for a fresh clone.
 
-* put the companion repo somewhere else and pin it with `$MARKET_INTEL_CONFIG` (leaving the
-  dotfile path free to be the plain, non-repo data home), or
-* leave the companion repo at the dotfile path and move the data home with
-  `$MARKET_INTEL_DATA_DIR`.
+Print it rather than retyping it:
 
-`fleet_check`'s `databoundary` row fails for as long as the resolved data dir is inside any git
-worktree, so it will tell you if these ever collapse back together.
+```bash
+python tools/datadir.py --path market-intel metrics/live-runs.jsonl
+```
+
+**This is a deliberate policy, decided 2026-07-31. Do not "fix" it back.** The rule the data
+boundary enforces is *real-run output must never reach a **public** repo, and a public repo never
+has an in-repo fallback*. It was never *data must not be in git*. Those are different predicates,
+and the second one condemns the correct answer: a **private** repo is exactly where a person's real
+data legitimately lives, and it is the only place it gets history, diffs and a backup. The
+alternative, a loose directory in `$HOME`, leaves the one artifact that records your real research
+runs as the one artifact with no version control at all.
+
+This is also the fleet shape, not a market-intel special case: `daily-hotspots` keeps its
+opportunity ledger tracked in its own private companion repo the same way.
+
+An earlier revision of this section said the opposite, and it cost something real: a check written
+to the git-vs-not-git predicate failed this skill for keeping its ledger where the doctrine says it
+belongs, and the ledger was moved out to an unversioned directory to satisfy it.
+
+`fleet_check`'s `databoundary` row now asserts the predicate that matches the harm: it **FAILS** if
+the resolved data dir is inside a repo whose remote is **PUBLIC**, and fails closed if the
+visibility cannot be established at all. Inside a **PRIVATE** repo it **PASSES**, and the row names
+the repo, so you can tell "the control looked at this and approved it" from "the control skipped
+it". Real-run output is still physically absent from **this** repo; the public repo ships only
+`skills/market-intel/metrics/live-runs.jsonl.example`.
 
 ## Schema, `registry.json` (E1)
 
