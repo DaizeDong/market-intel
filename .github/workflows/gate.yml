@@ -67,10 +67,24 @@ jobs:
           echo "ref=$base" >> "$GITHUB_OUTPUT"
           echo "event=${{ github.event_name }} baseline=$base"
       - name: Run anti-regression gate
+        # WHY `shell: bash` + an explicit `set -o pipefail`. This step used to be a bare
+        # `run: python tools/verify_matrix.py ... | tee gate-output.log`. The default shell for a
+        # `run:` block on a Linux runner is `bash -e {0}`: -e is on, pipefail is NOT. In a pipeline
+        # bash reports the status of the LAST command, which here is tee, and tee always succeeds.
+        # So verify_matrix.py could print "RESULT: BLOCK (N blocking issue(s))" and sys.exit(1), and
+        # the step, the job and the whole workflow still concluded success. Measured on run
+        # 30631478562 (head_sha 94b6344, main): conclusion success, three BLOCK lines in the log.
+        # That is the worst failure mode a gate has, because a gate that cannot go red is worse than
+        # no gate at all: it manufactures evidence that nothing is wrong.
+        # `shell: bash` alone would already give `-eo pipefail`, the inline `set -o pipefail` is
+        # kept so the invariant survives someone editing the shell key back out.
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # public repo: gh api repos/* needs only read
           PYTHONIOENCODING: utf-8
-        run: python tools/verify_matrix.py --base "${{ steps.baseline.outputs.ref }}" | tee gate-output.log
+        run: |
+          set -o pipefail
+          python tools/verify_matrix.py --base "${{ steps.baseline.outputs.ref }}" | tee gate-output.log
       - name: Upload gate log
         if: always()
         uses: actions/upload-artifact@v4
