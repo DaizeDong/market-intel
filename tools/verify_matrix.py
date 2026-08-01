@@ -13,7 +13,9 @@ Checks (the real failure modes of an unattended LLM refresh):
   REPO     every github.com/<owner>/<repo> in shards/pricing/tool-docs exists (gh api, fail-closed)
   GHACTIVE every github repo is alive (not archived) and pushed_at within 12mo (P4 deterministic gate
            against LLM-only "freshness" judgments; 404/archived = BLOCK, stale = WARN, RL = bypass)
-  STAR     where a repo and an (NNk★) annotation co-occur on a line, the count is within tolerance
+  STAR     every star count in the corpus that can be attributed to a repo is within tolerance of
+           the live API value; the run PRINTS what fraction of star-carrying rows it attributed, and
+           WARNs with the rows it could not (see star_claims: the old shape-matcher saw 20%)
   FRESH    every `last_verified:`/`Last verified:` is real + non-future (shards, pricing, AND tool docs)
   STALE    (WARN) a tool doc not re-verified in >9 months is nominated for re-check (anti-rot)
   DOCCOVER (WARN) a github repo in a LIVE (non-tombstone) shard row with no per-tool doc (anti-lost-tracking)
@@ -68,9 +70,86 @@ def git_show(ref, relpath):
 REPO_RE = re.compile(r"github\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)")
 # canonical bare owner/name slug (registry `repo` field for kind=repo tools)
 SLUG_FMT = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
-# repo token must be IMMEDIATELY before the (NNk★) annotation (only **/spaces between) ,
-# prevents pairing a star with a prose token or an adjacent repo on the same line.
+# STAR_LINE_RE is the STRICT shape: a slug immediately followed by a bare `(NNk★)`. It is used for
+# ONE job only, seeding repo_set for the 404-hard-BLOCK existence gate, where a false positive costs
+# a bogus BLOCK. The STAR TOLERANCE check does NOT use it, see star_claims() below for why.
 STAR_LINE_RE = re.compile(r"([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)\*{0,2}\s*\((\d+(?:\.\d+)?)k★\)")
+
+# ---- STAR claim extraction (the shape survey, not a guess) --------------------------------------
+# STAR_LINE_RE above requires the annotation to be exactly `(NNk★)` and to close IMMEDIATELY after
+# the glyph. Enumerating every line in the corpus that carries a star count showed that shape is a
+# MINORITY of the corpus: 57 of 282 rows, 20.2%. The gate was verifying a fifth of its own subject
+# and reporting on all of it, and among the four fifths it could not see were rows more than 25%
+# off. Refreshing the three rows it could see and calling it armed is the exact false confidence
+# this gate exists to prevent.
+#
+# The shapes the corpus actually uses (all of these were invisible):
+#   `(1236★)`                        no `k` suffix at all, the single largest class
+#   `(WordPress/mcp-adapter, 1236★ official)`   comma and/or trailing words inside the parens
+#   `(contentful/contentful-mcp-server 58★)`    slug and count share one paren group, no comma
+#   `**directus/mcp** (79★ official)`           bold, plus words after the count
+#   `` `omkarcloud/amazon-scraper (0.2k★, gh-api 2026-06)` ``  backticked, count followed by a date
+#   `github.com/steel-dev/steel-browser, 7.1k★, self-host`     anchored by a URL, no parens at all
+#   `jaipandya/**producthunt-mcp-server** 46★`  emphasis INSIDE the slug
+#   `(0.2k★, ...)`; active (220★, ...)`         a second count for the same repo later in the line
+#
+# So the matcher stops pattern-matching a fixed annotation and instead does what a reader does:
+# find every numeric star claim, then attribute it to the nearest repo named before it, refusing to
+# attribute across a boundary that means the subject changed.
+STAR_CLAIM_RE = re.compile(r"(?<![\w.])(\d+(?:\.\d+)?)\s*([kK])?\s*★")
+STAR_ANCHOR_RE = re.compile(r"(?:github\.com/)?([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)")
+STAR_WINDOW = 60         # chars between the repo and its count; beyond this the subject has moved on
+
+
+def star_claims(line):
+    """[(repo|None, claimed_stars, unpaired_reason|None)] for every star claim on `line`.
+
+    Attribution rules, each one paying for a specific misattribution seen in the corpus:
+      * markdown emphasis is blanked (not deleted) so `jaipandya/**producthunt-mcp-server**` is one
+        token while every offset below stays comparable to the raw line;
+      * the anchor is the nearest repo-shaped token BEFORE the count, `github.com/` prefix optional;
+      * a `|`, `·` or `;` between them un-pairs it: those separate table cells, list items and
+        clauses, i.e. a different subject. `(697★) | ... (717★ at last gh-api check)` must not pair
+        the historical second reading to the row's repo, and `replaces ComposioHQ/awesome-claude-
+        skills** (less-maintained); 40k★` must not pair the ROW's own 40k to the repo it replaced
+        (that one was caught by this gate misfiring on it before `;` was added);
+      * more than STAR_WINDOW chars between them un-pairs it: `(79★ official) | ① | official MCP for
+        Directus (SQL-backed headless CMS, 36k★)` claims 36k for DIRECTUS CORE, a repo the line never
+        names, and pairing it to directus/mcp would BLOCK on a true statement;
+      * a count may chain off the PREVIOUS COUNT for the same repo, which is how
+        `(0.2k★, gh-api 2026-06)`; active (220★, pushed ...)` gets both numbers checked.
+
+    What it deliberately does NOT do is invent an anchor. A claim with no repo named near it
+    ("Free MIT, 2.6k★, actively pushed") is returned UNPAIRED with a reason, and the caller reports
+    the count of those. Attributing them to the enclosing document's subject would be a guess, and
+    the corpus contains counterexamples that prove the guess wrong: tools/directus-mcp.md says "the
+    weight is the Directus core platform (36k★)" and claude-marketing-research-skill.md compares
+    itself to "the 8k to 32k★ bundles". A gate that BLOCKS on a guess is worse than one that says
+    out loud what it could not see.
+    """
+    n = re.sub(r"[*`]", " ", line)
+    anchors = [(m.end(1), m.group(1).rstrip("./,);:")) for m in STAR_ANCHOR_RE.finditer(n)]
+    out, last_claim = [], None
+    for c in STAR_CLAIM_RE.finditer(n):
+        claimed = float(c.group(1)) * (1000 if c.group(2) else 1)
+        prev = [a for a in anchors if a[0] <= c.start()]
+        cand = prev[-1] if prev else None
+        if last_claim and (cand is None or last_claim[0] > cand[0]):
+            cand = last_claim                       # chain: same repo, second count on the line
+        if cand is None:
+            out.append((None, claimed, "no repo named earlier on the line"))
+            continue
+        pos, repo = cand
+        win = n[pos:c.start()]
+        if any(ch in win for ch in "|·;"):
+            out.append((None, claimed, "separated from %s by a cell/clause boundary" % repo))
+        elif len(win) > STAR_WINDOW:
+            out.append((None, claimed, "nearest repo %s is %d chars away (>%d)"
+                        % (repo, len(win), STAR_WINDOW)))
+        else:
+            out.append((repo, claimed, None))
+            last_claim = (c.end(), repo)
+    return out
 
 def count_table_rows(text):
     """Count markdown source-table rows (lines starting with '|' that aren't header/sep)."""
@@ -96,6 +175,10 @@ if orphan: warn("STRUCT", f"shards not in index: {sorted(orphan)}")
 # Every tool listed in tools/index.md must have a doc file, and vice versa. Deterministic, like
 # STRUCT. Missing doc = BLOCK (the index promised a how-to that isn't there); orphan doc = WARN.
 tool_docs_text = {}
+# Bound unconditionally: the STAR scan below reads it, and it used to be assigned only inside the
+# isdir branch, so a repo with no reference/tools/ would have raised NameError there instead of
+# running the gate.
+tools_idx = ""
 if os.path.isdir(TOOLS_DIR):
     if not os.path.exists(TOOLS_INDEX):
         block("TOOLS", "reference/tools/ exists but index.md is missing")
@@ -150,6 +233,42 @@ for txt in shard_text.values():
                and not o[:1].isdigit():          # skip "10-K/Q"-style prose
                 warn_slugs.add(tok)
 
+# ---- extract every star claim in the corpus (text only, no network yet) ----
+# Done HERE, before the fetch, because a starred repo that is named nowhere as a github.com URL
+# (dozens of shard rows are bare slugs) still has to be fetched for its count to be checkable.
+#
+# WHAT IS IN SCOPE, and why tools/index.md had to be added by name. `tool_docs_text` is built by
+# excluding index.md (it is the catalog, not a tool doc), so for its whole life the STAR gate could
+# not see it. It carries a live star claim about a current top pick, which is exactly the kind of
+# claim this gate exists to hold to the API. A file being excluded from one check's input set is not
+# a reason for it to be excluded from every check's.
+#
+# WHAT IS DELIBERATELY OUT OF SCOPE: volatile/discovery-state.md, 93 rows of star counts, the single
+# largest concentration in the repo. It is an append-only DATED ledger whose rows are written as
+# `1569★ (was 1514★ 2026-06, +55, slow)` -- a measurement taken on a stated date, plus the previous
+# measurement kept on purpose to show the trend. Holding a dated historical reading to today's API
+# value would BLOCK on rows that are true, and "fixing" them would destroy the growth signal the
+# file exists to record. Its own header already binds it to C1 (real gh-api values at the noted
+# date). Scope is decided by whether a claim asserts a CURRENT value, not by where the glyph is.
+STAR_SCAN = ([("domains/%s.md" % d, t) for d, t in sorted(shard_text.items())]
+             + ([("volatile/pricing-install.md", read(PRICING))] if os.path.exists(PRICING) else [])
+             + ([("tools/index.md", tools_idx)] if tools_idx else [])
+             + [("tools/%s.md" % s, t) for s, t in sorted(tool_docs_text.items())])
+star_pairs, star_unpaired, star_rows = [], [], 0
+for _fname, _txt in STAR_SCAN:
+    for _lno, _ln in enumerate(_txt.splitlines(), 1):
+        if "★" not in _ln:
+            continue
+        _claims = star_claims(_ln)
+        if not _claims:
+            continue
+        star_rows += 1
+        for _repo, _claimed, _why in _claims:
+            if _why is None:
+                star_pairs.append((_fname, _lno, _repo, _claimed))
+            else:
+                star_unpaired.append((_fname, _lno, _claimed, _why))
+
 # ---- combined parallel GitHub fetch (feeds REPO + STAR + GHACTIVE) ----
 # WHY: REPO and GHACTIVE each hit `gh api repos/<r>` SEPARATELY (2 calls/repo), and the
 # per-repo network round-trip dominated wall-clock (109 repos ~= 70s serial). Fetch once
@@ -185,7 +304,12 @@ def _fetch_repo_api(r):
 repo_api = {}
 if not NO_NET:
     import concurrent.futures as _cf
-    _to_fetch = sorted(set(repos) | set(warn_slugs))
+    # Star anchors join the fetch set. They are NOT added to repo_set: repo_set drives the 404
+    # hard-BLOCK, and the widened matcher can legitimately anchor on a prose token that merely looks
+    # like a slug ("umbrella/TS repo"). Such a token 404s, and the STAR check below treats a 404
+    # anchor as unverifiable rather than as a lie, so a loose anchor costs one wasted API call and
+    # never a false BLOCK. Existence remains REPO's job, on REPO's stricter input.
+    _to_fetch = sorted(set(repos) | set(warn_slugs) | {p[2] for p in star_pairs})
     _workers = max(1, min(8, len(_to_fetch)))
     if _workers <= 1:
         for _r in _to_fetch:
@@ -217,19 +341,60 @@ else:
         if a and not a["ok"] and a["err"] == "404":
             warn("REPO?", f"{r} not found on GitHub — if it's a repo it may be hallucinated/mistyped; "
                           f"if prose/npm-scope, ignore (mirror block will disambiguate)")
-    # STAR tolerance on lines pairing a repo with an (NNk★)
-    for txt in list(shard_text.values()) + list(tool_docs_text.values()) + ([read(PRICING)] if os.path.exists(PRICING) else []):
-        for ln in txt.splitlines():
-            m = STAR_LINE_RE.search(ln)
-            if not m:
-                continue
-            repo, claimed_k = m.group(1), float(m.group(2))
-            real = repo_stars.get(repo)
-            if real is None:
-                continue
-            claimed = claimed_k * 1000
-            if real == 0 or abs(claimed - real) / real > STAR_TOL:
-                block("STAR", f"{repo}: claims {claimed_k}k★ but API says {real} (>{int(STAR_TOL*100)}% off)")
+    # ---- STAR tolerance, over every claim star_claims() could attribute to a repo ----
+    # Fail-closed on a transient error, mirroring REPO: an anchor we could not resolve is an
+    # unanswered question, not a pass. A 404 anchor is the one exception and is COUNTED, not
+    # silently dropped: it is either prose the matcher over-read (harmless) or a hallucinated repo,
+    # and the second is REPO/REPO?'s job on its own stricter input.
+    star_unresolved, star_checked_rows, _star_said = [], set(), set()
+    for fname, lno, repo, claimed in star_pairs:
+        a = repo_api.get(repo)
+        if a is None:
+            block("STAR", f"{fname}:{lno} {repo}: star anchor was never fetched (internal error)")
+            continue
+        if not a["ok"]:
+            if a["err"] == "404":
+                star_unresolved.append(f"{fname}:{lno} {repo} (404)")
+            else:
+                block("STAR", f"{fname}:{lno} {repo}: could not verify {claimed:g}★ "
+                              f"(fail-closed): {a['stderr'].strip()[:60]}")
+            continue
+        real = a["stars"]
+        if real is None:
+            block("STAR", f"{fname}:{lno} {repo}: API returned no star count")
+            continue
+        star_checked_rows.add((fname, lno))
+        # `real == 0` is a DIVISION GUARD, not a verdict. Written as part of the tolerance test it
+        # meant "a repo with no stars always BLOCKs", so five rows that honestly said 0★ about a
+        # repo the API also reports at 0★ were reported as a mismatch, printing the self-refuting
+        # "claims 0★ but API says 0". Zero is a fact like any other: it matches iff the claim is 0.
+        off = (claimed != 0) if real == 0 else (abs(claimed - real) / real > STAR_TOL)
+        msg = (f"{fname}:{lno} {repo}: claims {claimed:g}★ but API says {real} "
+               f"(>{int(STAR_TOL*100)}% off)")
+        if off and msg not in _star_said:     # one line can carry the same claim twice
+            _star_said.add(msg)
+            block("STAR", msg)
+    if star_unresolved:
+        warn("STAR?", f"{len(star_unresolved)} star claim(s) anchored on a token GitHub does not "
+                      f"know; unverifiable (prose the matcher over-read, or a dead repo — REPO/REPO? "
+                      f"owns existence): {', '.join(star_unresolved[:6])}"
+                      f"{' …' if len(star_unresolved) > 6 else ''}")
+    # DECLARE THE BLIND SPOT. A star claim with no repo named near it cannot be attributed without
+    # guessing, so it is not checked -- but silence about that is what let 80% of the corpus go
+    # unverified behind a green gate. The coverage line prints on every run, pass or fail.
+    # Report the VERIFIED fraction, not the attributed one. An anchor the API does not know was
+    # attributed but never compared to anything, and counting it as covered would re-tell the exact
+    # lie this whole change exists to end: a percentage that flatters the gate.
+    print(f"STAR coverage: {len(star_checked_rows)}/{star_rows} rows carrying a star claim were "
+          f"attributed to a repo and CHECKED against the live API "
+          f"({100.0 * len(star_checked_rows) / max(1, star_rows):.1f}%); "
+          f"{len(star_pairs)} claim(s) attributed, {len(star_unpaired)} unattributable, "
+          f"{len(star_unresolved)} attributed-but-unresolvable")
+    if star_unpaired:
+        _u = ", ".join(f"{f}:{l}({c:g}★)" for f, l, c, _w in star_unpaired[:8])
+        warn("STAR-BLIND", f"{len(star_unpaired)} star claim(s) name no repo close enough to "
+                           f"attribute, so they are NOT verified. Name the repo on the line to "
+                           f"bring one into the gate: {_u}{' …' if len(star_unpaired) > 8 else ''}")
 
 # ---- GHACTIVE (P4 deterministic activity gate) ----
 # WHY: LLM-judgment lenses (existence, freshness, top_pick_impact) confidently passed a candidate
@@ -501,8 +666,14 @@ for d in fs_domains:
         if not cells:
             return ""
         name = re.sub(r"[*`]", "", cells[0])
-        name = re.sub(r"\(\d+(?:\.\d+)?k★\)", "", name)
-        return name.strip().lower()
+        # Strip the star count in EVERY shape, via the same regex the STAR gate matches with. It
+        # used to strip only the literal `(NNk★)`, the same narrow assumption STAR itself made, so
+        # the moment STAR started catching a stale `(133★)` and the fix landed, DELETE saw the row's
+        # identity change and blocked the very edit STAR demanded. Two gates disagreeing about what
+        # a star annotation looks like is how a repo ends up unable to satisfy both.
+        name = STAR_CLAIM_RE.sub("", name)
+        name = re.sub(r"\(\s*[,;]?\s*\)", "", name)
+        return re.sub(r"\s{2,}", " ", name).strip().lower()
     def _is_src_row(line):
         s = line.lstrip("+-").strip()
         return s.startswith("|") and "---" not in s and not re.search(r"\|\s*(source|repo|tool|name)\s*\|", s, re.I)

@@ -3,8 +3,8 @@
 - **Domain(s):** reddit-community (also: none)
 - **Barrier route:** ④ self-host (keyless public RSS) · **Source tier:** L4 · **Ready MCP:** no, ships as a **Claude Code plugin** (self-host), not a hosted MCP; runs locally
 - **Cost:** free, no API key, no Reddit account; reads public RSS feeds, stores to local SQLite [https://github.com/dancolta/subscope, fetched 2026-06]
-- **Repo / Provider:** github.com/dancolta/subscope, `dancolta/subscope (0.0k★, gh-api 2026-06 — 10 stars, thin adoption)`; not archived, MIT, pushed 2026-06 (active but very early)
-- **Top pick for its domain:** no, a niche, post-GummySearch buyer-intent tool, thin adoption (10★)
+- **Repo / Provider:** github.com/dancolta/subscope, `dancolta/subscope (21★, gh-api 2026-08-01, thin adoption)`; not archived, MIT, pushed 2026-07-22 (active but very early)
+- **Top pick for its domain:** no, a niche, post-GummySearch buyer-intent tool, thin adoption (21★)
 
 ## What it does / when to pick it
 A free Claude Code plugin that surfaces **buyer-intent Reddit threads** with **no API key and no Reddit account**: it reads public RSS feeds, scores each post against 8 buying-signal patterns, and returns a ranked buyer-signal + authority-play list right in chat, persisting to local SQLite. **Decision rule:** pick it specifically for **lead-gen / buyer-intent monitoring**, "which Reddit threads right now show someone ready to buy / asking for a tool like ours", i.e. as an open-source **GummySearch / Syften / F5Bot alternative** (relevant because GummySearch shuts down 2026-11, per the shard "Watch"). It is **not** a general Reddit reader: for broad browse/search/post-details use **reddit-mcp-buddy**, and for *finding which subreddits* to monitor use **reddit-research-mcp**. Choose subscope only when the job is recurring buyer-signal scoring, and you want zero creds and local storage.
@@ -19,7 +19,7 @@ Self-host Claude Code plugin (Python), installed via the **plugin marketplace** 
 As a plugin, you invoke it in chat to monitor a set of subreddits/feeds and get back a **ranked buyer-signal list** (posts scored by the 8 buying-intent patterns) plus suggested "authority-play" responses. Minimal: point it at the subreddit RSS feeds for your niche → run the scoring → review the top-ranked buyer-intent threads. Results land in local SQLite so you can re-query / dedupe across runs. List the exact plugin commands from its README after install, don't assume signatures from memory.
 
 ## General experience & gotchas (踩坑)
-- **Very thin adoption (10★, pushed 2026-06).** It's early and lightly used, treat it as experimental: pin the commit you tested, and re-verify behavior before depending on it for a client deliverable.
+- **Very thin adoption (21★, pushed 2026-07).** It's early and lightly used, treat it as experimental: pin the commit you tested, and re-verify behavior before depending on it for a client deliverable.
 - **RSS-only = limited window and no deep history.** Public RSS returns a shallow slice of recent posts per feed, not the full-API backfill GummySearch had, it's a *monitoring* tool (catch new buyer signals), not a historical-research tool.
 - **The 8 buying-signal patterns are heuristics, not ground truth**, they'll surface false positives ("looking for recommendations" that never converts). Read the actual thread before treating a high score as a lead (CONSTITUTION C1, verify, don't trust the score).
 - **No Reddit account = no rate-limit creds**, but RSS endpoints can still throttle if you poll many feeds aggressively, space out polling.

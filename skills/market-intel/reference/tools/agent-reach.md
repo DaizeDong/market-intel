@@ -3,7 +3,7 @@
 - **Domain(s):** x-twitter (also cross-domain: reddit-community, web-scraping, frontier-research, reads GitHub/YouTube/Bilibili/小红书)
 - **Barrier route:** ④/③ · **Source tier:** L2 · **Ready MCP:** **yes**, ships an MCP server *and* a `SKILL.md`, plus a CLI. Cookie-local, self-healing "首选 + 备选" adapters per platform.
 - **Cost:** free, open-source, **zero API fees** (optional ~$1/mo proxy for scale) [github.com/Panniantong/Agent-Reach, gh-api fetched 2026-07-01]
-- **Repo / Provider:** `Panniantong/Agent-Reach (47.5k★, gh-api 2026-07-01)`, not archived, pushed 2026-06-29, ~3.8k forks; Trendshift-ranked, CN-origin (surfaced via the CN discovery pass, an EN-only sweep would have missed it).
+- **Repo / Provider:** `Panniantong/Agent-Reach (63.8k★, gh-api 2026-08-01)`, not archived, pushed 2026-07-25, ~3.8k forks; Trendshift-ranked, CN-origin (surfaced via the CN discovery pass, an EN-only sweep would have missed it).
 - **Top pick for its domain:** no, **READ-ONLY**, so it does *not* replace twikit's write/DM path. It is a strong free ④ read layer that collapses per-platform scraper wiring into one router.
 
 ## What it does / when to pick it
@@ -23,7 +23,7 @@ CLI (illustrative): `agent-reach search twitter "AI agents" --limit 20` / `agent
 - **Read-only:** no post/comment/DM, pair with twikit (X write), Postiz/Buffer (multi-platform publish) if you need to *act*, not just observe.
 - **Cookie-dependent for walled platforms:** X and 小红书 reads need valid session cookies; expect the usual login-wall friction + ban risk if over-used on a main account.
 - **Self-healing ≠ unbreakable:** the multi-backend fallback buys resilience when one read path dies, but a platform-wide anti-bot change can still take a platform offline until an adapter update.
-- **CN-origin, GitHub-native:** heavy real adoption (47.5k★, 3.8k forks) but little English HN/Reddit discussion, evaluate on the repo's own activity, not Western community chatter.
+- **CN-origin, GitHub-native:** heavy real adoption (63.8k★, 3.8k forks) but little English HN/Reddit discussion, evaluate on the repo's own activity, not Western community chatter.
 
 ## Failure signals & fallback
 Failure looks like empty reads, login-wall redirects, or an adapter erroring on one platform. **Fallback:** (1) refresh the platform cookies; (2) for X, drop to **twscrape**/**twikit** (③) or **twitterapi.io** (②); (3) for Reddit, **reddit-mcp-buddy** (①); (4) for hard anti-bot pages, **Bright Data**/**Scrapling**. Treat Agent-Reach as the convenient first read pass, with the per-domain incumbents as the reliable fallback.

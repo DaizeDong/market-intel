@@ -10,7 +10,7 @@ want to assemble MCPs from scratch, 现成的营销/调研 skill.
 |---|---|---|---|
 | **coreyhaines31/marketingskills** (32.6k★) | skill bundle | ~40 skills: customer-research, competitor-profiling, programmatic-seo, directory-submissions, copy, ads, email | `npx skills add coreyhaines31/marketingskills` |
 | **ericosiu/ai-marketing-skills** (2.6k★) | skill bundle | finance-ops / sales-pipeline / revenue-intel / outbound / lead-dossier, fills the "business-ops scarce" gap | `git clone` + pip + cp (NOT npx) |
-| **indranilbanerjee/digital-marketing-pro** (133★) | skill bundle | AEO/GEO answer-engine optimization (ChatGPT/Perplexity/Google AI Mode) | GitHub |
+| **indranilbanerjee/digital-marketing-pro** (674★) | skill bundle | AEO/GEO answer-engine optimization (ChatGPT/Perplexity/Google AI Mode) | GitHub |
 | **Anthropic official Marketing plugin** | official plugin | /competitive-brief, /seo-audit, /campaign-plan; connects HubSpot/Ahrefs/Klaviyo | claude.com/plugins/marketing |
 | **AgricIDaniel/claude-seo** (11.5k★) | plugin | strongest SEO, 25 sub-skills + 18 agents, offline | `/plugin marketplace add AgricIDaniel/claude-seo` |
 | **ishwarjha/claude-marketing-research-skill** | packaged skill | 6-stage market research workflow (competitor→product→persona→positioning) | GitHub |
