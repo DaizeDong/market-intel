@@ -14,7 +14,7 @@ LinkedIn free but approval wall (legal entity + vetting).
 | **Publora** (MCP-native) | ① core | MCP-native social publishing API across X/LinkedIn/TikTok/YouTube/Instagram + others | connected + key | **replaces Blotato**, confirmed via G2/ProductHunt/mcp.so/official GitHub org. 50-80% cost cut at the MCP-native tier (per Discovery; re-verify before quoting) |
 | Typefully API v2 | ① | text/thread first (X/LI/BS/Masto/Threads) | key | Free $0 (1 post) / Starter $8 / Creator $19 / Team $39; API needs a paid plan |
 | **Postiz** (OSS, built-in MCP) | ③ self-host | 30+ platforms, agentic-first, no token storage | self-host URL | free OSS; v2.12+ needs Temporal |
-| **gitroomhq/postiz-agent** (278★) | ③ | official Postiz agent front-end (`npx skills add`) for 28+ platforms | self-host | lowers agent-vs-API friction over Postiz (373★ at last gh-api check, 2026-07-22) |
+| **gitroomhq/postiz-agent** (388★) | ③ | official Postiz agent front-end (`npx skills add`) for 28+ platforms | self-host | lowers agent-vs-API friction over Postiz (388★ at last gh-api check, 2026-08-01) |
 | **langchain-ai/social-media-agent** (2.6k★) | ③ | source/curate/schedule agent w/ human-in-loop | self-host + key | content-pipeline tier above the post APIs; pairs w/ Buffer/Postiz |
 | Mixpost (OSS) | ③ self-host | 11 platforms, REST+n8n, buy-once | self-host | Lite free / Pro $269 one-time |
 | X single: EnesCinr/twitter-mcp, OpenTweet | ①/② | post+search / hosted no-dev-portal | connected | X API cost自负 / OpenTweet $11.99/mo |
