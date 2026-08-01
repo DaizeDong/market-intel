@@ -3,7 +3,7 @@
 - **Domain(s):** ecommerce-arbitrage (also: none)
 - **Barrier route:** ① official · **Source tier:** L1 · **Ready MCP:** yes, `cosjef/Keepa_MCP` or `BWB03/keepa-adapter` (.mcpb one-click)
 - **Cost:** ~€49/mo @ 20 tokens/min start, scales with token burn [https://keepa.com (api), price unverified 2026-06, site 403s bots; confirm at keepa.com/#!api]
-- **Repo / Provider:** github.com/cosjef/Keepa_MCP, `cosjef/Keepa_MCP (28★, gh-api 2026-06, MIT, pushed 2026-02)`; alt `BWB03/keepa-adapter (11★, gh-api 2026-06, MIT, pushed 2026-05)`. Data provider: keepa.com (paid key)
+- **Repo / Provider:** github.com/cosjef/Keepa_MCP, `cosjef/Keepa_MCP (30★, gh-api 2026-08-01, MIT, pushed 2026-02)`; alt `BWB03/keepa-adapter (15★, gh-api 2026-08-01, MIT, pushed 2026-06)`. Data provider: keepa.com (paid key)
 - **Top pick for its domain:** yes
 
 ## What it does / when to pick it

@@ -24,11 +24,11 @@
 - HN: `uvx mcp-hn` (free, no key) or `npx -y @smithery/cli install mcp-hn --client claude`.
 - Reddit (**top pick**): karanb192/reddit-mcp-buddy (702★): `npx -y reddit-mcp-buddy` (free; anon tier
   no creds, app-id 60/min, login 100/min). Replaces stale GridfireAI/reddit-mcp.
-- king-of-the-grackles/reddit-research-mcp (120★): hosted OAuth MCP, no creds (semantic subreddit discovery).
+- king-of-the-grackles/reddit-research-mcp (224★): hosted OAuth MCP, no creds (semantic subreddit discovery).
 - Reddit (D-SUPERSEDED fallback): GridfireAI/reddit-mcp, `uvx reddit-mcp`; create app at
   reddit.com/prefs/apps for REDDIT_CLIENT_ID/SECRET (free). Superseded by reddit-mcp-buddy; minimal fallback only.
 - Stack Exchange: midodimori-stack-overflow-mcp (free; SE key raises 300→10k/day).
-- dancolta/subscope (10★): self-host, keyless public-RSS buyer-intent.
+- dancolta/subscope (21★): self-host, keyless public-RSS buyer-intent.
 
 ## web-scraping `last_verified: 2026-06`
 - Firecrawl: `npx -y firecrawl-mcp` (key from firecrawl.dev; free 1,000 credits/mo, cheapest paid
@@ -99,7 +99,7 @@
 - Typefully: Free $0 (1 scheduled post) / Starter $8 / Creator $19 / Team $39 (API needs a paid plan).
 - Postiz (OSS, free): self-host → Settings → Public API → copy MCP URL. v2.12+ needs Temporal.
 - X single: `npx -y @enescinar/twitter-mcp` (needs X dev creds, API cost自负). OpenTweet $11.99/mo (hosted).
-- gitroomhq/postiz-agent (278★): `npx skills add` (official Postiz agent, self-host).
+- gitroomhq/postiz-agent (388★): `npx skills add` (official Postiz agent, self-host).
 - langchain-ai/social-media-agent (2.6k★): clone + keys (content pipeline).
 
 ## content-cms `last_verified: 2026-06`
@@ -184,7 +184,7 @@ Platform-specific OSS repos (free; most violate platform ToS, throwaway accounts
 
 ## ready-skills `last_verified: 2026-06`
 - ericosiu/ai-marketing-skills (2.6k★): `git clone` + pip + cp (NOT npx), marketing skill pack.
-- indranilbanerjee/digital-marketing-pro (133★): GitHub clone (AEO/GEO skills).
+- indranilbanerjee/digital-marketing-pro (674★): GitHub clone (AEO/GEO skills).
 
 ## Discovery registries (find more)
 smithery.ai (one-click) · glama.ai (largest) · mcp.so · pulsemcp.com (curated + traffic) ·

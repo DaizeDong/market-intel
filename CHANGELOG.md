@@ -1,5 +1,65 @@
 # Changelog
 
+## Unreleased
+
+### STAR gate: widen the matcher to the shapes the corpus actually uses (it was seeing 20%)
+
+The STAR tolerance check only fired on `slug (NNk★)`, an annotation closing immediately after the
+glyph. Enumerating every star-carrying line in the reference corpus showed that shape is a minority:
+**57 of 278 rows, 20.5%**. The gate was verifying a fifth of its subject and reporting on all of it.
+
+The shapes it could not see, all present in the corpus: a bare integer with no `k` (`(1236★)`, the
+largest single class); words or a comma inside the parens (`(79★ official)`, `(0.2k★, gh-api
+2026-06)`); slug and count sharing one paren group (`(contentful/contentful-mcp-server 58★)`);
+markdown emphasis inside the slug; no parens at all (`github.com/steel-dev/steel-browser, 7.1k★`);
+and a second count for the same repo later in the line.
+
+`star_claims()` now finds every numeric star claim and attributes it to the nearest repo named
+before it, refusing to attribute across a `|`, `·` or `;` (a different table cell, list item or
+clause) or across more than 60 characters. Claims it cannot attribute are reported as **STAR-BLIND**
+rather than guessed at, and the run prints its own coverage on every invocation, pass or fail.
+
+**Coverage: 20.5% -> 79.9%** of rows carrying a star claim are now attributed AND compared against
+the live API. The remaining 20% is reported out loud, not silently skipped.
+
+Running the widened matcher against the pre-change docs found **18 out-of-tolerance claims across 14
+rows, none of which the old matcher could see.** All were refreshed from live `gh api`, not memory:
+
+| row | claimed | live |
+|---|---|---|
+| ready-skills.md:13, pricing-install.md:187, digital-marketing-pro.md:6 | 133★ | 674 |
+| reddit-community.md:11, pricing-install.md:27, reddit-research-mcp.md:6 | 120★ / 100★ | 224 |
+| reddit-community.md:12, pricing-install.md:31, subscope.md:6 | 10★ / 0★ | 21 |
+| social-publishing.md:17, pricing-install.md:102, postiz-agent.md:6, :13 | 278★ | 388 |
+| agent-reach.md:6 | 47.5k★ | 63864 |
+| botasaurus.md:6 | 3.6k★ | 5618 |
+| claude-marketing-research-skill.md:6 | 25★ | 43 |
+| keepa.md:6 | 11★ | 15 |
+| pipepost.md:6 | 2★ | 4 |
+
+The tolerance was NOT raised; every row was corrected to the live value.
+
+Two further gaps closed while widening:
+- **`tools/index.md` was in no scan at all.** `tool_docs_text` excludes it (it is the catalog, not a
+  tool doc), so the file carrying a live star claim about a current top pick was outside the gate.
+  It is now scanned by name. `volatile/discovery-state.md` stays deliberately out: its 93 star rows
+  are a dated append-only ledger (`1569★ (was 1514★ 2026-06)`) whose whole purpose is the historical
+  trend, and holding a dated reading to today's API would block on true statements.
+- **A latent `NameError`.** `tools_idx` was bound only inside the `os.path.isdir(TOOLS_DIR)` branch
+  while the new scan reads it unconditionally, so a repo without `reference/tools/` would have
+  crashed instead of running the gate. Reproduced on a fixture, then fixed and re-verified.
+- The DELETE identity helper stripped only the literal `(NNk★)`. Once STAR started catching the
+  other shapes, a corrected row looked to DELETE like a renamed row, so the two gates would have
+  disagreed and blocked the very edit STAR demanded. It now strips via the same regex STAR matches.
+
+### CI: PHILOSOPHY P7 is now actually enforced (`load-budget.yml`)
+
+`tools/load_budget.py` was vendored here and into 17 other repos and wired into **nothing**: no
+workflow, no hook, no schedule. An inert gate sitting beside the ones that do run is worse than no
+gate, because it reads as coverage. It now runs on every push and PR. Exit 3 (measured nothing) and
+exit 1 (over budget) both fail the job, verified by running the exact workflow command against
+repos in each state.
+
 ## [0.29.0], 2026-07-22
 
 Scheduled monthly refresh, July trigger month so this is a FULL 13-domain sweep + quarterly Horizon

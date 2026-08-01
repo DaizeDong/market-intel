@@ -3,7 +3,7 @@
 - **Domain(s):** reddit-community (also: none)
 - **Barrier route:** ① official (free Reddit API, hosted) · **Source tier:** L2 · **Ready MCP:** yes, hosted OAuth MCP, **no creds to manage** (the host holds Reddit auth)
 - **Cost:** free, hosted, no key; rides Reddit's official API via the provider [https://github.com/king-of-the-grackles/reddit-research-mcp, fetched 2026-06]
-- **Repo / Provider:** github.com/king-of-the-grackles/reddit-research-mcp, `king-of-the-grackles/reddit-research-mcp (0.1k★ / 120 stars, gh-api 2026-06)`; not archived, MIT, pushed 2026-04 (active). MCP endpoint is `https://reddit-research-mcp.fastmcp.app/mcp` (FastMCP-hosted); `app.dialog.tools` is a separate web UI built on the same server, **not** the MCP endpoint, confirm the current URL at `reference/volatile/pricing-install.md → reddit-community`
+- **Repo / Provider:** github.com/king-of-the-grackles/reddit-research-mcp, `king-of-the-grackles/reddit-research-mcp (0.2k★ / 224 stars, gh-api 2026-08-01)`; not archived, MIT, pushed 2026-07-24 (active). MCP endpoint is `https://reddit-research-mcp.fastmcp.app/mcp` (FastMCP-hosted); `app.dialog.tools` is a separate web UI built on the same server, **not** the MCP endpoint, confirm the current URL at `reference/volatile/pricing-install.md → reddit-community`
 - **Top pick for its domain:** no, it's the **discovery complement** to the reddit-mcp-buddy default, not the default itself
 
 ## What it does / when to pick it

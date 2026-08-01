@@ -3,7 +3,7 @@
 - **Domain(s):** browser-automation (also: web-scraping, ecommerce-arbitrage)
 - **Barrier route:** ④ · **Source tier:** L2 · **Ready MCP:** no, it's a Python library, drive from your own script.
 - **Cost:** free, MIT [github.com/omkarcloud/botasaurus, fetched 2026-06]
-- **Repo / Provider:** `omkarcloud/botasaurus (3.6k★, gh-api 2026-06)`. MIT, active.
+- **Repo / Provider:** `omkarcloud/botasaurus (5.6k★, gh-api 2026-08-01)`. MIT, active.
 - **Top pick for its domain:** no, playwright MCP is the default ④ route; botasaurus is the **library-of-record** for omkarcloud's catalog of single-target scrapers (amazon-scraper, google-maps-scraper, etc.). Reach for it when you're cloning one of those repos or writing a quick anti-detection scraper without spinning up a full playwright wrapper.
 
 ## What it does / when to pick it
