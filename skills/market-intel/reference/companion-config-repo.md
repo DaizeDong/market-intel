@@ -278,8 +278,8 @@ exchange for the simpler workflow. Mitigations:
 
 The same companion-repo pattern fits any market-intel-style "matrix" skill:
 
-- `shopping-aggregator` users can stand up a `<skill>-config` companion repo for
-  their Keepa subscription, Camelcamelcamel email, Apify token, etc.
+- A price-tracking skill can stand up a matching `<skill>-config` companion repo for its
+  subscription keys, alert-destination addresses, vendor tokens, and so on.
 - Future matrix-shaped skills (e.g. an academic-research-tools matrix) would follow the same
   split.
 
