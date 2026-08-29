@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+### Register skillsmp, the source whose absence produced a confident false negative
+
+`ready-skills` catalogued twelve hand-curated awesome-lists and not the one aggregator that indexes
+SKILL.md files across GitHub as a whole. The cost of that gap is measurable rather than theoretical.
+On 2026-08-29 an eleven agent survey swept five configured registries, both Anthropic repositories,
+six aggregator sites, GitHub repository and code search, and eighteen papers, and concluded that no
+skill existed for the question it was asked. One pass over skillsmp with the same question returned
+nine relevant skills, three of them direct hits. **The survey was thorough everywhere it looked, and
+its headline was wrong because of where it did not look.**
+
+Added as `skillsmp` (saas, ready-skills, top pick), with `reference/tools/skillsmp.md` carrying the
+behaviours that make it usable and the ones that silently mislead: `pagination.total` is a sentinel
+equal to rows returned plus one and must never be reported as a match count; the default sort ranks
+by the star count of the containing repository, so every skill in one monorepo scores identically
+and taking the top three is close to random; deduplication has to be on repository rather than row;
+matching is stemmed over full text, so `slack` matches stack and `ticketing` matches ticking; an
+invalid category slug returns 200 with zero rows instead of an error; and errors arrive as HTTP 200
+carrying a JSON-RPC error object, so code that branches on status treats a missing skill as success.
+
+The MCP was also actually connected on this machine, which it had never been despite being
+documented. Registry count 176 to 177 (saas 68 to 69). Probed availability afterwards: 82/177.
+
+### Finding, not fixed: `activation-checklist.md` header counts are stale and cannot be safely patched
+
+The header claims 37/168 available with 50 needs-key, 34 cold-mcp and 47 needs-install. Probing gives
+82/177 with 31, 18 and 46. The counts were already wrong before this change. They are deliberately
+left alone: the sections below the header enumerate the individual entries, so correcting only the
+header would replace a stale number with a contradiction between two parts of one file. The file is
+hand maintained and has no generator, which is the actual defect. Deriving it from
+`tools/console.py`, which already probes every state, would retire the whole class.
+
+
 ### STAR gate: widen the matcher to the shapes the corpus actually uses (it was seeing 20%)
 
 The STAR tolerance check only fired on `slug (NNk★)`, an annotation closing immediately after the

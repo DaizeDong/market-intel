@@ -1,9 +1,9 @@
 {
  "note": "Authoritative machine-readable tool registry. Every market-intel tool (repo + SaaS + lib) appears here exactly once. The gate (REGISTRY check) enforces registry <-> tools/index.md <-> tools/*.md three-way consistency, so NO tool — including non-GitHub SaaS — can lose its doc or fall out of tracking. Adding/removing a tool is an atomic op across shard + index + doc + this registry (refresh-protocol R1). Regenerate via the snippet in CHANGELOG 0.10.2.",
- "count": 176,
+ "count": 177,
  "by_kind": {
   "repo": 104,
-  "saas": 68,
+  "saas": 69,
   "lib": 4
  },
  "tools": [
@@ -1294,6 +1294,14 @@
    "repo": "gtmagents/gtm-agents",
    "domain": "ready-skills",
    "top_pick": false
+  },
+  {
+   "slug": "skillsmp",
+   "name": "skillsmp.com (skill aggregator)",
+   "kind": "saas",
+   "repo": null,
+   "domain": "ready-skills",
+   "top_pick": true
   },
   {
    "slug": "instantly-mcp",
