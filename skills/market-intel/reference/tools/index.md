@@ -193,6 +193,7 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 - [botasaurus](botasaurus.md), ④ · anti-detection Python scraping framework (omkarcloud scrapers' base)
 
 ## ready-skills
+- ★ [skillsmp.com](skillsmp.md),, · indexes SKILL.md across GitHub as a whole, the first stop before writing one (hosted MCP, no key)
 - ★ [coreyhaines31/marketingskills](marketingskills.md),, · ~40 install-and-go marketing skills
 - [Anthropic Marketing plugin](anthropic-marketing-plugin.md),, · /competitive-brief, /seo-audit
 - ★ [AgricIDaniel/claude-seo](claude-seo.md),, · strongest SEO plugin, 25 sub-skills
