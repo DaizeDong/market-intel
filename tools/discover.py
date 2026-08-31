@@ -51,9 +51,41 @@ except Exception:
 
 # ─── paths ────────────────────────────────────────────────────────────────────
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DEFAULT_OUT = os.path.join(
-    ROOT, "skills", "market-intel", "reference", "discovery-state.md"
-)
+def _companion_root():
+    """Where this skill's private companion is, via tools/datadir.py. None when there is none."""
+    p = os.path.join(ROOT, "tools", "datadir.py")
+    if not os.path.isfile(p):
+        return None
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("_dd_for_discover", p)
+    if spec is None or spec.loader is None:
+        return None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    fn = getattr(mod, "resolve_companion_root", None)
+    return str(fn("market-intel")) if fn and fn("market-intel") else None
+
+
+def _default_out():
+    """Where a discovery sweep writes its state. The companion, not this repo.
+
+    This defaulted to skills/market-intel/reference/discovery-state.md: a TRACKED file, inside the
+    public repo, with no gitignore entry and no class declared for it in .dataclass.json. Every
+    sweep appended what the operator was researching, on the public side of the boundary, and the
+    only reason it never tripped the guard is that check 4 recognises shapes and this one wears the
+    shape of a document.
+
+    Falls back to the repo path ONLY when no companion resolves, and that fallback is exactly what
+    check 4 is there to catch, so an uninitialized machine produces a violation rather than a quiet
+    write. Better to be caught than to be silent.
+    """
+    root = _companion_root()
+    if root:
+        return os.path.join(root, "data", "discovery-state.md")
+    return os.path.join(ROOT, "skills", "market-intel", "reference", "discovery-state.md")
+
+
+DEFAULT_OUT = _default_out()
 
 # ─── config: what to track ────────────────────────────────────────────────────
 # E2: GitHub topics scanned for "new + already stary" repos.
