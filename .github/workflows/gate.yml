@@ -33,6 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          submodules: true
           fetch-depth: 0          # COVER/CHURN/CONST need to diff against base main
       - run: git fetch origin main:main || true
       - uses: actions/setup-python@v5
