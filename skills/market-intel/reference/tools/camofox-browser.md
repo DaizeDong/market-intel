@@ -3,7 +3,7 @@
 - **Domain(s):** browser-automation (also: none)
 - **Barrier route:** ④ · **Source tier:** L2 · **Ready MCP:** no (REST API + plugin; drive over HTTP, no MCP wrapper)
 - **Cost:** free (MIT, self-host), an optional key only gates cookie-import, not core use [github.com/jo-inc/camofox-browser, fetched 2026-06]
-- **Repo / Provider:** github.com/jo-inc/camofox-browser, `jo-inc/camofox-browser (6.5k★, gh-api 2026-06)`; license MIT, active (pushed 2026-06)
+- **Repo / Provider:** github.com/jo-inc/camofox-browser, `jo-inc/camofox-browser (9.1k★, gh-api 2026-06)`; license MIT, active (pushed 2026-06)
 - **Top pick for its domain:** no (an anti-fingerprint escalation, reached for only when plain playwright is blocked)
 
 ## What it does / when to pick it

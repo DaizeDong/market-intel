@@ -5,7 +5,7 @@ headless CMS, 发博客/内容发布.
 
 | source | route | capability | detect | auth |
 |---|---|---|---|---|
-| **WordPress MCP** (WordPress/mcp-adapter, 1236★ official) | ① | post CRUD + publish, media, categories via Abilities API | connected | App Password; **D-SUPERSEDED** old gaupoit (0★) / archived Automattic/wordpress-mcp |
+| **WordPress MCP** (WordPress/mcp-adapter, 1663★ official) | ① | post CRUD + publish, media, categories via Abilities API | connected | App Password; **D-SUPERSEDED** old gaupoit (0★) / archived Automattic/wordpress-mcp |
 | **Ghost MCP** (MFYDev/ghost-mcp, 199★) | ① | ~45 tools incl members/newsletter/tiers | connected | Admin API Key; old @ryukimin/ghost-mcp **D-404** (community repo, not official Ghost org) |
 | **Sanity hosted MCP** (mcp.sanity.io) | ① | 40+ tools, schema-aware, rules auto-update | connected (OAuth) | best headless experience, GA |
 | Contentful MCP (contentful/contentful-mcp-server 58★) | ① | create/edit/publish, multi-locale | connected | CMA token; free 100k API calls/mo |

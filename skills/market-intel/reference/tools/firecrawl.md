@@ -3,7 +3,7 @@
 - **Domain(s):** web-scraping (also: none)
 - **Barrier route:** ② resale API · **Source tier:** L2 · **Ready MCP:** yes, `npx -y firecrawl-mcp` + ready skill `firecrawl`
 - **Cost:** free **1,000 credits/mo** (firecrawl.dev, refreshed 2026-06, was "500 one-time"), cheapest paid Hobby ~$16/mo; confirm current tiers at https://www.firecrawl.dev/pricing [fetched 2026-06]
-- **Repo / Provider:** github.com/firecrawl/firecrawl, `firecrawl/firecrawl (130.4k★, gh-api 2026-06)`; active (pushed 2026-06-09, not archived, AGPL-3.0, verified gh-api 2026-06-09)
+- **Repo / Provider:** github.com/firecrawl/firecrawl, `firecrawl/firecrawl (176.4k★, gh-api 2026-06)`; active (pushed 2026-06-09, not archived, AGPL-3.0, verified gh-api 2026-06-09)
 - **Top pick for its domain:** yes (the default JS-render SCRAPE/crawl pick)
 
 ## What it does / when to pick it

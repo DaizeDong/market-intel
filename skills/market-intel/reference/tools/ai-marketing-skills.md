@@ -3,7 +3,7 @@
 - **Domain(s):** ready-skills (also: none, skill bundle, not an MCP)
 - **Barrier route:**, (no data barrier; it's prompt/skill scaffolding) · **Source tier:** L2 · **Ready MCP:** no, installs as Claude *skills* via `git clone` + `pip` + `cp` (**NOT** `npx skills add`)
 - **Cost:** free (MIT) [github.com/ericosiu/ai-marketing-skills, gh-api 2026-06]
-- **Repo / Provider:** github.com/ericosiu/ai-marketing-skills, `ericosiu/ai-marketing-skills (2.6k★, gh-api 2026-06)`; active (pushed 2026-06-07, not archived, MIT)
+- **Repo / Provider:** github.com/ericosiu/ai-marketing-skills, `ericosiu/ai-marketing-skills (3.5k★, gh-api 2026-06)`; active (pushed 2026-06-07, not archived, MIT)
 - **Top pick for its domain:** no (specialist that fills the business-ops gap, not the default marketing reach)
 
 ## What it does / when to pick it

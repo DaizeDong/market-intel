@@ -3,7 +3,7 @@
 - **Domain(s):** trends-discovery (also: none)
 - **Barrier route:** ① official (free, no auth, self-host) · **Source tier:** L2 · **Ready MCP:** yes, self-host MCP server, no key
 - **Cost:** free, no key, no quota, unlimited (you pay only your own hosting) [https://github.com/claude-world/trend-pulse, fetched 2026-06]
-- **Repo / Provider:** github.com/claude-world/trend-pulse, `claude-world/trend-pulse (41★, gh-api 2026-06)` (MIT; not archived; last push 2026-04-13)
+- **Repo / Provider:** github.com/claude-world/trend-pulse, `claude-world/trend-pulse (58★, gh-api 2026-06)` (MIT; not archived; last push 2026-04-13)
 - **Top pick for its domain:** no, GDELT/Trends MCP/Product Hunt lead; trend-pulse is the free-unlimited aggregator alternative
 
 ## What it does / when to pick it

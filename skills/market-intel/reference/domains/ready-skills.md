@@ -8,16 +8,16 @@ want to assemble MCPs from scratch, 现成的营销/调研 skill.
 
 | resource | type | use | get |
 |---|---|---|---|
-| **coreyhaines31/marketingskills** (32.6k★) | skill bundle | ~40 skills: customer-research, competitor-profiling, programmatic-seo, directory-submissions, copy, ads, email | `npx skills add coreyhaines31/marketingskills` |
-| **ericosiu/ai-marketing-skills** (2.6k★) | skill bundle | finance-ops / sales-pipeline / revenue-intel / outbound / lead-dossier, fills the "business-ops scarce" gap | `git clone` + pip + cp (NOT npx) |
+| **coreyhaines31/marketingskills** (46.9k★) | skill bundle | ~40 skills: customer-research, competitor-profiling, programmatic-seo, directory-submissions, copy, ads, email | `npx skills add coreyhaines31/marketingskills` |
+| **ericosiu/ai-marketing-skills** (3.5k★) | skill bundle | finance-ops / sales-pipeline / revenue-intel / outbound / lead-dossier, fills the "business-ops scarce" gap | `git clone` + pip + cp (NOT npx) |
 | **indranilbanerjee/digital-marketing-pro** (674★) | skill bundle | AEO/GEO answer-engine optimization (ChatGPT/Perplexity/Google AI Mode) | GitHub |
 | **Anthropic official Marketing plugin** | official plugin | /competitive-brief, /seo-audit, /campaign-plan; connects HubSpot/Ahrefs/Klaviyo | claude.com/plugins/marketing |
-| **AgricIDaniel/claude-seo** (11.5k★) | plugin | strongest SEO, 25 sub-skills + 18 agents, offline | `/plugin marketplace add AgricIDaniel/claude-seo` |
+| **AgricIDaniel/claude-seo** (16.3k★) | plugin | strongest SEO, 25 sub-skills + 18 agents, offline | `/plugin marketplace add AgricIDaniel/claude-seo` |
 | **ishwarjha/claude-marketing-research-skill** | packaged skill | 6-stage market research workflow (competitor→product→persona→positioning) | GitHub |
 | alirezarezvani/claude-skills (23.5k★) | mega bundle | 338 skills incl market-research, c-level, finance | `/plugin marketplace add alirezarezvani/claude-skills` |
 | **sickn33/antigravity-awesome-skills** (40k★, active 2026-06) | catalog | broader multi-platform installable awesome-skills catalog | GitHub | **replaces ComposioHQ/awesome-claude-skills** (less-maintained); 40k★, last push 1d ago |
-| **Imbad0202/academic-research-skills** (32.2k★) | skill bundle | full academic-research pipeline: planning → lit review → methodology → drafting → peer review (v3.12.1 on 2026-06-15) | `/plugin marketplace add Imbad0202/academic-research-skills` |
-| **gtmagents/gtm-agents** (279★) | agents bundle | GTM agents: 67 plugins / 92 agents / 52 skills (sales pipeline, lead gen, cold-email personalization), Apache-2.0 | GitHub |
+| **Imbad0202/academic-research-skills** (46.3k★) | skill bundle | full academic-research pipeline: planning → lit review → methodology → drafting → peer review (v3.12.1 on 2026-06-15) | `/plugin marketplace add Imbad0202/academic-research-skills` |
+| **gtmagents/gtm-agents** (397★) | agents bundle | GTM agents: 67 plugins / 92 agents / 52 skills (sales pipeline, lead gen, cold-email personalization), Apache-2.0 | GitHub |
 | **Eronred/aso-skills** (1.5k★) | skill bundle | 40+ App Store Optimization skills (keyword/metadata/competitor/paywall/preview-video), backed by appeeky.com data | GitHub |
 | **DaizeDong/shopping-aggregator** ★ | packaged skill | **consumer shopping price comparison** (Amazon / eBay / Walmart / Target / Taobao / JD + Keepa / Camelcamelcamel / 慢慢买 + Capital One Shopping / Karma / 购物党); sister skill to market-intel | `/plugin install github:DaizeDong/shopping-aggregator` · [repo](https://github.com/DaizeDong/shopping-aggregator) |
 

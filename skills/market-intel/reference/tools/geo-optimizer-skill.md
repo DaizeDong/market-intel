@@ -3,7 +3,7 @@
 - **Domain(s):** seo-keywords
 - **Barrier route:** ④/① · **Source tier:** L2 · **Ready MCP:** **yes**, ships CLI + Python + an MCP + an Astro integration.
 - **Cost:** free, open-source (no key for the OSS toolkit; the LLM-citation checks consume whatever model access you supply) [github.com/Auriti-Labs/geo-optimizer-skill, gh-api fetched 2026-07-01]
-- **Repo / Provider:** `Auriti-Labs/geo-optimizer-skill (515★, gh-api 2026-07-01)`, not archived, pushed 2026-07-01, actively maintained.
+- **Repo / Provider:** `Auriti-Labs/geo-optimizer-skill (767★, gh-api 2026-07-01)`, not archived, pushed 2026-07-01, actively maintained.
 - **Top pick for its domain:** no, it's the **OSS pick for the new GEO/AEO angle** (folded into seo-keywords per the 2026-07 Horizon scan). Paid ② incumbents in this space: Profound, Otterly, Ahrefs Brand Radar.
 
 ## What it does / when to pick it
