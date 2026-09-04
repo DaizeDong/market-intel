@@ -3,7 +3,7 @@
 - **Domain(s):** frontier-research (also: none)
 - **Barrier route:** ① free official APIs · **Source tier:** L1 · **Ready MCP:** yes (stdio, `uvx`/clone, no key for the default arXiv/PubMed/bioRxiv/medRxiv venues)
 - **Cost:** free, no key, no quota (it just fans out to public scholarly APIs) [github.com/openags/paper-search-mcp, fetched 2026-06]
-- **Repo / Provider:** github.com/openags/paper-search-mcp, `openags/paper-search-mcp (1.8k★, gh-api 2026-06)`; active (pushed 2026-05-18, not archived, MIT)
+- **Repo / Provider:** github.com/openags/paper-search-mcp, `openags/paper-search-mcp (2.6k★, gh-api 2026-06)`; active (pushed 2026-05-18, not archived, MIT)
 - **Top pick for its domain:** no (arXiv MCP + HF Daily Papers are the default floor; reach for this when you need multi-venue / biomed coverage)
 
 ## What it does / when to pick it

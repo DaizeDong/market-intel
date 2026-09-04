@@ -33,7 +33,7 @@ too low-level or gets fingerprint-blocked.
 | **ultrafunkamsterdam/nodriver** (4.3k★) | undetected Chrome automation successor | evades bot detection |
 | **daijro/camoufox** (9.1k★) | anti-fingerprint Firefox build | strongest fingerprint spoofing |
 | **steel-dev/steel-browser** (7.1k★) | open-source browser infra for AI agents, self-host | hosted-browser alternative |
-| **jo-inc/camofox-browser** (6.5k★) | C++-level fingerprint spoofing on Camoufox base, REST API + plugin | free MIT (key only gates cookie-import) |
+| **jo-inc/camofox-browser** (9.1k★) | C++-level fingerprint spoofing on Camoufox base, REST API + plugin | free MIT (key only gates cookie-import) |
 | **Kaliiiiiiiiii-Vinyzu/patchright** (3.9k★) | undetected-Playwright patch, passes Cloudflare/DataDome/Akamai/Kasada/F5 | free Apache-2.0, keeps full Playwright API; `reference/tools/patchright.md` |
 
 **Default pick:** start with the already-connected **playwright MCP**; for AI-goal-driven extraction

@@ -3,7 +3,7 @@
 - **Domain(s):** seo-keywords (also: trends-discovery)
 - **Barrier route:** ④ (free lib, no key) · **Source tier:** L4 · **Ready MCP:** no, Python library; call from code or wrap in a thin MCP
 - **Cost:** free [github.com/sdil87/trendspy, gh-api 2026-06]
-- **Repo / Provider:** github.com/sdil87/trendspy, sdil87/trendspy (114★, gh-api 2026-06; MIT). ⚠ canonical `trendspy` PyPI repo last pushed **2024-12 (>18mo, stale)**. Actively maintained sibling: github.com/flack0x/trendspyg (31★, MIT, last push 2026-06-08).
+- **Repo / Provider:** github.com/sdil87/trendspy, sdil87/trendspy (114★, gh-api 2026-06; MIT). ⚠ canonical `trendspy` PyPI repo last pushed **2024-12 (>18mo, stale)**. Actively maintained sibling: github.com/flack0x/trendspyg (48★, MIT, last push 2026-06-08).
 - **Top pick for its domain:** no
 
 ## What it does / when to pick it

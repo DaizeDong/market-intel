@@ -16,7 +16,7 @@ conference (NeurIPS/ICLR/ICML/ACL), citations, 论文/前沿研究/学术.
 | **Semantic Scholar Graph API** (+ semantic-scholar MCP) | ① free | citations, influentialCitationCount, references/citations graph | REST or MCP | free key (raises rate limit); unauth is throttled |
 | ~~Papers with Code API~~ | ① | SOTA leaderboards | REST → **302 to huggingface.co/papers** | **D-404, Meta sunset the API 2025-07-24/25** (verified 2026-06; domain now redirects to HF Trending Papers); the SOTA-leaderboard signal is LOST, HF Papers trending = weak proxy |
 | **LMArena** (arena.ai/leaderboard) | ① free | live human-eval Elo leaderboard for LLMs via pairwise blind voting; **partial** D-404 fill for Papers-with-Code | REST + web UI, no key | rebrand: lmarena.ai → arena.ai (Jan 2026, Series A $1.7B); **chat/agent rankings only, does NOT replace paper-task SOTA** |
-| **openags/paper-search-mcp** (1.8k★) | ① free | one MCP fans out arXiv + PubMed + bioRxiv/medRxiv+ | `uvx` self-host | covers biomed venues the arXiv-only pick misses |
+| **openags/paper-search-mcp** (2.6k★) | ① free | one MCP fans out arXiv + PubMed + bioRxiv/medRxiv+ | `uvx` self-host | covers biomed venues the arXiv-only pick misses |
 | **Future-House/paper-qa** (8.7k★) | ④ | grounded deep-research over full-text PDFs w/ citations | self-host | strongest free agentic paper-QA; a layer above raw search |
 | **OpenReview API** | ① free | ICLR/NeurIPS/etc. submissions + reviews + scores | REST (api2.openreview.net) | reviewer scores = early significance signal pre-publication |
 | **GitHub trending + GitHub API/MCP** | ① free | frontier repos/releases, star velocity | github MCP connected, or REST | star velocity = adoption proxy; watch for launch-day inflation |
