@@ -6,7 +6,7 @@
 - **Domain(s):** reddit-community (also: none)
 - **Barrier route:** ④ browser / act-like-human (user session) · **Source tier:** L4 · **Ready MCP:** yes (self-host), you run it with your Discord user token
 - **Cost:** free (OSS, self-host), you supply a logged-in Discord session; no provider fee
-- **Repo / Provider:** github.com/elyxlz/discord-mcp, `elyxlz/discord-mcp (10★, gh-api 2026-06)`; not archived, pushed 2025-06 (~12mo), **no license file** (treat usage rights as unclear, another reason it's last-resort)
+- **Repo / Provider:** github.com/elyxlz/discord-mcp, `elyxlz/discord-mcp (14★, gh-api 2026-06)`; not archived, pushed 2025-06 (~12mo), **no license file** (treat usage rights as unclear, another reason it's last-resort)
 - **Top pick for its domain:** no, last-resort, ToS-violating; the shard flags it as ban-risk
 
 ## What it does / when to pick it

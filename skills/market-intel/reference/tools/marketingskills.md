@@ -3,7 +3,7 @@
 - **Domain(s):** ready-skills (also: none, this is a skill bundle, not an MCP)
 - **Barrier route:**, (no data barrier; it's prompt/skill scaffolding) · **Source tier:** L1 · **Ready MCP:** no, installs as Claude *skills* via `npx skills add`
 - **Cost:** free (MIT) [github.com/coreyhaines31/marketingskills, gh-api 2026-06]
-- **Repo / Provider:** github.com/coreyhaines31/marketingskills, `coreyhaines31/marketingskills (32.6k★, gh-api 2026-06)`; active (pushed 2026-06-05, not archived, MIT)
+- **Repo / Provider:** github.com/coreyhaines31/marketingskills, `coreyhaines31/marketingskills (46.9k★, gh-api 2026-06)`; active (pushed 2026-06-05, not archived, MIT)
 - **Top pick for its domain:** yes (the default for marketing / competitor / content)
 
 ## What it does / when to pick it

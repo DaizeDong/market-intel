@@ -3,7 +3,7 @@
 - **Domain(s):** content-cms (also: none)
 - **Barrier route:** ① · **Source tier:** L1 · **Ready MCP:** yes (official WP MCP via Abilities API)
 - **Cost:** free (self-hosted WordPress; MCP plugin is FOSS), no per-call fee
-- **Repo / Provider:** github.com/WordPress/mcp-adapter, `WordPress/mcp-adapter (1.2k★, gh-api 2026-06)` (GPL-2.0, pushed 2026-06, active)
+- **Repo / Provider:** github.com/WordPress/mcp-adapter, `WordPress/mcp-adapter (1.7k★, gh-api 2026-06)` (GPL-2.0, pushed 2026-06, active)
 - **Top pick for its domain:** yes (the CMS-backend default alongside Sanity)
 
 ## What it does / when to pick it

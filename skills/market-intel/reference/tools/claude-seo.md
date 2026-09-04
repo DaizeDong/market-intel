@@ -3,7 +3,7 @@
 - **Domain(s):** ready-skills (also: serves seo-keywords work)
 - **Barrier route:**, (skill/plugin scaffolding; runs offline, no data barrier of its own) · **Source tier:** L1 · **Ready MCP:** no, installs as a Claude *plugin* via `/plugin marketplace add`
 - **Cost:** free (MIT) [github.com/AgricIDaniel/claude-seo, gh-api 2026-06]
-- **Repo / Provider:** github.com/AgricIDaniel/claude-seo, `AgricIDaniel/claude-seo (11.5k★, gh-api 2026-07)`; active (pushed 2026-07-06, not archived, MIT)
+- **Repo / Provider:** github.com/AgricIDaniel/claude-seo, `AgricIDaniel/claude-seo (16.3k★, gh-api 2026-07)`; active (pushed 2026-07-06, not archived, MIT)
 - **Top pick for its domain:** yes (the default SEO pick in this domain)
 
 ## What it does / when to pick it

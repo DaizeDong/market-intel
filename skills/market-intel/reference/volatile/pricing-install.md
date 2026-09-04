@@ -32,7 +32,7 @@
 
 ## web-scraping `last_verified: 2026-06`
 - Firecrawl: `npx -y firecrawl-mcp` (key from firecrawl.dev; free 1,000 credits/mo, cheapest paid
-  Hobby $16/mo yearly). Repo github.com/firecrawl/firecrawl (130k★).
+  Hobby $16/mo yearly). Repo github.com/firecrawl/firecrawl (176k★).
 - Tavily: `claude mcp add --transport http tavily https://mcp.tavily.com/mcp/?tavilyApiKey=...`
   (free 1000 credits/mo).
 - Exa: remote MCP, free 1000/mo with key or 150/day no-key. Skill `exa-search` already present.
@@ -103,7 +103,7 @@
 - langchain-ai/social-media-agent (2.6k★): clone + keys (content pipeline).
 
 ## content-cms `last_verified: 2026-06`
-- WordPress: WordPress/mcp-adapter (1236★, official WP MCP via Abilities API; Application Password).
+- WordPress: WordPress/mcp-adapter (1663★, official WP MCP via Abilities API; Application Password).
   Replaces stale gaupoit/wordpress-mcp + archived Automattic/wordpress-mcp.
 - Ghost: MFYDev/ghost-mcp (199★), GHOST_URL + GHOST_ADMIN_API_KEY. Replaces dead @ryukimin/ghost-mcp (404).
 - Sanity: `sanity` CLI auto-configures, or remote `https://mcp.sanity.io` (OAuth).
@@ -129,7 +129,7 @@
   tier; forecasting gated Investor+).
 - App stores: `npm i google-play-scraper app-store-scraper` (free) or mobile-store-scraper-mcp (self-host).
 - Finnhub MCP: cfdude/mcp-finnhub (free 60/min key).
-- claude-world/trend-pulse (41★): self-host, free no-key (20-source aggregator + lifecycle).
+- claude-world/trend-pulse (58★): self-host, free no-key (20-source aggregator + lifecycle).
 - jmanek/google-news-trends-mcp (81★): self-host, free no-key (Google News RSS + Trends).
 
 ## frontier-research `last_verified: 2026-06`
@@ -148,7 +148,7 @@ Most sources are free / no-key (arXiv, HF read, OpenReview).
   DeepMind, Meta AI, Mistral, Qwen, DeepSeek; AINews (smol.ai), The Batch, Import AI.
 - alphaXiv (browser) · arxiv-sanity-lite (`karpathy/arxiv-sanity-lite`, self-host free) ·
   Connected Papers / ResearchRabbit (browser, no official API → playwright MCP).
-- openags/paper-search-mcp (1.8k★): `uvx`/clone (arXiv+PubMed+bioRxiv multi-venue).
+- openags/paper-search-mcp (2.6k★): `uvx`/clone (arXiv+PubMed+bioRxiv multi-venue).
 - Future-House/paper-qa (8.7k★): `pip install paper-qa` (grounded full-text PDF research).
 - Deep synthesis → delegate to the `research-lit` skill (don't re-implement lit-review here).
 
@@ -164,7 +164,7 @@ General frameworks (all free, self-host):
   token-efficient browser agent)
 Anti-detection: nodriver (`pip install nodriver`, 4.3k★) · camoufox (`pip install camoufox`, 9.1k★) ·
 steel-browser (github.com/steel-dev/steel-browser, 7.1k★, self-host) ·
-camofox-browser (github.com/jo-inc/camofox-browser, 6.5k★, free MIT, fingerprint spoofing on Camoufox).
+camofox-browser (github.com/jo-inc/camofox-browser, 9.1k★, free MIT, fingerprint spoofing on Camoufox).
 playwright MCP already connected, verify with `claude mcp list`.
 
 Platform-specific OSS repos (free; most violate platform ToS, throwaway accounts for write/scrape):
@@ -183,7 +183,7 @@ Platform-specific OSS repos (free; most violate platform ToS, throwaway accounts
 - Dead/avoid: tomquirk/linkedin-api (404), pytrends (archived), snscrape (停更), elizaOS/agent-twitter-client (下架)
 
 ## ready-skills `last_verified: 2026-06`
-- ericosiu/ai-marketing-skills (2.6k★): `git clone` + pip + cp (NOT npx), marketing skill pack.
+- ericosiu/ai-marketing-skills (3.5k★): `git clone` + pip + cp (NOT npx), marketing skill pack.
 - indranilbanerjee/digital-marketing-pro (674★): GitHub clone (AEO/GEO skills).
 
 ## Discovery registries (find more)
