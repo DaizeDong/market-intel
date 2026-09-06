@@ -755,10 +755,12 @@ def cmd_tool(args, snap, source):
     if not match:
         # fuzzy suggest
         nz = normalize(args.slug)
-        near = [s["slug"] for s in states if nz in normalize(s["slug"])][:8]
+        near_all = [s["slug"] for s in states if nz in normalize(s["slug"])]
+        near = near_all[:8]
         stderr(f"console: no tool with slug '{args.slug}'.")
         if near:
-            stderr("  did you mean: " + ", ".join(near))
+            more = f"  (showing {len(near)} of {len(near_all)} matches)" if len(near_all) > len(near) else ""
+            stderr("  did you mean: " + ", ".join(near) + more)
         sys.exit(2)
     s = match[0]
     print(f"TOOL · {s['slug']}   ({s['name']})")
