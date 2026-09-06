@@ -161,6 +161,9 @@ def surface_E3_hf_spaces(cfg: dict) -> list[dict]:
     limit = int(e3.get("limit", 50))
     min_score = float(e3.get("min_trending_score", 0))  # 0 = keep all top-N, calibrate after 2 rounds
     data = _http_json(f"https://huggingface.co/api/spaces?sort=trendingScore&limit={limit}")
+    if isinstance(data, list) and len(data) >= limit:
+        print(f"  E3  CAPPED    trending page hit limit={limit}; more spaces exist past it",
+              file=sys.stderr)
     out = []
     for sp in data if isinstance(data, list) else []:
         score = sp.get("trendingScore", 0) or 0
