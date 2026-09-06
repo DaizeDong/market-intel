@@ -554,6 +554,8 @@ if tool_docs_text:
                     undoc.setdefault(r, d)
     if undoc:
         items = ", ".join(f"{r}({d})" for r, d in list(undoc.items())[:10])
+        if len(undoc) > 10:
+            items += f" (showing 10 of {len(undoc)})"
         warn("DOCCOVER", f"{len(undoc)} live shard repo(s) have no per-tool doc — add tools/<slug>.md "
                          f"+ an index row (or tombstone the shard row): {items}")
 
