@@ -2,8 +2,8 @@
 
 - **Domain(s):** web-scraping (also: browser-automation)
 - **Barrier route:** ③/④ · **Source tier:** L2 · **Ready MCP:** **yes**, ships an official built-in MCP server (registered `io.github.D4Vinci/Scrapling`), plus an n8n integration. The MCP extracts targeted content *before* it reaches the LLM, so it doubles as a token-saver, not just a fetcher.
-- **Cost:** free, open-source (no key, no quota) [github.com/D4Vinci/Scrapling, gh-api fetched 2026-07-01]
-- **Repo / Provider:** `D4Vinci/Scrapling (67.5k★, gh-api 2026-07-01)`, not archived, pushed 2026-06-29, ~6.6k forks (healthy star/fork ratio, no inflation smell). Active release cadence (v0.4.x line through mid-2026).
+- **Cost:** free, open-source (no key, no quota) [github.com/D4Vinci/Scrapling, gh-api fetched 2026-09-06]
+- **Repo / Provider:** `D4Vinci/Scrapling (78.8k★, gh-api 2026-09-06)`, not archived, pushed 2026-09-04, ~7.9k forks (healthy star/fork ratio, no inflation smell). Active release cadence (v0.4.x line through mid-2026).
 - **Top pick for its domain:** no (Bright Data ② stays the top barrier-breaker; Scrapling is the strongest **free** ③/④ self-host scrape option, directly contesting Firecrawl's self-host role at $0)
 
 ## What it does / when to pick it
@@ -35,4 +35,4 @@ MCP: point an MCP client at the packaged Scrapling server; it returns pre-extrac
 ## Failure signals & fallback
 Failure looks like persistent CAPTCHA/JS-challenge loops, `403`/`429`, or a Cloudflare "checking your browser" page that never resolves. **If Scrapling still gets blocked: (1)** add a residential proxy and retry (most remaining ④ blocks are IP-based); **(2)** escalate to **Bright Data Web Unlocker** (②, free 5k/mo, no card) which absorbs both fingerprint *and* IP; **(3)** for managed self-host with docker MCP, **crawl4ai** (③) is the sibling option. For plain JS-render scrapes that aren't barrier-blocked, **Firecrawl** (②) or the connected **playwright MCP** (④) is simpler.
 
-## Last verified: 2026-07
+## Last verified: 2026-09 (repo facts re-pulled from gh api and the tool promoted to a web-scraping shard row this sweep; usage/gotcha notes carried forward from 2026-07)

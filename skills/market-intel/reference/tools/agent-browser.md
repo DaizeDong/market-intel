@@ -3,7 +3,7 @@
 - **Domain(s):** browser-automation (also: none)
 - **Barrier route:** ④ · **Source tier:** L2 · **Ready MCP:** no, but agent-native, ships a native CLI + a `.claude-plugin` (Claude Code plugin), so the agent drives it directly without an MCP server
 - **Cost:** free (self-host OSS) [github.com/vercel-labs/agent-browser, fetched 2026-06]
-- **Repo / Provider:** github.com/vercel-labs/agent-browser, `vercel-labs/agent-browser (35.6k★, gh-api 2026-06)`; license Apache-2.0, active (pushed 2026-06)
+- **Repo / Provider:** github.com/vercel-labs/agent-browser, `vercel-labs/agent-browser (42.1k★, gh-api 2026-09-06)`; license Apache-2.0, active (pushed 2026-09-06)
 - **Top pick for its domain:** no (the already-connected **playwright MCP** is the default; agent-browser is the token-efficient fast peer you reach for when context budget matters)
 
 ## What it does / when to pick it
@@ -45,4 +45,4 @@ The `@ref` indirection is the whole point: the model passes back a short handle 
 ## Failure signals & fallback
 Failed when: the CLI can't launch its bundled Chrome (missing binary / build), a `@ref` action errors with "ref not found" (stale snapshot, re-snapshot), or the target serves a bot interstitial (fingerprint block, agent-browser can't bypass it). **Fallback ladder:** (1) default back to the already-connected **playwright MCP** for the same act-like-human task; (2) for natural-language goal extraction, **browser-use**; (3) for fingerprint blocks, **camoufox**, **jo-inc/camofox-browser**, or **patchright**; (4) for vision-robust workflows resilient to layout changes, **Skyvern**.
 
-## Last verified: 2026-06
+## Last verified: 2026-09 (repo facts — existence, stars, activity — re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)
