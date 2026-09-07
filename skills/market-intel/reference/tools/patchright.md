@@ -3,7 +3,7 @@
 - **Domain(s):** web-scraping (also: browser-automation)
 - **Barrier route:** ④ · **Source tier:** L2 · **Ready MCP:** no, it's a Playwright-API drop-in library (Python `patchright` / Node `patchright`), drive it from your own script or wire it under a playwright-style runner. No prebuilt MCP server.
 - **Cost:** free, Apache-2.0 (no key, no quota) [github.com/Kaliiiiiiiiii-Vinyzu/patchright, fetched 2026-06]
-- **Repo / Provider:** `Kaliiiiiiiiii-Vinyzu/patchright (3.4k★, gh-api 2026-06)` (umbrella/TS repo; the language packages are `patchright-python` 1.4k★ and `patchright-nodejs` 710★, both gh-api 2026-06). Apache-2.0, not archived, pushed 2026-06-03.
+- **Repo / Provider:** `Kaliiiiiiiiii-Vinyzu/patchright (4.4k★, gh-api 2026-09-06)` (umbrella/TS repo; the language packages are `patchright-python` 1.5k★ and `patchright-nodejs` 776★, both gh-api 2026-09-06). Apache-2.0, not archived, pushed 2026-09-04.
 - **Top pick for its domain:** no (Bright Data ② is the top barrier-breaker; patchright is the free ④ fallback)
 
 ## What it does / when to pick it
@@ -41,4 +41,4 @@ Node: `const { chromium } = require('patchright');` then the usual `launchPersis
 ## Failure signals & fallback
 Failure looks like: persistent CAPTCHA/JS-challenge interstitials, `403`/`429`, Cloudflare "checking your browser" loops, or a `cf_clearance`/challenge page in the DOM that never resolves. **If patchright still gets blocked: (1)** add a residential proxy and retry (most ④ blocks are now IP-based); **(2)** escalate to **Bright Data Web Unlocker** (② route, free 5k/mo Rapid, no card) which absorbs both fingerprint *and* IP-reputation; **(3)** for managed self-host, **crawl4ai** (③, docker MCP) wraps similar auto-anti-bot. For ordinary JS-render scrapes that aren't actually barrier-blocked, **Firecrawl** (②) or the already-connected **playwright MCP** (④) is simpler than scripting patchright.
 
-## Last verified: 2026-06
+## Last verified: 2026-09 (repo facts — existence, stars, activity — re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)
