@@ -37,6 +37,7 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 - [Patchright](patchright.md), ④ · undetected-Playwright, passes Cloudflare/DataDome (free)
 - [crawl4ai](crawl4ai.md), ③ · zero-cost self-host LLM crawler (primary doc under browser-automation)
 - [D4Vinci/Scrapling](scrapling.md), ③④ · free adaptive stealth scraper + built-in MCP, auto-Cloudflare (NEW 2026-07)
+- [wigolo](wigolo.md), ③④ · free keyless search+fetch+crawl+extract in one MCP, 18-engine SERP fusion (NEW 2026-09)
 - [ihor-sokoliuk/mcp-searxng](mcp-searxng.md), ③ · free self-host search MCP over SearXNG, Tavily replacement (NEW 2026-07)
 
 ## ecommerce-arbitrage
@@ -115,6 +116,7 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 - [postiz-agent](postiz-agent.md), ③ · official Postiz agent front-end, 28+ platforms
 - [social-media-agent](social-media-agent.md), ③ · source/curate/schedule agent (content pipeline)
 - [yikart/AiToEarn](aitoearn.md), ①④ · free OSS desktop multi-publish incl. CN majors (Douyin/XHS/Kuaishou), GUI handoff (NEW 2026-07)
+- [dreammis/social-auto-upload](social-auto-upload.md), ④ · automated CN+global video publishing, 11 platforms, `sau` CLI + bundled skills (NEW 2026-09)
 
 ## content-cms
 - ★ [WordPress MCP](wordpress-mcp.md), ① · post CRUD + publish, Application Password

@@ -3,7 +3,7 @@
 - **Domain(s):** leadgen-crm (also: browser-automation)
 - **Barrier route:** ④ browser / act-like-human · **Source tier:** L4 · **Ready MCP:** no (Go CLI / self-host, no MCP)
 - **Cost:** free (OSS, MIT), proxies are the only hidden cost at scale
-- **Repo / Provider:** github.com/gosom/google-maps-scraper, `gosom/google-maps-scraper (4.3k★, gh-api 2026-06)` (MIT; active, last push 2026-05, not archived)
+- **Repo / Provider:** github.com/gosom/google-maps-scraper, `gosom/google-maps-scraper (5.8k★, gh-api 2026-09)` (MIT; active, last push 2026-08-22, not archived)
 - **Top pick for its domain:** yes (the FREE-ROUTE default for local-business B2B leads)
 
 ## What it does / when to pick it
