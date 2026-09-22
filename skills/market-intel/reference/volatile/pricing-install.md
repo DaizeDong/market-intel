@@ -44,7 +44,7 @@
   echoes the URL+token). Verify: `claude mcp list | grep brightdata | sed -E 's/token=[^ &]*/token=***/'`.
   Stdio alt: `npx @brightdata/mcp` with env `API_TOKEN`.
 - DataForSEO: official TS MCP github.com/dataforseo/mcp-server-typescript; $1 trial + free Sandbox, $50 min.
-- patchright: `pip install patchright` or `npm i patchright`, Kaliiiiiiiiii-Vinyzu/patchright (3.4k★,
+- patchright: `pip install patchright` or `npm i patchright`, Kaliiiiiiiiii-Vinyzu/patchright (4657★, gh-api 2026-09-22,
   undetected-Playwright, Apache-2.0, free).
 
 ## ecommerce-arbitrage `last_verified: 2026-06`
@@ -90,7 +90,7 @@
 - SerpApi: key, free 250/mo; Starter $25/1k.
 - Google Suggest: `https://suggestqueries.google.com/complete/search?client=firefox&q=...`
   (free no-key, undocumented).
-- respectlytics/respectaso (377★): self-host, free (iTunes Search API, iOS only).
+- respectlytics/respectaso (504★, gh-api 2026-09-22): self-host, free (iTunes Search API, iOS only).
 
 ## social-publishing `last_verified: 2026-06`
 - Buffer: API key from dashboard (free tier works) + official MCP.
@@ -178,7 +178,7 @@ Platform-specific OSS repos (free; most violate platform ToS, throwaway accounts
 - Bluesky: `pip install atproto` (MarshalX/atproto, official) · Mastodon: `pip install Mastodon.py` (official)
 - Ecom: Cybrarist/Discount-Bandit (697★, self-host tracker) · omkarcloud/amazon-scraper (220★)
 - SERP/SEO: searxng/searxng (31k★, self-host meta-search) · towfiqi/serpbear (2k★, rank tracker) · deedy5/ddgs (2.7k★)
-- B2B leads: gosom/google-maps-scraper (4.3k★, low-risk) · omkarcloud/google-maps-scraper (2.7k★)
+- B2B leads: gosom/google-maps-scraper (5980★, gh-api 2026-09-22, low-risk) · omkarcloud/google-maps-scraper (2.7k★)
 - Trends: flack0x/trendspyg · sdil87/trendspy. App stores: facundoolano/google-play-scraper (2.9k★) + app-store-scraper
 - Dead/avoid: tomquirk/linkedin-api (404), pytrends (archived), snscrape (停更), elizaOS/agent-twitter-client (下架)
 
