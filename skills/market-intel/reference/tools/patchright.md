@@ -3,7 +3,7 @@
 - **Domain(s):** web-scraping (also: browser-automation)
 - **Barrier route:** ④ · **Source tier:** L2 · **Ready MCP:** no, it's a Playwright-API drop-in library (Python `patchright` / Node `patchright`), drive it from your own script or wire it under a playwright-style runner. No prebuilt MCP server.
 - **Cost:** free, Apache-2.0 (no key, no quota) [github.com/Kaliiiiiiiiii-Vinyzu/patchright, fetched 2026-06]
-- **Repo / Provider:** `Kaliiiiiiiiii-Vinyzu/patchright (3.4k★, gh-api 2026-06)` (umbrella/TS repo; the language packages are `patchright-python` 1.4k★ and `patchright-nodejs` 710★, both gh-api 2026-06). Apache-2.0, not archived, pushed 2026-06-03.
+- **Repo / Provider:** `Kaliiiiiiiiii-Vinyzu/patchright (4657★, gh-api 2026-09-22)` (umbrella/TS repo; the language packages are `patchright-python` 1.4k★ and `patchright-nodejs` 710★, both gh-api 2026-06). Apache-2.0, not archived, pushed 2026-09-13.
 - **Top pick for its domain:** no (Bright Data ② is the top barrier-breaker; patchright is the free ④ fallback)
 
 ## What it does / when to pick it

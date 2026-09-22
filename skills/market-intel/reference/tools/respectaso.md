@@ -3,7 +3,7 @@
 - **Domain(s):** seo-keywords (also: none)
 - **Barrier route:** ④ (free OSS, self-host) · **Source tier:** L4 · **Ready MCP:** no, Python/CLI tool; run locally or wrap in a thin MCP
 - **Cost:** free (open source; uses the free iTunes Search API) [github.com/respectlytics/respectaso, gh-api 2026-06]
-- **Repo / Provider:** github.com/respectlytics/respectaso, respectlytics/respectaso (377★, gh-api 2026-06; AGPL-3.0, last push 2026-06-07, active)
+- **Repo / Provider:** github.com/respectlytics/respectaso, respectlytics/respectaso (504★, gh-api 2026-09-22; AGPL-3.0, last push 2026-09-04, active)
 - **Top pick for its domain:** no
 
 ## What it does / when to pick it
