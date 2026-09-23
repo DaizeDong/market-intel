@@ -42,4 +42,4 @@ uv run main.py --platform xhs --lt qrcode --type search --keywords "无人机"
 ## Failure signals & fallback
 You know it failed when: QR login loops without caching a cookie, runs return empty `data/` with a 461/滑块 in the browser, or the platform serves a risk-control interstitial. **Fallback ladder:** (1) for 小红书 posting *and* reading, switch to **xpzouying/xiaohongshu-mcp** (ready MCP); (2) for 微博 specifically, **dataabc/weibo-crawler**; (3) for a one-off single page, drop to the already-connected **playwright MCP** with a throwaway logged-in session; (4) if fingerprint-blocked, route the browser through **camoufox** / **camofox-browser**.
 
-## Last verified: 2026-09 (repo facts — existence, stars, activity — re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)
+## Last verified: 2026-09 (repo facts, existence, stars, activity, re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)

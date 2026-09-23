@@ -53,8 +53,12 @@ def main():
 
     # 2. The mirror: a manifest entry with no file is a broken manifest, and check_all returns 2 for
     #    it at runtime. Catch it here instead, where the message is cheaper to read.
-    ghosts = sorted(n for n in ca.MANIFEST if not os.path.isfile(os.path.join(HERE, n)))
+    ghosts = sorted(n for n in ca.MANIFEST if not os.path.isfile(ca.checker_path(n)))
     check("every MANIFEST entry exists on disk", not ghosts, "missing files: " + ", ".join(ghosts))
+    for name, kit in (("pii_guard.py", "guards"), ("data_boundary.py", "guards"), ("dash_guard.py", "style")):
+        expected = os.path.join(os.path.dirname(HERE), kit, "tools", name)
+        check("shared checker %s uses its pinned submodule" % name, ca.checker_path(name) == expected)
+    check("missing checker remains a failure", ca.run("check_missing_synthetic.py", []) == 2)
 
     # 3. An exclusion without a reason is an orphan with extra steps.
     unreasoned = sorted(n for n, why in ca.EXCLUDED.items() if not (why or "").strip())

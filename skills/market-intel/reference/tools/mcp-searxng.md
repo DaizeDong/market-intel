@@ -27,4 +27,4 @@ Once connected, the model calls the MCP's `searxng_web_search` tool with a query
 ## Failure signals & fallback
 Failure looks like empty result arrays, `429` from the SearXNG backend, or MCP connect errors (wrong `SEARXNG_URL`). **Fallback:** (1) check the SearXNG instance directly in a browser + confirm JSON format is enabled; (2) for paid-grade semantic search use **Exa**; (3) for bulk cheap SERP, **DataForSEO** (②, ~$0.0006/query). Tavily remains the ② incumbent *if/when its key is rotated*, the 2026-06 outage was a 401 key issue, not a dead service.
 
-## Last verified: 2026-09 (repo facts — existence, stars, activity — re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)
+## Last verified: 2026-09 (repo facts, existence, stars, activity, re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)

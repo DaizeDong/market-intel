@@ -28,4 +28,4 @@ CLI (illustrative): `agent-reach search twitter "AI agents" --limit 20` / `agent
 ## Failure signals & fallback
 Failure looks like empty reads, login-wall redirects, or an adapter erroring on one platform. **Fallback:** (1) refresh the platform cookies; (2) for X, drop to **twscrape**/**twikit** (③) or **twitterapi.io** (②); (3) for Reddit, **reddit-mcp-buddy** (①); (4) for hard anti-bot pages, **Bright Data**/**Scrapling**. Treat Agent-Reach as the convenient first read pass, with the per-domain incumbents as the reliable fallback.
 
-## Last verified: 2026-09 (repo facts — existence, stars, activity — re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)
+## Last verified: 2026-09 (repo facts, existence, stars, activity, re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)

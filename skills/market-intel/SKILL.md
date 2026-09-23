@@ -82,57 +82,55 @@ per run prevents true runaway (P5: no *infinite* fan-out). If `exhaustive` would
 surface the projected scope + the uncovered remainder as an **explicit gap**, never silently
 truncate. Raising the ceiling is a deliberate, stated choice, not a default.
 
-### Step 2, Detect available sources (do NOT guess by tool name)
+### Step 2, Detect sources in the current client
 
-Run `claude mcp list` and parse the three-state health output, a source is only usable if it
-shows `✓ Connected`. Treat `✗ Failed` and `! Needs authentication` as **not available** (they
-will fail at call time). Tool-name prefix matching (`mcp__*twitter*`) is unreliable: deferred
-tools, plugin prefixes, and dead connections all distort it, use it only as a cross-check, never
-as the primary signal. Also note which research skills exist (`research-lit`, `deep-research`,
-`exa-search`, `firecrawl`) as fallbacks.
+Identify the running client first. Use its exposed tool catalogue and MCP `tools/list` to
+discover capabilities; a Claude status listing is not evidence about a Codex session. When
+configuration inspection is needed, honor the client's explicit configuration override, read
+UTF-8, and return names and states only. Never print raw configuration or credentials.
 
-If you must parse `~/.claude.json` directly, read it as UTF-8 (it contains non-ASCII paths;
-default GBK decode crashes on Windows). Prefer `claude mcp list` / `claude mcp get` over raw JSON.
+Keep these observations separate: **configured → discovered → call succeeded → content
+validated**. A Connected label or successful `tools/list` establishes discovery only. Make a
+small, relevant read-only call before relying on a capability, then validate its actual content.
+A keyless endpoint, installed library, and historical registry health are candidates to probe,
+not evidence of current success. Note available research skills as alternative execution routes.
 
-#### Step 2b, Task-time availability gate (classify each relevant tool AT THIS MOMENT)
+#### Step 2b, Task-time availability gate
 
-Detection isn't a yes/no list, it's a per-tool **state** decided *now*, for *this theme's*
-routed tools only. Using query-side signals only (`claude mcp list` + companion-config presence, and
-**never** import a refresh/ops script; that breaks the P5 seam), sort each relevant tool into one
-of three buckets:
+Classify each relevant capability from current query-side evidence. Do not load refresh/ops
+scripts into the query path (P5). The companion registry records setup and dated observations;
+the current call decides whether a route works for this task.
 
-| bucket | query-side signal (this moment) | what the run does with it |
+| bucket | current evidence | action |
 |---|---|---|
-| **available-now** | `claude mcp list` shows `✓ Connected`, **or** keyless/no-auth (GDELT, CoinGecko, SEC EDGAR), **or** a local lib already installed, **or** companion `registry.json` marks it `installed:true` + a matching `mcp_server_name` is Connected | fan out to it at the chosen SCALE (Step 4) |
-| **configurable-with-setup** | not connected now, but a free/cheap activation path exists, companion repo has the tool but it's not applied, or `reference/activation-recipes.md` lists a free-key/free-tier/install-no-key recipe for its slug | **do NOT call it this turn** (a fresh MCP only connects after `/mcp` restart). Surface a JIT, theme-tied config suggestion in the report (Step 4 + Coverage-gaps) |
-| **hard-gap** | only a paid/enterprise tier unlocks it, or it's tombstoned (`D-404`/`D-PRICE`/`D-TOS`/dead repo per the shard / companion `deprecation_code`) | note as an explicit gap; suggest only if the theme genuinely needs the paid depth, flagged as paid |
+| **available-now** | exposed capability or authorized direct HTTP/CLI route, confirmed by a relevant read-only call | fan out at the selected scale; validate returned content |
+| **configurable-with-setup** | credentials, installation, or client reconnect are still needed | report the gap and exact activation path; use another available route |
+| **hard-gap** | required paid/enterprise access or a documented retired route | report the missing depth and its reason |
 
-This is **warn-level guidance, never a fail-closed gate** (Side A/B/C): the classifier informs
-fan-out and what to recommend, it never refuses to run or silently drops a relevant tool. A tool
-you can't reach right now is always an **explicit gap**, never a silent skip (iron rule 1). The
-companion `registry.json` (`installed`, `tier`, `transport`, `mcp_server_name`, `health_last`) is
-the authoritative "what the user has" read here; `claude mcp list` is the authoritative "what is
-live right now." When they disagree, live state wins for *can-I-call-it-now*, and the registry tier
-informs *is-it-free-to-activate*.
+A newly registered MCP needs a client reconnect before its tools appear in an existing session.
+An already usable direct HTTP/CLI route can run immediately. Never label a source unavailable
+solely because its MCP registration is new. Failed, empty, invalid and untested probes remain
+distinct coverage gaps; the classifier never silently drops a source or blocks the whole report.
 
 ### Step 3, Select sources + guide install (non-blocking)
 
 For each triaged domain, read only its shard: `reference/domains/<domain>.md`. Pick the best
 **available** source. **Prefer the free browser-automation / act-like-human route (④) over paid
-APIs when it fits**, you already have the playwright MCP connected, plus free open-source repos
+APIs when it fits**, when a usable browser session is available, plus free open-source repos
 per platform (see `reference/domains/browser-automation.md`). A real logged-in browser often
 returns **richer data** than a stripped/paid API, at zero cost. Reach for paid official ① / resale
 ② sources when you need history the browser can't backfill (e.g. Keepa price history), large-scale
-reliability, or compliance (no ToS/ban risk). Note browser scraping needs a session/cookies and,
+reliability, or licensed access whose permitted use fits the task. Note browser scraping needs a session/cookies and,
 at scale, a proxy pool, and most platform scraping violates that platform's ToS, use throwaway
-accounts for heavy/write work and respect the disconfirmation + source-tier guardrails.
+accounts only within the authorized task. A logged-in session does not authorize bulk collection,
+account changes, or writes. Respect the disconfirmation and source-tier guardrails.
 
 If the topic clearly depends on a source that is missing or not connected:
 
 > "This topic depends on <source> (e.g. real X tweet data). Recommend installing it:
 > `claude mcp add -s user <...>` (exact command + cost in `reference/volatile/pricing-install.md`).
 > **Note: a newly added MCP only takes effect after you restart the session or `/mcp` reconnect;
-> it will NOT work this turn.** For now I'll proceed with a fallback source and flag the gap."
+> its tools then become visible.** An authorized direct HTTP/CLI route may already work; otherwise use a fallback and flag the gap."
 
 Never block on install. Prefer HTTP-transport sources on Windows (no local Node/uv needed; stdio
 `npx`/`uvx` MCPs are flaky there).
@@ -149,7 +147,7 @@ Four prohibitions, absolute. **The procedure that satisfies them lives in
 - **NEVER rotate on the user's behalf** as a cleanup, a transcript-clean key is one the user rotated
   from their own browser.
 
-Keys land plaintext in `~/.claude.json`, never commit or screenshot it. **The skill holds the
+Keys may be present in client configuration; never print, publicly commit, or screenshot it. **The skill holds the
 procedure, not the key.**
 
 #### Where the user's keys + install state live: the COMPANION CONFIG REPO
@@ -162,18 +160,15 @@ private companion config repo**. This is a hard architectural rule; see
 The exchange between this skill and any companion config repo follows a **formal spec**
 ([`reference/companion-config-spec.md`](reference/companion-config-spec.md), spec version 1).
 As an agent, **assume one may exist on the user's machine**, and treat it as the authoritative
-source of "what the user has installed." The spec defines: discovery convention, required
+source of recorded configuration. Absence means unrecorded, not uninstalled; reconcile current discovery first. The spec defines: discovery convention, required
 directory layout, `registry.json` schema, per-tool template formats, conformance checklist,
 and versioning policy.
 
-> 🔒 **When guiding the user to bootstrap a new companion repo, ALWAYS surface the
-> hardening runbook ([`reference/companion-config-hardening.md`](reference/companion-config-hardening.md))
-> BEFORE the first push.** A freshly-created GitHub repo defaults to "All repositories"
-> access for installed GitHub Apps (ChatGPT Codex, Devin.ai, etc.) and account-level
-> Copilot training is opt-out, not opt-in. The runbook is a 12-step lockdown that closes
-> these by hand; ~15 min the first time. Skipping it means the user's API keys may be
-> visible to third-party AI agents and used as future training data the moment the repo
-> exists.
+When bootstrapping a companion, read the hardening runbook
+([`reference/companion-config-hardening.md`](reference/companion-config-hardening.md)) and verify
+repository visibility and actual app access before adding secrets or populating a remote.
+Treat repository permissions, third-party access and training policies as separate checks.
+A checklist is not proof of confidentiality. Preserve the user's chosen private storage policy.
 
 **Discovery convention (try in order):**
 
@@ -192,16 +187,16 @@ at root, `tools/<slug>/` per-tool dirs with `claude.json.template` + `env.templa
 
 **How to use it from this skill (Step 2 detection enhancement):**
 
-1. After running `claude mcp list` (still primary signal), also check whether a companion
-   config repo exists at one of the paths above.
+1. After current-client discovery, check whether a companion config repo exists at one of
+   the paths above.
 2. If yes, read its `registry.json` to learn which tools the user has *configured*, and read
    the specific `tools/<slug>/README.md` only when you need tier/rate-limit context for that
    tool.
 3. **Never** read `secrets/<slug>.env` files even when they're committed in the repo (Mode
    A), reading them spills key values into the transcript regardless of where they're
-   stored. apply.py handles substitution into `~/.claude.json`; you never need to look at
+   stored. The companion configuration tooling handles substitution; you never need to look at
    the raw value.
-4. When a tool the user would benefit from is NOT in their companion repo, recommend
+4. When a useful tool has no recorded or currently working route, recommend
    adding it using the standard procedure: if the user's companion repo includes
    `runbooks/add-new-tool.md`, follow that (each user authors their own runbooks);
    otherwise summarize the procedure from `reference/companion-config-repo.md` here.
@@ -225,16 +220,21 @@ Fan out **only to the `available-now` bucket** from Step 2b, at the chosen SCALE
 subagent on a tool that isn't live this turn, it would just fail. Hand the selected
 available-now sources + sub-questions to the heavy harness:
 
-- Mixed/general or when a connected commercial MCP exists → fan out subagents (Agent tool), one
-  per sub-question, **each told to load its target MCP via ToolSearch first** (subagents inherit
-  the session's MCPs but only in deferred form). Or invoke `deep-research` for the web portion.
+- Mixed/general or when a usable commercial source exists → delegate independent sub-questions
+  through the installed `llmcall.call(prompt, mode="agent")` interface, inheriting its current
+  routing, timeout and fallback defaults. Give each worker its source access method explicitly;
+  external agents do not automatically inherit this session's MCP tools. Use `deep-research` for
+  the web portion when available. Deterministic independent tool calls can run concurrently.
 - For source-routed retrieval, `research-lit`'s `— sources:` mechanism already does
   detect-or-skip routing; reuse it rather than rewriting fan-out.
 
 Require every subagent to return a **structured evidence unit**, not free prose:
-`{ status: ok|partial|empty|failed, claims: [{claim, source_url, quote, source_tier, date, confidence}], coverage_notes }`
+`{ source, status: ok|partial|empty|failed|content_invalid|unknown, fetched_at,
+   claims: [{claim, source_url, quote, source_tier, published_at, date_basis, original_page_verified, confidence}], coverage_notes }`
 with a length cap per field. The main agent reduces these units, it does **not** read raw page
-dumps. If fan-out exceeds ~5, insert a combiner layer (each combiner merges 3 to 4 workers) so the
+dumps. Require one status per requested source. A homepage, login page, repeated landing URL,
+or a missing provider result is not usable discovery content. Deduplicate canonical URLs before
+counting independent evidence. If fan-out exceeds ~5, insert a combiner layer (each combiner merges 3 to 4 workers) so the
 main context never holds N long reports.
 
 #### JIT config-gap surfacing, recommend configuration at task-time, driven by the theme
@@ -248,11 +248,10 @@ you need tier/gotcha detail) to fill the path. Template:
 
 **The wording is owned by [`reference/report-template.md`](./reference/report-template.md)** ("configure
 for deeper data"), so it is not restated here: copy it from there. It names the tool, its cost tier,
-the `console.py connect <slug>` command, where the key comes from, and that a reconnect will not help
-the current turn. One canonical copy, because a line that appears in three files drifts in three
+the `console.py connect <slug>` command, where the key comes from, and when a client reconnect is required. One canonical copy, because a line that appears in three files drifts in three
 directions.
 
-Examples: an X-sentiment theme with `x-twitter` dark → "configure twikit (install-no-key) to add
+Examples: an X-sentiment theme with `x-twitter` dark → "configure twscrape (install-no-key) to add
 real X founder/crypto discourse"; a macro-backdrop theme without FRED → "configure FRED MCP
 (free-key) for the rates/CPI series this thesis leans on." These lines feed straight into the
 report's **Coverage-gaps → Configure for deeper data** block (Output / `reference/report-template.md`), so
@@ -277,7 +276,9 @@ the gate's output is a concrete, theme-tied next step the user can act on, never
    on [L?] fallback, reliability reduced." Never swap silently.
 5. **Timestamp volatile data.** Every price/policy/ranking/rate carries `[fetched YYYY-MM-DD |
    published ____]`. Missing publish date → mark "date unknown, treat as stale." Never present an
-   undated precise figure. State a snapshot date at the report top.
+   undated precise figure. Record publication, fetch and provider-index dates separately. For a
+   requested recent-year window, verify the original page date; search filters and snippets alone
+   do not qualify a result. State the exact date window and snapshot date at the report top.
 6. **Disconfirmation mandate (esp. arbitrage/investing).** Run a dedicated reverse-search subagent
    (terms: scam/failure/loss/banned/expired/risk/regulation). Report must include a "Risks &
    counter-evidence" section and, for arbitrage, "execution friction" (fees, slippage, capacity,
@@ -288,6 +289,9 @@ the gate's output is a concrete, theme-tied next step the user can act on, never
 8. **Failures become explicit gaps.** Any subagent that returns `failed/empty` triggers one query
    rewrite + retry; if still empty, list it in an explicit "Not covered / insufficient data"
    section. A report must never look complete while hiding a missing dimension.
+9. **Stability requires longitudinal evidence.** Record distinct dated observations, independent
+   corroboration and observed failures. Repeated promotional copies or a vendor longevity claim
+   cannot establish stable operation. A single successful call is one observation, not an SLA.
 
 ## Output
 
@@ -316,12 +320,13 @@ What DOES get published is the knowledge distilled from the ledger, "this source
 route falls back", which lands in `reference/tools/*.md` on the next sweep. The lesson is public;
 the research history is not.
 
-```jsonc
-{ "ts":"<UTC>", "domain":"x-twitter", "source":"d60/twikit", "route":"④",
-  "outcome":"verified|unverifiable|dead|fallback_used|price_mismatch",
-  "detail":"<what diverged, e.g. official price now $X vs shard $Y>",
-  "user_correction": null }   // set when the user manually corrected an entry — highest-weight truth
-```
+Use [`reference/live-run-contract.json`](reference/live-run-contract.json), schema version 2.
+Keep legacy `unverifiable` and `fallback_used` observations distinct. Record transport, auth,
+quota and invalid-content failures with their typed outcomes; unknown events require review.
+Include `client`, `capability` and a private `evidence_ref` where available. A successful query
+does not refresh a whole tool document: automatic `Last verified` advancement requires
+`outcome: verified`, `verification_scope: tool_documentation` and a nonempty evidence reference.
+
 
 The refresh then reads these to prioritise which domains/sources to re-verify first (a source
 flagged `dead` in real use gets auto-nominated for the C4 deletion path next sweep).

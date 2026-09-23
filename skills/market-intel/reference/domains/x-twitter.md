@@ -18,7 +18,7 @@ account+proxy+login-wall cost.
 | Apify tweet actors | ② resale | bulk historical, trends | apify MCP connected | pay-per-result |
 | Bright Data X API/datasets | ② resale | enterprise, 22M+ historical | bright-data MCP | ~10x pricier, best SLA |
 | **vladkens/twscrape** (2.7k★) | ③ scrape | search/users/followers, account rotation | python lib installed | needs X cookies+proxy, ban risk; **still actively maintained** (pushed 2026-08-28, v0.19.1 updated X GraphQL op IDs), pin the `vladkens/` repo |
-| **d60/twikit** (4.7k★) + adhikasp/mcp-twikit (235★) | ③/④ self-host | read+write, search, DM, no API key | connected MCP or python lib | free; cookie/login, ban risk. ⚠ **worse than last sweep recorded**: twikit's 2026-03-10 push was README-only, its last *code* commit was 2025-04-22 (>12mo) and PyPI is frozen at 2.3.3 (2025-02-07); adhikasp/mcp-twikit is 17.8mo silent, i.e. an unmaintained wrapper around an unmaintained lib. Both still install and neither is archived, so no C4 death code is executed — but **twscrape is now the maintained free ③ route and the Default pick moves accordingly** |
+| **d60/twikit** (4.7k★) + adhikasp/mcp-twikit (235★) | ③/④ self-host | read+write, search, DM, no API key | connected MCP or python lib | free; cookie/login, ban risk. ⚠ **worse than last sweep recorded**: twikit's 2026-03-10 push was README-only, its last *code* commit was 2025-04-22 (>12mo) and PyPI is frozen at 2.3.3 (2025-02-07); adhikasp/mcp-twikit is 17.8mo silent, i.e. an unmaintained wrapper around an unmaintained lib. Both still install and neither is archived, so no C4 death code is executed, but **twscrape is now the maintained free ③ route and the Default pick moves accordingly** |
 | playwright MCP + browser-use | ④ browser | act-like-human: logged-in search, scrape rendered view | playwright connected | free, real session, best for fields API hides |
 | Infatoshi/x-mcp, DataWhisker | ① official | full read+write incl. media | connected + X dev creds | needs Basic $200/mo+ |
 | **FxEmbed** (4.8k★) fka FxTwitter | ② free / ③ self-host | resolve ONE post/thread as JSON (text+media+metrics), no key | plain GET, no `claude mcp` entry | read-one only (no search); public-instance uptime + ToS gray, self-host on CF Workers to own it |
@@ -41,5 +41,7 @@ added MCP needs session reconnect before use.
 - **Public Nitter instances**, public ecosystem **collapsed late-2024** after X's mandatory-auth +
   rate-limits; nitter.net decommissioned. Self-hosting still works but now needs real X session
   tokens. Treat public-instance scraping as unavailable; use Twiiit only to find a flaky live one.
-- elizaOS/agent-twitter-client — **D-404**, no longer an assertion: `gh api repos/elizaOS/agent-twitter-client`
+  ⚠ **2026-08 legal overhang:** X Corp C&D'd Nitter+XCancel (`zedeus/nitter` #1442, 08-25), all public
+  instances down 08-27. Repo alive (pushed 2026-09-07) → **not D-404**, but self-host now risks the operator.
+- elizaOS/agent-twitter-client, **D-404**, no longer an assertion: `gh api repos/elizaOS/agent-twitter-client`
   returned HTTP 404 Not Found on 2026-09-06 (原仓库下架，只剩 fork). Flag L5/unavailable if relied on.
