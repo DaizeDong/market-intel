@@ -27,7 +27,7 @@ search traffic intel, 关键词/竞品SEO/排名.
 | **towfiqi/serpbear** (2k★) | ④ self-host | keyword rank tracker, replaces paid rank monitoring |
 | deedy5/ddgs (2.7k★) | ④ | lightweight free web search lib, no key |
 | **Google Suggest / Autocomplete** | ④ free | keyword-ideas / long-tail expander, `suggestqueries.google.com/complete/search` (no key); ⚠ undocumented endpoint, Google can throttle anytime |
-| **respectlytics/respectaso** (505★) | ④ | ASO App-Store keyword research (iTunes Search API, 30 countries); ⚠ iOS/App Store ONLY, no Google Play |
+| **respectlytics/respectaso** (504★) | ④ | ASO App-Store keyword research (iTunes Search API, 30 countries); ⚠ iOS/App Store ONLY, no Google Play |
 | flack0x/trendspyg / sdil87/trendspy | ④ | Google Trends after pytrends archived |
 | playwright MCP | ④ | drive trends.google.com / SERP directly when no repo fits |
 
