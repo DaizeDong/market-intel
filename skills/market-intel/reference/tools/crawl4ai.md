@@ -34,4 +34,4 @@ For structured output use `JsonCssExtractionStrategy` (free, selector-based) or 
 ## Failure signals & fallback
 Failed = 403 / challenge page text in the markdown / empty result, or you actually need to click/log in. Fallbacks: **patchright/nodriver/camoufox** (fingerprint), **browser-use/stagehand** (interaction needed), **Firecrawl ② or Bright Data ②** (let a provider absorb the anti-bot barrier).
 
-## Last verified: 2026-09 (repo facts — existence, stars, activity — re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)
+## Last verified: 2026-09 (repo facts, existence, stars, activity, re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)

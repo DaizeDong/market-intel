@@ -1,9 +1,9 @@
 {
   "note": "Authoritative machine-readable tool registry. Every market-intel tool (repo + SaaS + lib) appears here exactly once. The gate (REGISTRY check) enforces registry <-> tools/index.md <-> tools/*.md three-way consistency, so NO tool — including non-GitHub SaaS — can lose its doc or fall out of tracking. Adding/removing a tool is an atomic op across shard + index + doc + this registry (refresh-protocol R1). Regenerate via the snippet in CHANGELOG 0.10.2.",
-  "count": 179,
+  "count": 181,
   "by_kind": {
-    "repo": 106,
-    "saas": 69,
+    "repo": 107,
+    "saas": 70,
     "lib": 4
   },
   "tools": [
@@ -52,6 +52,14 @@
       "name": "NanmiCoder/MediaCrawler",
       "kind": "repo",
       "repo": "NanmiCoder/MediaCrawler",
+      "domain": "browser-automation",
+      "top_pick": false
+    },
+    {
+      "slug": "opencli",
+      "name": "jackwener/OpenCLI",
+      "kind": "repo",
+      "repo": "jackwener/OpenCLI",
       "domain": "browser-automation",
       "top_pick": false
     },
@@ -1189,7 +1197,7 @@
       "kind": "repo",
       "repo": "d60/twikit",
       "domain": "x-twitter",
-      "top_pick": true
+      "top_pick": false
     },
     {
       "slug": "twitterapi-io",
@@ -1205,7 +1213,7 @@
       "kind": "repo",
       "repo": "vladkens/twscrape",
       "domain": "x-twitter",
-      "top_pick": false
+      "top_pick": true
     },
     {
       "slug": "x-official-api",
@@ -1437,6 +1445,13 @@
       "kind": "repo",
       "repo": "every-app/open-seo",
       "domain": "seo-keywords",
+      "top_pick": false
+    },
+    {
+      "slug": "parallel",
+      "name": "Parallel Search MCP",
+      "kind": "saas",
+      "domain": "web-scraping",
       "top_pick": false
     }
   ]

@@ -20,7 +20,7 @@
 - Apify tweet actors: pay-per-result ~$0.1 to 0.25/1k. Apify MCP: `https://mcp.apify.com` (HTTP).
 - twscrape (self-host, free): `pip install twscrape`, needs X account cookies + proxy. **This is now
   the free ③ default** (2.7k★, pushed 2026-08-28, v0.19.1 refreshed X's GraphQL operation IDs).
-- twikit / adhikasp/mcp-twikit: still installable but **both unmaintained** — twikit's last code
+- twikit / adhikasp/mcp-twikit: still installable but **both unmaintained**, twikit's last code
   commit was 2025-04-22 and PyPI is frozen at 2.3.3 (2025-02-07); the MCP wrapper is 17.8mo silent
   (gh-api 2026-09-06). Neither is archived, so neither is tombstoned; re-test before relying on them.
 
@@ -39,7 +39,8 @@
   Hobby $16/mo yearly). Repo github.com/firecrawl/firecrawl (176k★).
 - Tavily: `claude mcp add --transport http tavily https://mcp.tavily.com/mcp/?tavilyApiKey=...`
   (free 1000 credits/mo).
-- Exa: remote MCP, free 1000/mo with key or 150/day no-key. Skill `exa-search` already present.
+- Exa: keyless hosted MCP at https://mcp.exa.ai/mcp; free access is rate-limited. Historical quotas are not current guarantees. See `reference/tools/exa.md` (interface checked 2026-09-23).
+- Parallel: keyless hosted MCP at https://search.parallel.ai/mcp; free light use, higher limits require authentication. See `reference/tools/parallel.md` (checked 2026-09-23).
 - Bright Data (verified 2026-06, **hosted HTTP, Windows-friendly**): add to `~/.claude.json`
   `mcpServers.brightdata = {"type":"http","url":"https://mcp.brightdata.com/mcp?token=<API_TOKEN>"}`
   (token = Bright Data dashboard → Settings → "Users and API keys" → API keys; **free 5000 req/mo
@@ -55,7 +56,7 @@
 - wigolo (free, AGPL-3.0, **no API key**): `npx wigolo init --agents=claude-code`, then `wigolo doctor`.
   Docker `towhid69420/wigolo`. github.com/KnockOutEZ/wigolo (5.1k★, gh-api 2026-09-06). ⚠ the npm
   channel is pinned at 0.2.1 (published 2026-07-19, registry checked 2026-09-06) while the repo is
-  current — install from source if you need a recent fix.
+  current, install from source if you need a recent fix.
 
 ## ecommerce-arbitrage `last_verified: 2026-06`
 - Keepa: KEEPA_API_KEY from keepa.com (€49/mo @ 20 tokens/min start). MCP: cosjef/Keepa_MCP or
@@ -84,7 +85,7 @@
 - Hummingbot: `claude mcp add --transport stdio hummingbot -- docker run --rm -i -e HUMMINGBOT_API_URL=http://host.docker.internal:8000 -v hummingbot_mcp:/root/.hummingbot_mcp hummingbot/hummingbot-mcp:latest`
 - ccxt: `pip install ccxt` (lib) **and now a first-party MCP**: `claude mcp add ccxt -- npx -y ccxt-mcp`
   (public market data needs no key; trading/funds tiers are opt-in in the config file). npm `ccxt-mcp`
-  since 2026-08-25, v0.1.3 2026-09-07 — young, so pin the version. funding-rates-mcp: Kukapay repo (D-STALE).
+  since 2026-08-25, v0.1.3 2026-09-07, young, so pin the version. funding-rates-mcp: Kukapay repo (D-STALE).
 - CoinMarketCap: free Basic now 50 req/min + 15k credits/mo (key at pro.coinmarketcap.com).
 - Nansen: ~$49/mo annual / $69 monthly (collapsed from up to ~$999/mo).
 - DefiLlama: free no-key REST `https://api.llama.fi` + `https://yields.llama.fi`
@@ -102,12 +103,12 @@
 - SerpApi: key, free 250/mo; Starter $25/1k.
 - Google Suggest: `https://suggestqueries.google.com/complete/search?client=firefox&q=...`
   (free no-key, undocumented).
-- respectlytics/respectaso (377★): self-host, free (iTunes Search API, iOS only).
+- respectlytics/respectaso (505★): self-host, free (iTunes Search API, iOS only).
 
 ## social-publishing `last_verified: 2026-09`
 - Buffer: API key from dashboard + official MCP. Free tier verified at https://buffer.com/pricing
   (fetched 2026-09-06): 3 channels · 1 API key · **3,000 API requests/mo** · 10 queued posts per
-  channel. Paid is **per channel**: Essentials $5/mo/channel, Team $10/mo/channel — so 8 channels is
+  channel. Paid is **per channel**: Essentials $5/mo/channel, Team $10/mo/channel, so 8 channels is
   $40/mo, not $5.
 - Publora: verified at https://publora.com/pricing (fetched 2026-09-06). Starter **free forever**
   (3 accounts, API + MCP, all platforms **except X**) / Pro **$29.95/mo** (unlimited accounts, incl.
@@ -183,7 +184,7 @@ General frameworks (all free, self-host):
 - scrapegraph-ai: `pip install scrapegraphai`, github.com/ScrapeGraphAI/Scrapegraph-ai (30.6k★)
 - agent-browser: native CLI, ships `.claude-plugin`, github.com/vercel-labs/agent-browser (42.1k★,
   token-efficient browser agent)
-Anti-detection: nodriver (`pip install nodriver`, 4.7k★ — ⚠ last push 2026-05-13, no tagged releases) ·
+Anti-detection: nodriver (`pip install nodriver`, 4.7k★, ⚠ last push 2026-05-13, no tagged releases) ·
 camoufox (`pip install camoufox`, 11.7k★) ·
 steel-browser (github.com/steel-dev/steel-browser, 7.6k★, self-host) ·
 camofox-browser (github.com/jo-inc/camofox-browser, 9.2k★, free MIT, fingerprint spoofing on Camoufox).

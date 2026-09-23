@@ -18,7 +18,7 @@ wigolo doctor                            # per-component health report
 ```
 Also on Docker Hub as `towhid69420/wigolo` (`:full` preinstalls the browser engine; the slim image lazy-loads models into the volume). An 11-pack agent-skill catalog is installed by `init` and managed with `wigolo skills add|list|remove`.
 
-⚠ **The npm channel lags the repo.** npm `wigolo` is pinned at **0.2.1, published 2026-07-19** (registry checked 2026-09-06) while the repo was pushed 2026-09-06 — roughly seven weeks of drift. If you need a recent fix, install from source rather than npm.
+⚠ **The npm channel lags the repo.** npm `wigolo` is pinned at **0.2.1, published 2026-07-19** (registry checked 2026-09-06) while the repo was pushed 2026-09-06, roughly seven weeks of drift. If you need a recent fix, install from source rather than npm.
 
 ## Auth / keys
 None for the core tools, which is the whole point of the row. No account, no API key, no cloud round-trip. Optional keys only buy optional engines. The one credential you may add is a proxy (below), and that is opt-in.
@@ -28,8 +28,8 @@ After `init`, the tools appear to the agent directly (`search`, `fetch`, `crawl`
 
 ## General experience & gotchas (踩坑)
 > Not yet exercised in a live market-intel run. The notes below come from the repo's own README/LICENSE and the npm registry, all fetched 2026-09-06; harden them with a `live-runs.jsonl` entry after first real use (R4).
-- **It labels barriers, it does not break them.** When a bot-protected page can't be read you get a `blocked_by_challenge` failure rather than a challenge shell returned as content (README §116). That honesty is a feature — but it means **Cloudflare/DataDome targets still belong to Bright Data ②**. The shard's 2026-06 real-run lesson (Amazon returns HTTP 500 to firecrawl/WebFetch) is exactly the class wigolo will label.
-- **IP reputation is still yours.** The README warns self-hosters plainly: challenge-protected sites score IP reputation, so a datacenter IP won't clear a wall a home connection would. Same ④ split as patchright/Scrapling — these tools fix the client, not your address. The opt-in proxy answer is in the repo's self-hosting guide.
+- **It labels barriers, it does not break them.** When a bot-protected page can't be read you get a `blocked_by_challenge` failure rather than a challenge shell returned as content (README §116). That honesty is a feature, but it means **Cloudflare/DataDome targets still belong to Bright Data ②**. The shard's 2026-06 real-run lesson (Amazon returns HTTP 500 to firecrawl/WebFetch) is exactly the class wigolo will label.
+- **IP reputation is still yours.** The README warns self-hosters plainly: challenge-protected sites score IP reputation, so a datacenter IP won't clear a wall a home connection would. Same ④ split as patchright/Scrapling, these tools fix the client, not your address. The opt-in proxy answer is in the repo's self-hosting guide.
 - **Public beta, one maintainer.** Contribution is ~98% single-author and there are 60 open issues against 5.1k★. Treat it as promising infrastructure you can read, not as something with an SLA.
 - **The crawl/fetch half overlaps crawl4ai ③.** The genuinely non-duplicative part is the free search layer; don't add both to a pipeline just to have them.
 

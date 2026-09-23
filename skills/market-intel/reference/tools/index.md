@@ -9,8 +9,8 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 
 ## x-twitter
 - ★ [twitterapi.io](twitterapi-io.md), ② · resale X search/users/replies/trends, pay-per-use, native MCP
-- ★ [twikit (+ mcp-twikit)](twikit.md), ③④ · free self-host X read+write+DM, ready MCP
-- [twscrape](twscrape.md), ③ · self-host X search with account rotation
+- [twikit (+ mcp-twikit)](twikit.md), ③④ · free self-host X read+write+DM, ready MCP
+- ★ [twscrape](twscrape.md), ③ · self-host X search with account rotation
 - [X official API](x-official-api.md), ① · official read+write incl media, needs Basic $200/mo+
 - [Panniantong/Agent-Reach](agent-reach.md), ④③ · free multi-platform read/search router (X+Reddit+YT+GitHub+Bili+XHS), zero API fees (NEW 2026-07)
 - [FxEmbed](fxembed.md), ②③ · free zero-auth single post/thread JSON resolver (text+media+metrics), no key (NEW 2026-07)
@@ -29,6 +29,7 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 ## web-scraping
 - ★ [Tavily](tavily.md), ② · agent-ranked semantic search, free 1000/mo
 - ★ [Exa](exa.md), ② · neural search + content extract (skill exa-search)
+- [Parallel Search MCP](parallel.md), ② · keyless web search and focused page excerpts
 - ★ [Firecrawl](firecrawl.md), ② · JS-render scrape/crawl/extract (skill firecrawl)
 - ★ [Bright Data](brightdata.md), ② · strongest barrier-breaker, free 5k/mo no card
 - [DataForSEO](dataforseo.md), ② · cheap large-scale SERP/keywords/backlinks
@@ -191,6 +192,7 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 - [MediaCrawler](mediacrawler.md), ④ · 小红书/抖音/B站/微博/快手/知乎/贴吧 (7 中文平台)
 - [weibo-crawler](weibo-crawler.md), ④ · 微博 user/post crawler
 - [agent-browser](agent-browser.md), ④ · token-efficient Rust browser-agent CLI (.claude-plugin)
+- [OpenCLI](opencli.md), ④ · 182 per-site adapters → deterministic CLI over your logged-in Chrome (NEW 2026-09)
 - [camofox-browser](camofox-browser.md), ④ · fingerprint-spoofing browser on Camoufox (free)
 - [botasaurus](botasaurus.md), ④ · anti-detection Python scraping framework (omkarcloud scrapers' base)
 

@@ -45,4 +45,4 @@ The `@ref` indirection is the whole point: the model passes back a short handle 
 ## Failure signals & fallback
 Failed when: the CLI can't launch its bundled Chrome (missing binary / build), a `@ref` action errors with "ref not found" (stale snapshot, re-snapshot), or the target serves a bot interstitial (fingerprint block, agent-browser can't bypass it). **Fallback ladder:** (1) default back to the already-connected **playwright MCP** for the same act-like-human task; (2) for natural-language goal extraction, **browser-use**; (3) for fingerprint blocks, **camoufox**, **jo-inc/camofox-browser**, or **patchright**; (4) for vision-robust workflows resilient to layout changes, **Skyvern**.
 
-## Last verified: 2026-09 (repo facts — existence, stars, activity — re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)
+## Last verified: 2026-09 (repo facts, existence, stars, activity, re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)

@@ -41,4 +41,4 @@ Node: `const { chromium } = require('patchright');` then the usual `launchPersis
 ## Failure signals & fallback
 Failure looks like: persistent CAPTCHA/JS-challenge interstitials, `403`/`429`, Cloudflare "checking your browser" loops, or a `cf_clearance`/challenge page in the DOM that never resolves. **If patchright still gets blocked: (1)** add a residential proxy and retry (most ④ blocks are now IP-based); **(2)** escalate to **Bright Data Web Unlocker** (② route, free 5k/mo Rapid, no card) which absorbs both fingerprint *and* IP-reputation; **(3)** for managed self-host, **crawl4ai** (③, docker MCP) wraps similar auto-anti-bot. For ordinary JS-render scrapes that aren't actually barrier-blocked, **Firecrawl** (②) or the already-connected **playwright MCP** (④) is simpler than scripting patchright.
 
-## Last verified: 2026-09 (repo facts — existence, stars, activity — re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)
+## Last verified: 2026-09 (repo facts, existence, stars, activity, re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)

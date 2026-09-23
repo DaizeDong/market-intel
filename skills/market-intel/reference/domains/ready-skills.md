@@ -18,7 +18,7 @@ want to assemble MCPs from scratch, 现成的营销/调研 skill.
 | **sickn33/antigravity-awesome-skills** (40k★, active 2026-06) | catalog | broader multi-platform installable awesome-skills catalog | GitHub | **replaces ComposioHQ/awesome-claude-skills** (less-maintained); 40k★, last push 1d ago |
 | **Imbad0202/academic-research-skills** (46.3k★) | skill bundle | full academic-research pipeline: planning → lit review → methodology → drafting → peer review (v3.12.1 on 2026-06-15) | `/plugin marketplace add Imbad0202/academic-research-skills` |
 | **gtmagents/gtm-agents** (397★) | agents bundle | GTM agents: 67 plugins / 92 agents / 52 skills (sales pipeline, lead gen, cold-email personalization), Apache-2.0 | GitHub |
-| **Eronred/aso-skills** (1.5k★) | skill bundle | 40+ App Store Optimization skills (keyword/metadata/competitor/paywall/preview-video), backed by appeeky.com data | GitHub |
+| **Eronred/aso-skills** (2.1k★) | skill bundle | 40+ App Store Optimization skills (keyword/metadata/competitor/paywall/preview-video), backed by appeeky.com data | GitHub |
 | **DaizeDong/shopping-aggregator** ★ | packaged skill | **consumer shopping price comparison** (Amazon / eBay / Walmart / Target / Taobao / JD + Keepa / Camelcamelcamel / 慢慢买 + Capital One Shopping / Karma / 购物党); sister skill to market-intel | `/plugin install github:DaizeDong/shopping-aggregator` · [repo](https://github.com/DaizeDong/shopping-aggregator) |
 
 **Default pick:** Marketing/competitor/content → coreyhaines31/marketingskills (装了即用). SEO →
