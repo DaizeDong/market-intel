@@ -50,13 +50,14 @@ MANIFEST = {
     "pii_guard.py":       (["--tree"], False, True,  "no real private data in tracked files"),
     "dash_guard.py":      (["--tree"], False, True,  "no en/em dashes in prose"),
     "data_boundary.py":   ([],         False, True,  "no real-run output can land inside the repo"),
-    "check_doc_drift.py": ([],         False, False, "README badges vs plugin.json; 3 pre-existing "
-                                                     "badge failures owned by a separate change"),
+    "check_doc_drift.py": ([],         False, True,  "README badges vs plugin.json and source counts"),
     "check_drift.py":     ([],         False, True,  "shard and doc cross-references"),
     "check_p5_drift.py":  ([],         False, True,  "SKILL.md must not import refresh-side scripts"),
-    "l0_verify.py":       ([],         False, True,  "L0 install-guide mechanics"),
+    "l0_verify.py":       (["--selftest"], False, True, "deterministic L0 verdict regressions; no live-site assumptions"),
     "verify_matrix.py":   ([],         True,  True,  "registry, index and docs three-way, plus live "
                                                      "star claims (GitHub API)"),
+    "make_fixtures.py":   (["--check"], False, True, "public fixtures are reproducible synthetic data"),
+    "test_feedback_contract.py": ([], False, True, "feedback semantics and invalid-ledger regressions"),
 }
 
 # name -> reason. A checker here is deliberately not run by this entry point.
@@ -65,8 +66,16 @@ EXCLUDED = {
 }
 
 
+def checker_path(name):
+    """Security and style checks belong to their pinned submodules."""
+    shared = {"pii_guard.py": "guards", "data_boundary.py": "guards", "dash_guard.py": "style"}
+    if name == "test_feedback_contract.py":
+        return os.path.join(REPO, "tests", name)
+    return os.path.join(REPO, shared[name], "tools", name) if name in shared else os.path.join(HERE, name)
+
+
 def run(name, argv):
-    path = os.path.join(HERE, name)
+    path = checker_path(name)
     if not os.path.isfile(path):
         # A manifest entry whose file is gone is a broken manifest, not a pass. Never infer
         # "nothing to run" from a missing file.
@@ -84,6 +93,7 @@ def main():
     ap.add_argument("--with-net", action="store_true",
                     help="also run the checkers that call out to the network")
     ap.add_argument("--list", action="store_true", help="print the manifest and exit")
+    ap.add_argument("--base", help="explicit baseline for verify_matrix diff checks")
     a = ap.parse_args()
 
     if a.list:
@@ -99,6 +109,8 @@ def main():
         if net and not a.with_net:
             skipped.append(name)
             continue
+        if name == "verify_matrix.py" and a.base:
+            argv = [*argv, "--base", a.base]
         results.append((name, run(name, argv), req))
 
     print("\n" + "=" * 78)

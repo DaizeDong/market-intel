@@ -21,7 +21,9 @@ HTTP/npm/pypi use metrics/l0-cache.json (7-day TTL, keyed by URL/pkg).
 
 CLI: python tools/l0_verify.py --url <url> [--type <type>]
      exit 0 if PASS, 1 if BLOCK, 2 if UNCERTAIN.
-Run with --selftest (or no args) for the canonical fixtures.
+Run with --selftest (or no args) for deterministic synthetic regression tests.
+Use --live-selftest for the historical live-site expectations; an external outage
+is an observation, not a deterministic unit-test fixture.
 """
 from __future__ import annotations
 import argparse, datetime, io, json, os, re, socket, ssl, subprocess, sys
@@ -30,8 +32,8 @@ from urllib.parse import urlparse
 import requests
 
 # BOM-safe Windows stdout, matches verify_matrix.py / discover.py convention
-if sys.platform == "win32" and hasattr(sys.stdout, "buffer"):
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GH_CACHE_PATH = os.path.join(ROOT, "metrics", "gh-api-cache.json")
@@ -285,7 +287,7 @@ def _check_web(url: str, registry: bool = False) -> dict:
                 else:
                     verdict, reason = "PASS", f"HTTP {status}"
             except requests.exceptions.RequestException:
-                verdict, reason = "PASS", f"HTTP {status} (body sniff skipped)"
+                verdict, reason = "UNCERTAIN", f"HTTP {status} but body inspection failed"
         elif status in (301, 302, 307, 308):
             verdict, reason = "UNCERTAIN", f"redirect chain unresolved ({status})"
         elif status == 404:
@@ -469,7 +471,7 @@ SELF_TESTS = [
     ("https://www.npmjs.com/package/@modelcontextprotocol/server-filesystem", "npm", "PASS"),
 ]
 
-def _selftest() -> int:
+def _live_selftest() -> int:
     rows, passed = [], 0
     for url, ctype, expected in SELF_TESTS:
         try:
@@ -492,6 +494,16 @@ def _selftest() -> int:
     return 0 if passed == total else 1
 
 
+def _selftest() -> int:
+    import unittest
+    suite = unittest.defaultTestLoader.discover(os.path.join(ROOT, 'tests'), pattern='test_l0_verify.py')
+    if suite.countTestCases() == 0:
+        print('L0 regression tests missing', file=sys.stderr)
+        return 1
+    result = unittest.TextTestRunner(verbosity=1).run(suite)
+    return 0 if result.wasSuccessful() else 1
+
+
 # ---------------- CLI ----------------
 
 def main() -> int:
@@ -500,9 +512,12 @@ def main() -> int:
     ap.add_argument("--type", default="auto",
                     choices=["auto", "github", "web", "web-registry", "npm", "pypi"])
     ap.add_argument("--selftest", action="store_true",
-                    help="run canonical self-tests instead of a single URL")
+                    help="run deterministic regression tests instead of a single URL")
+    ap.add_argument("--live-selftest", action="store_true", help="check historical expectations against live sites")
     args = ap.parse_args()
 
+    if args.live_selftest:
+        return _live_selftest()
     if args.selftest or not args.url:
         return _selftest()
     result = verify(args.url, args.type)
