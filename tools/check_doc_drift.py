@@ -172,7 +172,7 @@ def get_readme_domain_badge(readme_path: str) -> tuple[int | None, int | None]:
     # shields.io uses `--` to escape literal dashes in labels, but the label
     # here is just "Source Matrix" → "Source%20Matrix-N%20domains". Match
     # the dash that separates label from value.
-    pat = re.compile(r"badge/Source%20Matrix-(\d+)%20domains")
+    pat = re.compile(r"badge/(?:Source%20Matrix|%E6%BA%90%E7%9F%A9%E9%98%B5)-(\d+)%20(?:domains|%E4%B8%AA%E6%96%B9%E5%90%91)", re.IGNORECASE)
     v, ln, _ = _find_line(readme_path, pat)
     if v is None:
         return None, None
@@ -460,10 +460,11 @@ def fix_drift(drifts: list[dict[str, Any]]) -> list[str]:
             )
         elif field.endswith("domain count badge"):
             new_text = re.sub(
-                r"(badge/Source%20Matrix-)(\d+)(%20domains)",
+                r"(badge/(?:Source%20Matrix|%E6%BA%90%E7%9F%A9%E9%98%B5)-)(\d+)(%20(?:domains|%E4%B8%AA%E6%96%B9%E5%90%91))",
                 lambda m: m.group(1) + str(n_domains) + m.group(3),
                 new_text,
                 count=1,
+                flags=re.IGNORECASE,
             )
         elif field.endswith("section heading domain count"):
             # EN section heading

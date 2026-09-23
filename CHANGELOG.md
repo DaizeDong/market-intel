@@ -2,6 +2,247 @@
 
 ## Unreleased
 
+## [0.30.0] - 2026-09-23
+
+- Separate current-client configuration, MCP discovery, capability calls and validated content; require dated original-page evidence for recency and repeated independent observations for stability claims.
+- Publish live-run contract v2. Preserve legacy gaps and typed failures, expose malformed records, and require documentation-scoped evidence before advancing a whole tool document's verification date.
+- Repair the unified checker paths after the guards/style submodule migration; require README drift checks and support both English and Chinese source-count badges.
+- Refresh Exa and Firecrawl interface guidance and add the keyless Parallel Search MCP route. Keep emerging browser adapters subject to capability checks.
+
+## [0.29.2], 2026-09-09, volatile-domain re-run, and a correction to 0.29.1's horizon headline
+
+An independent second pass over the same five volatile domains 0.29.1 swept three days earlier, run
+without reading 0.29.1's results first. Most of its value turned out to be negative space: it
+reproduced nearly every prior verdict, which is worth recording, and found two things the prior
+sweep missed.
+
+### The re-run agreed with itself, which is the boring and important part
+
+Thirteen discovery agents (5 domains × angle-②/angle-④, plus community angles on the two fastest
+domains, plus an H1 pulse) produced 12 landable candidates; adversarial verification refuted 9. On
+every candidate the two sweeps overlapped, the verdicts matched: `dreammis/social-auto-upload` ADD,
+and HOLD/WATCH on `Tencent/BrowserSkill`, `PawiX25/twifork`, `Altimis/Scweet`, `nirholas/XActions`,
+`CloakHQ/CloakBrowser`. Per the D5b correlation lesson, two agreeing runs on the same model are weak
+evidence on their own, so the agreements are logged and not treated as confirmation. **The
+disagreements are the deliverable.**
+
+### browser-automation: `jackwener/OpenCLI` (29.1k★), ADD
+
+Absent from the matrix entirely, not in a shard, not in the watchlist, not in the reject log, and
+the 0.29.1 sweep did not surface it. 182 prebuilt per-site adapters (`clis/`, counted via `gh api`)
+expose a website as a deterministic subcommand driven through a real logged-in Chrome profile. The
+adapter list crosses six of this matrix's own domains: twitter, reddit, hackernews, producthunt,
+xiaohongshu, douyin, weibo, zhihu, bilibili, taobao, xianyu, amazon, binance, coingecko, xueqiu.
+
+It occupies a real gap between the neighbours rather than duplicating one: playwright MCP is
+low-level and you write the selectors, browser-use is LLM-driven and pays tokens per run, and a
+hand-written adapter returns the same shape every time at zero token cost until the site changes. It
+is an **access** play, not an anti-detection one, it reuses a profile rather than spoofing a
+fingerprint, so a fingerprint block still routes to camoufox/nodriver.
+
+What carried it through verification was **npm, not stars**: 84,338 downloads last month at a flat
+~3k/day weekday profile. Recorded honestly against it: a 470:1 star:watcher ratio that is normally a
+D4 inflation shape (argued down by 2,855 forks and a 933/85/65/30/27/21 contributor tail across 100+
+accounts, but flagged for a slope re-check next sweep), 933 of ~1,200 commits on one account, 248
+open issues against 182 scraped-UI adapters, and a Hacker News submission that drew 6 points, so no
+community troubleshooting base exists yet.
+
+Four-file landing: shard row + `tools/opencli.md` + `tools/index.md` row + `registry.json`
+(179 → 180 entries, repo 106 → 107).
+
+### x-twitter: the Nitter tombstone gains a legal overhang (not a death code)
+
+X Corp sent cease-and-desist letters to Nitter and XCancel (`zedeus/nitter` issue #1442, opened
+2026-08-25, 33 comments, still open); every public instance was down by 2026-08-27. **This is
+explicitly not a D-404.** The repo is machine-alive, not archived, pushed 2026-09-07, and C4
+forbids tombstoning a live source, so the edit is to the *self-host* advice only: the cost of that
+route is now named-operator legal exposure on top of session tokens.
+
+### Correction: 0.29.1's H1 headline was wrong about its own inputs
+
+The 0.29.1 pulse states that no H1 class produced "a barrier route opening or closing, or an
+acquisition affecting commercial data." Three such events sit inside that window, each confirmed at a
+source returning HTTP 200 on 2026-09-09: the Nitter C&D above, Nvidia's official announcement that it
+will acquire Hugging Face, and AWS acquiring DuckLabs. The prior entry's own watchlist row for
+`zedeus/nitter` already contradicted its headline.
+
+The *verdict* does not change, everything is FOLD, no NEW-DOMAIN, no NEW-SKILL, no new territory,
+but a headline that reads "nothing happened" when three things happened is the kind of drift the
+protocol exists to catch. The correction is appended to `discovery-state.md` rather than overwriting
+the earlier text, so the disagreement stays visible.
+
+- **Nvidia/Hugging Face** touches two live assets: the HF Daily Papers row in `frontier-research.md`
+  and **discovery surface E3** (`huggingface.co/api/spaces?sort=trendingScore`) in the refresh
+  protocol. Risk note only; no route has changed. The widely-quoted ~$12.9B figure is third-party
+  blog reporting, **not** on the official page, per C5/C6 it is not quoted as fact anywhere.
+- **AWS/DuckLabs** is logged so the next scan does not re-discover it as news. DuckDB is local
+  analytics infrastructure, not a queryable source; the matrix cites it nowhere. No shard edit.
+- **Cloudflare Kitesurf** was the window's closest thing to a new category and still is not one: a
+  cheaper non-Chromium substrate under the same route-④ tooling. Cloudflare's own post says it cannot
+  negotiate TLS-fingerprint bot challenges, so it does not touch the anti-detect picks. WATCH.
+
+### Weekly surface inbox: the harness said there was none, and there was
+
+The run prompt reported "no weekly surface inbox found, first month, or the weekly poller has not run
+yet." The poller has in fact been running since 2026-07-16: 137 entries across 8 dates, the most
+recent 2026-09-07, in the private companion store. The wrapper's inbox lookup does not find it. **The
+inbox was consumed manually this run**; the lookup is worth fixing, because a discovery pipeline that
+silently reports empty is the exact failure mode the E-class surfaces were built to avoid.
+
+From it, one candidate was worth verifying and did not clear the bar: `0xchasercat/draco` (97★, 5
+forks, 1 contributor), a single-binary Rust "Firecrawl drop-in you own entirely" from a Show HN with
+11 points. WATCH, logged mainly because it is the **second** instance of the drop-in-Firecrawl-
+replacement shape after `us/crw`, a third would make the pattern worth a shard line even if no single
+implementation clears the bar.
+
+### Deliberately not done, so the gaps are stated rather than left to read as coverage
+
+- **Angle-④ came back negative in four of five domains, and that is the finding.** No free/browser
+  candidate appeared this quarter that replaces Bright Data (web-scraping), Nansen (crypto-defi), or
+  Publora/Ayrshare for Western text platforms (social-publishing). Reported as a negative result
+  rather than padded with a marginal ADD.
+- **Star refreshes were budget-limited by CHURN, not skipped for convenience.** Three shards entered
+  this run already at ~32% churn against `main` from 0.29.1, leaving roughly three diff-lines of
+  headroom each before the 40% CHURN gate discards the whole sweep. Every star claim in the five
+  shards was re-checked against live `gh api`; all sit inside the 25% STAR tolerance, so none
+  *required* an edit, and cosmetic refreshes were deliberately deferred rather than spend headroom a
+  real finding needed. The x-twitter Nitter note was itself trimmed from six lines to three for this
+  reason.
+- **`frontier-research.md` was not edited** despite the Hugging Face ownership change; it is outside a
+  volatile-domain sweep's scope. Carried as a watchlist row for the next full sweep.
+- **Tool-doc `Last verified` dates were not mass-advanced.** Repo liveness and stars were re-checked
+  for the five swept domains, but headline prices were not re-fetched, and R2 permits a bump only
+  after an actual re-check. Advancing 60 docs on a partial verification would make the STALE gate
+  report a freshness that was never established.
+
+
+## [0.29.1], 2026-09-06, volatile-domain sweep
+
+September is not a quarterly month, so this is the volatile-five pass (x-twitter, web-scraping,
+social-publishing, crypto-defi, browser-automation) plus a light this-month horizon pulse, not a
+full 13-domain sweep.
+
+AUDIT: workflow-L0L1 verdict=pass, editor and verifier were separate agents. Eleven blind
+single-angle discovery agents produced candidates; each proposed ADD/REPLACE was then handed to an
+independent adversarial verifier told to default to refusal, which re-pulled every number itself
+rather than trusting the discovery agent's. **That gate did work rather than rubber-stamp: of six
+candidates proposed for landing, two were refuted and held** (Tencent/BrowserSkill, refuted because
+`nodriver` already documents the profile-reuse it claimed as novel; mahrtayyab/tweety, refuted for
+benchmarking itself against twikit when twscrape is the shard's actually-live ③ row).
+
+### The finding that mattered: x-twitter's free default pick had quietly died
+
+The shard recommended **twikit + adhikasp/mcp-twikit** as the free route, with a caveat saying twikit
+was "4.5mo" unpushed. Re-checking the commit list rather than `pushed_at` changed the picture: the
+2026-03-10 push was **README-only**, the last actual code commit was **2025-04-22**, and PyPI is
+frozen at 2.3.3 (2025-02-07). The MCP half is worse, `adhikasp/mcp-twikit` is **17.8 months**
+silent, an unmaintained wrapper around an unmaintained library, and it was still being sold in the
+Default pick line as "ready MCP".
+
+Neither repo is archived and both still install, so **no C4 death code was executed**, the burden of
+proof for removal was not met, and a machine-alive source is not deletable. What changed is the
+recommendation: the Default pick now points at **vladkens/twscrape** (2.7k★, pushed 2026-08-28,
+v0.19.1 refreshed X's GraphQL operation IDs), the route stays free ③/④ so there is no C2 downgrade,
+and the twikit row now carries the real dates. The "use twikit" pointer inside the Avoid-list note
+was corrected to match, it had been contradicting the rest of the shard.
+
+Also tombstone-hardened: `elizaOS/agent-twitter-client` was carrying the prose claim 原仓库下架.
+`gh api` now returns a hard **404**, so it is labelled **D-404** with the date rather than left as an
+assertion.
+
+### Added, four sources, each verified twice
+
+- **web-scraping · Scrapling** (`D4Vinci/Scrapling`, 78.8k★), the free tier had no whole-stack
+  option. Adds a TLS-impersonating HTTP tier, a StealthyFetcher that **solves** Turnstile/Interstitial
+  rather than only evading fingerprints, and adaptive selectors that relocate after markup drift, a
+  capability no row on that shard had in any tier. Explicitly not a REPLACE: its own README hands
+  enterprise-grade WAFs to a paid partner and it has no SERP layer, so Bright Data ② and Tavily/Exa ②
+  are untouched. It already had a tool doc; this sweep promoted it to a shard row.
+- **web-scraping · wigolo** (`KnockOutEZ/wigolo`, 5.1k★), fills the shard's only genuinely free
+  **search** gap. Every search row was route ②: Tavily and Exa are both key-gated and Tavily's free
+  tier caps at 1,000 credits/mo. wigolo does 18-engine SERP fusion with a SearXNG fallback, keyless,
+  $0/query. It does **not** break Cloudflare/DataDome, it returns a labelled `blocked_by_challenge`,
+  which is why the Default architecture line did not change.
+- **social-publishing · dreammis/social-auto-upload** (14.8k★), the ④ table had no automated CN
+  video-publish route, and the shard said so itself: MediaCrawler is a crawler that cannot post, and
+  the AiToEarn row is annotated "publish manually not automated". This closes exactly that gap with a
+  `--headless` CLI and four bundled Claude-Code skills. The honest cost is stated in the row: CN
+  风控 is the harshest surface in the matrix and the price is a banned account, not dollars.
+- **crypto-defi · ccxt**, not a new source but a false claim retired. The row said route `n/a`,
+  "python lib", i.e. write your own glue. Upstream now ships a **first-party `ccxt-mcp`** in-repo
+  (npm since 2026-08-25), adding ccxt.pro WebSocket order-book streaming, which is precisely the
+  "spread monitor" capability the row already promised. The row identity was deliberately left
+  byte-identical so the change reads as the edit it is.
+
+### Changed, corrections that were overdue
+
+- **Pricing, now sourced instead of estimated.** Publora entered in 2026-06 on an unverified
+  "50-80% cost cut". Fetched from publora.com/pricing 2026-09-06: Starter **free forever** (3
+  accounts, API+MCP, every platform except X), Pro **$29.95/mo**, Agency custom, a **79.9%** cut
+  against Ayrshare's $149/mo, the top of the guessed band. Buffer's "free tier works" is true and
+  re-verified, but the caps were never stated and the caps are the story: 3 channels, 3,000 API
+  requests/mo, 10 queued posts per channel, and paid is priced **per channel**, so eight channels is
+  $40/mo rather than $5.
+- **Two "active" claims that were never true.** `vooi-app/mcp` was admitted as "active 2026-06"; it
+  was created and pushed within 39 minutes on 2026-06-08 and has had zero commits since. The Coinbase
+  Agentic Wallet MCP was labelled "NEW 2026-07" while its repo had last been pushed 2025-10-22, it
+  was already ~9 months stale on the day it was added. Both stay (machine-alive, C4), both now say so.
+- **nodriver is stalling**: 3.8 months unpushed with an empty releases list, the only repo on the
+  browser-automation shard without a recent push, in a domain that turns over in weeks. patchright and
+  camoufox now carry the escalation path.
+- **Star counts refreshed from live `gh api`, never from memory** (C1). Two were already **blocking
+  the gate before this run started** and are unrelated to the swept domains: `gosom/google-maps-scraper`
+  4.3k→5.8k and `SaseQ/discord-mcp` 356→475. Inside the sweep: camoufox 9.1k→11.7k and MediaCrawler
+  50k→64.5k were both within a few points of the 25% block threshold and would have failed next month.
+  Also crawl4ai 68.1k→81.8k, browser-use 97.9k→112.7k, agent-browser 35.6k→42.1k, Scrapegraph 27k→30.6k,
+  patchright 3.4k/3.9k→4.4k, xiaohongshu-mcp 14k→15.7k, linkedin-mcp-server 3.0k→3.4k, postiz-agent
+  388→450, twscrape 2.5k→2.7k, Blockscout 40→45.
+- **MediaCrawler now says it is read-only.** It keeps being read as a CN posting route in a
+  publishing shard; it scrapes and cannot publish.
+
+### Horizon pulse: no new territory
+
+All four H1 classes scanned for 2026-08-01..2026-09-06. No platform API-policy change, no barrier
+route opened or closed, no acquisition affecting commercial data. Four watchlist angles recur at
+scan 3 (agent-memory, MCP deployment shape, prediction markets, x402) with **no verdict changes**;
+the prediction-markets NEW-DOMAIN proposal from 2026-07 **remains a proposal awaiting human
+approval** and was not landed. x402's canonical repo has moved out of the Coinbase org to
+`x402-foundation/x402`, governance news, still a payment rail rather than a queryable source.
+
+Two new angles, both folded rather than promoted: the **DeepSeek Harness** plugin-distribution
+surface (a harness, so no new data becomes reachable → FOLD to mcp-ecosystem as a discovery surface)
+and **GEO/AEO** answer-engine visibility tracking (recurrence now 2, so nominally arguable, and
+declined anyway, measuring rank on search-shaped surfaces is seo-keywords with different engines).
+**No new domain or sub-skill was created**; structural change stays a human decision.
+
+### Deliberately not done
+
+- **The weekly surface inbox was reported empty in the run prompt, but the poller data existed** in
+  the companion repo (126 rows through 2026-08-31). It was read and consumed. Its yield was low and
+  worth recording as a signal-quality note: E3 was almost entirely HuggingFace image/video Spaces and
+  E6 was AI-YouTube, neither relevant to commercial-data tooling; the E1 rows read like an alphabetic
+  crawl of PulseMCP rather than the curated newsletter the protocol describes. **The single relevant
+  lead in 95 rows** was `0xchasercat/draco` (Show HN, "self-hostable Firecrawl alternative"), which
+  was checked and held: 1 contributor, 0 subscribers, and across all 10 HN comments **not one person
+  reports having run it**. One E2 row (`Ryze-AI-Adgent/open-seo-mcp-skills`) went to the reject log
+  at 542★ with zero subscribers. The inbox's surface mix is worth tuning before next month.
+- **x-twitter stopped at 34% churn and social-publishing at 33%** against the 40% rewrite gate. Both
+  had further true-but-lower-value edits available (EnesCinr/twitter-mcp is 13.7 months untouched and
+  still offered without a freshness note; the snscrape tombstone's D-STALE re-confirmation was
+  shortened to a one-line successor fix to buy budget for a reader-facing contradiction). Deferred
+  rather than risk a BLOCK discarding the whole sweep.
+- **Ayrshare was not re-priced.** Its $149/mo figure was carried forward as the comparison baseline
+  and is stated here rather than left silent, since an unstated omission reads as a confirmation.
+- **`activation-checklist.md` header counts remain stale**, unchanged from the prior entry, same
+  reasoning.
+- Tool docs re-verified this sweep carry a qualified date: `Last verified: 2026-09 (repo facts
+  re-pulled from gh api; usage notes carried forward)`. The machine-checkable half was genuinely
+  re-checked and the prose half was not, and the line says which is which rather than implying a
+  full re-read.
+
+Registry 177 → 179 (repo 104 → 106).
+
+
 ### Register skillsmp, the source whose absence produced a confident false negative
 
 `ready-skills` catalogued twelve hand-curated awesome-lists and not the one aggregator that indexes

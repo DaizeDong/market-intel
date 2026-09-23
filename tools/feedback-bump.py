@@ -16,10 +16,10 @@ reference/refresh-protocol.md):
          - price_pressure per domain (for P2 D-PRICE wave detection)
 
     2. Cleanup pass §8 "Auto-advance ## Last verified": for every slug that
-       appears with outcome=verified, advance its
+       carries documentation-scoped outcome=verified with an evidence reference, advance its
        reference/tools/<slug>.md `## Last verified: YYYY-MM` line to the month
-       of the most recent verified run. Truthful "I just used it and it worked"
-       is stronger evidence than a scheduled re-check.
+       of the most recent documentation check. A successful capability call alone
+       does not re-verify pricing, installation, or the other claims in a tool document.
 
 When to run:
     Step -1 of EVERY refresh sweep, before Horizon scan.
@@ -64,6 +64,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                                 "guards", "tools"))
 from datadir import resolve_data_dir  # noqa: E402
+from live_run_contract import VALID_OUTCOMES, REVIEW_OUTCOMES, documentation_verified
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TOOLS_DIR = REPO_ROOT / "skills" / "market-intel" / "reference" / "tools"
@@ -105,8 +106,8 @@ def reconfigure_stdout_utf8() -> None:
 def load_live_runs(path: Path, since: str) -> list[dict]:
     """Read live-runs.jsonl, tolerate UTF-8 BOM, and filter by ts >= since.
 
-    Each non-empty line is a JSON object. Malformed lines are skipped with a
-    warning to stderr — we never want a bad line to block a sweep.
+    Malformed lines become explicit unknown events. A damaged ledger must not
+    produce an empty, clean report or expose raw values in an error message.
     """
     if not path.exists():
         print(f"WARN: live-runs.jsonl not found at {path}", file=sys.stderr)
@@ -121,11 +122,20 @@ def load_live_runs(path: Path, since: str) -> list[dict]:
                 continue
             try:
                 obj = json.loads(line)
-            except json.JSONDecodeError as e:
-                print(f"WARN: skipping malformed line {lineno}: {e}", file=sys.stderr)
+                if not isinstance(obj, dict) or any(not isinstance(obj.get(k), str)
+                        for k in ('ts', 'domain', 'source', 'outcome')):
+                    raise ValueError('invalid record shape')
+                stamp = datetime.fromisoformat(obj['ts'].replace('Z', '+00:00'))
+                stamp = stamp.replace(tzinfo=timezone.utc) if stamp.tzinfo is None else stamp
+            except (ValueError, TypeError):
+                obj = {'ts': since, 'source': '', 'domain': '', 'outcome': 'invalid_record',
+                       'detail': f'Ledger line {lineno} needs review'}
+                print(f"WARN: ledger line {lineno} is invalid; recorded for review", file=sys.stderr)
+                entries.append(obj)
                 continue
-            ts = obj.get("ts", "")
-            if ts >= since:
+            boundary = datetime.fromisoformat(since.replace('Z', '+00:00'))
+            boundary = boundary.replace(tzinfo=timezone.utc) if boundary.tzinfo is None else boundary
+            if stamp >= boundary:
                 entries.append(obj)
     return entries
 
@@ -239,6 +249,8 @@ def bucket_entries(entries: list[dict]) -> dict:
     open_questions: list[dict] = []
     price_pressure: Counter[str] = Counter()
     unresolved_sources: list[dict] = []
+    unknown_outcomes: list[dict] = []
+    verification_observations: list[dict] = []
 
     for e in entries:
         outcome = e.get("outcome") or ""
@@ -250,17 +262,21 @@ def bucket_entries(entries: list[dict]) -> dict:
         by_outcome[outcome] += 1
 
         # user_correction always wins (highest priority signal)
-        if user_correction is not None:
+        if user_correction is not None or outcome == "user_correction":
             top_priority.append(
                 {
                     "ts": ts,
                     "domain": domain,
                     "source": source,
-                    "user_correction": user_correction,
+                    "user_correction": user_correction if user_correction is not None else e.get("detail", ""),
                 }
             )
 
         slug = extract_slug(source)
+        if outcome not in VALID_OUTCOMES:
+            unknown_outcomes.append({"ts": ts, "source": source, "outcome": outcome})
+            if domain:
+                hot_domains.add(domain)
         if slug is None and source and outcome in {"dead", "verified", "price_mismatch"}:
             # only flag unresolved when slug extraction actually matters for this outcome
             unresolved_sources.append({"ts": ts, "source": source, "outcome": outcome})
@@ -274,7 +290,7 @@ def bucket_entries(entries: list[dict]) -> dict:
             if domain:
                 hot_domains.add(domain)
                 price_pressure[domain] += 1
-        elif outcome == "coverage_gap":
+        elif outcome in REVIEW_OUTCOMES:
             if domain:
                 hot_domains.add(domain)
             open_questions.append(
@@ -282,6 +298,7 @@ def bucket_entries(entries: list[dict]) -> dict:
                     "ts": ts,
                     "domain": domain,
                     "source": source,
+                    "outcome": outcome,
                     "detail": e.get("detail", ""),
                 }
             )
@@ -289,7 +306,10 @@ def bucket_entries(entries: list[dict]) -> dict:
             if slug:
                 forced_recheck.add(slug)
         elif outcome == "verified":
-            if slug:
+            verification_observations.append({"ts": ts, "source": source,
+                "capability": e.get("capability"), "verification_scope": e.get("verification_scope"),
+                "evidence_ref": e.get("evidence_ref")})
+            if slug and documentation_verified(e):
                 # keep the latest ts for this slug
                 prev = auto_bump_slugs.get(slug)
                 if prev is None or ts > prev:
@@ -304,6 +324,8 @@ def bucket_entries(entries: list[dict]) -> dict:
         "open_questions": open_questions,
         "price_pressure": dict(price_pressure),
         "unresolved_sources": unresolved_sources,
+        "unknown_outcomes": unknown_outcomes,
+        "verification_observations": verification_observations,
     }
 
 
@@ -323,6 +345,8 @@ def build_report(buckets: dict, since: str, total: int) -> dict:
         "by_outcome": buckets["by_outcome"],
         "price_pressure": buckets["price_pressure"],
         "unresolved_sources": buckets["unresolved_sources"],
+        "unknown_outcomes": buckets["unknown_outcomes"],
+        "verification_observations": buckets["verification_observations"],
     }
 
 
@@ -348,7 +372,7 @@ def print_report(report: dict) -> None:
     for s in report["forced_recheck_slugs"]:
         print(f"  - {s}")
 
-    print(f"\nAuto-bump candidates (verified outcomes): {len(report['auto_bump_slugs'])}")
+    print(f"\nAuto-bump candidates (documentation scope with evidence): {len(report['auto_bump_slugs'])}")
     for s in report["auto_bump_slugs"]:
         ts = report["auto_bump_detail"].get(s, "?")
         print(f"  - {s} (latest verified ts: {ts})")
@@ -367,6 +391,8 @@ def print_report(report: dict) -> None:
               f"{len(report['unresolved_sources'])}")
         for u in report["unresolved_sources"]:
             print(f"  - {u['ts']} [{u['outcome']}] {u['source']!r}")
+    if report["unknown_outcomes"]:
+        print(f"\nWARN: {len(report['unknown_outcomes'])} unknown outcome(s); review writer contract")
 
 
 # --- p2 trigger ------------------------------------------------------------
@@ -532,7 +558,14 @@ def main(argv: list[str] | None = None) -> int:
         report["bump_results"] = results
 
     if args.out:
-        out_path = Path(args.out)
+        data_root = resolve_data_dir(SKILL)
+        if data_root is None:
+            raise RuntimeError("private companion DATA must be initialized before writing feedback")
+        data_root = data_root.resolve()
+        out_path = Path(args.out).expanduser()
+        out_path = (out_path if out_path.is_absolute() else data_root / out_path).resolve()
+        if out_path == data_root or not out_path.is_relative_to(data_root):
+            raise ValueError("feedback report must be beneath private companion DATA")
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(report, indent=2, ensure_ascii=False),
                             encoding="utf-8")
@@ -544,7 +577,7 @@ def main(argv: list[str] | None = None) -> int:
     #   0 otherwise
     if p2:
         return 2
-    if report["hot_domains"]:
+    if report["hot_domains"] or report["unknown_outcomes"]:
         return 1
     return 0
 
