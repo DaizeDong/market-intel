@@ -2,7 +2,7 @@
 """Semi-automatic draft helper for the 6-step `runbooks/fix-broken-tool.md` incident flow.
 
 User describes an incident in 1-2 sentences. Helper:
-  - Parses it via `claude -p` into a structured {slug, outcome, detail, domain, d_code}.
+  - Parses it via `llmcall agent` into a structured {slug, outcome, detail, domain, d_code}.
   - Drafts the 6 step artifacts (live-runs.jsonl entry, D-code rationale, shard edit
     suggestion, sources-index advisory, config-side reminder, commit message).
   - Prints everything to stdout for human review.
@@ -21,8 +21,8 @@ Usage:
 Exit codes:
   0  drafts generated cleanly
   1  parse error (bad LLM JSON, bad CLI args)
-  2  claude -p invocation error
-  3  claude CLI not on PATH
+  2  llmcall agent invocation error
+  3  llmcall interface unavailable
 """
 from __future__ import annotations
 
@@ -80,10 +80,7 @@ def live_runs_path() -> str:
 DOMAINS_DIR = os.path.join(ROOT, "skills", "market-intel", "reference", "domains")
 SOURCES_INDEX = os.path.join(ROOT, "skills", "market-intel", "reference", "sources-index.md")
 
-VALID_OUTCOMES = {
-    "dead", "barrier_found", "coverage_gap",
-    "price_mismatch", "verified", "user_correction",
-}
+from live_run_contract import SCHEMA_VERSION, VALID_OUTCOMES
 VALID_D_CODES = {"D-404", "D-PRICE", "D-STALE", "D-TOS", "D-SUPERSEDED", "none"}
 VALID_DOMAINS = {
     "x-twitter", "reddit-community", "web-scraping", "ecommerce-arbitrage",
@@ -103,12 +100,12 @@ D_CODE_EXPLANATIONS = {
 
 
 # ─── LLM bridge ──────────────────────────────────────────────────────────────
-def _run_claude(prompt: str, stdin_payload: Optional[str] = None, timeout: int = 180) -> str:
-    """Parse via the shared llmcall chain (codex -> cc -> claude; read-only, one-shot). Extra bulk
+def _run_agent(prompt: str, stdin_payload: Optional[str] = None) -> str:
+    """Draft via the installed llmcall interface and its current defaults. Extra bulk
     context is folded into the prompt (llmcall takes a single prompt on stdin). Returns text on
     success, raises RuntimeError if the whole chain failed."""
     full = f"{prompt}\n\n{stdin_payload}" if stdin_payload else prompt
-    r = _llmcall(full, timeout=timeout)
+    r = _llmcall(full, mode="agent")
     if not r:
         raise RuntimeError(f"llmcall chain failed: {r.error}")
     return r.text.strip()
@@ -122,11 +119,11 @@ _INCIDENT_SCHEMA = {"type": "object", "required": ["slug", "outcome", "detail", 
 
 # ─── step 2: parse the incident into structure ───────────────────────────────
 def parse_incident(user_text: str) -> dict:
-    """Ask claude -p to extract {slug, outcome, detail, domain, d_code} from free text."""
+    """Ask llmcall agent to extract {slug, outcome, detail, domain, d_code} from free text."""
     prompt = (
         "You are parsing a market-intel incident report. Extract these fields:\n"
         "- slug: tool slug (e.g. \"funding-rates-mcp\" or \"kukapay/funding-rates-mcp\" or \"barker\")\n"
-        "- outcome: one of [dead, barrier_found, coverage_gap, price_mismatch, verified, user_correction]\n"
+        f"- outcome: one of {sorted(VALID_OUTCOMES)}\n"
         "- detail: 1-line specific observation (<=200 chars, include evidence like dates/URLs)\n"
         "- domain: one of [x-twitter, reddit-community, web-scraping, ecommerce-arbitrage, "
         "finance-markets, crypto-defi, seo-keywords, social-publishing, content-cms, leadgen-crm, "
@@ -140,17 +137,16 @@ def parse_incident(user_text: str) -> dict:
         "\"d_code\":\"D-404\"}\n\n"
         f"Incident description: {user_text}"
     )
-    r = _llmcall(prompt, schema=_INCIDENT_SCHEMA, timeout=180)
+    r = _llmcall(prompt, mode="agent", schema=_INCIDENT_SCHEMA)
     if not r:
         # covers both a dead chain and a reply that never validated (llmcall already retried once)
         print(f"ERROR: failed to parse incident (chain/schema failed): {r.error}", file=sys.stderr)
-        print(f"--- last reply ---\n{r.text}", file=sys.stderr)
         sys.exit(1)
     data = r.data
     # Light validation, coerce instead of erroring, surface warnings.
     warnings = []
     if data.get("outcome") not in VALID_OUTCOMES:
-        warnings.append(f"outcome={data.get('outcome')!r} not in canonical 6 — review manually")
+        warnings.append(f"outcome={data.get('outcome')!r} is unknown; review the live-run contract")
     if data.get("domain") not in VALID_DOMAINS:
         warnings.append(f"domain={data.get('domain')!r} unknown — shard edit will be skipped")
     if data.get("d_code") not in VALID_D_CODES:
@@ -161,7 +157,7 @@ def parse_incident(user_text: str) -> dict:
 
 # ─── step 3: shard edit suggestion ───────────────────────────────────────────
 def suggest_shard_edit(slug: str, d_code: str, domain: str, detail: str) -> Optional[str]:
-    """Read the relevant shard, ask claude -p for the exact FROM/TO line edit.
+    """Read the relevant shard, ask llmcall agent for the exact FROM/TO line edit.
 
     Returns suggestion text or None if shard doesn't exist / d_code is 'none'.
     """
@@ -192,9 +188,9 @@ def suggest_shard_edit(slug: str, d_code: str, domain: str, detail: str) -> Opti
         "NOTES:\n<grep the shard for the closest match>"
     )
     try:
-        return _run_claude(prompt, stdin_payload=shard_text)
+        return _run_agent(prompt, stdin_payload=shard_text)
     except RuntimeError as e:
-        return f"(claude -p failed for shard edit: {e})"
+        return f"(llmcall agent failed for shard edit: {e})"
 
 
 # ─── step 4: sources-index advisory ──────────────────────────────────────────
@@ -216,9 +212,9 @@ def sources_index_advisory(slug: str, d_code: str, domain: str) -> str:
         "ACTION: <skip | edit-after-shard-default-changes | other>"
     )
     try:
-        return _run_claude(prompt, stdin_payload=idx_text)
+        return _run_agent(prompt, stdin_payload=idx_text)
     except RuntimeError as e:
-        return f"(claude -p failed for sources-index check: {e})"
+        return f"(llmcall agent failed for sources-index check: {e})"
 
 
 # ─── step 6: commit message ──────────────────────────────────────────────────
@@ -240,9 +236,9 @@ def suggest_commit_message(slug: str, d_code: str, domain: str, detail: str) -> 
         "Output ONLY the commit message text, no markdown fences, no preamble."
     )
     try:
-        return _run_claude(prompt)
+        return _run_agent(prompt)
     except RuntimeError as e:
-        return f"(claude -p failed for commit message: {e})\nFallback skeleton:\n" + (
+        return f"(llmcall agent failed for commit message: {e})\nFallback skeleton:\n" + (
             f"incident: {slug} {d_code_for_msg}\n\n"
             f"{detail}\n\n"
             "Per runbooks/fix-broken-tool.md."
@@ -255,14 +251,18 @@ def build_live_runs_entry(struct: dict) -> str:
     the existing entries (sample read at write time) use YYYY-MM-DD."""
     today = dt.date.today().isoformat()
     entry = {
+        "schema_version": SCHEMA_VERSION,
         "ts": today,
         "domain": struct.get("domain", "<unknown>"),
         "source": f"shard/{struct.get('slug', '<unknown>')}",
-        "route": "①",  # best-guess default; user can edit
+        "route": struct.get("route", "unknown"),
         "outcome": struct.get("outcome", "<unknown>"),
         "detail": struct.get("detail", ""),
-        "user_correction": None,
+        "user_correction": struct.get("user_correction"),
     }
+    for field in ("capability", "client", "verification_scope", "evidence_ref"):
+        if struct.get(field) is not None:
+            entry[field] = struct[field]
     return json.dumps(entry, ensure_ascii=False)
 
 

@@ -1,0 +1,129 @@
+{
+  "legacy_gaps": [
+    {
+      "ts": "2020-01-01",
+      "domain": "web-scraping",
+      "source": "shard/example-source",
+      "detail": "Generated synthetic observation",
+      "user_correction": null,
+      "outcome": "unverifiable"
+    },
+    {
+      "ts": "2020-01-01",
+      "domain": "web-scraping",
+      "source": "shard/example-source",
+      "detail": "Generated synthetic observation",
+      "user_correction": null,
+      "outcome": "fallback_used"
+    }
+  ],
+  "unknown": [
+    {
+      "ts": "2020-01-01",
+      "domain": "web-scraping",
+      "source": "shard/example-source",
+      "detail": "Generated synthetic observation",
+      "user_correction": null,
+      "outcome": "synthetic_unknown_event"
+    }
+  ],
+  "unscoped_verified": [
+    {
+      "ts": "2020-01-01",
+      "domain": "web-scraping",
+      "source": "shard/example-source",
+      "detail": "Generated synthetic observation",
+      "user_correction": null,
+      "outcome": "verified"
+    }
+  ],
+  "documentation_verified": [
+    {
+      "ts": "2020-01-01",
+      "domain": "web-scraping",
+      "source": "shard/example-source",
+      "detail": "Generated synthetic observation",
+      "user_correction": null,
+      "outcome": "verified",
+      "verification_scope": "tool_documentation",
+      "evidence_ref": "https://example.com/documentation-check"
+    }
+  ],
+  "documentation_without_evidence": [
+    {
+      "ts": "2020-01-01",
+      "domain": "web-scraping",
+      "source": "shard/example-source",
+      "detail": "Generated synthetic observation",
+      "user_correction": null,
+      "outcome": "verified",
+      "verification_scope": "tool_documentation"
+    }
+  ],
+  "correction_event": [
+    {
+      "ts": "2020-01-01",
+      "domain": "web-scraping",
+      "source": "shard/example-source",
+      "detail": "Generated synthetic observation",
+      "user_correction": null,
+      "outcome": "user_correction"
+    }
+  ],
+  "typed_failures": [
+    {
+      "ts": "2020-01-01",
+      "domain": "web-scraping",
+      "source": "shard/example-source",
+      "detail": "Generated synthetic observation",
+      "user_correction": null,
+      "outcome": "transport_error"
+    },
+    {
+      "ts": "2020-01-01",
+      "domain": "web-scraping",
+      "source": "shard/example-source",
+      "detail": "Generated synthetic observation",
+      "user_correction": null,
+      "outcome": "auth_failed"
+    },
+    {
+      "ts": "2020-01-01",
+      "domain": "web-scraping",
+      "source": "shard/example-source",
+      "detail": "Generated synthetic observation",
+      "user_correction": null,
+      "outcome": "quota_exceeded"
+    },
+    {
+      "ts": "2020-01-01",
+      "domain": "web-scraping",
+      "source": "shard/example-source",
+      "detail": "Generated synthetic observation",
+      "user_correction": null,
+      "outcome": "content_invalid"
+    }
+  ],
+  "invalid_records": [
+    null,
+    7,
+    {
+      "ts": "not-a-date",
+      "domain": "web-scraping",
+      "source": "shard/example-source",
+      "detail": "Generated synthetic observation",
+      "user_correction": null,
+      "outcome": "verified"
+    },
+    {
+      "ts": "2020-01-01",
+      "domain": "web-scraping",
+      "source": "shard/example-source",
+      "detail": "Generated synthetic observation",
+      "user_correction": null,
+      "outcome": [
+        "not-a-string"
+      ]
+    }
+  ]
+}

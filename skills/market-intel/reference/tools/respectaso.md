@@ -3,7 +3,7 @@
 - **Domain(s):** seo-keywords (also: none)
 - **Barrier route:** ④ (free OSS, self-host) · **Source tier:** L4 · **Ready MCP:** no, Python/CLI tool; run locally or wrap in a thin MCP
 - **Cost:** free (open source; uses the free iTunes Search API) [github.com/respectlytics/respectaso, gh-api 2026-06]
-- **Repo / Provider:** github.com/respectlytics/respectaso, respectlytics/respectaso (504★, gh-api 2026-09-22; AGPL-3.0, last push 2026-09-04, active)
+- **Repo / Provider:** github.com/respectlytics/respectaso, respectlytics/respectaso (504★, gh-api 2026-09-23; AGPL-3.0, last push 2026-09-04, active)
 - **Top pick for its domain:** no
 
 ## What it does / when to pick it
@@ -32,7 +32,7 @@ Returns per-keyword traffic/difficulty estimates and app rankings derived from i
 - **Estimates, not Apple ground truth.** Traffic/difficulty are *modeled* from the public iTunes Search API (which exposes ranking/metadata, not real search volume). Treat numbers as directional signals, not Apple Search Ads-grade data.
 - **iTunes Search API throttling.** Apple's endpoint has informal rate limits (~20 calls/min territory); wide multi-country sweeps can get throttled, pace requests and don't fan out all 30 countries at once.
 - **AGPL-3.0 license trap.** Heavier copyleft than the MIT-licensed SEO siblings (serpbear/ddgs/SearXNG). Self-use is fine; offering it as a service triggers source-disclosure obligations.
-- **Thin adoption / small project.** ~377★, niche maintainership, verify it still runs against the current iTunes API before building a workflow on it (added 2026-06; not battle-tested at scale).
+- **Thin adoption / small project.** ~505★, niche maintainership, verify it still runs against the current iTunes API before building a workflow on it (added 2026-06; not battle-tested at scale).
 
 ## Failure signals & fallback
 Empty/zero results, HTTP 403/429 from the iTunes endpoint, or stale data = throttled or an upstream iTunes Search API change. Pace requests / narrow the country set / re-pull from the repo. If iOS ASO needs paid-grade accuracy, fall back to **Sensor Tower** ② (paid, App Store + Play download/keyword estimates) or App Store scrapers (`app-store-scraper` ③ for raw listing/review data). For **Android** ASO there is no sibling here, use `google-play-scraper` ③ for raw Play data. For web (non-app) keywords, this tool is the wrong domain slice, use **GSC** ① / **DataForSEO** ② / **SearXNG** ④.

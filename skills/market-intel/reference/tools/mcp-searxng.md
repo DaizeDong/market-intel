@@ -3,7 +3,7 @@
 - **Domain(s):** web-scraping (also: seo-keywords)
 - **Barrier route:** ③ self-host · **Source tier:** L2 · **Ready MCP:** **yes**, it *is* the MCP server (stdio/HTTP), wrapping a SearXNG instance for any MCP client (Claude, Cursor, etc.).
 - **Cost:** free, open-source (no key, no quota) [github.com/ihor-sokoliuk/mcp-searxng, gh-api fetched 2026-07-01]
-- **Repo / Provider:** `ihor-sokoliuk/mcp-searxng (987★, gh-api 2026-07-01)`, not archived, pushed 2026-06-30, actively maintained. Backbone: `searxng/searxng` (33k★, pushed 2026-06-30, gh-api 2026-07-01).
+- **Repo / Provider:** `ihor-sokoliuk/mcp-searxng (1204★, gh-api 2026-09-06)`, not archived, pushed 2026-09-06, actively maintained. Backbone: `searxng/searxng` (36.6k★, pushed 2026-09-05, gh-api 2026-09-06).
 - **Top pick for its domain:** no, but it is the **free self-host search layer that fills the role Tavily just vacated** (Tavily MCP returned 401 on every call in the 2026-06-25 live run). When you don't want a paid semantic-search vendor, this is the default free replacement.
 
 ## What it does / when to pick it
@@ -27,4 +27,4 @@ Once connected, the model calls the MCP's `searxng_web_search` tool with a query
 ## Failure signals & fallback
 Failure looks like empty result arrays, `429` from the SearXNG backend, or MCP connect errors (wrong `SEARXNG_URL`). **Fallback:** (1) check the SearXNG instance directly in a browser + confirm JSON format is enabled; (2) for paid-grade semantic search use **Exa**; (3) for bulk cheap SERP, **DataForSEO** (②, ~$0.0006/query). Tavily remains the ② incumbent *if/when its key is rotated*, the 2026-06 outage was a 401 key issue, not a dead service.
 
-## Last verified: 2026-07
+## Last verified: 2026-09 (repo facts, existence, stars, activity, re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)

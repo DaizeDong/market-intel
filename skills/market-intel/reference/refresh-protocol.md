@@ -47,7 +47,10 @@ of its cadence tier.
     | `barrier_found` | 命中新付费墙/captcha/反爬 | 该 domain 升级为 hot;启动 D-PRICE / D-TOS / D-CAPTCHA 评估;考察是否到达"第 3 次同档 D-PRICE → 触发 ROADMAP brokerage transport"(P2 触发条件) |
     | `coverage_gap` | 用户问题用现有矩阵答不上 | 该 domain 升级为 hot;Discovery 时显式带"为什么这个 gap 没被现存工具覆盖"角度 |
     | `price_mismatch` | shard 排名/价格与真实不符 | 该工具该轮必复检 + 改 shard,但**该 domain 不一定升 hot**(可能是缓慢漂移) |
-    | `verified` | 工具被真实使用且工作 | **cleanup pass 阶段自动把对应 `tools/<slug>.md` 的 `## Last verified` 推进到当月**, "诚实原则"下,真用过即算复检,STALE 闸门豁免 |
+    | `verified` | 已核验的具体能力或文档 | 仅 `verification_scope: tool_documentation` 且 `evidence_ref` 非空时，cleanup 才推进整篇文档的 `Last verified`；普通查询成功只保留能力记录 |
+    | `unverifiable` / `fallback_used` | 历史兼容的证据缺口 / 降级 | 标记 hot domain，保留各自原因，不忽略 |
+    | `transport_error` / `auth_failed` / `quota_exceeded` / `content_invalid` | 分类型运行失败 | 优先复查对应能力，不自动归为价格压力 |
+    | 未知 outcome / 损坏行 | 写入方与契约不一致 | 显式列出并要求复核，不能报空账本通过 |
     | `user_correction` (非 null) | 用户人工修正 | 最高权重信号,直接覆盖任何 shard 推断,该条目复检时 quote 用户原话 |
 
     输出: hot-domains 清单(本轮 Discovery 这些 domain 的角度数 + 候选数翻倍)、必复检 slug 列表、
@@ -446,12 +449,13 @@ get buried.
      demotion to "deferred" with reason. Per P3 monotonic evolution: triggers only
      accumulate or get explicitly retired, never silently sit indefinitely.
    - Full doctrine: `runbooks/doc-sync.md`.
-8. **Auto-advance `## Last verified` from real runs** (v0.17.0), at the END of cleanup
+8. **Auto-advance `## Last verified` from documentation-scoped checks** (v0.17.0), at the END of cleanup
    pass, for every slug that appears in `live-runs.jsonl` since last refresh with
-   `outcome: "verified"`, advance its `tools/<slug>.md` `## Last verified: YYYY-MM`
-   line to the current month. Rationale: truthful "I just used it and it worked" is
-   stronger evidence than a scheduled re-check; the STALE gate WARN on >9mo unchecked
-   docs is exempted for these. Record the auto-bumped slug list in the sweep's
+   `outcome: "verified"`, `verification_scope: "tool_documentation"`, and a nonempty
+   `evidence_ref`, advance its `tools/<slug>.md` `## Last verified: YYYY-MM`
+   line to the evidence month. A capability success alone does not verify installation,
+   pricing or other document claims. Use the versioned `live-run-contract.json`; retain
+   the scoped evidence reference for audit. Record the auto-bumped slug list in the sweep's
    CHANGELOG entry under "Auto-verified from live-runs".
 
 ### Downstream: companion-config sync (skip if no companion repo)
