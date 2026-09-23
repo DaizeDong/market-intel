@@ -1,7 +1,8 @@
 # Report template
 
 > Data snapshot: <YYYY-MM-DD> · Scale: <scan|standard|deep|exhaustive> · Domains: <...>
-> Sources available this run: <connected MCPs> · Fallbacks used: <...>
+> Client: <...> · Date window: <start/end, inclusive>
+> Sources available this run: <successful capabilities> · Fallbacks used: <...>
 
 ## Executive summary
 3 to 6 bullets. Each decision-grade bullet carries a confidence tag (high/medium/low).
@@ -10,6 +11,7 @@
 For each triaged domain:
 - **<claim>**, value/finding `[L? tier]` `[fetched DATE | published DATE]` `confidence: high/med/low`
   - source: <verified URL>, verbatim quote: "…", `✓verified / ⚠unverifiable`
+  - date evidence: <original-page publication date / provider-only / unknown>; original page checked: <yes/no>
   - corroboration: <2nd independent source, or "single source ⚠">
 
 ## Cross-verification verdicts
@@ -25,6 +27,7 @@ From the disconfirmation subagent. For arbitrage/investing also list **execution
 search was run and found nothing, not proof of no risk.
 
 ## Coverage gaps
+- **Per-source checks:** configured / discovered / call succeeded / content validated, with client, capability and check time. Missing results are `unknown`; home/login pages are `content_invalid`.
 - **Tool coverage:** invoked <N> / <M> available-now in scope (per domain + total) at scale `<scan|standard|deep|exhaustive>`. Makes "comprehensive" verifiable, not asserted.
 - **Availability gate (Step 2b classification, this run):** available-now <list> · configurable-with-setup <list> · hard-gap <list>. Fan-out hit only the available-now bucket.
 - **Uncovered tools (explicit gaps, not silent skips):** <tool, reason: cold-mcp / missing-key / unreachable / paid-tier-only>
@@ -32,7 +35,11 @@ search was run and found nothing, not proof of no risk.
 - **Configure for deeper data (JIT, theme-tied):** "To deepen <this theme aspect>, configure
   <source> (<free-key | free-tier | install-no-key | paid $X>), `python tools/console.py connect <slug>`
   (canonical, resolves by slug), or see `reference/activation-recipes.md` for the key source;
-  then `/mcp` reconnect (won't help this turn)."
+  then reconnect the relevant client if the MCP is newly registered. An authorized direct HTTP/CLI route may work immediately."
+
+## Stability evidence (when requested)
+List independent dated observations, observed failures and gaps. A single successful query or
+repeated seller/marketing text does not establish stable operation.
 
 ## Sources
 Full list with tier + date. Mark any unverified or dead links.

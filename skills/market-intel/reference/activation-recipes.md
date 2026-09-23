@@ -24,6 +24,13 @@
 > 4. `pip`/`uvx` libs: on the **first** `pip install` of a session, ask the user where it should land
 >    (`reference/install-guide.md` "Python install target").
 
+## Current keyless search routes (checked 2026-09-23)
+
+Exa and Parallel offer anonymous hosted HTTP MCPs. Follow their per-tool docs and inspect the
+actual tool schema; a successful read-only call and content check establish task-time usability.
+Existing client sessions need reconnect after registration; direct HTTP/CLI access may already
+work. The older quota and machine-coverage observations below remain historical, not current state.
+
 ## Last verified: 2026-06
 
 Every URL / free-tier quota / death-state below was checked against the provider or the matching
@@ -47,7 +54,7 @@ to "available now" for **free** (free-key or free-tier or no-key self-host). Ord
 | 5 | **Product Hunt MCP** | free-key | trends-discovery, launch tracking (free PH dev token; install-no-key for GDELT already done) | ~4 | [T1](#t1-product-hunt) |
 | 6 | **crawl4ai** (self-host) + **SearXNG** (self-host) | install-no-key | web-scraping + seo-keywords, zero-cost crawl + a private SERP API | ~10 (Docker) | [W4](#w4-crawl4ai) [S3](#s3-searxng) |
 | 7 | **Hunter.io** | free-tier | leadgen-crm (0/16!), email find+verify, 25 searches+50 verifies/mo free | ~3 | [L1](#l1-hunter) |
-| 8 | **twikit** (lib, no key) | install-no-key | x-twitter (0/4!), free X read+write via cookies (throwaway acct) | ~5 | [X1](#x1-twikit) |
+| 8 | **twscrape** (maintained free library) | install-no-key | x-twitter (0/4!), free X read+write via cookies (throwaway acct) | ~5 | [twscrape](tools/twscrape.md) |
 
 **Honest gain math.** Items 1 to 5 are the fastest *available-now* flips because they're free and
 mostly hosted-HTTP (Windows-friendly, no local process). Items 6 to 8 take longer (Docker / pip / a

@@ -36,4 +36,4 @@ Use `geoip=True` so spoofed locale/timezone match the proxy's country, mismatche
 ## Failure signals & fallback
 Failed = still blocked/CAPTCHA after the fingerprint upgrade, geo-mismatch flags, or Firefox-specific page breakage. Fallbacks: **nodriver/patchright** if you actually need Chrome behavior, **jo-inc/camofox-browser** for a REST-API wrapper over the same base, and when free evasion fully fails hand the barrier to **Bright Data ②** (provider absorbs Cloudflare/DataDome/CAPTCHA at managed cost).
 
-## Last verified: 2026-09 (repo facts — existence, stars, activity — re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)
+## Last verified: 2026-09 (repo facts, existence, stars, activity, re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)
