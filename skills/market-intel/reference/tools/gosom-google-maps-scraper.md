@@ -3,7 +3,7 @@
 - **Domain(s):** leadgen-crm (also: browser-automation)
 - **Barrier route:** ④ browser / act-like-human · **Source tier:** L4 · **Ready MCP:** no (Go CLI / self-host, no MCP)
 - **Cost:** free (OSS, MIT), proxies are the only hidden cost at scale
-- **Repo / Provider:** github.com/gosom/google-maps-scraper, `gosom/google-maps-scraper (5.8k★, gh-api 2026-09)` (MIT; active, last push 2026-08-22, not archived)
+- **Repo / Provider:** github.com/gosom/google-maps-scraper, `gosom/google-maps-scraper (5980★, gh-api 2026-09-22)` (MIT; active, last push 2026-09-20, not archived)
 - **Top pick for its domain:** yes (the FREE-ROUTE default for local-business B2B leads)
 
 ## What it does / when to pick it
@@ -40,7 +40,7 @@ the emails (ZeroBounce/Hunter) before any outreach.
   and hurt sender reputation.
 - Google rate-limits aggressive scraping, pace requests / rotate proxies at volume; too fast → empty
   results or soft-blocks.
-- MIT license (permissive) and active (last push 2026-05), safe to embed.
+- MIT license (permissive) and active (last push 2026-09-20), safe to embed.
 - Personal-data (a named person's contact) still needs GDPR/CCPA delete-request handling, even though
   it's business data (shard red line).
 
