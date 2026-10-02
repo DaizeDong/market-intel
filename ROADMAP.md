@@ -12,7 +12,7 @@ Current: **v0.29.0**
 
 ## Done (v0.3.0), self-evolution / anti-regression core
 
-- [x] **Scheduled auto-refresh**, Windows Task `RefreshMarketIntel`, monthly, branch + gate + PR.
+- [x] **Scheduled auto-refresh**, Windows Task `RefreshMarketIntel`, monthly, branch + gate + PR. Retired on 2026-10-01; refreshes are manual now.
 - [x] **Constitution** (`CONSTITUTION.md`, C1 to C10) injected as hard constraints each run.
 - [x] **Deterministic gate** (`tools/verify_matrix.py`), API-verified repo existence + star
       tolerance + structure + freshness + methodology + anti-mass-deletion + constitution lock.
