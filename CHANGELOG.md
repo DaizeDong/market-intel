@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Retire the scheduled monthly refresh. The Windows task `RefreshMarketIntel`, its local runner and the weekly surface poll that fed it were removed on 2026-10-01, so refreshes now run manually through the refresh protocol. The `heartbeat` workflow, which opened an issue whenever a month passed without a scheduled refresh, is removed with them; it would now fire every month.
+
 ## [0.30.0] - 2026-09-23
 
 - Separate current-client configuration, MCP discovery, capability calls and validated content; require dated original-page evidence for recency and repeated independent observations for stability claims.
