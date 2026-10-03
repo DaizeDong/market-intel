@@ -1,8 +1,8 @@
-# Agent-in-scripts doctrine, where `claude -p` is allowed, where it isn't
+# Agent-in-scripts doctrine, where `llmcall` is allowed, where it isn't
 
 The market-intel scripts evolved as 100% deterministic infrastructure (gh-api,
 HTTP, regex, file IO). After v0.25 the question came up: can we make scripts
-smarter by calling `claude -p` (headless Claude Code) from inside them?
+smarter by calling installed `llmcall` from inside them?
 
 **Yes, but only on the helper side, never on the gate side.** This document is
 the rule.
@@ -34,7 +34,7 @@ past" failure mode.
 | `market-intel-config/scripts/sync-check.py` | 7-bucket drift on companion-config. Release gate at step 5. |
 | `tools/sidecar_from_changelog.py` (the primary slug-to-doc resolution) | Forms the contract config-bridge consumes. Fuzzy fallback is OK, see helper side. |
 
-**Rule**: these scripts MUST stay deterministic. Adding a `claude -p` call is a
+**Rule**: these scripts MUST stay deterministic. Adding a `llmcall` call is a
 P4 violation. If you genuinely need LLM judgment in this area, build a SEPARATE
 helper that runs `BEFORE` the gate and outputs structured data; the gate then
 checks the data.
@@ -69,10 +69,10 @@ because the human decides whether to act on the warning.
 
 Examples (future):
 - `check_doc_drift.py` PHILOSOPHY-amendment-age narrative check
-- `feedback-bump.py` ambiguous `outcome` classification (e.g. user wrote `unverifiable` → suggest mapping to `barrier_found`)
+- `feedback-bump.py` unresolved observations (preserve the recorded outcome; model suggestions must not replace it with an unsupported barrier claim)
 - Refresh-protocol cleanup pass's "README narrative vs reality" fork agent
 
-These can call `claude -p` freely. The warn output goes to the cleanup pass /
+These can call `llmcall` freely. The warn output goes to the cleanup pass /
 release log; no decision is taken automatically.
 
 ---
@@ -94,36 +94,29 @@ If all three answers point toward LLM-OK, add it. Otherwise stay deterministic.
 
 ## Invocation pattern (canonical)
 
-For Python scripts calling `claude -p`:
+Use the installed Python interface and inherit its current routing, model,
+timeout and fallback defaults. Do not probe provider CLIs or recreate a provider
+ladder. Deterministic inspection and validation require no model call.
 
 ```python
-import subprocess
-prompt = build_prompt()
-# Pipe the prompt via stdin to avoid command-line length / quoting issues.
-result = subprocess.run(
-    ["claude", "-p", "--output-format", "text"],
-    input=prompt, capture_output=True, text=True, encoding="utf-8",
-    timeout=120,
-)
-if result.returncode != 0:
-    sys.exit(3)  # claude not available or errored
-draft = result.stdout
+from llmcall import call
+
+result = call(build_prompt())
+if not result:
+    raise RuntimeError("draft failed; inspect private provider diagnostics")
+draft = result.text
 ```
 
-For PowerShell scripts (release.ps1 won't call LLM directly per P4, but
-ancillary helpers might):
-
-```powershell
-$prompt = Get-Content tmp/prompt.md -Raw
-$draft = $prompt | claude -p --output-format text
-```
+For external-agent work, use `call(prompt, mode="agent")`. A PowerShell helper
+should invoke the same Python interface. Report failures without printing raw
+provider errors, responses or credential-bearing command lines.
 
 ---
 
 ## What this rule prevents
 
 Without this doctrine, the slippery slope is:
-1. "Let's have verify_matrix use claude -p to be smarter about ambiguous repos."
+1. "Let's have verify_matrix use a model to be smarter about ambiguous repos."
 2. → LLM occasionally hallucinates that a 404 repo "looks fine", silent drift in.
 3. → Matrix degrades; gate has been talked past.
 
@@ -146,7 +139,7 @@ checks."
 
 ---
 
-## When NOT to use claude -p
+## When NOT to use a model
 
 - When the answer is in a deterministic source you already have (gh-api gives
   pushed_at, don't ask LLM "is this repo active")

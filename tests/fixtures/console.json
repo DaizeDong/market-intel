@@ -1,0 +1,215 @@
+{
+  "evidence": {
+    "capabilities": [
+      {
+        "authentication": "authenticated",
+        "capability_id": "search",
+        "execution": "success",
+        "exposed": true,
+        "host": "codex",
+        "observed_at": "2031-01-02T03:04:05+00:00",
+        "response_valid": true,
+        "session_id": "fixture-session",
+        "source_id": "github-mcp",
+        "supported": true
+      }
+    ],
+    "host": "codex",
+    "provenance": {
+      "host": "codex",
+      "observation_method": "current-session-adapter",
+      "observed_at": "2031-01-02T03:04:05+00:00",
+      "session_id": "fixture-session"
+    },
+    "schema_version": 1,
+    "session_id": "fixture-session"
+  },
+  "inventory": {
+    "clis": {
+      "gh": "C:/Synthetic Tools/gh.exe"
+    },
+    "companion": {
+      "present": true,
+      "tools": {
+        "github-mcp": {
+          "installed": true
+        }
+      }
+    },
+    "generated": "2031-01-02T03:04:05+00:00",
+    "host": "fixture-machine",
+    "mcp": {
+      "ran": true,
+      "servers": [
+        {
+          "connected": true,
+          "name": "github"
+        }
+      ]
+    },
+    "py_modules": {
+      "ccxt": true
+    },
+    "schema_version": 1
+  },
+  "maintenance": {
+    "companion_identity": "example/companion",
+    "discovery": {
+      "discovered_at": "2031-01-02",
+      "name": "Synthetic source",
+      "one_line_pitch": "Generated discovery example.",
+      "signal": "synthetic",
+      "surface": "E1",
+      "url": "https://example.com/source"
+    },
+    "ledger": [
+      {
+        "detail": "Generated synthetic ledger example.",
+        "domain": "example-domain",
+        "outcome": "verified",
+        "route": "\u2460",
+        "source": "example-source",
+        "ts": "2031-01-02",
+        "user_correction": null
+      },
+      {
+        "detail": "Generated synthetic ledger example.",
+        "domain": "example-domain",
+        "outcome": "unverifiable",
+        "route": "\u2460",
+        "source": "example-source",
+        "ts": "2031-01-02",
+        "user_correction": null
+      },
+      {
+        "detail": "Generated synthetic ledger example.",
+        "domain": "example-domain",
+        "outcome": "dead",
+        "route": "\u2460",
+        "source": "example-source",
+        "ts": "2031-01-02",
+        "user_correction": null
+      },
+      {
+        "detail": "Generated synthetic ledger example.",
+        "domain": "example-domain",
+        "outcome": "fallback_used",
+        "route": "\u2460",
+        "source": "example-source",
+        "ts": "2031-01-02",
+        "user_correction": null
+      },
+      {
+        "detail": "Generated synthetic ledger example.",
+        "domain": "example-domain",
+        "outcome": "price_mismatch",
+        "route": "\u2460",
+        "source": "example-source",
+        "ts": "2031-01-02",
+        "user_correction": null
+      },
+      {
+        "detail": "Generated synthetic ledger example.",
+        "domain": "example-domain",
+        "outcome": "barrier_found",
+        "route": "\u2460",
+        "source": "example-source",
+        "ts": "2031-01-02",
+        "user_correction": null
+      },
+      {
+        "detail": "Generated synthetic ledger example.",
+        "domain": "example-domain",
+        "outcome": "coverage_gap",
+        "route": "\u2460",
+        "source": "example-source",
+        "ts": "2031-01-02",
+        "user_correction": null
+      },
+      {
+        "detail": "Generated synthetic ledger example.",
+        "domain": "example-domain",
+        "outcome": "user_correction",
+        "route": "\u2460",
+        "source": "example-source",
+        "ts": "2031-01-02",
+        "user_correction": null
+      },
+      {
+        "detail": "Generated synthetic ledger example.",
+        "domain": "example-domain",
+        "outcome": "transport_error",
+        "route": "\u2460",
+        "source": "example-source",
+        "ts": "2031-01-02",
+        "user_correction": null
+      },
+      {
+        "detail": "Generated synthetic ledger example.",
+        "domain": "example-domain",
+        "outcome": "auth_failed",
+        "route": "\u2460",
+        "source": "example-source",
+        "ts": "2031-01-02",
+        "user_correction": null
+      },
+      {
+        "detail": "Generated synthetic ledger example.",
+        "domain": "example-domain",
+        "outcome": "quota_exceeded",
+        "route": "\u2460",
+        "source": "example-source",
+        "ts": "2031-01-02",
+        "user_correction": null
+      },
+      {
+        "detail": "Generated synthetic ledger example.",
+        "domain": "example-domain",
+        "outcome": "content_invalid",
+        "route": "\u2460",
+        "source": "example-source",
+        "ts": "2031-01-02",
+        "user_correction": null
+      }
+    ],
+    "other_identity": "example/other-private",
+    "public_identity": "example/public",
+    "release": {
+      "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "doc": {
+        "canonical": {
+          "domain_count": 1,
+          "tool_count": 2,
+          "version": "1.2.3"
+        },
+        "drifts": [],
+        "exit_code": 0
+      },
+      "sync": "[0] A - synthetic bucket\n[0] B - synthetic bucket\n[0] C - synthetic bucket\n[0] D - synthetic bucket\n[0] E - synthetic bucket\n[0] F - synthetic bucket\n[0] G - synthetic bucket",
+      "version": "1.2.3",
+      "warning": {
+        "field": "synthetic narrative",
+        "location": "README.md",
+        "severity": "warn"
+      }
+    },
+    "surface": {
+      "key": "E1:synthetic",
+      "raw": {},
+      "signal": "synthetic",
+      "surface": "E1",
+      "title": "Synthetic source",
+      "url": "https://example.com/source"
+    }
+  },
+  "synthetic_origin": "market-intel-maintenance-v3-synthetic",
+  "tool": {
+    "authentication_required": true,
+    "capability_id": "search",
+    "domain": "frontier-research",
+    "kind": "repo",
+    "name": "Synthetic catalog operation",
+    "slug": "synthetic-display",
+    "source_id": "github-mcp"
+  }
+}

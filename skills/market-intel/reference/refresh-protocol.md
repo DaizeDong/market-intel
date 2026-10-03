@@ -37,7 +37,7 @@ of its cadence tier.
 > 「候选池（candidate pool）」，核实/差分阶段只处理通过准入门槛的候选 + 旧条目复检。
 
 -1. **Step -1, 消费 live-run 账本（必跑，v0.17.0 起）。** 账本在**私有 store**（`~/.market-intel-config/
-    data/metrics/live-runs.jsonl`，由 `tools/datadir.py` 解析），**不在本仓**：它记录你真实在调研什么，是
+    data/metrics/live-runs.jsonl`，由 `guards/tools/datadir.py` 解析），**不在本仓**：它记录你真实在调研什么，是
     data 而非工具知识。在 Horizon scan 之前,先读账本自上次 refresh 以来的所有条目（按 `ts` 过滤;首次跑取最近 90 天）,按
     `outcome` 分桶:
 
@@ -47,17 +47,17 @@ of its cadence tier.
     | `barrier_found` | 命中新付费墙/captcha/反爬 | 该 domain 升级为 hot;启动 D-PRICE / D-TOS / D-CAPTCHA 评估;考察是否到达"第 3 次同档 D-PRICE → 触发 ROADMAP brokerage transport"(P2 触发条件) |
     | `coverage_gap` | 用户问题用现有矩阵答不上 | 该 domain 升级为 hot;Discovery 时显式带"为什么这个 gap 没被现存工具覆盖"角度 |
     | `price_mismatch` | shard 排名/价格与真实不符 | 该工具该轮必复检 + 改 shard,但**该 domain 不一定升 hot**(可能是缓慢漂移) |
-    | `verified` | 已核验的具体能力或文档 | 仅 `verification_scope: tool_documentation` 且 `evidence_ref` 非空时，cleanup 才推进整篇文档的 `Last verified`；普通查询成功只保留能力记录 |
-    | `unverifiable` / `fallback_used` | 历史兼容的证据缺口 / 降级 | 标记 hot domain，保留各自原因，不忽略 |
-    | `transport_error` / `auth_failed` / `quota_exceeded` / `content_invalid` | 分类型运行失败 | 优先复查对应能力，不自动归为价格压力 |
-    | 未知 outcome / 损坏行 | 写入方与契约不一致 | 显式列出并要求复核，不能报空账本通过 |
-    | `user_correction` (非 null) | 用户人工修正 | 最高权重信号,直接覆盖任何 shard 推断,该条目复检时 quote 用户原话 |
+    | `verified` | 已核实记录明确指定的能力或文档范围 | 只有 `verification_scope=tool_documentation` 且 `evidence_ref` 非空时，才可在 cleanup 阶段推进整份工具文档的日期；单次能力调用成功不获得整份文档的 STALE 豁免 |
+    | `fallback_used` / `unverifiable` | 保留原始结果含义 | 列入待复检项；不自动授予核实信用，也不推断为访问壁垒 |
+    | `transport_error` / `auth_failed` / `quota_exceeded` / `content_invalid` | 分别记录传输、鉴权、额度或内容校验失败 | 保留失败类型并复检；不能当成成功的空结果 |
+    | `user_correction` | 用户人工修正 | 最高优先级复检信号；原话保存在私有账本，公开文档只写经核实的通用工具事实 |
+
+    完整的 12 种结果、必填字段及日期推进条件见 `live-run-contract.json`；未知结果必须保留并触发复检。
 
     输出: hot-domains 清单(本轮 Discovery 这些 domain 的角度数 + 候选数翻倍)、必复检 slug 列表、
     cleanup-auto-bump 清单。**此步是后续所有步骤的优先级输入**,不是装饰。
 
-0. **跑 Horizon scan**（全量扫必跑）：按下方 Horizon scan 规则做跨域趋势扫描，找**已有 13 域之外**的新
-   territory / 新工具品类 / 新调研角度，产出新角度提案清单（FOLD 项并入下一步；NEW-DOMAIN/NEW-SKILL 进 PR）。
+0. **按季度运行 Horizon scan**：仅在 Jan/Apr/Jul/Oct 的月度全量扫中运行 H1-H4，按下方规则寻找已有域之外的新领域、工具品类和调研角度。FOLD 项并入下一步；NEW-DOMAIN/NEW-SKILL 进 PR。其他月份的全量扫只做 10 分钟的“当月脉搏”快照，再继续域内 Discovery。
 1. **跑发现阶段**：按下方 Discovery phase 规则，对每个域并行盲扫多个发现源，产出候选池
    （每个候选附带：来源、score、对现有首选的「新增/替换/不收录」裁决 + 理由）。
 2. **Apply the same quality guardrails** as a normal run (verify each claimed tool exists and the
@@ -68,9 +68,10 @@ of its cadence tier.
    changed.
 3b. **Keep the L2 per-tool docs + install guide in sync** (added v0.10.0): for every tool **ADDed or
    REPLACEd**, create/update `reference/tools/<slug>.md` (per-tool how-to: install + auth + usage +
-   踩坑, each fact gh-api/official-site verified) and add its row to `reference/tools/index.md`. For
-   every tool **deleted/tombstoned**, mark its doc `⚠ Avoid (dead)` (never silent-delete) and drop its
-   index row. Touch `reference/install-guide.md` only when install *mechanics* change (a new
+   踩坑, each fact gh-api/official-site verified), its `reference/tools/index.md` row and its
+   canonical `reference/tools/registry.json` record together. Apply the same synchronization to
+   renames. For every tool **tombstoned**, retain and mark its shard row, index row and tool card
+   `⚠ Avoid (dead, D-xxx)`, and retain its registry record with synchronized metadata. Touch `reference/install-guide.md` only when install *mechanics* change (a new
    prerequisite, an HTTP/stdio transport shift), per-tool commands live in the tool doc +
    `pricing-install.md`, not the overview. **Also re-verify the swept domain's EXISTING docs (not just
    changed ones) and bump each `## Last verified` only when actually re-checked**, full doctrine in
@@ -153,7 +154,7 @@ signal(stars/score/points/dl-growth/upload-date), one_line_pitch}`，让月度 s
 | 发现源 | 怎么查 | 阈值 | 信号质量 |
 |---|---|---|---|
 | **E1. PulseMCP newsletter RSS** | RSS：`https://www.pulsemcp.com/feed.xml`（若 404 退回 `https://www.pulsemcp.com/` 找 `<link rel="alternate" type="application/rss+xml">`；URL 未在 curl 下成功验证，**首次跑须人工确认**）| 任何新条目（已人工策展）| **最高**。已经过 PulseMCP 团队人工筛，每 token 的 MCP 发现密度最高；几乎无噪。Weekly 轮询。<br>**候选日志**：把每条 newsletter 提到的 MCP 单独写一行进 `discovery-state.md` inbox，标 `surface=E1` + 摘自哪期 |
-| **E2. GitHub Search velocity API** | `gh api 'search/repositories?q=created:>YYYY-MM-DD+stars:>50+topic:mcp-server'`；并行重复 `topic:claude-skill`、`topic:llm-agent` | **≥50 star 且 <90 天龄** | **高**。捕「天生即火」型仓库,纯靠 github.com/trending 看不到（trending 偏向已有粉丝基础的作者发新仓时短暂上榜）。每次 refresh sweep（含 weekly）都跑。<br>**候选日志**：每仓库一行 `surface=E2`，记录 `created_at + stars + repo` 三元组，月度 sweep 再 gh api 复核 star 真实性（防刷量） |
+| **E2. GitHub Search velocity API** | `gh api --hostname github.com 'search/repositories?q=created:>YYYY-MM-DD+stars:>50+topic:mcp-server'`；并行重复 `topic:claude-skill`、`topic:llm-agent` | **≥50 star 且 <90 天龄** | **高**。捕「天生即火」型仓库,纯靠 github.com/trending 看不到（trending 偏向已有粉丝基础的作者发新仓时短暂上榜）。每次 refresh sweep（含 weekly）都跑。<br>**候选日志**：每仓库一行 `surface=E2`，记录 `created_at + stars + repo` 三元组，月度 sweep 再 gh api 复核 star 真实性（防刷量） |
 | **E3. HF Spaces trending JSON** | HTTP GET：`https://huggingface.co/api/spaces?sort=trendingScore&limit=50`（JSON，无须鉴权）| `trendingScore > X`（初轮经验校准；建议从前 10% 切，跑 2 轮后定阈值）| **中高**。常在 GitHub trending **之前** 抓到新 agent demo / tool wrapper to HF demo 上线门槛比开源发布低。Weekly during hot-sweep。<br>**候选日志**：每 Space 一行 `surface=E3` + `trendingScore` + `task tag` + author |
 | **E4. npm download velocity API** | 候选 npm 包：`https://api.npmjs.org/downloads/range/last-week/<pkg>` + `last-month/<pkg>`，算 WoW 增长比 | **WoW ≥2x 且周下载绝对值 ≥500** | **高**（远强于 star）。下载量＝真实安装动作，比 star 抗刷量、抗营销得多。每次 refresh sweep。<br>**候选日志**：每包一行 `surface=E4` + `weekly_dl + WoW_ratio + npm_url`，触发条件后直接进 month-sweep 的必复检列表 |
 | **E5. Show HN / Launch HN scan** | Algolia HN API：`https://hn.algolia.com/api/v1/search_by_date?tags=show_hn&query=mcp+OR+agent+OR+scraper`（按时间排序，无需鉴权）| `points ≥ 30` **或** 顶层有实质讨论串（≥10 评论且非营销号）| **高**。Show HN 是**工具优先**的展示窗口（不是 think-piece），往往在 release 后 24 to 72h 出现，HN 评论区天然去炒作。Weekly during hot-sweep。<br>**候选日志**：每帖一行 `surface=E5` + `points + comment_count + repo/site_url`（HN 帖子里附的链接） |
@@ -167,7 +168,7 @@ signal(stars/score/points/dl-growth/upload-date), one_line_pitch}`，让月度 s
 
 **F. 中文发现源（CN surfaces）**,A to E 主扫英文圈，会系统性漏掉国产生态（DeepSeek 工具圈 / 即梦 / 可灵 /
 MiniMax / 抖音电商 / 小红书 / Qwen ecosystem）。每轮 sweep 按 `discovery-cn.md` 跑一遍 CN 源（即刻 / 36Kr AI /
-量子位 / 极客公园 / 十字路口播客；小红书 + DeepSeek 群仅 Horizon 季度扫）；候选写入 `volatile/discovery-state.md`
+量子位 / 极客公园 / 十字路口播客；小红书 + DeepSeek 群仅 Horizon 季度扫）；候选写入 已验证私有伴生仓 DATA 目录下的 `discovery-state.md`
 的 **CN candidates** 子段，每条同时记录中文原名 + 最近的英文等价物/GitHub 链接以便与主候选池 dedup。完整清
 单、polling 方式、入选准则、CN-only 必跑域见 `discovery-cn.md`。
 
@@ -236,8 +237,8 @@ MiniMax / 抖音电商 / 小红书 / Qwen ecosystem）。每轮 sweep 按 `disco
 - **【不收录 SKIP / WATCH】**：未过门槛 → SKIP（记 reject log）；前沿但未验证 → WATCH（记 watchlist，下轮复看）。
 
 裁决产物交给核实/差分阶段：ADD/REPLACE 经独立核实后才落 shard；REPLACE 还需同步改 `sources-index.md` 的
-top pick 并在 CHANGELOG 写明「why replaced」。WATCH/SKIP 不动 shard，但维护在 refresh-protocol 旁的
-`volatile/discovery-state.md`（watchlist + reject log，带发现日期），让后续运行不重复造轮子、也能追踪成势。
+top pick 并在 CHANGELOG 写明通用的替换理由。WATCH/SKIP 不动 shard，记录保存在
+已验证私有伴生仓 DATA 目录下的 `discovery-state.md`（watchlist + reject log，带发现日期），让后续运行不重复造轮子、也能追踪成势。
 
 ### D5b. Verify 管道结构（2026-06-17 修正,从 3-LLM-lens → L0 deterministic + L1 单 lens）
 
@@ -256,8 +257,8 @@ candidate → L0 deterministic → (PASS / BLOCK / UNCERTAIN)
 
 **L0 deterministic check** (实现: `tools/l0_verify.py`,见 PHILOSOPHY §P4):
 - URL 类型自动分流: github / web / npm / pypi / web-registry
-- github: gh api repos/<o>/<r>, 404→BLOCK,archived→BLOCK,>12mo→BLOCK,else→PASS
-- web: HTTP HEAD + DNS + cert, 200→PASS,404→BLOCK,403 anti-bot + DNS+cert 健康→PASS,5xx/timeout→UNCERTAIN
+- github: gh api --hostname github.com repos/<o>/<r>, 404→BLOCK,archived→BLOCK,>12mo→BLOCK,else→PASS
+- web: HEAD 后检查 GET 状态和正文；GET 2xx 且正文未发现异常才可 PASS，404→BLOCK，5xx/timeout 或正文检查失败→UNCERTAIN。普通站点的 anti-bot 403 还需 DNS、证书和新鲜度证据；只有 DNS/证书健康仍为 UNCERTAIN。
 - npm/pypi: registry API, time.modified ≤12mo + 未 deprecated→PASS
 - web-registry (github.com/mcp, chatgpt.com/apps 等元页): anti-bot 403 + DNS+cert→PASS(此类注册页本身就 anti-bot,内容用其他证据)
 
@@ -297,7 +298,7 @@ Discovery phase 在**已知 13 个域内**找更好的工具。但工具世界�
 Horizon scan 是 PHILOSOPHY.md **P1（改框架，不只改症状）应用到本 skill 自己的范围上**：定期问"地图本身
 是不是该长大了？"，并在适当时**新增子域 / 子 skill**。
 
-**何时跑：** 每次全量扫（Jan/Apr/Jul/Oct）必跑；月度轻量扫做一个 10 分钟的"当月脉搏"快照即可。
+**何时跑：** 域内矩阵每月全量扫。H1-H4 只在季度窗口（Jan/Apr/Jul/Oct）运行；其他月份保留 10 分钟的“当月脉搏”快照，不执行完整 Horizon scan。每周的 Discovery 轻量扫仍按上方 cadence 运行。
 
 ### H1. 扫什么（跨域、看趋势，而非看单个工具）
 - **当月发生了什么**：本月该领域的大事件,平台 API 政策变动、重大收购、某类工具突然爆发、某条壁垒
@@ -321,7 +322,7 @@ Horizon scan 是 PHILOSOPHY.md **P1（改框架，不只改症状）应用到本
 
 ### H3. 防膨胀门槛（用 P3 约束 P1, 范围增长不等于腐化）
 "与时俱进"绝不等于"什么新东西都加一个域"。膨胀本身就是一种退化。所以：
-- **新 ≠ 需要一个新域**：新角度先进 `volatile/discovery-state.md` 的 **new-angle watchlist**（带发现日期），
+- **新 ≠ 需要一个新域**：新角度先进 已验证私有伴生仓 DATA 目录下的 `discovery-state.md` 的 **new-angle watchlist**（带发现日期），
   **至少跨 2 次扫仍持续相关**才可提名升级为新域,一次性炒作会自然过期。
 - **必须过生成式检验**（PHILOSOPHY.md）："这是在改框架（真的有一块没被覆盖的territory），还是只在打补丁
   （其实塞进现有域更对）？" 倾向折叠；提名新域/新 skill 的举证责任在提名方。
@@ -351,7 +352,7 @@ ROI 最高。其余域每轮至少跑角度②（GitHub）+ 角度③（社区�
 
 0. **先读 `CONSTITUTION.md`（仓库根），逐条作为硬约束遵守 C1 to C10。** 自动运行**不得修改**宪法/`tools/`。
 1. **只在 `refresh/<date>` 分支工作，绝不直推 main。**
-2. **事实一律 API 实测**：每个收录/改动的仓库用 `gh api repos/<o>/<r>` 核实存在 + 真实 star（写 API 返回的
+2. **事实一律 API 实测**：每个收录/改动的仓库用 `gh api --hostname github.com repos/<o>/<r>` 核实存在 + 真实 star（写 API 返回的
    真值，标 `(NNk★)` 紧贴仓库名）；价格核官网。**禁止凭记忆**。核实不了 → 不收录（C1/C6）。
 3. **删除是高权限操作**：必须带死亡码 + 证据（C4：D-404/D-STALE/D-PRICE/D-TOS/D-SUPERSEDED）；死条目移入
    "Avoid (dead)" 墓碑行而非静默删除；机器判活的源默认不可删。
@@ -361,6 +362,20 @@ ROI 最高。其余域每轮至少跑角度②（GitHub）+ 角度③（社区�
    闸门有最终否决权；LLM reviewer 只能更保守，不能把 FAIL 改成 PASS。
 6. **全绿才落地**：写 CHANGELOG + 升 version + commit 到分支 + push + `gh pr create`（**开 PR，不自动 merge**）
    + Discord 通知人审。合并后由 `tools/deploy_skill.sh` 同步到生效版 skill（先在 main 上重跑闸门才部署）。
+
+   For a completed manual refresh, create the normal commit only after the required
+   verification above passes, with these completion trailers:
+
+   ```bash
+   git commit -m "Refresh market-intel source matrix" \
+     --trailer "Market-Intel-Refresh: success" \
+     --trailer "Market-Intel-Refresh-Month: $(date -u '+%Y-%m')"
+   ```
+
+   Keep both trailers in the final message when squash-merging. They record the
+   completed refresh; a pending PR, an ordinary reference edit, or an unfinished or
+   failed refresh does not confirm completion on the default branch.
+   No scheduled heartbeat is configured.
 
 > 本地调度脚本 `refresh-market-intel.sh` 曾实现 1/5/6 的编排骨架与 scope guard（拒绝越界改动）；2026-10-01 起它随每月定时任务一起退役，刷新改为手动触发，按本协议在会话里执行。
 > v1 闸门覆盖协议强制的格式（github URL + star 标注）；裸 slug 无标注的漏检由 ROADMAP 的「机读镜像块」补全。
@@ -375,8 +390,7 @@ L2 逐工具文档（`reference/tools/<slug>.md`）+ L0 `install-guide.md` 是 v
 `tools/<slug>.md`、(d) 机读清单 `tools/registry.json` 一条 `{slug,name,kind,repo,domain,top_pick}`。
 绝不允许只改其一。闸门三网兜底：**REGISTRY**（registry↔index↔doc 三方一致，**含非仓库 SaaS**，不符即
 BLOCK,这是 SaaS 工具的确定性追踪网）+ **TOOLS**（index↔doc，缺即 BLOCK）+ **DOCCOVER**（活跃分片仓库无
-文档即 WARN）。`registry.json` 是工具清单的**权威来源**，由 `index.md` + 文档**派生生成**（再生成脚本见
-CHANGELOG 0.10.2）,改完工具后重跑该脚本即可保持同步，不必手编。
+文档即 WARN）。`registry.json` 是工具清单的**权威来源**。新增、替换、改名和墓碑处理都要同步其中的来源记录及操作元数据，再运行 REGISTRY 检查。替代品必须有自己的规范来源标识，不能借用旧工具的身份。
 
 ### R2. 扫到一个域，复检该域的全部文档（不止变更项）
 旧步骤 3b 只更新「被改动」工具的文档，不变的会静默腐化。补足：每次 sweep 对**所扫域**的每份
@@ -387,7 +401,7 @@ CHANGELOG 0.10.2）,改完工具后重跑该脚本即可保持同步，不必手
 ### R3. 死亡 = 墓碑，不是删除（保住追踪链）
 工具死亡（死亡码 D-404/D-STALE/D-PRICE/D-TOS/D-SUPERSEDED）时：分片行进 `⚠ Avoid (dead, D-xxx)` 墓碑、
 索引行去星或标注、**文档保留并在顶部加死亡横幅**（不要删文件）,死条目才不会被下一轮重新「幻觉」回来，
-追踪链不断。**改名（rebrand，如 Polygon→Massive）不是死亡**：保留为 live、标 REBRAND，别误套死亡码。
+追踪链不断。`registry.json` 中的记录也要保留，并同步名称、仓库、域和 `top_pick` 等既有字段，不能靠删除记录消除检查结果。**改名（rebrand，如 Polygon→Massive）不是死亡**：保留为 live、标 REBRAND，别误套死亡码。
 
 ### R4. 经验必须真实，禁止编造
 文档的「General experience & gotchas / 踩坑」只能来自：分片沉淀的真实运行教训、live-run 账本（私有 store）
@@ -429,13 +443,12 @@ get buried.
 6. **Per-tool docs with `## Last verified` >9mo old**, covered by the STALE gate, but
    the cleanup pass should triage: re-verify, deprecate, or tombstone (`⚠ Avoid (dead)`).
 7. **The live-run ledger** (`<data>/metrics/live-runs.jsonl` in the PRIVATE store, NOT this
-   repo), keep all entries; this is the feedback ledger and the refresh consumes it. Don't
-   compress. **Year-rollover convention (added 2026-06-17 ops audit):** at the first Cleanup
-   pass each January, freeze last year's entries into `<data>/metrics/live-runs.<YYYY>.jsonl`
-   and start a fresh `live-runs.jsonl`. Step -1 looks at
-   `live-runs.jsonl` first (default 90-day window); historical year files are read only
-   when `--since` predates the current file's earliest entry. Prevents Step -1 scan cost
-   from creeping past 0.5s at 500+ entry sizes.
+   repo), keep all entries in this active file; this is the feedback ledger and the refresh
+   consumes it. Do not compress it or move older entries into annual files.
+   `feedback-bump.py` reads only the active `live-runs.jsonl`, including when `--since`
+   selects an earlier date. Annual archives are not searched, so moving rows out would
+   silently remove their failures and recheck signals from feedback. Retain the complete
+   active ledger until archive-aware reading is implemented and verified.
 8. **Top-level doc drift sweep** (2026-06-17 added against entropy growth)
    - **Machine-checkable**: run `python tools/check_doc_drift.py`. Fail-level drift
      blocks the sweep (must fix in this cleanup, not the next). Warn-level drift
@@ -449,14 +462,13 @@ get buried.
      demotion to "deferred" with reason. Per P3 monotonic evolution: triggers only
      accumulate or get explicitly retired, never silently sit indefinitely.
    - Full doctrine: `runbooks/doc-sync.md`.
-8. **Auto-advance `## Last verified` from documentation-scoped checks** (v0.17.0), at the END of cleanup
-   pass, for every slug that appears in `live-runs.jsonl` since last refresh with
-   `outcome: "verified"`, `verification_scope: "tool_documentation"`, and a nonempty
-   `evidence_ref`, advance its `tools/<slug>.md` `## Last verified: YYYY-MM`
-   line to the evidence month. A capability success alone does not verify installation,
-   pricing or other document claims. Use the versioned `live-run-contract.json`; retain
-   the scoped evidence reference for audit. Record the auto-bumped slug list in the sweep's
-   CHANGELOG entry under "Auto-verified from live-runs".
+8. **Advance `## Last verified` only from scoped documentation verification.** At the
+   end of cleanup, accept a `verified` entry for a whole tool document only when
+   `verification_scope` is `tool_documentation` and `evidence_ref` is nonempty.
+   A successful capability call alone does not refresh the document or exempt it
+   from STALE. Follow `live-run-contract.json`; preserve typed failures and unknown
+   outcomes for review. Keep the real verification ledger in PRIVATE DATA and
+   describe only the resulting public documentation changes in release notes.
 
 ### Downstream: companion-config sync (skip if no companion repo)
 
@@ -508,17 +520,25 @@ In the sweep CHANGELOG entry, the cleanup pass gets its own section:
 Once the sweep produces ADD/REPLACE/WATCH/SKIP verdicts, the actual landing is a 7-step
 mechanical sequence. Skip any step and the matrix drifts:
 
-1. **Edit `domains/<X>.md`**, add/replace/tombstone rows per verdict. Replaces tombstone with
-   `⚠ Avoid (dead, D-xxx)` (see §C4 for D-codes).
+1. **Edit `domains/<X>.md`**, add/replace/tombstone rows per verdict. A retirement must meet
+   `CONSTITUTION.md` C4 and retain a row marked `⚠ Avoid (dead, D-xxx)`.
 2. **Update `sources-index.md`**, only if a domain's top pick changed. Most sweeps don't touch this.
-3. **Write `tools/<slug>.md`** for each ADD, follow `tools/polygon.md` shape. Per-tool naming
-   rule: `companion-config-spec.md §3.1`.
-4. **Update `tools/index.md`**, add the new row pointing at the new tool doc.
-5. **Run `python tools/verify_matrix.py`**, fail-closed gate (7 sub-gates). Any BLOCK → fix before continuing.
-6. **(If companion-config installed)** run `python ../market-intel-config/scripts/sync-check.py`
-, bucket B-G must all = 0. Bucket A is intentional skips.
-7. **Write CHANGELOG entry + bump `.claude-plugin/plugin.json` version + `tools/release.ps1 -Version <new>`.**
-   The release script wraps commit + tag + push and aborts if step 5 or 6 fails.
+3. **Update `tools/<slug>.md`** for every add, replacement, rename or tombstone. Keep retired
+   cards with their death banner. Per-tool naming rule: `companion-config-spec.md §3.1`.
+4. **Update `tools/index.md` and `tools/registry.json` together**, including canonical source
+   and operation metadata. Retain marked index rows and registry records for tombstoned tools.
+5. **Run `python tools/verify_matrix.py`**, including REGISTRY / TOOLS consistency. Any BLOCK
+   must be resolved before continuing.
+6. **Resolve the optional companion** using `companion-config-spec.md` §1, including the
+   `MARKET_INTEL_CONFIG_DIR` alias. Report an explicitly selected invalid path. If a companion
+   exists, run `python "<resolved-companion>/scripts/sync-check.py"` and address its reported
+   buckets; missing checker or failed execution is an unresolved sync gap, never a clean check.
+7. **Prepare and review the release commit**, including the public changelog entry,
+   plugin version and derived documentation, through the normal hooks. Then run
+   `tools/release.ps1` with `-Version`, the verified PRIVATE `-ConfigRepo` path and
+   `-DryRun`. It validates the prepared clean commit without editing or committing
+   files. Remove `-DryRun` only after publication authorization; see
+   `../../../runbooks/release.md` for exact tag/push and remote-readback requirements.
 
 Discovery agents writing `git@` SSH or `/blob/` URLs is normal, `l0_verify.py` and the
 post-sweep `verify_matrix.py` GHACTIVE gate both sanitize them, so no extra step needed.

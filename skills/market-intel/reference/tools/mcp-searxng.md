@@ -10,7 +10,7 @@
 Exposes a SearXNG meta-search instance as an MCP `search` (and URL-read) tool: private, keyless web search aggregating dozens of engines, returning JSON to the model. **Decision rule:** when the paid search tier (Tavily/Exa) is down, rate-limited, or you simply don't want per-query cost, run SearXNG + mcp-searxng as your search layer, it covers the "give the agent web search" need at $0. Keep **Exa** for genuinely neural/"recent" semantic ranking and **Bright Data** for hard-target *scraping* (this is search, not an unlocker).
 
 ## Install
-1. Stand up a SearXNG instance (docker is easiest: `docker run -d -p 8080:8080 searxng/searxng`), enable the JSON output format in its `settings.yml`. 2. Add the MCP: `npx -y mcp-searxng` (or the documented `claude mcp add` form), pointing `SEARXNG_URL` at your instance. Requires a reachable SearXNG URL (self-hosted or a trusted public instance). Volatile install line: `pricing-install.md` → web-scraping.
+First follow the [SearXNG backend setup](searxng.md): verify an initialized PRIVATE versioned runtime, confirm supported persistence settings, bind an absolute private configuration directory to `/etc/searxng`, and keep logs and results in verified PRIVATE versioned DATA. Revalidate before service start and enable JSON output in that private configuration. Then inspect the selected MCP version's launch and storage settings; add it only when its configuration, logs and outputs also use supported verified private destinations. Point `SEARXNG_URL` at the actual backend. Keep setup pending if either component has an unverified writer. Requires a reachable SearXNG URL (self-hosted or a trusted public instance). Volatile install line: `pricing-install.md` → web-scraping.
 
 ## Auth / keys
 None. No API key. The only config is `SEARXNG_URL` (your instance). If you point it at a *public* SearXNG instance instead of self-hosting, you inherit that instance's uptime + rate limits, self-host for reliability.
@@ -27,4 +27,4 @@ Once connected, the model calls the MCP's `searxng_web_search` tool with a query
 ## Failure signals & fallback
 Failure looks like empty result arrays, `429` from the SearXNG backend, or MCP connect errors (wrong `SEARXNG_URL`). **Fallback:** (1) check the SearXNG instance directly in a browser + confirm JSON format is enabled; (2) for paid-grade semantic search use **Exa**; (3) for bulk cheap SERP, **DataForSEO** (②, ~$0.0006/query). Tavily remains the ② incumbent *if/when its key is rotated*, the 2026-06 outage was a 401 key issue, not a dead service.
 
-## Last verified: 2026-09 (repo facts, existence, stars, activity, re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)
+## Last verified: 2026-09 (repository existence, stars and activity checked through gh api; usage/gotcha notes carried forward unchanged from the prior check)

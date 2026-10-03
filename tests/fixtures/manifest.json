@@ -1,0 +1,25 @@
+{
+  "generator": "tools/make_fixtures.py",
+  "generator_sha256": "11b03f5f63e8f8a40c844ee24517deb1659ee540454d0dd46c7ec461aa003868",
+  "seed_or_recipe_id": "market-intel-maintenance-v3-synthetic",
+  "synthetic_origin": true,
+  "files": {
+    "tests/fixtures/console.json": "625ea57c26fdc9ddf0a13451534ce3d9e0650d39956e60f035bd6a9bab600d2d",
+    "inventory/availability-cache.json.example": "2eab986bd95faa0e2894ea217ed4f4d06825ea4530df8dce5e6d38ff1fb08212",
+    "inventory/host-capabilities.json.example": "c50f4d8ce25d52114a92254daa346800025b6808bdea3aa3e3175bb4bbb9ba26",
+    "skills/market-intel/reference/live-run-schema.json": "1d800d56c3d1c70aa74fafddda391e650b2eed3dcae24a63bc8559d12ff75852",
+    "tests/fixtures/live-runs.json": "9f6106745215f57c8ca02e2a61209d22072465f23cae9767c3b4634d36ab877d",
+    "skills/market-intel/reference/remaining-tools.md.example": "1967d7c77cdc36538c88d85315fbf21d515750795db932675fb251c4b9cb5e83",
+    "discovery-state.md.example": "b6c86bdfca766673f1b89a566542dab0df1f2a4c74275f47a5f684718b472186",
+    "surface-inbox.jsonl.example": "cff6ab97942c62ae4267c1d699d590d91f64710e01ebfb3e3d0c44f3dd1a2791",
+    "skills/market-intel/metrics/live-runs.jsonl.example": "0c8ad3f4899dbee7a1b8e8d2c662c4b416b648e66e0251346250345c2512b0ec",
+    "tools/test_verification_contract.py": "5368b2797b57486ba6a59d064ea38788aa268322118f4462e309bb5510c14f7e",
+    "tools/test_discovery_contract.py": "5f87f2cce09b76ca964eeee66eef69dfc8d2f362034480d5f1013730ad261044",
+    "tools/test_first_use_contract.py": "ca72d6004120547fc9b07c9187fd4cb0007e3c0a344780b2682b75b585e64a95",
+    "tools/test_check_all.py": "a0500c77f51af2a0e2bfc8db70e2d60889266259c7fc66807153f37e1e0825b4",
+    "tools/test_console.py": "766ed78f6724970eceb23dc18cd683d73ab372f91fb873229b3c924e62cce823",
+    "tools/test_private_writers.py": "3cae885f8edfb5d3e57bac8d95a5fa3203ff48a7476acb4ce7c5f54521dee373",
+    "tools/test_incident_boundary.py": "0fe20f923b0721b2567c2a7d7493197ba5cf834ea51a384fe72ee12a671eabfa",
+    "tools/test_human_review.py": "95fa54d0ca86d009f8ac92d6c40302dbe09b1603787a093217abe02019714d09"
+  }
+}

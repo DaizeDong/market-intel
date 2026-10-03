@@ -13,20 +13,29 @@ LLM-friendly crawler that renders pages and emits clean **Markdown / structured 
 `pip install crawl4ai` then `crawl4ai-setup` (installs Playwright browsers), **or** run the Docker image which exposes a **ready MCP**, preferred for a clean, reproducible server (see `install-guide.md` Docker prereq). L1 line: `reference/volatile/pricing-install.md#browser-automation`. Docker/HTTP route is the Windows-friendly path (avoids native Playwright path quirks).
 
 ## Auth / keys
-No service key for crawl4ai itself. Only needs an **LLM API key** if you opt into `LLMExtractionStrategy` (schema/NL extraction); the default CSS/XPath/Markdown extraction needs no key. Target auth = cookies/headers you pass. Key-bearing only in LLM-extraction mode: set the LLM key via env, keep it out of the transcript (see `install-guide.md` secret hygiene).
+Crawl4AI's deterministic CSS/XPath/Markdown extraction needs no model key. Target cookies, headers, browser state, caches and extracted data still belong in a verified PRIVATE versioned runtime configured through the installed version's supported options. Any model-assisted extraction must use installed `llmcall` with its current routing and defaults. `LLMExtractionStrategy` remains setup-only until a compatible adapter and its extraction input/output contract have been verified; supplying a direct provider key does not satisfy this workflow.
 
 ## Usage, call examples
 ```python
 from crawl4ai import AsyncWebCrawler
-async with AsyncWebCrawler() as c:
-    r = await c.arun(url="https://site/page")
-    print(r.markdown)        # clean LLM-ready markdown
+
+async def read_markdown(crawler: AsyncWebCrawler):
+    result = await crawler.arun(url="https://example.com/")
+    return result.markdown
 ```
-For structured output use `JsonCssExtractionStrategy` (free, selector-based) or `LLMExtractionStrategy` (token-cost, schema-driven). Via Docker MCP: call the crawl tool with `{url, extraction_strategy}` and read back markdown/JSON.
+The caller supplies an initialized crawler whose browser/cache/output paths use the verified
+PRIVATE runtime, then persists the returned Markdown through the private output adapter. Do not
+construct a crawler with default persistence paths for real work. If a writer cannot be
+redirected through the installed version's supported options, keep the integration in setup.
+For structured output, prefer `JsonCssExtractionStrategy` or the installed version's XPath
+strategy. For Docker MCP, discover the selected crawl operation in the active host and verify
+its actual input/output shape with a read request. Upstream MCP support or a reachable container
+is only a setup signal. Keep the model-assisted path in setup until the installed `llmcall`
+adapter passes the same operation check.
 
 ## General experience & gotchas (踩坑)
 - **Best free first hop for "fetch + clean to Markdown" at volume**, its anti-bot clears many soft Cloudflare/Akamai walls that stop plain Playwright, at zero per-request cost (unlike Firecrawl/Bright Data ②).
-- **Prefer CSS/XPath extraction over LLM extraction** to stay free and deterministic, only reach for `LLMExtractionStrategy` when the page structure is irregular; it adds token cost per page.
+- **Prefer deterministic CSS/XPath/Markdown extraction.** Irregular structure may justify model assistance after the installed `llmcall` adapter and tool I/O are verified. Preserve routing, model, timeout and fallback defaults; do not create another provider ladder.
 - **Not an interaction agent.** It reads/extracts; it won't reliably log in, click through paginated portals, or fill forms. For that use browser-use/stagehand/skyvern.
 - **Hard anti-bot still wins.** Aggressive DataDome / per-request CAPTCHA / heavy JS-fingerprinting will still block it, signal: 403, challenge HTML in `.markdown`, empty result. Then add patchright/camoufox, or hand it to Bright Data ② (provider absorbs the barrier). For e-commerce price work specifically, prefer the e-commerce shard's picks (Keepa ①, Bright Data ②) over raw crawling, Amazon returns 500/blocks to generic crawlers.
 - Proxies are the hidden cost at scale; the software is free.
@@ -34,4 +43,4 @@ For structured output use `JsonCssExtractionStrategy` (free, selector-based) or 
 ## Failure signals & fallback
 Failed = 403 / challenge page text in the markdown / empty result, or you actually need to click/log in. Fallbacks: **patchright/nodriver/camoufox** (fingerprint), **browser-use/stagehand** (interaction needed), **Firecrawl ② or Bright Data ②** (let a provider absorb the anti-bot barrier).
 
-## Last verified: 2026-09 (repo facts, existence, stars, activity, re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)
+## Last verified: 2026-09 (repository existence, stars and activity checked through gh api; earlier usage observations retained, with setup guidance revised separately)

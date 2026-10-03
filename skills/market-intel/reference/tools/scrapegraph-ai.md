@@ -12,22 +12,20 @@ You **describe what to extract in plain words** ("get every product name + price
 ## Install
 `pip install scrapegraphai` then `playwright install` (it uses Playwright to render). Python ≥3.10. Not an MCP, call from a short Python harness. L1 line: `reference/volatile/pricing-install.md#browser-automation`. On Windows prefer WSL or a clean venv to dodge native Playwright path quirks (see `install-guide.md` Windows notes).
 
-## Auth / keys
-No service key for the OSS lib itself. It **needs an LLM API key** (OpenAI/Anthropic/Ollama/etc.) to drive extraction, set via env or the graph `config`. Target-site auth = cookies/headers you supply. Key-bearing: keep the LLM key out of the transcript, user sets the env var themselves; never echo it (see `install-guide.md` secret hygiene). Local models via Ollama avoid an API key entirely.
+## Model integration status
+This source is cataloged as requiring setup. The upstream direct-provider example
+does not satisfy this workspace's shared model interface. No supported `llmcall`
+adapter for this library is supplied or verified here, so do not instantiate a
+provider client or pin a planner model from this page.
 
-## Usage, call examples
-```python
-from scrapegraphai.graphs import SmartScraperGraph
-graph = SmartScraperGraph(
-    prompt="Extract all product names and prices as a list",
-    source="https://site/listing",
-    config={"llm": {"model": "openai/gpt-...", "api_key": "<env>"}})
-print(graph.run())   # -> structured dict / JSON
-```
-`SmartScraperGraph` for one page; `SearchGraph` / `OmniScraperGraph` for multi-source or image-aware extraction.
+All model or external-agent work must use installed `llmcall`, inheriting its
+current routing, model, timeout and fallback policy. Verify an actual supported
+adapter and its tool-I/O contract before using this library. Until then, use a
+current-session verified deterministic browser/extractor route. Keep resulting
+content, cookies, profiles and traces in verified PRIVATE versioned DATA.
 
 ## General experience & gotchas (踩坑)
-- **Token cost is the real cost, not a license.** Every run pumps page content through an LLM; large/long pages get expensive. Trim the source, scope the prompt, or run a local Ollama model to zero out token cost.
+- **Token cost is the real cost, not a license.** Every run pumps page content through an LLM; large/long pages get expensive. Trim the source, scope the prompt, and inherit llmcall's configured model policy.
 - **Non-deterministic output shape.** The same prompt can return slightly different keys/structure run-to-run, pin a JSON schema/output type and validate, don't trust the shape blindly.
 - **Same fingerprint ceiling as plain Playwright.** It does NOT add anti-bot; hardened Cloudflare/DataDome still blocks it (signal: challenge HTML in the result, 403, empty extraction). Escalate to patchright/nodriver/camoufox, or hand the barrier to Bright Data ②.
 - **Read/extract only**, it won't log in, paginate a portal, or click through flows; use browser-use/stagehand/skyvern for that.

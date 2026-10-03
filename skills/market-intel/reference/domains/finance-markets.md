@@ -15,8 +15,12 @@ unusual options flow, 股票/期权/基本面. (Tools only, not investment advic
 | Unusual Whales MCP | ① | options flow, dark pool, congress trades | connected + paid token | differentiated arb signals; community wrapper **erikmaday/unusual-whales-mcp** (73★) lowers client-integration friction over rolling your own, same paid data source underneath |
 | Alpaca / Tradier MCP | ① official | trade execution (paper first!) | connected | put risk guardrails in front |
 
-**Default pick:** Free start → SEC EDGAR + FRED + Finnhub free tier; **collapse the free-tier
-juggling with OpenBB MCP** (single endpoint for all of them). Pro → Massive (ex-Polygon). Execution
+**Default pick:** Free start → SEC EDGAR MCP (stefanoamorelli) + FRED MCP.
+
+**Conditional choices:** Require task fit and current operation, cost and permission checks.
+Free-start extension → Finnhub free tier. OpenBB MCP can consolidate
+supported providers such as SEC and FRED; keep the dedicated Finnhub route when its data is needed,
+because OpenBB does not bundle Finnhub. Pro → Massive (ex-Polygon). Execution
 → Alpaca (paper trading first, MCP holds key + enforces risk policy).
 
 **Dead/avoid:** **IEX Cloud**, officially retired **2024-08-31** (announced 2024-05-31; <2% of IEX

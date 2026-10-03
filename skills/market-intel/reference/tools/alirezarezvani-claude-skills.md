@@ -1,7 +1,7 @@
 # Tool: alirezarezvani/claude-skills
 
 - **Domain(s):** ready-skills (also: none)
-- **Barrier route:**, (skill mega-bundle; no data barrier of its own) · **Source tier:** L2 · **Ready MCP:** no, installs as a *plugin marketplace* of skills
+- **Barrier route:**, (skill mega-bundle; no data barrier of its own) · **Source tier:** L2 · **Ready MCP:** no, distributed through a plugin marketplace; selected plugins require a separate install
 - **Cost:** free (MIT) [github.com/alirezarezvani/claude-skills, gh-api 2026-06]
 - **Repo / Provider:** github.com/alirezarezvani/claude-skills, `alirezarezvani/claude-skills (23.5k★, gh-api 2026-07-31)`; active (pushed 2026-06-07, not archived, MIT)
 - **Top pick for its domain:** no (huge, but breadth-over-depth; reach for the focused bundles first)
@@ -10,13 +10,27 @@
 A **mega bundle of 338 skills** including market-research, C-level/exec, and finance modules. **Decision rule:** pick this when you want *one install that covers a wide surface* (including business-ops/exec/finance that the focused marketing bundles lack), or when a focused bundle is missing a niche skill. For the everyday marketing/competitor/content default, `marketingskills` is leaner; for SEO, `claude-seo`. Use this as the broad fallback, not the first reach (L2 tier vs the L1 focused picks).
 
 ## Install
-`/plugin marketplace add alirezarezvani/claude-skills` (plugin-marketplace install, **not** an MCP, **not** `npx skills add`). Exact command in shard `reference/domains/ready-skills.md`. Activates on session restart. L0 mechanics: `reference/install-guide.md`.
+`/plugin marketplace add alirezarezvani/claude-skills` registers the marketplace catalog only.
+Inspect that catalog or the selected version's manifest, choose the actual plugin IDs
+needed for this task, and use the host's plugin manager to install and enable those
+plugins. Current plugin and marketplace IDs are unverified here; do not guess them from
+the repository name. This is a plugin workflow, not an MCP registration.
+
+Restart or reconnect the active host after installation, then verify the selected
+plugin's exposed skills or commands and the intended operation. Registration alone or
+a restart alone does not make the catalog's entire contents available. See the
+[installation guide](../install-guide.md) for host scope and readiness checks.
 
 ## Auth / keys
 None to install. With 338 skills the relevant concern isn't keys but **scope**: only the skills you actually invoke matter, and each is only as grounded as the data MCP behind it (the recurring shard lesson, the skill is a shell; the data wiring is the work). No secret in the bundle, so no secret-hygiene note.
 
 ## Usage, call examples
-After install, 338 skills become available (market-research, c-level strategy, finance, plus much more). Minimal flow: install → restart → invoke the specific skill you need by name. Treat it as a *library*, search for the one skill that fits, rather than expecting a curated workflow.
+After the selected plugins are installed and enabled, inspect their current command or
+skill surface and invoke the one needed for the task. The counts above describe a dated
+catalog snapshot, not a promise that every skill is installed. Verify the selected
+operation after reconnecting; keep it in setup while its plugin ID, activation or
+execution remains unverified. Data-dependent conclusions still require the relevant
+source connections and usable results.
 
 ## General experience & gotchas (踩坑)
 - **338 skills = massive surface clutter.** This is the main cost: the skill list balloons, making the *right* skill harder to find than in a focused 40-skill bundle. Know the skill name you want before installing.

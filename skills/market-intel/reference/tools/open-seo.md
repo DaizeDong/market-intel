@@ -10,18 +10,21 @@
 open-seo bundles the common SEO-suite jobs, keyword research, SERP inspection, backlink analysis, site audit, into a self-hostable app with MCP access. **Decision rule:** after you have wired the free **GSC MCP** for first-party clicks/impressions, reach for open-seo when you need the *competitive/external* view (keywords you do not yet rank for, competitor backlinks, a crawl-based audit) and want to avoid a Semrush/Ahrefs subscription. Escalate to paid **DataForSEO** (① cheap, pay-per-call) only when you need vendor-grade SERP/keyword volume at scale or coverage open-seo's data sources do not reach.
 
 ## Install
-Node/TypeScript app: clone the repo and follow its README (`pnpm install`, configure env, `pnpm dev` or a Docker build). Enable the MCP server per the repo's MCP docs, then add it as a stdio/remote MCP and confirm with `claude mcp list`. Volatile install line: `pricing-install.md` → seo-keywords.
+Clone the selected source version and follow its README for dependency installation. Before starting the app, Docker runtime or MCP, use the full Market checkout's `tools/private_inventory.py` to verify an existing PRIVATE versioned runtime. Inventory its configuration, OAuth/provider credentials, databases, crawl results, caches, logs and exports, then use an adapter with supported absolute destinations for all real writes. Revalidate the private destination before launch. If any writer cannot be redirected and verified, keep the tool in setup.
+
+After a verified runtime is running, enable MCP per that version's docs and reconnect the active host. Use a supported value-free diagnostic for the selected server, returning only allowlisted name, connection status and authentication state; report those states as unverified if unavailable. Discover and execute the selected operation with usable results before claiming readiness. Volatile install line: `pricing-install.md` → seo-keywords.
 
 ## Auth / keys
-No central paid key for the tool itself. Depending on which data sources you enable, you may supply your own Google Search Console OAuth (for GSC-backed data) and/or keys for any third-party SERP/keyword provider you connect. Keep those keys in the app's env/config, never in a transcript or in git.
+No central paid key for the tool itself. Depending on which data sources you enable, you may supply your own Google Search Console OAuth (for GSC-backed data) and/or keys for any third-party SERP/keyword provider you connect. Load those credentials through supported configuration at a verified absolute path in the PRIVATE versioned runtime. Keep values out of public source, commands that echo them and transcripts. A public clone's ignored env/config file does not establish private storage.
 
 ## Usage, call examples
-Once the MCP is connected, call it like any other MCP tool (keyword lookup, SERP fetch, audit) from Claude. Self-host/UI usage:
+Source and dependency preparation only:
 ```bash
-git clone https://github.com/every-app/open-seo && cd open-seo
-pnpm install && pnpm dev   # then open the local UI / connect the MCP per README
+git clone https://github.com/every-app/open-seo
+cd open-seo
+pnpm install
 ```
-Prefer the MCP path for agent use so results come back structured instead of scraped from the UI.
+Launch through the verified private runtime adapter only after the storage checks above pass. Then discover the active MCP schema and run the selected keyword lookup, SERP fetch or audit. Prefer the MCP path for structured results. Exact runtime redirects and MCP operation names remain unverified here; source installation alone does not establish runtime readiness.
 
 ## General experience & gotchas (踩坑)
 > Not yet exercised in a live market-intel run, notes are from the repo + topic metadata, gh-api verified 2026-07-15; harden with a `live-runs.jsonl` entry after first real use (R4).

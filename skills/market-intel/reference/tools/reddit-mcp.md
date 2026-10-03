@@ -1,8 +1,10 @@
 # Tool: GridfireAI/reddit-mcp  `D-SUPERSEDED`
 
 > ⚠ **D-SUPERSEDED (2026-06).** Demoted from Reddit default, superseded by
-> **karanb192/reddit-mcp-buddy** (702★, zero-setup anon tier, no creds). Kept here only as a minimal
-> read-only fallback. Do **not** present this as the live top pick; reach for `reddit-mcp-buddy.md` first.
+> **karanb192/reddit-mcp-buddy**, conditional on verified app-id/login access or demonstrated
+> anonymous recovery. For research without Reddit credentials, use [reddit-research-mcp](reddit-research-mcp.md)
+> after hosted OAuth and current-session operation verification. Kept here only as a minimal
+> read-only fallback; do **not** present this as the live top pick.
 
 - **Domain(s):** reddit-community (also: none)
 - **Barrier route:** ① official (free Reddit API) · **Source tier:** L2 · **Ready MCP:** yes, `uvx reddit-mcp` (stdio); needs a free Reddit app client id/secret
@@ -11,7 +13,7 @@
 - **Top pick for its domain:** no, **D-SUPERSEDED** by reddit-mcp-buddy; minimal read-only fallback only
 
 ## What it does / when to pick it
-Read-only access to Reddit via the official API: fetch submissions, search, and browse a subreddit's posts. **Decision rule:** this is **no longer the Reddit default**, use **reddit-mcp-buddy** (zero-setup anon tier, no creds) for subreddit pain-point mining, product-feedback hunting, or "what is r/<niche> saying about X". Reach for GridfireAI/reddit-mcp **only** as a minimal read-only fallback if buddy is unavailable. It's the older **Reddit half** of the reddit-community pair (mcp-hn is the HN half). Choose **praw** instead when you need custom read flows the MCP doesn't expose (comment-tree walking, multi-sub aggregation, pagination control). Prefer any official-API route over an unauthorized Reddit scraper, the shard says PRAW/official is still free enough that browser-scraping Reddit is unnecessary.
+Read-only access to Reddit via the official API: fetch submissions, search, and browse a subreddit's posts. **Decision rule:** this is **no longer the Reddit default**. For subreddit pain-point mining and product-feedback research, use **reddit-mcp-buddy** only with verified app-id/login access or demonstrated anonymous recovery; its anonymous tier has a recorded 403 outage (2026-07-22), not a current recovery proof. For research without Reddit credentials, use **reddit-research-mcp** after hosted OAuth and current-session operation/content verification. Reach for GridfireAI/reddit-mcp **only** as a minimal read-only fallback if buddy is unavailable, after verifying its own access and selected read operation. It's the older **Reddit half** of the reddit-community pair (mcp-hn is the HN half). Choose **praw** instead when you need custom read flows the MCP doesn't expose (comment-tree walking, multi-sub aggregation, pagination control). Prefer any official-API route over an unauthorized Reddit scraper, the shard says PRAW/official is still free enough that browser-scraping Reddit is unnecessary.
 
 ## Install
 `uvx reddit-mcp` (stdio). Create a free app at reddit.com/prefs/apps (type "script") to get `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET`. Exact L1 command: `reference/volatile/pricing-install.md → reddit-community`. On Windows, stdio `uvx` is flaky, test in a plain shell first; see `reference/install-guide.md` for Windows + stdio mechanics. A newly added MCP needs a session restart / `/mcp` reconnect.

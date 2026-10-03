@@ -12,19 +12,10 @@ Adds three AI primitives, `act` (do this), `extract` (pull structured data with 
 ## Install
 `npm i @browserbasehq/stagehand` (Node ≥18; runs on local Playwright Chromium by default, or set Browserbase env to use their hosted browser). Not an MCP, call from a TS script. See L1 line in `reference/volatile/pricing-install.md#browser-automation`. On Windows prefer running the Node script in a clean shell; HTTP-first guidance in `install-guide.md` doesn't apply (this is a lib, not a server).
 
-## Auth / keys
-No Stagehand service key for local mode. Needs an **LLM API key** (`OPENAI_API_KEY`/`ANTHROPIC_API_KEY`) for the AI primitives; optionally a **Browserbase API key + project ID** if running on Browserbase cloud. Target-site auth = supplied session/cookies. Key-bearing: set keys via env yourself, keep them out of the transcript (see `install-guide.md` secret hygiene).
+## Model integration status
+Stagehand's model-dependent act, extract and observe modes require setup. All model or external-agent work must use installed `llmcall`, inheriting its current routing, model, timeout and fallback policy. No supported adapter for this library is supplied or verified here. Before using these modes, verify an actual installed-version adapter and its tool-I/O contract; otherwise stop at setup. Do not instantiate a direct provider client or add a separate model/provider ladder.
 
-## Usage, call examples
-```ts
-import { Stagehand } from "@browserbasehq/stagehand";
-const sh = new Stagehand({ env: "LOCAL" });           // or "BROWSERBASE"
-await sh.init();
-await sh.page.goto("https://site");
-await sh.page.act("click the login button");
-const data = await sh.page.extract({ instruction: "list product names+prices",
-  schema: z.object({ items: z.array(z.object({ name: z.string(), price: z.string() })) }) });
-```
+Plain deterministic browser scraping or local PDF text extraction remains usable through a current-session verified non-model route. Keep resulting content, indexes, cookies, profiles, traces and exports in verified PRIVATE versioned DATA. Any hosted browser or target-site credentials belong in the approved PRIVATE credential store and must stay out of transcripts.
 
 ## General experience & gotchas (踩坑)
 - **TypeScript-first.** The Python port lags the TS one, for Python pipelines prefer browser-use/crawl4ai rather than fighting the less-maintained Python path.

@@ -7,26 +7,24 @@
 - **Top pick for its domain:** no, the **escalation** when the read-only reddit-mcp isn't enough
 
 ## What it does / when to pick it
-The mature, canonical Python client for the official Reddit API: full read access to submissions, search, subreddits, **and nested comment trees**, plus pagination and multi-sub aggregation. **Decision rule:** the shard's `④`-route note says PRAW (official API) is "still free enough, no real need to browser-scrape" Reddit. Pick **reddit-mcp-buddy** first for quick read-only subreddit/search queries (the zero-setup Reddit default; GridfireAI/reddit-mcp is the superseded fallback); escalate to **praw** when you need what the MCP can't give: the **comment tree** (objections, "I switched because…"), custom pagination, or aggregating many subreddits in one flow. It's a library (L1), so it lives in your script, not the MCP list.
+The mature Python client for the official Reddit API supports submissions, search, subreddits, nested comment trees, pagination and multi-sub aggregation. Consider **reddit-mcp-buddy** for quick read-only queries after current-session verification; use **praw** when the selected MCP operation cannot provide the needed comment depth or pagination. API access, quotas and authorization still need verification. An installed library alone does not prove the required read operation works.
 
 ## Install
 `pip install praw`. No MCP to add, write a short Python script. The L1 line: `reference/volatile/pricing-install.md → reddit-community` (notes PRAW as the still-free official-API route under `④ Browser/OSS`). Windows: pure-Python, so no stdio/path flakiness, runs fine in any Python ≥3.10 env. (If you'd rather have it in the MCP list, use `reddit-mcp-buddy` first; the superseded `reddit-mcp` also wraps PRAW, see `reddit-mcp-buddy.md` / `reddit-mcp.md`.)
 
 ## Auth / keys
-Create a free "script" app at reddit.com/prefs/apps → get `client_id`, `client_secret`, set a descriptive `user_agent`. These are **secrets**, load them from env vars the **user** sets (e.g. a local `.env`), never hard-code or echo the values into the transcript. No MCP header to leak here, but treat the client secret like a credential and keep it out of committed code. One-line reminder; full hygiene in `reference/install-guide.md`.
+Follow Reddit's current application and authorization process. Load credentials and the real contact User-Agent through approved PRIVATE configuration without printing them. Keep collected comments, caches and exports in verified PRIVATE versioned DATA. Public code and generated tests use only synthetic values; see `reference/install-guide.md`.
 
 ## Usage, call examples
-```python
-import praw
-reddit = praw.Reddit(client_id=..., client_secret=..., user_agent="market-intel/0.x")
-for s in reddit.subreddit("homeimprovement").search("patio heater", sort="top", time_filter="year", limit=25):
-    s.comments.replace_more(limit=0)          # flatten the comment tree
-    pains = [c.body for c in s.comments.list()]
-```
-`reddit.subreddit(...).top()/hot()/new()`, `.search(...)`, and `submission.comments.list()` are the core calls. Always set `user_agent`; respect `time_filter`/`limit`.
+Use `reddit.subreddit(...).top()/hot()/new()` or `.search(...)` for a bounded submission
+set. For comments, choose an explicit expansion budget for `submission.comments.replace_more`.
+Retain the returned unexpanded `MoreComments` placeholders as coverage gaps, then use
+`.list()` to flatten the comments that were actually loaded. `replace_more(limit=0)`
+performs no additional expansion and removes unloaded placeholders; its result is partial.
+Record fetched counts, remaining gaps and the expansion limit with the private output.
 
 ## General experience & gotchas (踩坑)
-- **This is the tool that closes the comment-tree gap** the shard flagged on the patio-heaters run, `submission.comments.replace_more(limit=0)` then `.list()` flattens nested replies the read-only MCP can't return. That's the main reason to reach for praw over reddit-mcp.
+- **Comment depth is an explicit coverage choice.** PRAW can fetch more replies than a limited MCP operation, but `.list()` only flattens loaded comments. Never describe `replace_more(limit=0)` output as a complete comment tree.
 - **Reddit API rate limits (~60 req/min)** still apply, PRAW handles backoff internally but a wide multi-sub + comment-tree crawl is slow; cache and pace. `replace_more` calls are the expensive part (each costs a request).
 - **Reddit API is tightening** (shard "Watch": API restrictions ongoing, GummySearch shuts 2026-11). Official OAuth access remains compliant and free for read, stay on it rather than scraping, but watch for quota/policy drift.
 - **Read-only is enough for research; avoid write/vote actions** (post/comment/vote) which carry account-action risk and add nothing to intel work.

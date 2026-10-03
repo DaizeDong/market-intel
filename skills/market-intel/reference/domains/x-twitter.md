@@ -2,15 +2,17 @@
 
 **Triage signals:** tweets, X/Twitter search, user/influencer analysis, viral tracking, 推特/X 舆情.
 
-> **Real-run lesson (2026-06): X is a LOW-signal source for consumer / non-tech demand research.**
-> For e.g. auto-modding/patio-heater, X "Top" search was nearly empty; the real demand discourse lives on
-> 抖音/小红书/B站/懂车帝 (China) and Reddit/vertical forums (US). Route consumer-demand questions there
-> (web/Bright Data), not X. X earns its keep for **tech/crypto/startup/founder** discourse, breaking
-> news, and named-account/influencer tracking, use twitterapi for those, not for "do people buy X".
+Choose X when the question depends on timely public posts or named-account discourse.
+For consumer demand, compare its coverage with relevant communities and vertical forums;
+low query yield is a coverage observation, not evidence that demand does not exist.
 
 **Hard truth:** X killed anonymous scraping (login wall since 2024). Official free API is unusable;
 snscrape and public Nitter instances are effectively dead. Choice = who absorbs the
 account+proxy+login-wall cost.
+
+The detect column lists setup/discovery checks, not this host's state. Count a source as
+available only after active-host operation, authentication and content checks succeed.
+A stored key, connected listing or import is insufficient.
 
 | source | route | capability | detect | risk |
 |---|---|---|---|---|
@@ -20,7 +22,7 @@ account+proxy+login-wall cost.
 | **vladkens/twscrape** (2.7k★) | ③ scrape | search/users/followers, account rotation | python lib installed | needs X cookies+proxy, ban risk; **still actively maintained** (pushed 2026-08-28, v0.19.1 updated X GraphQL op IDs), pin the `vladkens/` repo |
 | **d60/twikit** (4.7k★) + adhikasp/mcp-twikit (235★) | ③/④ self-host | read+write, search, DM, no API key | connected MCP or python lib | free; cookie/login, ban risk. ⚠ **worse than last sweep recorded**: twikit's 2026-03-10 push was README-only, its last *code* commit was 2025-04-22 (>12mo) and PyPI is frozen at 2.3.3 (2025-02-07); adhikasp/mcp-twikit is 17.8mo silent, i.e. an unmaintained wrapper around an unmaintained lib. Both still install and neither is archived, so no C4 death code is executed, but **twscrape is now the maintained free ③ route and the Default pick moves accordingly** |
 | playwright MCP + browser-use | ④ browser | act-like-human: logged-in search, scrape rendered view | playwright connected | free, real session, best for fields API hides |
-| Infatoshi/x-mcp, DataWhisker | ① official | full read+write incl. media | connected + X dev creds | needs Basic $200/mo+ |
+| Infatoshi/x-mcp, DataWhisker | ① official | full read+write incl. media | official API integration and private developer credentials | see the dated platform-pricing notes in [social-publishing.md](social-publishing.md); verify current endpoint terms |
 | **FxEmbed** (4.8k★) fka FxTwitter | ② free / ③ self-host | resolve ONE post/thread as JSON (text+media+metrics), no key | plain GET, no `claude mcp` entry | read-one only (no search); public-instance uptime + ToS gray, self-host on CF Workers to own it |
 
 **Default pick:** Free + good data → **vladkens/twscrape** (the maintained ③ lib, see the staleness note

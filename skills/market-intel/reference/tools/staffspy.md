@@ -32,16 +32,26 @@ throwaway/burner account, never the user's primary LinkedIn.** Optional `solver_
 do not echo the LinkedIn password or solver key into the transcript; have the USER supply them, see
 `reference/install-guide.md` (secret-handling).
 
-## Usage, call examples
-```python
-from staffspy import LinkedInAccount
-account = LinkedInAccount(session_file="session.pkl", log_level=1)
-staff = account.scrape_staff(company_name="openai", search_term="software engineer",
-                             location="london", extra_profile_data=True, max_results=50)  # up to 1000
-staff.to_csv("staff.csv", index=False)
-```
-Other entry points: `scrape_users([...ids])`, `scrape_comments([post_ids])`, `scrape_companies([...])`,
-`scrape_connections()`.
+## Usage and PRIVATE runtime paths
+Before any real run, resolve the full consumer checkout and use
+`tools/private_inventory.py`'s `resolve_destination(path=...)` for individual
+config/output files and `resolve_directory(path=...)` for existing runtime or
+browser-profile directories. Pass the final absolute path. Each check proves the
+containing repository, including a repository rooted at the directory itself,
+and PRIVATE visibility for every effective
+publication destination. Stop on missing, PUBLIC or unknown proof.
+Keep runtime files versioned in that PRIVATE companion. An ignored directory in
+this public checkout is not a valid destination. A later real run must repeat the
+check; this recipe is not a live destination attestation.
+
+Install the upstream library in the selected environment. Run its caller from a
+verified PRIVATE runtime directory. Pass the absolute verified session path to
+`LinkedInAccount(session_file=...)` and the absolute verified report path to
+the returned DataFrame's `to_csv(...)`. This redirects the documented session
+and CSV outputs. Verify any additional log/cache locations for the installed
+version before querying. Keep company/target inputs in PRIVATE config.
+Other supported entry points include `scrape_staff`, `scrape_users`,
+`scrape_comments`, `scrape_companies` and `scrape_connections`.
 
 ## General experience & gotchas (踩坑)
 - **⚠ HIGHEST-ban-risk route**, LinkedIn cookie-scraping = 25 to 35% account ban rate (shard compliance

@@ -12,9 +12,9 @@ between monthly runs.
 
 DATA BOUNDARY (Skill Repo Spec s9): this file is TOOL (public code). Its OUTPUT is a record of what
 surfaced during a real run -> it is written to the PRIVATE data home, never into the public repo.
-  inbox default: <tools/datadir.py resolution>/surface-inbox.jsonl
+  inbox default: <verified PRIVATE companion>/surface-inbox.jsonl
                  ($MARKET_INTEL_DATA_DIR -> $MARKET_INTEL_CONFIG/data -> ~/.market-intel-config/data)
-  print it with: python tools/datadir.py --path market-intel surface-inbox.jsonl
+  Both default and explicit paths are verified before polling; dry-run creates no storage.
 Reads may degrade (a surface down -> warn + continue); the inbox WRITE hard-fails (never a repo
 fallback). One candidate per JSONL line: {surface, key, title, url, signal, discovered_at, raw}.
 
@@ -44,16 +44,27 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(HERE, "surfaces.json")
 SKILL = "market-intel"
 
-sys.path.insert(0, HERE)
-# datadir moved into the guards submodule: one copy for the fleet instead of one per repo,
-# which had already begun to drift. The insert above stays, because sibling modules in this
-# same tools/ directory are still imported by bare name.
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                                "guards", "tools"))
-from datadir import resolve_data_dir  # noqa: E402
+import private_inventory
+
+INBOX_RELATIVE = "surface-inbox.jsonl"
 
 
 # ----------------------------------------------------------------------------- helpers
+class SurfaceRows(list):
+    """Usable observations plus completion evidence for a multi-request surface."""
+    def __init__(self, attempted):
+        super().__init__()
+        self.attempted = attempted
+        self.completed = 0
+        self.errors = []
+
+    @property
+    def status(self):
+        if self.attempted == 0:
+            return "UNINITIALIZED"
+        return "OK" if self.completed == self.attempted and not self.errors else "DEGRADED"
+
+
 def _now() -> datetime:
     return datetime.now(timezone.utc)
 
@@ -68,10 +79,24 @@ def _http_json(url: str, timeout: int = 20):
     return json.loads(_http_get(url, timeout=timeout, accept="application/json").decode("utf-8", "replace"))
 
 
+def _json_rows(payload, surface: str, key: str | None = None) -> list[dict]:
+    """Validate provider envelopes before treating an empty result as an observation."""
+    if key is not None:
+        if not isinstance(payload, dict) or key not in payload:
+            raise ValueError(f"{surface}: expected an object containing {key!r}")
+        if payload.get("error") or payload.get("errors"):
+            raise ValueError(f"{surface}: provider reported an error")
+        payload = payload[key]
+    if not isinstance(payload, list) or any(not isinstance(row, dict) for row in payload):
+        raise ValueError(f"{surface}: expected an array of objects")
+    return payload
+
+
 def _gh_json(path: str):
     """`gh api <path>` -> parsed JSON. Raises on failure (caller wraps per-surface)."""
     exe = os.environ.get("GH_BIN", "gh")
-    out = subprocess.run([exe, "api", path], capture_output=True, text=True, encoding="utf-8", timeout=60)
+    out = subprocess.run([exe, "api", "--hostname", "github.com", path],
+                         capture_output=True, text=True, encoding="utf-8", timeout=60)
     if out.returncode != 0:
         raise RuntimeError(f"gh api failed: {out.stderr.strip()[:200]}")
     return json.loads(out.stdout)
@@ -82,18 +107,6 @@ def _load_config() -> dict:
         with open(CONFIG_PATH, encoding="utf-8") as f:
             return json.load(f)
     return {}
-
-
-def _data_home() -> str:
-    """The private data home, resolved by tools/datadir.py -- the ONE resolver, not a copy of it.
-
-    This used to re-implement the discovery order in four lines, and the copy went stale: it knew
-    only $MARKET_INTEL_DATA_DIR and the ~/.market-intel-config/data dotfile, so once the companion
-    repo was pinned elsewhere with $MARKET_INTEL_CONFIG this writer kept appending to a directory
-    nothing else read any more. A second ledger that nobody consumes is indistinguishable from
-    losing the observation, which is exactly what the write-side hard-fail rule exists to prevent.
-    """
-    return str(resolve_data_dir(SKILL, create=True))
 
 
 # ----------------------------------------------------------------------------- surfaces
@@ -117,7 +130,7 @@ def surface_E1_pulsemcp(cfg: dict) -> list[dict]:
     with urllib.request.urlopen(req, timeout=20) as r:
         data = json.loads(r.read().decode("utf-8", "replace"))
     out = []
-    for s in data.get("servers", []):
+    for s in _json_rows(data, "E1", "servers"):
         stars = s.get("github_stars") or 0
         dl = s.get("package_download_count") or 0
         if stars < min_stars and dl < min_dl:  # traction filter: notable, not every row
@@ -134,24 +147,41 @@ def surface_E1_pulsemcp(cfg: dict) -> list[dict]:
 
 
 def surface_E2_github_velocity(cfg: dict, since_days: int) -> list[dict]:
-    """GitHub Search velocity — repos <since_days old with >=min_stars in the target topics."""
+    """GitHub velocity; retain usable topic rows and report failed or incomplete requests."""
     e2 = cfg.get("E2", {})
     topics = e2.get("topics", ["mcp-server", "claude-skill", "llm-agent"])
+    if (not isinstance(topics, list) or not topics
+            or any(not isinstance(topic, str) or not topic.strip() for topic in topics)):
+        raise ValueError("E2: expected at least one nonempty topic")
     min_stars = int(e2.get("min_stars", 50))
     since = (_now() - timedelta(days=since_days)).strftime("%Y-%m-%d")
-    seen, out = set(), []
+    seen, out = set(), SurfaceRows(len(topics))
     for topic in topics:
-        q = f"created:>{since}+stars:>{min_stars}+topic:{topic}"
-        data = _gh_json(f"search/repositories?q={q}&sort=stars&order=desc&per_page=30")
-        for it in data.get("items", []):
-            full = it.get("full_name")
-            if not full or full in seen:
-                continue
-            seen.add(full)
-            out.append({"surface": "E2", "key": f"E2:{full}", "title": full,
-                        "url": it.get("html_url", ""), "signal": f"{it.get('stargazers_count')}star/{topic}",
-                        "raw": {"stars": it.get("stargazers_count"), "created_at": it.get("created_at"),
-                                "topic": topic, "desc": (it.get("description") or "")[:200]}})
+        try:
+            q = f"created:>{since}+stars:>{min_stars}+topic:{topic}"
+            data = _gh_json(f"search/repositories?q={q}&sort=stars&order=desc&per_page=30")
+            items = _json_rows(data, "E2", "items")
+            incomplete = data.get("incomplete_results", False)
+            if not isinstance(incomplete, bool):
+                raise ValueError("E2: expected boolean incomplete_results")
+            for it in items:
+                full = it.get("full_name")
+                if not full or full in seen:
+                    continue
+                row = {"surface": "E2", "key": f"E2:{full}", "title": full,
+                       "url": it.get("html_url", ""), "signal": f"{it.get('stargazers_count')}star/{topic}",
+                       "raw": {"stars": it.get("stargazers_count"), "created_at": it.get("created_at"),
+                               "topic": topic, "desc": (it.get("description") or "")[:200]}}
+                if incomplete:
+                    row["raw"]["incomplete_results"] = True
+                out.append(row)
+                seen.add(full)
+            if incomplete:
+                out.errors.append(f"{topic}: incomplete_results=true; response is incomplete")
+            else:
+                out.completed += 1
+        except Exception as exc:
+            out.errors.append(f"{topic}: {type(exc).__name__}: {exc}")
     return out
 
 
@@ -160,12 +190,12 @@ def surface_E3_hf_spaces(cfg: dict) -> list[dict]:
     e3 = cfg.get("E3", {})
     limit = int(e3.get("limit", 50))
     min_score = float(e3.get("min_trending_score", 0))  # 0 = keep all top-N, calibrate after 2 rounds
-    data = _http_json(f"https://huggingface.co/api/spaces?sort=trendingScore&limit={limit}")
-    if isinstance(data, list) and len(data) >= limit:
+    data = _json_rows(_http_json(f"https://huggingface.co/api/spaces?sort=trendingScore&limit={limit}"), "E3")
+    if len(data) >= limit:
         print(f"  E3  CAPPED    trending page hit limit={limit}; more spaces exist past it",
               file=sys.stderr)
     out = []
-    for sp in data if isinstance(data, list) else []:
+    for sp in data:
         score = sp.get("trendingScore", 0) or 0
         if score < min_score:
             continue
@@ -187,13 +217,17 @@ def surface_E4_npm_velocity(cfg: dict) -> list[dict]:
     watch = e4.get("watchlist", [])
     min_weekly = int(e4.get("min_weekly", 500))
     min_wow = float(e4.get("min_wow", 2.0))
-    out = []
+    out = SurfaceRows(len(watch))
     for pkg in watch:
         try:
-            wk = _http_json(f"https://api.npmjs.org/downloads/point/last-week/{pkg}").get("downloads", 0)
-            pm = _http_json(f"https://api.npmjs.org/downloads/point/last-month/{pkg}").get("downloads", 0)
-        except Exception:
+            wk = _http_json(f"https://api.npmjs.org/downloads/point/last-week/{pkg}")["downloads"]
+            pm = _http_json(f"https://api.npmjs.org/downloads/point/last-month/{pkg}")["downloads"]
+            if type(wk) is not int or type(pm) is not int or wk < 0 or pm < wk:
+                raise ValueError("invalid npm download counts")
+        except Exception as exc:
+            out.errors.append(f"{pkg}: {type(exc).__name__}")
             continue
+        out.completed += 1
         prev3wk_avg = max((pm - wk) / 3.0, 1e-9)
         wow = wk / prev3wk_avg
         if wk >= min_weekly and wow >= min_wow:
@@ -213,7 +247,7 @@ def surface_E5_show_hn(cfg: dict) -> list[dict]:
            f"&query={urllib.request.quote(query)}")
     data = _http_json(url)
     out = []
-    for h in data.get("hits", []):
+    for h in _json_rows(data, "E5", "hits"):
         pts = h.get("points") or 0
         ncomment = h.get("num_comments") or 0
         if pts < min_points and ncomment < min_comments:
@@ -257,20 +291,23 @@ def surface_E6_youtube(cfg: dict, since_days: int) -> list[dict]:
     """
     chans = cfg.get("E6", {}).get("channels", [])
     since = _now() - timedelta(days=max(since_days, 7))
-    out, warnings = [], []
+    out = SurfaceRows(len(chans))
     for ch in chans:
-        ucid = ch.get("ucid") or (_resolve_ucid(ch["handle"]) if ch.get("handle") else None)
-        if not ucid:
-            warnings.append(ch.get("name") or ch.get("handle") or "?")
-            continue
+        label = ch.get("name") or ch.get("handle") or ch.get("ucid") or "unnamed channel"
         try:
+            ucid = ch.get("ucid") or (_resolve_ucid(ch["handle"]) if ch.get("handle") else None)
+            if not ucid:
+                raise ValueError("UCID unresolved")
             raw = _http_get(f"https://www.youtube.com/feeds/videos.xml?channel_id={ucid}",
                             accept="application/atom+xml")
-        except Exception:
-            warnings.append((ch.get("name") or ucid) + "(feed)")
+            root = ET.fromstring(raw)
+            if root.tag != "{http://www.w3.org/2005/Atom}feed":
+                raise ValueError("response is not an Atom feed")
+        except Exception as exc:
+            out.errors.append(f"{label}: {type(exc).__name__}: {exc}")
             continue
         ns = {"a": "http://www.w3.org/2005/Atom"}
-        root = ET.fromstring(raw)
+        valid = True
         for entry in root.findall("a:entry", ns):
             title = (entry.findtext("a:title", default="", namespaces=ns) or "").strip()
             link_el = entry.find("a:link", ns)
@@ -278,16 +315,19 @@ def surface_E6_youtube(cfg: dict, since_days: int) -> list[dict]:
             pub = entry.findtext("a:published", default="", namespaces=ns)
             try:
                 pub_dt = datetime.fromisoformat(pub.replace("Z", "+00:00"))
-            except Exception:
-                pub_dt = None
-            if pub_dt and pub_dt < since:
+                if not title or not link or pub_dt.tzinfo is None:
+                    raise ValueError("incomplete video evidence")
+            except (ValueError, TypeError):
+                valid = False
+                out.errors.append(f"{label}: invalid video entry")
+                continue
+            if pub_dt < since:
                 continue
             out.append({"surface": "E6", "key": f"E6:{link}", "title": title, "url": link,
                         "signal": f"video/{ch.get('name','?')}",
                         "raw": {"channel": ch.get("name"), "published_at": pub}})
-    if warnings:
-        out.append({"surface": "E6", "key": "E6:_warn", "title": f"UCID unresolved: {', '.join(warnings)}",
-                    "url": "", "signal": "degraded", "raw": {"unresolved": warnings}})
+        if valid:
+            out.completed += 1
     return out
 
 
@@ -316,7 +356,12 @@ def main() -> int:
         with open(args.config, encoding="utf-8") as f:
             cfg = json.load(f)
 
-    inbox = args.inbox or os.path.join(_data_home(), "surface-inbox.jsonl")
+    try:
+        destination = private_inventory.resolve_destination(INBOX_RELATIVE, path=args.inbox)
+    except private_inventory.InventoryError as exc:
+        print(f"FATAL: inbox destination refused: {exc}", file=sys.stderr)
+        return 2
+    inbox = destination.path
     seen_keys = set()
     if not args.dry_run and os.path.exists(inbox):
         with open(inbox, encoding="utf-8") as f:
@@ -370,21 +415,29 @@ def main() -> int:
             c["discovered_at"] = stamp
             seen_keys.add(c["key"])
         all_new.extend(fresh)
-        summary.append((name, "OK", f"{len(fresh)} new / {len(cands)} seen"))
+        status = cands.status if isinstance(cands, SurfaceRows) else "OK"
+        detail = f"{len(fresh)} new / {len(cands)} seen"
+        if isinstance(cands, SurfaceRows):
+            detail += f"; {cands.completed}/{cands.attempted} requests complete"
+            if cands.errors:
+                detail += "; " + "; ".join(cands.errors)
+        summary.append((name, status, detail))
 
     # write (hard-fail on write error; never a repo fallback)
     if not args.dry_run and all_new:
         try:
-            os.makedirs(os.path.dirname(inbox), exist_ok=True)
-            with open(inbox, "a", encoding="utf-8") as f:
-                for c in all_new:
-                    f.write(json.dumps(c, ensure_ascii=False) + "\n")
-        except OSError as e:
-            print(f"FATAL: cannot write inbox {inbox}: {e}", file=sys.stderr)
+            def append(body):
+                existing = {json.loads(line).get("key") for line in body.splitlines() if line.strip()}
+                prefix = body + ("\n" if body and not body.endswith("\n") else "")
+                return prefix + "".join(json.dumps(row, ensure_ascii=False) + "\n"
+                                        for row in all_new if row["key"] not in existing)
+            private_inventory.update_text(append, INBOX_RELATIVE, destination)
+        except (private_inventory.InventoryError, ValueError) as e:
+            print(f"FATAL: cannot persist private inbox: {e}", file=sys.stderr)
             return 2
 
     # summary (stdout, machine-greppable last line for the wrapper)
-    print(f"# market-intel surface poll @ {stamp}  (inbox: {inbox})")
+    print(f"# market-intel surface poll @ {stamp}  (PRIVATE companion {destination.identity})")
     for name, status, detail in summary:
         print(f"  {name:3} {status:9} {detail}")
     degraded = [n for n, s, _ in summary if s != "OK"]

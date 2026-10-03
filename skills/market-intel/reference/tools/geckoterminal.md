@@ -10,7 +10,7 @@
 DEX-pair analytics: OHLCV candle history (down to 1s), pool liquidity, trades, across 100+ networks (eth, solana, base, …). Pick it when you need **historical** DEX price/liquidity for a token or pool, it beats DexScreener, which has no history. For CEX-listed token spot price use CoinGecko; for wallet/tx-level on-chain use Etherscan/Blockscout. GeckoTerminal is the DEX-pair history layer.
 
 ## Install
-Nothing to install if CoinGecko MCP is already connected, GeckoTerminal data comes through it (`npx mcp-remote https://mcp.api.coingecko.com/mcp`, public, no key). For raw REST just call `https://api.geckoterminal.com/api/v2/...` (no auth). Prefer the hosted MCP route on Windows. Exact command in `reference/volatile/pricing-install.md` → crypto-defi.
+If the selected CoinGecko MCP operation passes current-session verification, it can provide GeckoTerminal data (`npx mcp-remote https://mcp.api.coingecko.com/mcp`, public, no key). For raw REST just call `https://api.geckoterminal.com/api/v2/...` (no auth). Prefer the hosted MCP route on Windows. Exact command in `reference/volatile/pricing-install.md` → crypto-defi.
 
 ## Auth / keys
 None for the free public tier (no key, no secret-hygiene concern). A paid CoinGecko API key only raises the rate limit (10 → 250 calls/min) and is supplied as a CoinGecko Pro key, not a separate GeckoTerminal credential.
@@ -19,7 +19,7 @@ None for the free public tier (no key, no secret-hygiene concern). A paid CoinGe
 - Networks: `GET /api/v2/networks` → returns `{id:"eth", type:"network", attributes:{name:"Ethereum", ...}}, ...` (verified live 200 + JSON, 2026-06).
 - Pool OHLCV: `GET /api/v2/networks/{network}/pools/{pool_address}/ohlcv/{timeframe}` (e.g. `.../ohlcv/hour?aggregate=4`).
 - Top pools / token pools: `GET /api/v2/networks/{network}/tokens/{token_address}/pools`.
-Via CoinGecko MCP, the same data appears under the on-chain/GeckoTerminal tool names, list with `claude mcp get coingecko`.
+Via CoinGecko MCP, discover the on-chain/GeckoTerminal operations through the active host's callable-tool surface and inspect the selected operation's schema. Verify its execution, authentication and usable response in that session. Server configuration output is not a tool schema and can contain a paid key; diagnostics may return only the allowlisted selected-server fields in the [installation guide](../install-guide.md). Keep the operation unverified if that discovery or check is unavailable.
 
 ## General experience & gotchas (踩坑)
 - **10 calls/min on the free tier is the real ceiling**, batch/space requests or you hit 429. A long backfill of 1s candles will rate-limit fast; pull coarse timeframes first, drill in only where needed.

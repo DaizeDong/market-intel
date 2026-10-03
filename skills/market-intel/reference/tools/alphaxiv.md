@@ -1,18 +1,18 @@
 # Tool: alphaXiv (+ skill alphaxiv)
 
 - **Domain(s):** frontier-research (also: none)
-- **Barrier route:** ③④ (self-host comments backend exists, but in practice browser-driven) · **Source tier:** L4 (community signal) · **Ready MCP:** no, use the local **`alphaxiv` skill** (already in this skill set) or drive the site with the **playwright MCP**
+- **Barrier route:** ③④ (self-host comments backend exists, but in practice browser-driven) · **Source tier:** L4 (community signal) · **Ready MCP:** no, discover the optional **`alphaxiv` skill** in the active host or use a verified **playwright MCP** operation
 - **Cost:** **free**, public site; community comments + LLM-optimized summaries over arXiv. (Site is JS-heavy and bot-blocks plain fetch, returned **403 to WebFetch, 2026-06**; this is expected, not a dead site. No pricing page to confirm.)
 - **Repo / Provider:** https://www.alphaxiv.org (non-GitHub provider; an overlay on arXiv). Driven via the `alphaxiv` skill or playwright.
 - **Top pick for its domain:** no
 
 ## What it does / when to pick it
-alphaXiv layers a **discussion/comment thread and an LLM-optimized summary** on top of each arXiv paper. **Decision rule:** use it for a fast *single-paper* "explain this / what are people saying" pass, the local **`alphaxiv` skill** is purpose-built for "summarize this paper / paste an arXiv URL or ID". Pick it when you have a specific paper and want a quick read plus community sentiment. It is **NOT** for broad literature search (use arXiv API / HF Daily Papers) and **NOT** for deep multi-paper synthesis (delegate to `research-lit`). Treat its community signal as **L4**, a lead about reception, never significance evidence on its own.
+alphaXiv layers a **discussion/comment thread and an LLM-optimized summary** on top of each arXiv paper. **Decision rule:** use it for a fast *single-paper* "explain this / what are people saying" pass, the optional **`alphaxiv` skill** is purpose-built for "summarize this paper / paste an arXiv URL or ID". Pick it when you have a specific paper and want a quick read plus community sentiment. It is **NOT** for broad literature search (use arXiv API / HF Daily Papers) and **NOT** for deep multi-paper synthesis (delegate to `research-lit`). Treat its community signal as **L4**, a lead about reception, never significance evidence on its own.
 
 ## Install
 No MCP to add. Two routes:
-1. **Skill (preferred):** invoke the `alphaxiv` skill, it handles arXiv/alphaXiv URLs or a bare arXiv ID with a tiered source fallback. Already present in this skill set.
-2. **Browser:** drive https://www.alphaxiv.org with the **playwright MCP** (already connected), navigate to the paper, read the summary + comments from the DOM.
+1. **Optional skill:** check the active host's skill catalog for `alphaxiv` and read its installed instructions before invoking it with an arXiv/alphaXiv URL or ID. Market-intel does not bundle or install it. If absent, report the setup gap and use the verified browser route below or a verified arXiv read operation; do not assume a sibling skill is installed.
+2. **Browser:** drive https://www.alphaxiv.org with the **playwright MCP** (available only after current-session operation verification), navigate to the paper, read the summary + comments from the DOM.
 See `reference/install-guide.md` → "④ browser / act-like-human" and `reference/volatile/pricing-install.md` → frontier-research.
 
 ## Auth / keys

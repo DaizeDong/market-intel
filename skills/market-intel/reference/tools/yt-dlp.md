@@ -12,8 +12,13 @@ The standard **media downloader + metadata extractor** for YouTube and 1000+ sit
 ## Install
 `pip install yt-dlp` (or `pip install -U yt-dlp` to update, it updates constantly) or a standalone binary. Not an MCP, shell out to the CLI or `import yt_dlp`. L1 line: `reference/volatile/pricing-install.md#browser-automation`. Works fine on native Windows (single binary / pip), no Playwright path quirks. Pair with `ffmpeg` only if you actually need to merge/convert media (metadata pulls don't).
 
+## Private runtime and outputs
+Before any collection or login below, use `tools/private_inventory.py` from the full consumer checkout. Select an existing absolute runtime directory with `runtime = resolve_directory("runtime/yt-dlp")`. This proves the final directory's repository, including a nested repository at that directory, and every effective publication destination is PRIVATE and versioned. Stop if it is missing, PUBLIC or unknown. Revalidate `resolve_directory(path=runtime.path)` immediately before launching the caller with that directory as its working directory.
+
+Check the installed version's supported output and storage settings before use. Route every download, transcript, dataset, request queue, cache, session, cookie file and export through that verified PRIVATE runtime or an absolute file destination checked with `resolve_destination`. Settings that default elsewhere must be explicitly redirected with supported installed-version options. If any output cannot be located and redirected, keep the tool in setup status. Capture metadata stdout only into a verified PRIVATE file; do not redirect it into the consumer checkout. Credential values belong in the designated PRIVATE versioned companion and its approved backup.
+
 ## Auth / keys
-No service key. For age-gated / login-walled / rate-limited content, supply **browser cookies**: `--cookies-from-browser chrome` or a `--cookies cookies.txt` file. Cookies are session secrets, treat like keys: don't echo or commit them; the user exports them themselves (see `install-guide.md` secret hygiene). For scrape-heavy pulls use a throwaway account's cookies.
+No service key. For content that needs authentication, supply a user-selected browser session or an absolute cookie-file path verified with `resolve_destination`. Use only the installed version's supported cookie options, under the private runtime contract above. Keep cookie values out of transcripts.
 
 ## Usage, call examples
 ```bash

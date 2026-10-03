@@ -17,7 +17,7 @@
 The official Polygon (Massive) MCP is hosted and key-bearing. Two paths in 2026-06:
 
 1. **Direct REST** (recommended given the PyPI MCP-wrapper instability, see core.md gotchas):
-   key in `secrets/polygon.env`, call REST from subagent Bash.
+   resolve the credential file to a supported absolute path in an initialized PRIVATE versioned companion, validate that destination with the full Market checkout's `tools/private_inventory.py`, then call REST through the approved client without echoing the key. Revalidate before any credential or result write; no public-source-relative fallback is allowed. Keep setup pending if the selected client cannot use the verified private configuration.
 2. **Official MCP** (when stable): follow `reference/volatile/pricing-install.md → finance-markets`
    for the exact, time-stamped install command.
 

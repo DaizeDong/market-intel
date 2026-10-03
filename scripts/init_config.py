@@ -22,7 +22,9 @@ Stdlib only. Cross-platform. Never writes secrets; never echoes anything secret.
 import argparse
 import json
 import os
+import stat
 import sys
+import tempfile
 
 GITIGNORE = """\
 # Secrets gate (config-spec E6 / Mode B) — real values never enter git.
@@ -82,13 +84,63 @@ def detect_skill():
     return None
 
 
+def preflight(path):
+    """Reject aliased outputs and ancestors without creating or opening files."""
+    selected = os.path.abspath(path)
+    current = selected
+    existing = None
+    while True:
+        try:
+            info = os.lstat(current)
+        except FileNotFoundError:
+            pass
+        else:
+            reparse = getattr(info, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+            if stat.S_ISLNK(info.st_mode) or reparse:
+                raise ValueError("output path contains a filesystem alias: %s" % current)
+            if current == selected:
+                if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+                    raise ValueError("output must be an ordinary file with no hardlinks: %s" % current)
+                existing = info
+            elif not stat.S_ISDIR(info.st_mode):
+                raise ValueError("output parent is not a directory: %s" % current)
+        parent = os.path.dirname(current)
+        if parent == current:
+            return existing
+        current = parent
+
+
 def write(path, content, force):
-    if os.path.exists(path) and not force:
+    if preflight(path) is not None and not force:
         print("  SKIP (exists): %s" % path)
         return
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8", newline="\n") as f:
-        f.write(content)
+    preflight(path)
+    temporary = None
+    created = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", newline="\n",
+                                         dir=os.path.dirname(path), prefix=".init-config-", delete=False) as f:
+            temporary = f.name
+            created = os.fstat(f.fileno())
+            f.write(content)
+            f.flush()
+            os.fsync(f.fileno())
+        if preflight(path) is not None and not force:
+            print("  SKIP (exists): %s" % path)
+            return
+        pending = preflight(temporary)
+        if pending is None or not os.path.samestat(created, pending):
+            raise ValueError("initializer temporary file changed before replacement")
+        os.replace(temporary, path)
+        temporary = None
+    finally:
+        if temporary is not None:
+            pending = preflight(temporary)
+            if pending is not None:
+                if created is None or not os.path.samestat(created, pending):
+                    raise ValueError("initializer temporary file changed; cleanup refused")
+                os.unlink(temporary)
     print("  wrote: %s" % path)
 
 
@@ -99,6 +151,8 @@ def main():
     ap.add_argument("--mode", default="B", choices=["A", "B"])
     ap.add_argument("--force", action="store_true")
     a = ap.parse_args()
+    if a.mode == "A":
+        ap.error("Mode A is not implemented; no output was created. Use --mode B.")
 
     skill = a.skill or detect_skill()
     if not skill:
@@ -113,12 +167,21 @@ def main():
     # registry.json, deterministic; no machine-specific content (E4/E5).
     # Top-level shape per companion-config-spec.md §3 (schema_version + tools[]).
     registry = {"schema_version": 1, "tools": []}
-    write(os.path.join(out, "registry.json"),
-          json.dumps(registry, indent=2, ensure_ascii=False) + "\n", a.force)
-    write(os.path.join(out, ".gitignore"), GITIGNORE, a.force)
-    write(os.path.join(out, "tools", ".gitkeep"), "", a.force)
-    write(os.path.join(out, "secrets", "README.md"), SECRETS_README, a.force)
-    write(os.path.join(out, "secrets", ".gitkeep"), "", a.force)
+    outputs = [
+        (os.path.join(out, "registry.json"), json.dumps(registry, indent=2, ensure_ascii=False) + "\n"),
+        (os.path.join(out, ".gitignore"), GITIGNORE),
+        (os.path.join(out, "tools", ".gitkeep"), ""),
+        (os.path.join(out, "secrets", "README.md"), SECRETS_README),
+        (os.path.join(out, "secrets", ".gitkeep"), ""),
+    ]
+    try:
+        for path, _ in outputs:
+            preflight(path)
+        for path, content in outputs:
+            write(path, content, a.force)
+    except (OSError, ValueError) as exc:
+        print("ERROR: config initialization failed: %s" % exc)
+        return 2
 
     print("\nNext:")
     print("  1) For each tool: create tools/<slug>/{claude.json.template,env.template} and")

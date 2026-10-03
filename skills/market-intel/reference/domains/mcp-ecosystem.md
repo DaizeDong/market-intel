@@ -2,9 +2,9 @@
 
 **Triage signals:** this shard is **never** the answer to a user's research query. It exists so
 that the weekly/monthly refresh sweep knows **where new MCP servers come from**, and the other
-15 real domain shards can incorporate what this shard surfaces. If a user asks "what MCPs are
-new this week" you may route here directly; otherwise the only consumer is `refresh-protocol.md`
-Discovery phase D1 (surfaces A + B + C).
+real domain shards can incorporate what this shard surfaces. User questions such as "what MCPs
+are new this week" go to plain web search. This shard is consumed only by Discovery phase D1
+(surfaces A + B + C) of an explicitly requested or scheduled `refresh-protocol.md` sweep.
 
 **Why a meta-domain.** The MCP catalog turnover is sub-week. Pulling discovery sources into every
 single domain shard would duplicate them 15×. One shard, polled on the weekly cadence, lets each
@@ -28,10 +28,10 @@ upstream. Verified 2026-06.
 
 | surface | query | signal-to-noise |
 |---|---|---|
-| **topic:mcp-server** | `gh search repos --topic mcp-server --sort updated --limit 50` + `--sort stars` | **medium**, broad; filter `pushed:>last_verified` + stars ≥ N to cut noise |
-| **anthropic/modelcontextprotocol org** | `gh api orgs/modelcontextprotocol/repos`; also watch `modelcontextprotocol/servers` (87.3k★) reference list | **high**, official reference servers + spec changes land here first |
+| **topic:mcp-server** | `gh api --hostname github.com --method GET search/repositories -f q='topic:mcp-server' -f sort=updated -f per_page=50`; repeat with `-f sort=stars` | **medium**, broad; filter `pushed:>last_verified` + stars ≥ N to cut noise |
+| **anthropic/modelcontextprotocol org** | `gh api --hostname github.com orgs/modelcontextprotocol/repos`; also watch `modelcontextprotocol/servers` (87.3k★) reference list | **high**, official reference servers + spec changes land here first |
 | **awesome-mcp-servers** | `punkpeye/awesome-mcp-servers` (89.3k★), diff README between sweeps | **high**, human-curated, broken into domain sections; diff = newly-curated entries |
-| **new-repo velocity** | `gh search repos "mcp server" created:>YYYY-MM-DD sort:stars` | **medium-high** for "new + already starred"; check star-curve for inflation |
+| **new-repo velocity** | `gh api --hostname github.com --method GET search/repositories -f q='mcp server created:>YYYY-MM-DD' -f sort=stars` | **medium-high** for "new + already starred"; check star-curve for inflation |
 | **fork networks of top picks** | for each existing top-pick MCP, check forks + "used by" + releases | **high**, surfaces more-active forks, upstream-deprecated, dependents adopting alternatives |
 
 Anti-inflation: any new repo with stars-but-zero-issues-zero-forks or contributors concentrated on
@@ -56,11 +56,11 @@ one new account → demote to `WATCH`, do not promote across to a real domain sh
 2. Pull **PulseMCP** RSS + newsletter; cross-ref with (1).
 3. Pull **Glama.ai** `?sort=created` (or digest email); cross-ref.
 4. Pull **Smithery** trending + newest; cross-ref.
-5. `gh search repos --topic mcp-server pushed:>YYYY-MM-DD --sort stars --limit 50` + diff against last sweep's seen-set.
+5. `gh api --hostname github.com --method GET search/repositories -f q='topic:mcp-server pushed:>YYYY-MM-DD' -f sort=stars -f per_page=50` + diff against last sweep's seen-set.
 6. Diff `punkpeye/awesome-mcp-servers` README HEAD vs last sweep.
 7. Manual: scroll Discord `#mcp-showcase` since last poll (no API).
 8. Output: one consolidated candidate list, dedup by repo URL, each with `discovery_surface` tag.
-9. Drop candidates into `volatile/discovery-state.md` inbox; defer Verify & Diff to the monthly sweep per refresh-protocol §Cadence.
+9. Drop candidates into `discovery-state.md` in the verified PRIVATE companion DATA directory inbox; defer Verify & Diff to the monthly sweep per refresh-protocol §Cadence.
 
 ## Decision rule, when does an entry from here get promoted to a real domain shard
 

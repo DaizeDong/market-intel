@@ -1,44 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""market-intel CONSOLE — the ops-side command deck for the 168-tool source matrix.
+"""Catalog and selected-operation console, used only for maintenance.
 
-WHY THIS EXISTS
-  The registry (`reference/tools/registry.json`) is the *catalog*: 168 tools that the skill
-  *could* route to. But "in the catalog" != "usable right now on this machine". A tool can be
-  cataloged, its repo can be healthy, and it can still be unreachable because its MCP isn't
-  connected, its key isn't set, or its CLI isn't installed. This console flattens that
-  catalog-vs-reality gap into one four-state table and lets an operator drive it.
-
-FOUR-STATE MODEL (computed per tool)
-  1. cataloged       — always true (it's in registry.json).
-  2. repo_healthy    — kind in {repo} (and mcp-backed-by-repo): gh-api-cache verdict says alive
-                       (PASS/WARN = healthy-ish; BLOCK = 404/archived; missing = unknown).
-                       Non-repo (saas/lib without repo) → n/a.
-  3. available_now   — reachable on THIS machine right now:
-                         · MCP-class  → `claude mcp list` shows it Connected
-                         · CLI-class  → the binary is on PATH
-                         · keyless web-API → assumed reachable (no probe; flagged web-assumed)
-  4. blocked_by      — when available_now is false: cold-mcp / needs-key / needs-install /
-                       needs-deploy / unknown.
-
-HARD CONSTRAINT — P5 SEAM (PHILOSOPHY.md §P5)
-  This file is REFRESH/OPS-side. It MUST NOT be imported by SKILL.md (the user-query path).
-  `tools/check_p5_drift.py` greps SKILL.md for any import of refresh-side scripts. console.py is
-  deliberately NOT referenced anywhere in the skill body; it is self-contained under tools/.
-
-SAFETY
-  Read-only + probe-only. Never logs in, pays, writes a secret, or mutates ~/.claude.json.
-  `connect` only PRINTS a template for the user to paste themselves. Degrades gracefully: a
-  missing data source marks that dimension `unknown` rather than crashing.
-
-USAGE
-  python tools/console.py status [--domain X] [--state available|cold|needs-key|needs-install|...]
-  python tools/console.py tool <slug>
-  python tools/console.py connect <slug>
-  python tools/console.py <any-subcommand> --refresh      # re-probe env, rewrite snapshot cache
-  python tools/console.py --refresh                        # refresh + default (status)
-
-Pure stdlib (json/subprocess/argparse/os/...). UTF-8. Windows + Git Bash friendly.
+status/tool/connect read the public catalog and explicitly supplied session evidence.
+They never discover machine inventory. Only --refresh collects inventory, after a
+PRIVATE versioned destination has been verified, and persists it atomically.
+Catalog health, inventory presence, active session exposure and operation readiness
+remain separate signals. No model is needed for these deterministic decisions.
 """
 from __future__ import annotations
 
@@ -48,15 +16,20 @@ import json
 import os
 import re
 import shutil
-import subprocess
 import sys
+
+if __package__:
+    from . import host_capabilities, private_inventory
+else:
+    import host_capabilities
+    import private_inventory
 
 # Force UTF-8 on stdout/stderr: the Windows console defaults to GBK on this machine and chokes on
 # the table glyphs (▸ ★ ✓ █). Python 3.7+ exposes .reconfigure; fall back silently if unavailable.
 for _stream in (sys.stdout, sys.stderr):
     try:
         _stream.reconfigure(encoding="utf-8")
-    except Exception:
+    except (AttributeError, OSError, ValueError):
         pass
 
 # ---------------------------------------------------------------------------
@@ -68,11 +41,6 @@ REF = os.path.join(SKILL, "reference")
 TOOLS_DIR = os.path.join(REF, "tools")
 REGISTRY = os.path.join(TOOLS_DIR, "registry.json")
 TOOLS_INDEX = os.path.join(TOOLS_DIR, "index.md")
-GH_CACHE = os.path.join(ROOT, "metrics", "gh-api-cache.json")
-# Snapshot cache. metrics/gh-api-cache.json is already gitignored; we co-locate ours and add it
-# to .gitignore (see ensure_gitignore). It carries no secrets, only connected/installed booleans.
-AVAIL_CACHE = os.path.join(ROOT, "metrics", "availability-cache.json")
-
 # Marks for table cells
 YES, NO, NA, UNK = "yes", "no", "n/a", "?"
 
@@ -88,8 +56,8 @@ def read_json(path, default=None):
     try:
         with open(path, encoding="utf-8") as f:
             return json.load(f)
-    except Exception as e:
-        stderr(f"console: warning — could not parse {os.path.relpath(path, ROOT)}: {e}")
+    except (OSError, UnicodeError, ValueError):
+        stderr("console: warning — optional JSON input is unreadable or malformed")
         return default
 
 
@@ -101,9 +69,7 @@ def read_json(path, default=None):
 # tool shows `unknown`/`cold`, never a crash and never a false "available".
 # ---------------------------------------------------------------------------
 
-# registry slug -> substrings that, if present in a `claude mcp list` server NAME, mean "this
-# tool's MCP". Matching is case-insensitive on a normalized (alnum-only) form. A slug absent
-# here is still MCP-matched by its own normalized slug as a fallback (see mcp_match).
+# Registry slugs with known MCP setup routes. This table is install guidance only.
 MCP_NAME_HINTS = {
     "trends-mcp": ["trendsmcp", "trends"],
     "coingecko-mcp": ["coingecko"],
@@ -217,7 +183,7 @@ PY_IMPORTS = {
     "nodriver": "nodriver",
     "camoufox": "camoufox",
     # browser-use / scrapegraph-ai: the LIBRARY is keyless-importable; their AI driving needs an
-    # LLM key. Listed here so the import probe marks them available_now; config notes the key gate.
+    # LLM key. Listed here for inventory only; the selected operation still needs its own evidence.
     "browser-use": "browser_use",
     "scrapegraph-ai": "scrapegraphai",
     # activation (self-evolve R1): free-first lib routes, each live-verified installed +
@@ -229,8 +195,7 @@ PY_IMPORTS = {
 }
 
 # Keyless web-APIs: reachable without install OR key OR MCP. We do NOT block on these, mark
-# available_now=yes with a "web-assumed" note (a real reachability ping is optional and skipped
-# by default to keep the console offline-safe). Conservative list, only genuinely keyless ones.
+# guidance only. No entry is treated as available without current operation evidence.
 KEYLESS_WEB = {
     "google-suggest", "stackexchange", "defillama", "geckoterminal",
     "arxiv-sanity-lite", "papers-with-code", "connected-papers-researchrabbit",
@@ -243,21 +208,6 @@ KEYLESS_WEB = {
     "gdelt-mcp",
 }
 
-# Tools that are really "a skill you invoke", not an installable/connectable source. Treated as
-# available (the skill ships with the harness) with a note.
-SKILL_BACKED = {
-    "research-lit-skill", "alphaxiv", "semantic-scholar", "static-blog",
-}
-
-# Tools served by a CONNECTED Claude *plugin* MCP. Plugin MCPs don't appear in `claude mcp list`
-# (only user/project-scoped servers do), so the mcp_match path can't see them, but they are
-# genuinely usable in-session. Listed here only after a live check confirmed the plugin works
-# (huggingface: hf_whoami → authenticated; playwright: in active use this session).
-PLUGIN_MCP_BACKED = {
-    "huggingface", "playwright-mcp",
-}
-
-
 def normalize(s: str) -> str:
     """Lowercase, strip everything but [a-z0-9] — for fuzzy name/slug matching."""
     return re.sub(r"[^a-z0-9]", "", (s or "").lower())
@@ -266,46 +216,10 @@ def normalize(s: str) -> str:
 # ---------------------------------------------------------------------------
 # Live environment probes (the `--refresh` data)
 # ---------------------------------------------------------------------------
-def run(cmd, timeout=30):
-    """Run a command, return (rc, stdout, stderr). Never raises."""
-    try:
-        p = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8",
-                           errors="replace", timeout=timeout)
-        return p.returncode, p.stdout or "", p.stderr or ""
-    except FileNotFoundError:
-        return 127, "", "not found"
-    except subprocess.TimeoutExpired:
-        return 124, "", "timeout"
-    except Exception as e:  # pragma: no cover, defensive
-        return 1, "", str(e)
-
-
-_CONNECTED_RE = re.compile(r"connected", re.IGNORECASE)
-_NOTCONN_RE = re.compile(r"needs?\s+auth|failed|disconnect|error", re.IGNORECASE)
-
-
 def probe_mcp():
-    """Parse `claude mcp list`. Returns {"servers":[{name,connected}], "ran":bool}.
-
-    Connected iff the line says 'Connected' and NOT 'Needs authentication'/'Failed'. This mirrors
-    SKILL.md Step-2 detect (only ✓/✔ Connected counts; ! Needs auth and ✗ Failed are NOT usable).
-    The checkmark glyph varies (✓ U+2713 vs ✔ U+2714) across CLI versions, so we key on the word.
-    """
-    claude_bin = shutil.which("claude")
-    cmd = [claude_bin or "claude", "mcp", "list"]
-    rc, out, err = run(cmd, timeout=60)
-    if rc == 127 or (rc != 0 and not out):
-        return {"servers": [], "ran": False, "note": (err or "claude CLI not found").strip()[:120]}
-    servers = []
-    for line in out.splitlines():
-        # lines look like: "claude.ai Gmail: https://... - ✔ Connected"
-        if ":" not in line or " - " not in line:
-            continue
-        name = line.split(":", 1)[0].strip()
-        status = line.rsplit(" - ", 1)[-1]
-        connected = bool(_CONNECTED_RE.search(status)) and not bool(_NOTCONN_RE.search(status))
-        servers.append({"name": name, "connected": connected})
-    return {"servers": servers, "ran": True}
+    """Inventory cannot observe the caller's active MCP session from a child CLI."""
+    return {"servers": [], "ran": False,
+            "note": "active host capabilities are supplied separately by the caller"}
 
 
 def probe_clis():
@@ -330,25 +244,14 @@ def probe_python_modules():
     for slug, mod in PY_IMPORTS.items():
         try:
             mods[slug] = importlib.util.find_spec(mod) is not None
-        except Exception:
+        except (ImportError, ValueError, AttributeError):
             mods[slug] = False
     return mods
 
 
 def find_companion_repo():
-    """Discover the companion config repo per SKILL.md convention. Returns path or None."""
-    env = os.environ.get("MARKET_INTEL_CONFIG")
-    candidates = []
-    if env:
-        candidates.append(env)
-    home = os.path.expanduser("~")
-    candidates.append(os.path.join(home, ".market-intel-config"))
-    xdg = os.environ.get("XDG_CONFIG_HOME") or os.path.join(home, ".config")
-    candidates.append(os.path.join(xdg, "market-intel-config"))
-    for c in candidates:
-        if c and os.path.isdir(c) and os.path.exists(os.path.join(c, "registry.json")):
-            return c
-    return None
+    """Use the writer's selected, verified companion without a registry fallback."""
+    return str(private_inventory.resolve_destination().repository)
 
 
 def probe_companion():
@@ -361,7 +264,10 @@ def probe_companion():
     path = find_companion_repo()
     if not path:
         return {"present": False, "path": None, "tools": {}}
-    reg = read_json(os.path.join(path, "registry.json"), default={})
+    registry_path = os.path.join(path, "registry.json")
+    if not os.path.isfile(registry_path):
+        return {"present": False, "path": path, "tools": {}, "note": "registry.json missing"}
+    reg = read_json(registry_path, default={})
     if not isinstance(reg, dict):
         return {"present": True, "path": path, "tools": {}, "note": "registry.json not an object"}
     by_slug = {}
@@ -398,6 +304,7 @@ def probe_companion():
 def build_snapshot():
     """Run all live probes and assemble the snapshot dict written to availability-cache.json."""
     snap = {
+        "schema_version": 1,
         "generated": datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat(),
         "host": os.environ.get("COMPUTERNAME") or os.environ.get("HOSTNAME") or "?",
         "mcp": probe_mcp(),
@@ -409,49 +316,17 @@ def build_snapshot():
 
 
 def load_snapshot(refresh: bool):
-    """Return (snapshot, source) where source is 'fresh-probe' or 'cache' or 'fresh-no-cache'."""
-    if refresh:
-        snap = build_snapshot()
-        write_snapshot(snap)
-        return snap, "fresh-probe"
-    cached = read_json(AVAIL_CACHE, default=None)
-    if cached:
-        return cached, "cache"
-    # no cache and not asked to refresh → probe live but do not necessarily persist (we do persist,
-    # it's harmless and gitignored), so the next call is fast.
+    """Catalog reads need no DATA. Refresh validates storage before collecting inventory."""
+    if not refresh:
+        return {}, "catalog-only (inventory not probed)"
+    destination = private_inventory.resolve_destination()
     snap = build_snapshot()
-    write_snapshot(snap)
-    return snap, "fresh-no-cache"
+    saved = write_snapshot(snap, destination)
+    return snap, f"fresh inventory; PRIVATE companion {saved.identity}"
 
 
-def write_snapshot(snap):
-    try:
-        os.makedirs(os.path.dirname(AVAIL_CACHE), exist_ok=True)
-        with open(AVAIL_CACHE, "w", encoding="utf-8") as f:
-            json.dump(snap, f, ensure_ascii=False, indent=2, sort_keys=True)
-        ensure_gitignore()
-    except Exception as e:
-        stderr(f"console: warning — could not write snapshot cache: {e}")
-
-
-def ensure_gitignore():
-    """Make sure metrics/availability-cache.json is gitignored (it's a TTL snapshot, no history)."""
-    gi = os.path.join(ROOT, ".gitignore")
-    needle = "metrics/availability-cache.json"
-    try:
-        existing = ""
-        if os.path.exists(gi):
-            with open(gi, encoding="utf-8") as f:
-                existing = f.read()
-        if needle in existing:
-            return
-        with open(gi, "a", encoding="utf-8") as f:
-            if existing and not existing.endswith("\n"):
-                f.write("\n")
-            f.write("\n# Console availability snapshot — TTL probe state, no git history\n")
-            f.write(needle + "\n")
-    except Exception:
-        pass  # best-effort; gate doesn't scan this file regardless
+def write_snapshot(snap, destination=None):
+    return private_inventory.write_snapshot(snap, destination)
 
 
 # ---------------------------------------------------------------------------
@@ -468,7 +343,7 @@ def repo_health(gh_cache, repo):
         return NA, "non-repo source"
     entry = gh_cache.get(repo)
     if not entry:
-        return UNK, "no gh-api-cache entry (run verify_matrix to populate)"
+        return UNK, "not inspected by the catalog console; run verify_matrix.py for a separate health report"
     v = entry.get("verdict")
     reason = entry.get("reason", "")
     if v in ("PASS", "WARN"):
@@ -481,34 +356,6 @@ def repo_health(gh_cache, repo):
 # ---------------------------------------------------------------------------
 # THE four-state computation per tool
 # ---------------------------------------------------------------------------
-def mcp_match(slug, name, mcp_servers):
-    """Is there a Connected MCP server matching this tool? Returns (connected, cold, matched_name).
-
-    connected = a matched server is Connected. cold = a server matched by name but NOT connected
-    (the 'cold-mcp' signal — it's configured but down/needs-auth). matched_name for display.
-    """
-    hints = MCP_NAME_HINTS.get(slug, [])
-    # always allow the tool's own normalized slug + registry name as implicit hints
-    implicit = {normalize(slug), normalize(name)}
-    # drop noise tokens from implicit slug match to avoid over-matching ('mcp','api')
-    norm_hints = {h for h in (normalize(h) for h in hints) if h} | {h for h in implicit if len(h) >= 4}
-    connected = cold = False
-    matched = None
-    for srv in mcp_servers:
-        sn = normalize(srv["name"])
-        if not sn:
-            continue
-        hit = any(h and h in sn for h in norm_hints)
-        if hit:
-            matched = srv["name"]
-            if srv["connected"]:
-                connected = True
-            else:
-                cold = True
-    # a connected match wins over a cold one
-    return connected, (cold and not connected), matched
-
-
 def is_mcp_class(tool):
     """A tool is MCP-class if its name/slug/registry says it has a ready MCP. Heuristic but safe:
     used only to choose the *probe path* and the blocked_by label, never to assert availability."""
@@ -517,117 +364,23 @@ def is_mcp_class(tool):
 
 
 def compute_states(tool, snap, gh_cache):
-    """Return a dict with the four states + supporting detail for one registry tool."""
+    """Catalog health and discovery hints never grant selected-operation readiness."""
     slug = tool["slug"]
-    name = tool.get("name", slug)
-    kind = tool.get("kind", "?")
-    repo = tool.get("repo")
-    domain = tool.get("domain", "?")
-
-    rh_state, rh_detail = repo_health(gh_cache, repo)
-
-    mcp = snap.get("mcp", {})
-    mcp_ran = mcp.get("ran")
-    servers = mcp.get("servers", [])
-    clis = snap.get("clis", {})
-    pymods = snap.get("py_modules", {})
-    companion = snap.get("companion", {})
-    comp_tools = companion.get("tools", {})
-    comp_secret = set(companion.get("have_secret", []))
-
-    avail = NO
-    blocked = None
-    how = []          # human-readable "how it's reachable / why not"
-
-    # ---- MCP path ----
-    connected, cold, matched = mcp_match(slug, name, servers)
-    if connected:
-        avail = YES
-        how.append(f"MCP connected: {matched}")
-    cli_cmd = CLI_COMMANDS.get(slug)
-    cli_found = bool(cli_cmd and clis.get(cli_cmd))
-    py_mod_found = bool(pymods.get(slug))
-
-    # ---- CLI / lib path ----
-    if avail != YES and cli_found:
-        avail = YES
-        how.append(f"CLI installed: {cli_cmd} on PATH")
-    if avail != YES and py_mod_found:
-        avail = YES
-        how.append(f"python module importable: {PY_IMPORTS.get(slug)}")
-
-    # ---- skill-backed / keyless web ----
-    if avail != YES and slug in SKILL_BACKED:
-        avail = YES
-        how.append("skill-backed (ships with harness)")
-    if avail != YES and slug in KEYLESS_WEB:
-        avail = YES
-        how.append("keyless web-API (assumed reachable; not pinged)")
-    if avail != YES and slug in PLUGIN_MCP_BACKED:
-        avail = YES
-        how.append("connected plugin MCP (not shown in `claude mcp list`; live-checked)")
-
-    # ---- companion repo says installed (with key present) ----
-    comp = comp_tools.get(slug)
-    comp_installed = bool(comp and comp.get("installed"))
-    comp_has_key = slug in comp_secret
-    if avail != YES and comp_installed:
-        # companion claims installed. If it's MCP-class we still trust mcp list over companion for
-        # 'connected', but companion 'installed' upgrades a CLI/lib/saas to available_now=yes.
-        if not is_mcp_class(tool) or comp_has_key:
-            avail = YES
-            how.append("companion repo: installed" + (" + key present" if comp_has_key else ""))
-
-    # A tool with a concrete local-install path (python lib or CLI) is fundamentally an
-    # install-class source even if its registry name happens to mention an MCP wrapper
-    # (e.g. twikit = "d60/twikit (+ adhikasp/mcp-twikit)"). Only call it cold-mcp when an
-    # actually-configured-but-down MCP server matched it.
-    has_install_path = (slug in PY_IMPORTS) or bool(cli_cmd)
-
-    # ---- blocked_by reason (only when not available) ----
-    if avail != YES:
-        if cold:
-            blocked = "cold-mcp"
-            how.append(f"MCP configured but not connected: {matched}")
-        elif has_install_path:
-            blocked = "needs-deploy" if rh_state == NO else "needs-install"
-        elif is_mcp_class(tool):
-            # MCP-class, not in mcp list at all
-            if not mcp_ran:
-                blocked = "unknown"
-                how.append("could not run `claude mcp list`")
-            elif kind == "saas":
-                blocked = "needs-key"
-            else:
-                blocked = "cold-mcp"
-        elif kind == "saas":
-            blocked = "needs-key"
-        elif kind in ("repo", "lib"):
-            # self-hostable / installable
-            if rh_state == NO:
-                blocked = "needs-deploy"   # repo dead → can't even deploy without a fork
-            else:
-                blocked = "needs-install"
-        else:
-            blocked = "unknown"
-        # companion present but tool not installed there is itself a 'not installed' hint
-        if companion.get("present") and comp is None and blocked == "needs-install":
-            how.append("not present in companion repo")
-
+    rh_state, rh_detail = repo_health(gh_cache, tool.get("repo"))
+    readiness = host_capabilities.classify(
+        snap.get("_host_evidence"), tool.get("source_id"),
+        snap.get("_selected_capability") or tool.get("capability_id"),
+        authentication_required=tool.get("authentication_required"))
+    available = readiness["status"] == "available-now"
     return {
-        "slug": slug,
-        "name": name,
-        "kind": kind,
-        "domain": domain,
-        "repo": repo,
-        "top_pick": tool.get("top_pick", False),
-        "cataloged": YES,
-        "repo_healthy": rh_state,
-        "repo_detail": rh_detail,
-        "available_now": avail,
-        "blocked_by": blocked,
-        "how": how,
-        "mcp_class": is_mcp_class(tool),
+        "slug": slug, "name": tool.get("name", slug), "kind": tool.get("kind", "?"),
+        "domain": tool.get("domain", "?"), "repo": tool.get("repo"),
+        "top_pick": tool.get("top_pick", False), "cataloged": YES,
+        "repo_healthy": rh_state, "repo_detail": rh_detail,
+        "available_now": YES if available else NO,
+        "blocked_by": None if available else readiness["status"],
+        "how": [readiness["reason"]], "mcp_class": is_mcp_class(tool),
+        "readiness": readiness,
     }
 
 
@@ -644,8 +397,7 @@ def load_registry():
 
 def all_states(snap):
     reg = load_registry()
-    gh_cache = read_json(GH_CACHE, default={}) or {}
-    return [compute_states(t, snap, gh_cache) for t in reg["tools"]], reg
+    return [compute_states(t, snap, {}) for t in reg["tools"]], reg
 
 
 # ---------------------------------------------------------------------------
@@ -661,12 +413,15 @@ def doc_path_for(slug):
 # ---------------------------------------------------------------------------
 STATE_FILTER_ALIASES = {
     "available": ("available_now", YES),
-    "cold": ("blocked_by", "cold-mcp"),
-    "cold-mcp": ("blocked_by", "cold-mcp"),
-    "needs-key": ("blocked_by", "needs-key"),
-    "needs-install": ("blocked_by", "needs-install"),
-    "needs-deploy": ("blocked_by", "needs-deploy"),
-    "unknown": ("blocked_by", "unknown"),
+    "available-now": ("available_now", YES),
+    "setup": ("blocked_by", "setup"),
+    "hard-gap": ("blocked_by", "hard-gap"),
+    "cold": ("blocked_by", "setup"),
+    "cold-mcp": ("blocked_by", "setup"),
+    "needs-key": ("blocked_by", "setup"),
+    "needs-install": ("blocked_by", "setup"),
+    "needs-deploy": ("blocked_by", "setup"),
+    "unknown": ("blocked_by", "setup"),
 }
 
 
@@ -689,13 +444,9 @@ def cmd_status(args, snap, source):
     for s in states:
         by_domain.setdefault(s["domain"], []).append(s)
 
-    print(f"market-intel CONSOLE · four-state availability  (snapshot: {source}, "
-          f"generated {snap.get('generated','?')})")
-    mcp = snap.get("mcp", {})
-    if not mcp.get("ran"):
-        print(f"  ! MCP probe did not run ({mcp.get('note','?')}) — MCP-class tools may show 'unknown'.")
-    comp = snap.get("companion", {})
-    print(f"  companion-config: {'present @ ' + comp.get('path','') if comp.get('present') else 'absent (dimension skipped)'}")
+    print(f"market-intel CONSOLE (source: {source})")
+    print(f"  selected capability: {snap.get('_selected_capability', 'read')}")
+    print("  Catalog health and machine inventory are not operation readiness.")
     print()
 
     # column widths
@@ -703,17 +454,17 @@ def cmd_status(args, snap, source):
     header = f"  {'tool':<{SLUG_W}} {'kind':<{KIND_W}} {'repo_ok':<8} {'avail':<6} blocked_by"
     sep = "  " + "-" * (SLUG_W + KIND_W + 8 + 6 + 12)
 
-    total_cat = total_avail = total_cold = 0
+    total_cat = total_avail = total_setup = 0
     dom_summary = []  # (domain, avail, cat)
 
     for dom in sorted(by_domain):
         rows = sorted(by_domain[dom], key=lambda r: (r["available_now"] != YES, r["slug"]))
         d_cat = len(rows)
         d_avail = sum(1 for r in rows if r["available_now"] == YES)
-        d_cold = sum(1 for r in rows if r["blocked_by"] == "cold-mcp")
+        d_setup = sum(1 for r in rows if r["blocked_by"] == "setup")
         total_cat += d_cat
         total_avail += d_avail
-        total_cold += d_cold
+        total_setup += d_setup
         dom_summary.append((dom, d_avail, d_cat))
 
         print(f"▸ {dom}  ({d_avail}/{d_cat} available)")
@@ -725,7 +476,7 @@ def cmd_status(args, snap, source):
             blocked = r["blocked_by"] or ""
             avail_mark = {"yes": "✓", "no": "✗", "?": "?"}.get(r["available_now"], r["available_now"])
             print(f"  {slug:<{SLUG_W}} {r['kind']:<{KIND_W}} {r['repo_healthy']:<8} "
-                  f"{avail_mark:<6} {blocked}")
+                  f"{avail_mark:<6} {blocked} | {r['readiness']['reason']}")
         print()
 
     # ---- coverage summary ----
@@ -739,7 +490,7 @@ def cmd_status(args, snap, source):
     print("-" * 60)
     tot_pct = (total_avail / total_cat * 100) if total_cat else 0
     print(f"  {'TOTAL':<24} {total_avail:>3}/{total_cat:<3} {tot_pct:5.1f}%")
-    print(f"  cold-mcp (configured but not connected): {total_cold}")
+    print(f"  setup (selected operation not ready): {total_setup}")
     reg_count = reg.get("count", total_cat)
     if not args.domain and not args.state and total_cat != reg_count:
         print(f"  (registry declares count={reg_count}; computed over {total_cat} tools)")
@@ -749,9 +500,18 @@ def cmd_status(args, snap, source):
 # ---------------------------------------------------------------------------
 # Subcommand: tool <slug>
 # ---------------------------------------------------------------------------
+def print_readiness(readiness):
+    """Report requested identity and only the observation fields classification proves."""
+    for key in ("status", "reason", "access", "operation", "host", "session_id", "source_id",
+                "capability_id", "observed_at", "observation_method"):
+        if key in readiness:
+            print(f"  {key}: {readiness[key]}")
+
+
 def cmd_tool(args, snap, source):
-    states, _ = all_states(snap)
-    match = [s for s in states if s["slug"] == args.slug]
+    states, registry = all_states(snap)
+    selected_slug = registry.get("aliases", {}).get(args.slug, args.slug)
+    match = [s for s in states if s["slug"] == selected_slug]
     if not match:
         # fuzzy suggest
         nz = normalize(args.slug)
@@ -764,15 +524,15 @@ def cmd_tool(args, snap, source):
         sys.exit(2)
     s = match[0]
     print(f"TOOL · {s['slug']}   ({s['name']})")
+    print(f"  source: {source}")
     print(f"  domain        : {s['domain']}")
     print(f"  kind          : {s['kind']}" + (f"   repo: {s['repo']}" if s['repo'] else ""))
     print(f"  top_pick      : {'yes (★ domain leader)' if s['top_pick'] else 'no'}")
     print()
-    print("  FOUR-STATE")
-    print(f"    1 cataloged     : yes  (in registry.json)")
-    print(f"    2 repo_healthy  : {s['repo_healthy']:<4} ({s['repo_detail']})")
-    print(f"    3 available_now : {s['available_now']}")
-    print(f"    4 blocked_by    : {s['blocked_by'] or '— (available)'}")
+    print(f"  cataloged: yes")
+    print(f"  repo_healthy: {s['repo_healthy']} ({s['repo_detail']})")
+    readiness = s["readiness"]
+    print_readiness(readiness)
     print()
     if s["how"]:
         print("  SIGNALS")
@@ -786,14 +546,14 @@ def cmd_tool(args, snap, source):
     if s["slug"] in CLI_COMMANDS and CLI_COMMANDS[s["slug"]]:
         print(f"    CLI: shell out to `{CLI_COMMANDS[s['slug']]}` (see doc for flags).")
         if s["mcp_class"]:
-            print("    (also has an optional MCP wrapper — `claude mcp list` to check if connected.)")
+            print("    (also has an MCP wrapper; inspect exposure in the active host session.)")
     elif s["slug"] in PY_IMPORTS:
         print(f"    Python lib: `import {PY_IMPORTS[s['slug']]}` (pip install first if missing).")
         if s["mcp_class"]:
-            print("    (also has an optional MCP wrapper — `claude mcp list` to check if connected.)")
+            print("    (also has an MCP wrapper; inspect exposure in the active host session.)")
     elif s["mcp_class"]:
-        print("    MCP-class: invoke its mcp__<server>__<tool> functions once Connected.")
-        print("    Detect/connect: `claude mcp list` (must show ✓ Connected), then call its tools.")
+        print("    MCP-class: inspect tools exposed by this active host session.")
+        print("    Verify the selected operation, authentication and returned content before using it.")
     elif s["slug"] in KEYLESS_WEB:
         print("    Keyless web-API: HTTP GET, no key (see doc for endpoints).")
     else:
@@ -801,23 +561,12 @@ def cmd_tool(args, snap, source):
     doc = doc_path_for(s["slug"])
     print(f"    doc: {os.path.relpath(doc, ROOT) if doc else '(no per-tool doc found)'}")
     print()
-    # lighting guidance when cold/unavailable
     if s["available_now"] != YES:
-        print("  TO LIGHT IT UP")
-        b = s["blocked_by"]
-        if b == "cold-mcp":
-            print(f"    MCP is configured but not Connected → run `python tools/console.py connect {s['slug']}`")
-            print("    for the claude.json template, fill the key, then `/mcp` reconnect / restart.")
-        elif b == "needs-key":
-            print(f"    Needs an API key → `python tools/console.py connect {s['slug']}` for the template,")
-            print("    add your key (never echo it), then reconnect. Pricing: reference/volatile/pricing-install.md.")
-        elif b == "needs-install":
-            print("    Not installed locally → `pip install` the lib / clone the repo (see doc 'Install').")
-        elif b == "needs-deploy":
-            print("    Upstream repo is dead/archived (repo_healthy=no) → self-host from a fork or pick the")
-            print("    domain's ★ top_pick instead (see the domain shard).")
-        else:
-            print("    Availability unknown — re-run with `--refresh` (and ensure `claude mcp list` works).")
+        print("  NEXT STEP")
+        print(f"    {readiness['reason']}")
+        print("    Use the active host to verify the selected source operation, then supply")
+        print("    fresh session evidence. See reference/host-capabilities.md for the schema.")
+        print(f"    Install guidance: python tools/console.py connect {s['slug']}")
         print()
     return 0
 
@@ -826,14 +575,17 @@ def cmd_tool(args, snap, source):
 # Subcommand: connect <slug>  (PRINT-ONLY template; never writes/echoes secrets)
 # ---------------------------------------------------------------------------
 def cmd_connect(args, snap, source):
-    states, _ = all_states(snap)
-    match = [s for s in states if s["slug"] == args.slug]
+    states, registry = all_states(snap)
+    selected_slug = registry.get("aliases", {}).get(args.slug, args.slug)
+    match = [s for s in states if s["slug"] == selected_slug]
     if not match:
         stderr(f"console: no tool with slug '{args.slug}'.")
         sys.exit(2)
     s = match[0]
     print(f"CONNECT GUIDE · {s['slug']}  ({s['name']})")
-    print("  (this only PRINTS a template — it never writes ~/.claude.json and never handles a key)")
+    print(f"  source: {source}")
+    print_readiness(s["readiness"])
+    print("  (connect only prints guidance; it never writes host settings or handles a key)")
     print()
     if not s["mcp_class"]:
         print("  This tool is not MCP-class — there's nothing to add to mcpServers.")
@@ -849,7 +601,14 @@ def cmd_connect(args, snap, source):
         return 0
 
     server_name = s["slug"]
-    print("  1) Add to the `mcpServers` block of ~/.claude.json (HTTP transport preferred on Windows).")
+    host = snap.get("_host_evidence", {}).get("host", "")
+    if host == "codex":
+        print("  Codex: configure this source in Codex MCP settings or activate its installed app.")
+        print("  Reconnect Codex, inspect its callable tools, then verify the selected operation.")
+        print("  The JSON below is a Claude example; use the equivalent Codex settings fields.")
+    else:
+        print("  Claude: add the source to the mcpServers block of your Claude settings.")
+    print("  1) Use the selected host's supported MCP configuration (HTTP preferred on Windows).")
     print("     Replace <ENDPOINT_URL> and the placeholder header with the real values from the")
     print("     provider dashboard. DO NOT paste your key into this terminal or any transcript.")
     print()
@@ -866,20 +625,19 @@ def cmd_connect(args, snap, source):
     }
     print(json.dumps(template, indent=2, ensure_ascii=False))
     print()
-    print("  2) Secret hygiene (HARD rules — keys have leaked 3× in real runs):")
+    print("  2) Configure secrets without printing their values:")
     print("     · NEVER browser_snapshot a page showing the key (it's plaintext in the DOM).")
     print("     · Do NOT `claude mcp add` for secret-bearing servers (it echoes the header).")
-    print("     · Copy the key via the dashboard's copy button → write it into ~/.claude.json")
+    print("     · Use the provider's copy button and your selected host's secret configuration")
     print("       with a no-echo script; verify by length only, never print the value.")
-    print("  3) Restart the session or run `/mcp` to reconnect — a freshly added MCP does NOT")
-    print("     take effect in the current turn.")
-    print("  4) Verify: `claude mcp list` should then show this server as ✓ Connected.")
+    print("  3) Reconnect the selected host when required for the new configuration.")
+    print("  4) Verify active-session exposure, execution, authentication and usable content.")
     print()
     doc = doc_path_for(s["slug"])
     print(f"  Exact endpoint/cost/auth for this tool: "
           f"{os.path.relpath(doc, ROOT) if doc else 'reference/volatile/pricing-install.md'}")
     print("  Where install-state + keys are tracked durably: the companion config repo")
-    print("  (reference/companion-config-spec.md). This console never writes there.")
+    print("  (reference/companion-config-spec.md). Only explicit --refresh writes private inventory.")
     return 0
 
 
@@ -891,21 +649,22 @@ def build_parser():
     # every subparser), so `console.py --refresh status` and `console.py status --refresh` both work.
     refresh_parent = argparse.ArgumentParser(add_help=False)
     refresh_parent.add_argument(
-        "--refresh", action="store_true",
-        help="re-probe the environment (claude mcp list + local CLIs + python libs + companion "
-             "repo) and rewrite metrics/availability-cache.json before running.")
+        "--refresh", action="store_true", default=argparse.SUPPRESS,
+        help="collect inventory after verifying a PRIVATE versioned companion; persist atomically.")
+    refresh_parent.add_argument("--capability", default=argparse.SUPPRESS,
+                                help="selected operation for the catalog source_id (default: catalog capability_id)")
 
     p = argparse.ArgumentParser(
         prog="console.py",
         parents=[refresh_parent],
-        description="market-intel ops console — four-state (cataloged/repo_healthy/available_now/"
-                    "blocked_by) view of the 168-tool source matrix. Read-only + probe-only.")
+        description="market-intel catalog console with current-session operation evidence. "
+                     "Only explicit --refresh writes PRIVATE inventory.")
     sub = p.add_subparsers(dest="cmd")
 
     ps = sub.add_parser("status", parents=[refresh_parent],
                         help="four-state table grouped by domain + coverage summary")
     ps.add_argument("--domain", help="restrict to one domain (e.g. finance-markets)")
-    ps.add_argument("--state", help="filter: available|cold|needs-key|needs-install|needs-deploy|unknown")
+    ps.add_argument("--state", help="filter: available-now|setup|hard-gap (legacy aliases accepted)")
 
     pt = sub.add_parser("tool", parents=[refresh_parent],
                         help="single-tool detail + how-to-call + light-up guidance")
@@ -923,7 +682,16 @@ def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
 
-    snap, source = load_snapshot(refresh=args.refresh)
+    try:
+        snap, source = load_snapshot(refresh=getattr(args, "refresh", False))
+    except private_inventory.InventoryError as exc:
+        stderr(f"console: inventory refresh failed: {exc}")
+        return 2
+    except OSError:
+        stderr("console: inventory refresh failed: input or destination is inaccessible")
+        return 2
+    snap["_host_evidence"] = host_capabilities.load_environment()
+    snap["_selected_capability"] = getattr(args, "capability", None)
 
     cmd = args.cmd or "status"
     if cmd == "status":

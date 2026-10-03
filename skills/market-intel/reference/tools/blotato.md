@@ -4,10 +4,10 @@
 - **Barrier route:** ② resale/managed API · **Source tier:** L2 · **Ready MCP:** yes, native Claude Code MCP
 - **Cost:** Starter $29/mo = **20 social accounts** (API needs a paid plan) [https://blotato.com/pricing, price unverified 2026-06, confirm at the URL]
 - **Repo / Provider:** https://blotato.com (non-GitHub SaaS; managed posting API + native Claude Code MCP)
-- **Top pick for its domain:** yes
+- **Top pick for its domain:** yes, conditionally; not the domain default
 
 ## What it does / when to pick it
-Managed multi-platform posting (~9 platforms) with a **native Claude Code MCP**, designed to be driven by an agent. **Decision rule:** pick Blotato when you want a **cheap, Claude-Code-native** posting MCP and are fine with a paid plan ($29/mo). It is the shard's "Claude Code native cheap" default. Choose **Buffer** instead when you want route ①/official + a genuine **free** tier; choose **Postiz** when you must self-host (OSS, no fee, no token storage). Note the real unit is **20 social accounts** at Starter, *not* "9 platforms" (correct the one-liner from tool-master).
+Managed multi-platform posting (~9 platforms) with a **native Claude Code MCP**, designed to be driven by an agent. **Decision rule:** Consider Blotato when a native Claude Code posting MCP fits the task and a paid plan ($29/mo) is acceptable, after verifying current host access, the required operation, platform coverage and current cost. It is not the shard default and is not automatically adopted. Choose **Buffer** instead when you want route ①/official + a genuine **free** tier; choose **Postiz** when you must self-host (OSS, no fee, no token storage). Note the real unit is **20 social accounts** at Starter, *not* "9 platforms" (correct the one-liner from tool-master).
 
 ## Install
 Native Claude Code MCP, add per Blotato's docs with your API key (HTTP, **prefer on Windows**). Exact, time-stamped line: `reference/volatile/pricing-install.md → social-publishing` ("Blotato: Starter $29/mo = 20 social accounts, `backend.blotato.com/v2` + MCP (API key header; API needs a paid plan)"). A newly added MCP only works **after a session restart / `/mcp` reconnect**. L0 mechanics: `reference/install-guide.md`.

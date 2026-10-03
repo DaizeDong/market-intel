@@ -3,7 +3,6 @@
 Triage a commercial topic across 15 data domains, auto-detect the right specialized source, then delegate the heavy research to the harness you already have.
 
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-orange?style=flat)](https://docs.anthropic.com/en/docs/claude-code)
-[![Version](https://img.shields.io/badge/version-0.30.0-purple)](.claude-plugin/plugin.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Source Matrix](https://img.shields.io/badge/Source%20Matrix-15%20domains-green?style=flat)](skills/market-intel/reference/sources-index.md)
 [![Tool docs](https://img.shields.io/badge/Tool%20docs-per--tool%20how--to-green?style=flat)](skills/market-intel/reference/tools/index.md)
@@ -36,7 +35,7 @@ Claude Code already has a `deep-research` harness (fan-out → fetch → verify 
 `market-intel` is the **thin layer** that fills exactly that gap. It does **only three things nothing else does**, and delegates everything else:
 
 1. **Triage**, map a commercial topic to 1 to N of 15 data domains.
-2. **Detect + guide install**, check which specialized MCP sources are actually connected (via `claude mcp list`, not unreliable tool-name guessing), and if a key source is missing, hand you the exact `claude mcp add` command, or open its **per-tool how-to doc** ([`reference/tools/`](skills/market-intel/reference/tools/index.md)) for install + auth + usage + gotchas, guided by a multi-level [install guide](skills/market-intel/reference/install-guide.md).
+2. **Detect + guide install**, verify the selected operation in the active Claude or Codex session, including exposure, execution, authentication and usable content. Missing evidence produces a setup reason; the [per-tool docs](skills/market-intel/reference/tools/index.md) provide install and authentication guidance.
 3. **Quality guardrails**, citation verification, source tiers, multi-source corroboration, mandatory disconfirmation, explicit gaps.
 
 The actual fan-out, fetching, adversarial verification, and citation synthesis are **delegated** to `deep-research` / `research-lit`. No reinvented engine, no trigger fights.
@@ -52,14 +51,25 @@ The actual fan-out, fetching, adversarial verification, and citation synthesis a
 Or clone manually:
 
 ```bash
-git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market-intel
+git clone --recurse-submodules https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market-intel
 ```
+
+For Python maintenance commands, run `python -m pip install -r requirements.txt`
+from the checkout. Use `requirements-dev.txt` for the offline test suite. Catalog,
+source collection and deterministic checks need no model package. The optional
+incident and changelog draft helpers use the operator's configured `llmcall`
+interface; follow [model adapter setup](CONFIG.md#model-adapter) before using them.
 
 It auto-activates on phrases like `市场调研`, `competitor analysis`, `research this market`, `find arbitrage opportunities`, `X/Twitter sentiment`, `SEO intel`, `product trends`. For single-fact lookups or general web reports it deliberately steps aside (use plain search / `deep-research`); for academic literature it defers to `research-lit`.
 
 ---
 
 ## Config
+
+Resolve the full consumer checkout before running maintenance commands. Replace
+`<absolute-market-intel-checkout>` with that absolute directory and confirm its
+`tools/console.py` and `.claude-plugin/plugin.json` exist. Plugin installation does
+not make these scripts relative to the current project.
 
 `market-intel` is **config-bearing**, it reads per-user state (keys, installed-tool registry) from a
 **separate, private** companion config repo. Repo-root contract: [CONFIG.md](CONFIG.md); authoritative
@@ -69,9 +79,9 @@ deep spec: [`companion-config-spec.md`](skills/market-intel/reference/companion-
   `~/.config/market-intel-config/`. First that exists wins; absent = runs in matrix-only mode.
 - **First time:**
   ```bash
-  python scripts/init_config.py        # stamp a conformant skeleton (deterministic)
+  python "<absolute-market-intel-checkout>/scripts/init_config.py"        # stamp a conformant skeleton (deterministic)
   export MARKET_INTEL_CONFIG=~/.market-intel-config  # or pass --out <dir> to init
-  python scripts/verify_config.py       # doctor: PASS/FAIL, names what is missing
+  python "<absolute-market-intel-checkout>/scripts/verify_config.py"       # doctor: PASS/FAIL, names what is missing
   ```
 - **Switch configs (hot-swap):** point the env var at another config dir, configs are self-contained,
   no other change needed: `export MARKET_INTEL_CONFIG=~/configs/work` ↔ `~/configs/personal`.
@@ -80,6 +90,20 @@ deep spec: [`companion-config-spec.md`](skills/market-intel/reference/companion-
 
 ---
 
+## Catalog and current operation readiness
+
+The maintenance console preserves `status`, `tool <slug>` and `connect <slug>`
+without DATA initialization, inventory probes or writes. Pass `--capability` to
+select an operation for the catalog's `source_id` (default: its `capability_id`). Current evidence comes from
+`MARKET_INTEL_HOST`, `MARKET_INTEL_SESSION_ID` and `MARKET_INTEL_CAPABILITIES`.
+The [schema v1 guide](skills/market-intel/reference/host-capabilities.md) explains
+`available-now`, `setup` reasons and evidence-supported `hard-gap` results.
+
+Only explicit `--refresh` collects machine inventory and writes it to a verified
+PRIVATE versioned companion. Storage failures return nonzero and preserve the
+previous snapshot. Offline regression tests do not establish live research,
+installed-host acceptance or provider readiness.
+
 ## Quick start, install the free no-key bootstrap pack (3 minutes)
 
 Want to try it without configuring API keys? Install these 3 free, no-key MCPs first, they cover
@@ -87,20 +111,23 @@ HN/Reddit-style community + market trends + AI papers at zero cost:
 
 ```bash
 # 1. Hacker News (community)
-claude mcp add -s user mcp-hn 'uvx mcp-hn'
+claude mcp add -s user mcp-hn -- uvx mcp-hn
 
 # 2. GDELT (global news + trends, no key)
-claude mcp add -s user gdelt 'uvx gdelt-mcp'
+claude mcp add -s user gdelt -- uvx gdelt-mcp
 
 # 3. arXiv (research papers, no key)
-claude mcp add -s user arxiv 'uvx arxiv-mcp-server'
+claude mcp add -s user arxiv -- uvx arxiv-mcp-server
 ```
 
-Then **restart the Claude session** (`claude` → re-enter; MCPs only register on session start).
+Then **restart the Claude session** and verify the source operation in that session.
+For **Codex**, configure the source through Codex MCP settings or its installed app,
+reconnect Codex, and inspect the tools exposed there. Claude settings do not prove
+Codex availability. See the [host evidence guide](skills/market-intel/reference/host-capabilities.md).
 
 Now ask: `调研一下 AI agent 工具生态的趋势`. The skill will fan out research subagents that
 use these three sources together, community signal + trends + papers, and produce a sourced
-report. No keys, no signup, ~30s start-to-first-finding.
+report after the selected sources pass current operation and content checks.
 
 After this, the [60-second tour](#60-second-tour) below explains the **specialized MCPs**
 (paid X data, Bright Data, Keepa, etc.), these unlock the high-quality routes the skill is
@@ -131,7 +158,7 @@ research the competitive landscape and X sentiment around <product>, then find a
 What runs:
 
 1. **Triage** → maps to `x-twitter`, `trends-discovery`, `ecommerce-arbitrage`; picks a depth budget with hard caps (no runaway fan-out).
-2. **Detect** → runs `claude mcp list`, sees you have none of the X/ecommerce MCPs connected, notes it.
+2. **Detect** → inspects tools exposed in the active host session, then verifies the selected X/ecommerce operation and reports any setup gap.
 3. **Guide install** (non-blocking) → "This depends on real X data. Install twitterapi.io: `claude mcp add -s user ...`, note it only works after a session reconnect. For now I'll use web fallback and flag the gap."
 4. **Delegate** → fans out subagents / invokes `deep-research`, each returning a **structured evidence unit** (`claim · source · quote · tier · date · confidence`), not raw page dumps.
 5. **Guardrails** → independent verifier re-fetches each cited URL; decision-grade claims need ≥2 independent sources; a dedicated reverse-search subagent hunts risks/failures.
@@ -142,7 +169,7 @@ What runs:
 After the Quick Start install, try invoking the skill on something concrete:
 
 - `调研一下 AI agent 工具生态最近一个月的趋势`, exercises trends + community + frontier-research
-- `compare the top 3 hosted MCP marketplaces (Smithery / Glama / PulseMCP) — coverage, pricing, signal-to-noise`, exercises mcp-ecosystem
+- `compare the top 3 hosted MCP marketplaces (Smithery / Glama / PulseMCP) — coverage, pricing, signal-to-noise`, exercises trends-discovery + web-scraping
 - `find me 3 underrated open-source web-scraping tools released in 2026 with > 200 stars`, exercises web-scraping + GitHub velocity discovery
 - `who's been launching credible LLM eval skills in the last 3 months`, exercises ready-skills + frontier-research
 
@@ -158,7 +185,7 @@ The knowledge asset. Each domain shard names the best tool, its **barrier route*
 
 | Domain | Top pick (barrier route) |
 |---|---|
-| [x-twitter](skills/market-intel/reference/domains/x-twitter.md) | twikit ④③ · twitterapi.io ② resale |
+| [x-twitter](skills/market-intel/reference/domains/x-twitter.md) | twscrape ③ · playwright ④ · twitterapi.io ② resale |
 | [reddit-community](skills/market-intel/reference/domains/reddit-community.md) | HN MCP ① free · reddit-mcp-buddy ① |
 | [web-scraping](skills/market-intel/reference/domains/web-scraping.md) | Tavily/Exa + Firecrawl + Bright Data |
 | [ecommerce-arbitrage](skills/market-intel/reference/domains/ecommerce-arbitrage.md) | Keepa ① official (seller-side) |
@@ -173,6 +200,9 @@ The knowledge asset. Each domain shard names the best tool, its **barrier route*
 | [ready-skills](skills/market-intel/reference/domains/ready-skills.md) | coreyhaines31/marketingskills |
 | [browser-automation](skills/market-intel/reference/domains/browser-automation.md) | playwright MCP + browser-use / crawl4ai ④ |
 | [consumer-price-compare](skills/market-intel/reference/domains/consumer-price-compare.md) | **delegates to sister skill** shopping-aggregator |
+
+For X, twikit remains a conditional fallback after a fresh operation check; see the
+[domain notes](skills/market-intel/reference/domains/x-twitter.md) for its staleness limits.
 
 **Barrier routes:** ① official API (compliant, often paid) · ② resale API (provider absorbs the barrier, cheap, gray-area) · ③ self-host scrape (reverse-engineered API, free, accounts+proxies, ban risk) · ④ **browser automation / act-like-human**, real logged-in browser (playwright MCP + free OSS repos). **First-class, not a footnote:** often returns richer data (rendered/logged-in view, fields APIs hide) at zero API cost. The skill prefers route ④ over paid APIs when it fits, reaching for ①/② only for history it can't backfill (e.g. Keepa), scale reliability, or compliance.
 

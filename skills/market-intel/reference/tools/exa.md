@@ -16,7 +16,12 @@ comparison. It does not establish publication dates or bypass a login wall by it
 The hosted HTTP endpoint is `https://mcp.exa.ai/mcp`. Register it in the current client's MCP
 configuration; Claude uses `mcpServers`, Codex uses `mcp_servers`. Reconnect existing sessions
 to load newly registered tools. An authorized direct HTTP connection can run immediately.
-The `exa-search` skill is another route when installed. Generic mechanics: `reference/install-guide.md`.
+The optional `exa-search` skill is another route: discover it in the active host's catalog
+and read its installed instructions. Market-intel does not bundle or install sibling skills.
+If absent, use a verified raw Exa MCP operation, prepare setup from current provider
+instructions, or use a verified search alternative and report the gap. After reconnecting,
+verify the selected operation, authorization and useful content in the active session.
+Generic mechanics: `reference/install-guide.md`; historical plans: `reference/volatile/pricing-install.md`.
 
 ## Auth / keys
 Start keyless for a small check. Higher-volume access may require an account and current provider

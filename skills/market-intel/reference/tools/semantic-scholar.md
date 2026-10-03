@@ -1,7 +1,7 @@
 # Tool: Semantic Scholar Graph API (+ semantic-scholar MCP / skill)
 
 - **Domain(s):** frontier-research (also: none)
-- **Barrier route:** ① · **Source tier:** L1 · **Ready MCP:** yes, a `semantic-scholar` MCP exists; the `semantic-scholar` skill is also present in this environment
+- **Barrier route:** ① · **Source tier:** L1 · **Ready MCP:** yes, a `semantic-scholar` MCP exists; current-session availability of an MCP or sibling skill requires discovery and operation verification
 - **Cost:** free; free API key lifts the rate limit [https://www.semanticscholar.org/product/api, fetched 2026-06, key is free, no paid tier shown]
 - **Repo / Provider:** https://www.semanticscholar.org (provider; Graph API at https://api.semanticscholar.org/graph/v1)
 - **Top pick for its domain:** yes
@@ -15,8 +15,9 @@ Use citation *velocity* (recent citations) over raw count for new work, and over
 
 ## Install
 REST works with no key: `https://api.semanticscholar.org/graph/v1/...`. For the MCP, search the registries
-(smithery.ai / glama.ai) for "semantic-scholar mcp", or just use the present `semantic-scholar` skill.
+(smithery.ai / glama.ai) for "semantic-scholar mcp", or discover the `semantic-scholar` skill in the active host.
 Exact line: `reference/volatile/pricing-install.md#frontier-research`. L0 mechanics: `reference/install-guide.md`.
+Read installed skill instructions and verify the selected operation before using it. Any model or external-agent work uses installed `llmcall` with current defaults, including `mode="agent"` for agent work.
 
 ## Auth / keys
 Unauthenticated works but is throttled (a shared pool, effectively very low and bursty). Request a **free**

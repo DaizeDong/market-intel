@@ -17,11 +17,18 @@ None. No API key, no account, no quota. The hidden cost only appears at scale: h
 
 ## Usage, call examples
 ```js
-const gplay = require('google-play-scraper');
-await gplay.app({ appId: 'com.whatsapp' });                       // full details
-await gplay.reviews({ appId: 'com.whatsapp', sort: gplay.sort.NEWEST, num: 200 });
-await gplay.search({ term: 'meditation', num: 50, country: 'us' });
-await gplay.list({ collection: gplay.collection.TOP_FREE, category: gplay.category.HEALTH_AND_FITNESS });
+async function main() {
+  const gplay = require('google-play-scraper');
+  await gplay.app({ appId: 'com.whatsapp' });                     // full details
+  await gplay.reviews({ appId: 'com.whatsapp', sort: gplay.sort.NEWEST, num: 200 });
+  await gplay.search({ term: 'meditation', num: 50, country: 'us' });
+  await gplay.list({ collection: gplay.collection.TOP_FREE, category: gplay.category.HEALTH_AND_FITNESS });
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
 ```
 (Newer versions ship ESM/named exports, check the installed version's README; the API surface is otherwise stable.)
 

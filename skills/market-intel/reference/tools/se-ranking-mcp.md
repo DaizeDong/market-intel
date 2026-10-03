@@ -10,7 +10,11 @@
 160+ SEO tools over MCP, keyword research (volume/difficulty), rank tracking, competitor research, backlink and audit data, plus **7 ready-made Claude Skills**, which makes it the most agent-friendly of the paid SEO platforms. **Decision rule:** when the task needs a **broad paid SEO toolkit** and you're choosing on value, SE Ranking is the shard's default paid pick ("best pro-tier value"), cheaper coverage than Semrush, more breadth than a single-purpose tool, and a generous trial to validate before paying. Go **Ahrefs** instead only for backlink depth; **DataForSEO** for raw cheap bulk SERP; **GSC** (free) for your own site.
 
 ## Install
-Hosted HTTP MCP, **Windows-friendly** (no local process). `claude mcp add --transport http se-ranking https://api.seranking.com/mcp --header "X-Api-Key: ..."`, exact form + trial details: `reference/volatile/pricing-install.md → seo-keywords`. The 7 Claude Skills install separately per SE Ranking's docs. L0 transport/secret/Windows mechanics: `reference/install-guide.md`. Restart / `/mcp` reconnect after adding.
+Hosted HTTP endpoint: `https://api.seranking.com/mcp`. Set its `X-Api-Key` through
+the selected host's supported secret settings with a user-side or approved no-echo
+transfer. Never put the key in an MCP-add command. Activate the host connection
+and verify the selected operation. Provider skills install separately.
+See `reference/install-guide.md`; recheck current pricing before signup.
 
 ## Auth / keys
 SE Ranking account → API key, passed as the **`X-Api-Key` header**. The **14-day trial includes 100k credits**, enough to fully validate before committing to a plan. **Secret hygiene (one line):** the API key is secret-bearing, write the `X-Api-Key` header into `~/.claude.json` from clipboard, NOT via `claude mcp add` (which echoes the header into the transcript); never `browser_snapshot` the key page. See `reference/install-guide.md`.

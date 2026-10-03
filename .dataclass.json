@@ -3,8 +3,8 @@
     "Every path in a public skill repo belongs to exactly one class (Skill Repo Spec v1 s9).",
     "TOOL    = code, SKILL.md, reference docs, and metrics ABOUT THE SKILL. Public.",
     "FIXTURE = tests and examples. Public, SYNTHETIC, produced by tools/make_fixtures.py.",
-    "DATA    = anything a REAL RUN produced. Versioned in the private companion, never the public repo;",
-    "          config, resolved at runtime by tools/datadir.py. The repo ships only the schema.",
+    "DATA    = anything a REAL RUN produced. Versioned only in the PRIVATE companion",
+    "          config, resolved at runtime by guards/tools/datadir.py. The repo ships only the schema.",
     "",
     "The line here is subtle and worth stating: metrics/ holds BOTH classes.",
     "  history.jsonl / sweep-*.json / doc-drift-cache.json  -> TOOL. They measure the SKILL",
@@ -14,7 +14,7 @@
     "      actually investigating. Tool knowledge distilled FROM it (which source works, which",
     "      route falls back) is published -- that is what reference/tools/*.md already is. The",
     "      raw ledger is not.",
-    "Enforced by tools/data_boundary.py, in .githooks and in CI.",
+    "Enforced by guards/tools/data_boundary.py, in .githooks and in CI.",
     "",
     "`tool` is not a fourth class. It is the per-path allowlist for check 4, which fails any tracked",
     "file that WEARS the shape of real-run output (a jsonl under metrics/, a runs/ tree, a dated file",
@@ -23,16 +23,63 @@
     "in the diff rather than in a paragraph."
   ],
   "tool": [
-    "metrics/history.jsonl"
+    "metrics/history.jsonl",
+    "skills/market-intel/reference/live-run-schema.json"
   ],
   "_tool_note": "One row per REFRESH PERIOD, not per run: domain/source counts and the free-route share, keyed by period and git sha. It measures the catalog, it names no subject and no query, and reference/tools/*.md is generated from it. It matches the check-4 metrics-ledger shape only because it is a jsonl under metrics/, which is precisely the shape the sibling DATA ledger has -- so it is enumerated instead of exempted by category.",
   "data": [
-    "skills/market-intel/metrics/live-runs.jsonl"
+    "skills/market-intel/metrics/live-runs.jsonl",
+    "inventory/availability-cache.json",
+    "inventory/host-capabilities.json",
+    "discovery-state.md",
+    "surface-inbox.jsonl",
+    "reports/",
+    "runtime/",
+    "profiles/",
+    "cache/"
   ],
   "data_sealed": [
-    "metrics/live-runs.jsonl"
+    "skills/market-intel/reference/discovery-state.md",
+    "skills/market-intel/reference/volatile/discovery-state.md",
+    "skills/market-intel/reference/remaining-tools.md",
+    "metrics/l0-cache.json",
+    "metrics/gh-api-cache.json",
+    "cookies.json",
+    "accounts.db",
+    "accounts.txt",
+    "metrics/live-runs.jsonl",
+    "metrics/availability-cache.json",
+    "skills/market-intel/discovery-state.md",
+    "feedback-report.json",
+    "profiles.csv",
+    "data/",
+    "user_data/",
+    "staff.csv",
+    "session.pkl",
+    "udir/",
+    "serpbear_data/",
+    "browser_data/",
+    "weibo/"
   ],
-  "_sealed_note": "The repo-root ledger is the ledger's OLD home (11 entries, 2026-06-02..03). Nothing writes there any more -- both the reader (tools/feedback-bump.py) and the writer (tools/incident_helper.py) resolve through tools/datadir.py. It is declared sealed rather than deleted-and-forgotten so that re-adding it is a hard failure, not a quiet regression: .gitignore alone is advisory and `git add -f` walks straight through it.",
-  "fixture": ["tests/fixtures/live-runs.json"],
-  "_data_home": "~/.market-intel-config/data/   (override with $MARKET_INTEL_DATA_DIR)"
+  "_sealed_note": "Legacy public output paths are forbidden even when ignored. Real ledgers, discovery inboxes, reports, browser profiles and scraper caches belong only in a verified PRIVATE versioned companion.",
+  "fixture": [
+    "tools/test_human_review.py",
+    "tools/test_discovery_contract.py",
+    "tools/test_first_use_contract.py",
+    "tools/test_check_all.py",
+    "tools/test_verification_contract.py",
+    "tests/fixtures/console.json",
+    "tests/fixtures/manifest.json",
+    "tests/fixtures/live-runs.json",
+    "discovery-state.md.example",
+    "surface-inbox.jsonl.example",
+    "skills/market-intel/reference/remaining-tools.md.example",
+    "inventory/availability-cache.json.example",
+    "inventory/host-capabilities.json.example",
+    "skills/market-intel/metrics/live-runs.jsonl.example",
+    "tools/test_private_writers.py",
+    "tools/test_incident_boundary.py",
+    "tools/test_console.py"
+  ],
+  "_data_home": "PRIVATE versioned companion. All consumer writers verify the final containing repository and every effective fetch/push destination, including explicit output overrides. Discovery, surface and incident appends use a lock over read-modify-replace. No public fallback."
 }

@@ -10,17 +10,12 @@ Bot-token Discord MCP for own or admin servers - ToS-compliant alternative to us
 **Decision rule:** pick when you need Discord-server intel from servers **you own or admin** (bot-token model: invite the bot, scope its permissions, read what it can see). For unowned servers, scraping a user session violates Discord ToS and risks account termination - there is no legitimate route 2 or 3 here, so the honest answer for unowned servers is "you cannot, ask the server owner to invite a bot."
 
 ## Install
-```bash
-git clone https://github.com/SaseQ/discord-mcp
-cd discord-mcp
-docker compose up -d   # exposes MCP at http://localhost:8085/mcp
-```
-<TODO: confirm exact docker-compose env wiring> - see https://github.com/SaseQ/discord-mcp for the current `DISCORD_TOKEN` env-var name and compose file.
+Clone the selected source and inspect its Compose configuration and dependency requirements. Before any launch, use the full Market checkout's `tools/private_inventory.py` to verify an existing PRIVATE versioned runtime. Confirm the installed version's token variable and supported Compose env-file/bind wiring, then map configuration, credentials, message caches, logs and exports to absolute destinations in that runtime. Revalidate before launch. Keep setup pending if any real writer lacks a supported and verified private destination; no runtime adapter has been exercised here.
 
-Then register with Claude Code as an HTTP MCP pointing at `http://localhost:8085/mcp`.
+After those checks, start through the verified adapter and register the actual local endpoint as an HTTP MCP. The historical default is `http://localhost:8085/mcp`; confirm the selected version's listener and active tool schema before use. See https://github.com/SaseQ/discord-mcp for its current configuration.
 
 ## Auth / keys
-Free, but **requires your own Discord bot token**. Create an application at https://discord.com/developers/applications, add a bot, copy the token into `secrets/discord-mcp.env` as `DISCORD_TOKEN=...`, and invite the bot to your target server with the read scopes you need (Read Messages, Read Message History, View Channels, plus Message Content Intent toggled on in the dev portal). No paid API key, no marketplace key.
+Free, but **requires your own Discord bot token**. Create an application at https://discord.com/developers/applications, add a bot, store the token through the verified private configuration above without echoing it, and invite the bot to your target server with the read scopes you need (Read Messages, Read Message History, View Channels, plus Message Content Intent toggled on in the dev portal). No paid API key, no marketplace key.
 
 ## Usage - call examples
 Once registered, the MCP exposes tools like `list_guilds`, `list_channels`, `read_messages`. Minimal flow:

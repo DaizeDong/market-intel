@@ -17,7 +17,7 @@ to everything*; the exact per-tool command + price lives one level down.
 | **L2 per-tool** | `reference/tools/<slug>.md` → `## Install` | exact steps + auth + gotchas for one specific tool. Find the slug in `reference/tools/index.md` |
 | **L3a ops state, overview** | `reference/companion-config-repo.md` | the recommended pattern + tutorial for managing **your** install state in a per-user private companion repo separate from this public matrix |
 | **L3b ops state, formal spec** | `reference/companion-config-spec.md` (version 1) | machine-readable contract: discovery convention, `registry.json` schema, template formats, conformance checklist. What skills + tooling actually consume. |
-| **L3c ops state, GitHub hardening** | `reference/companion-config-hardening.md` | 12-step lockdown runbook for a freshly-created private repo (visibility, Features off, Actions disabled, GitHub Apps audit, Copilot training opt-out). **Run before the first push.** |
+| **L3c ops state, GitHub hardening** | `reference/companion-config-hardening.md` | Policy-preserving review for a PRIVATE companion: visibility, existing security gates, scoped optional settings, access inventory and synthetic support exports. Review before adding runtime state or credentials. |
 
 Flow: triage the domain → open its shard → for the picked tool, read `tools/<slug>.md` `## Install`
 (or the L1 line in `pricing-install.md`) → if it's an MCP, restart/reconnect before using it.
@@ -30,7 +30,7 @@ Flow: triage the domain → open its shard → for the picked tool, read `tools/
 | **Python ≥ 3.10 + uv** (`uvx`) | `uvx`-launched MCPs + pip-installed scraper libs | `uv --version` |
 | **gh CLI** (authenticated) | GitHub-API verification + cloning OSS repos | `gh auth status` |
 | **git** | clone self-host OSS repos (route ③④) | `git --version` |
-| **playwright MCP** | route ④ default (act-like-human), usually already connected | `claude mcp list` |
+| **playwright MCP** | route ④ default (act-like-human), requires current-session verification | discover and execute the selected read-only operation in the active host |
 | **Docker** (optional) | self-host MCPs (crawl4ai, hummingbot, steel-browser…) | `docker --version` |
 | **throwaway account + proxy pool** (route ③④ only) | platform scraping at scale; software is free, proxies are the hidden cost | n/a |
 
@@ -69,6 +69,13 @@ echo "$CONDA_DEFAULT_ENV / $VIRTUAL_ENV"
 If neither env var is set and `sys.prefix` points at a global Python, you are about
 to write to base, pause and confirm with the user.
 
+## Host scope
+
+The Claude CLI/config commands below apply only to Claude. For Codex, use its own
+MCP or app settings. In either host, verify the selected operation in the active
+session; subprocess listings only diagnose installation. Secret-bearing settings
+must never be returned in tool output.
+
 ## MCP transport types, which to prefer
 
 > Canonical enum lives in `companion-config-spec.md §3.1` (`transport` field). Five values:
@@ -100,18 +107,22 @@ tool yourself is fine, leaking the value is not.
 
 - **NEVER `browser_snapshot` a page that displays a key.** Provider dashboards render the API key in
   **plaintext in the DOM** (confirmed: twitterapi.io rotation page, Bright Data API-keys table).
-  Instead: have the user click the page's **copy button**, read the OS clipboard using whichever
-  command fits the user's shell (Windows PowerShell: `Get-Clipboard`; macOS: `pbpaste`; Linux:
-  `xclip -o` or `wl-paste`), pipe it in, and **verify by length only, never print the value**.
+  Instead, have the user copy the value directly into the selected host's private configuration
+  or use an approved no-echo transfer. Clipboard access must stay inside that helper; never run
+  a standalone clipboard-read command that returns the value. Return only success or length.
 - **For secret-bearing MCPs, do NOT use `claude mcp add`** (it echoes the `--header`/URL with the key).
   Edit `~/.claude.json` directly: a tiny python script reads the clipboard and writes
   `mcpServers.<name>.headers.Authorization` (or token-in-URL), with **no echo**.
-- **Mask tokens when verifying**: token-in-URL servers print the token in `claude mcp list` → pipe
-  through `sed -E 's/token=[^ &]*/token=***/'`.
+- **Use value-free diagnostics when verifying.** Never return raw MCP listings or configuration:
+  secret URLs, headers and environment values can appear in several forms. A diagnostic helper
+  may return only allowlisted fields for the selected server: name, connection status and
+  authentication state. A token-specific masking regex does not establish safe output.
 - **Rotation cooldowns**: if a key leaks, rotate it, but check the provider's cooldown (e.g.
   twitterapi.io = once/24h). A truly transcript-clean key = the **user** rotates from their own browser.
-- Keys land plaintext in `~/.claude.json`, **never commit/screenshot it.** The skill holds the
-  *procedure*, not the key. Prefer `-e KEY=$VAR` forms the **user** runs themselves.
+- Keys may be plaintext in local host settings. **Never expose them in transcripts, screenshots
+  or public repositories.** Designated PRIVATE versioned credential backups are allowed. The
+  public skill holds the procedure, not the key; use the selected host's supported secret
+  configuration and approved no-echo transfer.
 - **Clipboard-capture sanity gates**, when piping a key from clipboard, reject anything outside
   `length ∈ [8, 512]`, anything containing whitespace, or anything matching `^https?://` (someone
   copied a URL by mistake). These cheap checks catch ~all paste-by-mistake errors before the value
@@ -146,56 +157,58 @@ masking, no copy-only button):
 - **FMP** dashboard, key in the page DOM unmasked.
 - **Mastodon** `/settings/applications/<id>`, all 3 of `client_key`, `client_secret`,
   `access_token` rendered simultaneously as readonly plaintext inputs.
-- **Bluesky** App Password dialog, shows the password ONCE with no copy button; agent must
-  read the DOM string before the user closes the dialog.
+- **Bluesky** App Password dialog, shows the password ONCE with no copy button; the user must save it locally before closing the dialog; do not return it to the agent.
 - **Stack Apps** new-API-key dialog, masks all but last 4 chars in the visible cell, but
   the actual full value is reachable via `navigator.clipboard.writeText` from a hidden
-  readonly input, the agent must copy from DOM, not from the masked display.
+  readonly input, use a browser-side or user-side no-echo transfer; do not return the DOM value.
 
-When the agent reads any of these via `browser_evaluate`, the **full value enters the
-conversation transcript**. Under Mode A (committed-secrets) the residual exposure is
-tolerable; under Mode B prefer one of:
+Do not return DOM credential values from `browser_evaluate`, read them into the
+conversation, or print clipboard contents. The same transcript rule applies to
+both private storage modes. A private Git backup does not authorize transcript
+exposure.
 
-1. Have the user click the page's own copy button, then `Get-Clipboard | length-verify`.
-2. Use `navigator.clipboard.writeText(...)` from inside the page (browser-side), then read
-   clipboard, never returns the value to the JS evaluation result.
-
-See [`companion-config-hardening.md`](companion-config-hardening.md) for the wider Mode
-A vs Mode B trade-off.
+The user can copy the value directly into the selected host's supported secret
+configuration. If an approved no-echo transfer helper is used, it must keep the
+value inside the browser/OS/configuration process and return only success, length
+or a value-free diagnostic. Do not snapshot a key page or request its raw DOM.
+If such a transfer is unavailable, have the user complete it locally.
 
 ## Troubleshoot a non-Connected MCP
 
-When `claude mcp list` shows `✗ Failed` or `! Needs authentication`, the cause is almost always
-one of five categories. Walk these in order:
+When a selected-server, value-free diagnostic reports `✗ Failed` or `! Needs authentication`,
+check these categories in order. The selected operation in the active host remains the readiness
+test; a Claude subprocess diagnostic does not establish Codex readiness.
 
 | symptom | likely cause | first move |
 |---|---|---|
 | `! Needs authentication` | OAuth token expired or never completed | run `/mcp` and re-OAuth the server |
-| `✗ Failed` for stdio MCP, immediate exit | `uvx`/`npx` not on PATH, or absolute path wrong | shell-test the exact `command + args` line outside Claude; check `uv --version` / `node -v`; on Windows see `uv-path.md`-style PATH gotchas |
-| `✗ Failed` for HTTP MCP | Bearer token wrong / rotated / quota exceeded | `curl -H "Authorization: Bearer $TOKEN" <url>/health` to isolate transport vs auth |
-| `✗ Failed` with env var error in logs | required env var missing from `mcpServers.<name>.env` | re-check `tools/<slug>/env.template` against `secrets/<slug>.env`; common miss: `_STORAGE_DIR` paths that need pre-creating |
-| `✓ Connected` but actual tool calls fail | provider subscription gate (free tier read-only, etc.) | check provider dashboard for plan + quota; `functional-test.py`-style JSON-RPC ping catches this where `claude mcp list` doesn't |
+| `✗ Failed` for stdio MCP, immediate exit | `uvx`/`npx` not on PATH, or absolute path wrong | check `uv --version` / `node -v` and executable paths; if a launch probe is needed, keep secret-bearing arguments and captured output inside a private no-echo diagnostic |
+| `✗ Failed` for HTTP MCP | Bearer token wrong / rotated / quota exceeded | use a no-echo diagnostic and return only status/auth/content checks |
+| `✗ Failed` with env var error | required env var missing from the selected host's configuration | compare required variable names with private configuration through a no-echo helper; verify that required storage directories exist and resolve to PRIVATE versioned destinations |
+| `✓ Connected` but actual tool calls fail | provider subscription gate, operation-specific auth or another runtime failure | inspect plan/quota without exposing dashboard secrets, then verify the selected operation's authentication and usable response content in the active host |
 
-If still stuck, the active session's Claude log directory has per-MCP stderr capture;
-search for the server name in the most recent log file.
+If still stuck, inspect only the selected host/server's private diagnostics with a helper that
+returns allowlisted error categories. MCP stderr and logs can contain secrets and account data;
+do not return raw logs or search matches to the transcript.
 
-## Verify an install (always do this after adding)
+## Verify an install
 
-- `claude mcp list` → parse the three-state health: only **`✓ Connected`** is usable. Treat
-  **`✗ Failed`** and **`! Needs authentication`** as not available (they fail at call time).
-- Mask any token first: `claude mcp list | sed -E 's/token=[^ &]*/token=***/'`.
-- `claude mcp get <name>` for per-server detail.
-- **Tool-name prefix matching (`mcp__*twitter*`) is unreliable**, deferred tools, plugin prefixes,
-  and dead connections distort it. Use it only as a cross-check, never the primary signal.
+Inspect the selected host's current callable tools. Verify source and operation
+identity, execution, authentication and usable response content in that session.
+Apply the timestamp and attribution rules in [host-capabilities.md](host-capabilities.md).
+A Connected subprocess listing, installed library or keyless service is only a
+setup signal. Avoid raw listing/config output that may contain secret URLs or
+headers; return value-free diagnostics. A prefix match cannot transfer evidence
+between operations or hosts.
 
 ## Install by barrier route (①②③④)
 
 | route | what install looks like | cost shape |
 |---|---|---|
-| **① official API** | get key from provider dashboard → HTTP MCP or REST. Compliant, no ban risk | often paid/quota-limited; many free tiers |
+| **① official API** | get key from provider dashboard → HTTP MCP or REST; provider rules, moderation and rate limits still apply | often paid/quota-limited; many free tiers |
 | **② resale API** | provider key → HTTP MCP. Provider absorbs the account/proxy/login-wall barrier | cheap pay-per-use, gray-area |
 | **③ self-host scrape** | `git clone` + `pip`/`npm install` → supply your own accounts + proxies | free software; you carry ToS/ban risk |
-| **④ browser / act-like-human** | playwright MCP (already connected) or a per-platform OSS repo → supply a logged-in session/cookies | free; proxies at scale; most platform scraping violates ToS |
+| **④ browser / act-like-human** | playwright MCP (available only after current-session operation verification) or a per-platform OSS repo → supply a logged-in session/cookies | free; proxies at scale; most platform scraping violates ToS |
 
 **Prefer ④/③ (free) over paid ①/② when equivalent** (CONSTITUTION C2). Reach for paid only for data
 the free route can't get (e.g. Keepa price history), scale reliability, or compliance.
@@ -206,8 +219,8 @@ For the exact command, open the L1 section in `pricing-install.md`, or the L2 `t
 
 | domain | free-first pick (route) | L1 section |
 |---|---|---|
-| x-twitter | twikit ④③ / playwright ④ (twitterapi.io ② if you want the provider to absorb upkeep) | `pricing-install.md#x-twitter` |
-| reddit-community | mcp-hn ① (no key) · reddit-mcp-buddy ① (zero-setup anon tier) | `#reddit-community` |
+| x-twitter | twscrape ③ / playwright ④ (twitterapi.io ② if you want the provider to absorb upkeep; twikit only after a fresh operation check) | `pricing-install.md#x-twitter` |
+| reddit-community | mcp-hn ① (no key) · reddit-research-mcp ① (hosted OAuth, no Reddit credentials to manage) · reddit-mcp-buddy ① (verified app-id/login; recorded anon 403 outage) | `#reddit-community` |
 | web-scraping | Tavily/Exa ② + Firecrawl ② + Bright Data ② (free 5k/mo) | `#web-scraping` |
 | ecommerce-arbitrage | Discount-Bandit ④ / playwright ④ (Keepa ① for history) | `#ecommerce-arbitrage` |
 | finance-markets | SEC EDGAR + FRED ① (free, no/low key) | `#finance-markets` |
@@ -219,19 +232,21 @@ For the exact command, open the L1 section in `pricing-install.md`, or the L2 `t
 | trends-discovery | GDELT ① (no auth) + Product Hunt ① | `#trends-discovery` |
 | frontier-research | arXiv + HF Daily Papers ① (free, no key) | `#frontier-research` |
 | ready-skills | `npx skills add coreyhaines31/marketingskills` (skill, not MCP) | shard `ready-skills.md` |
-| browser-automation | playwright MCP ④ (connected) + browser-use/crawl4ai | `#browser-automation` |
+| browser-automation | playwright MCP ④ (verify the selected operation in the current session) + browser-use/crawl4ai | `#browser-automation` |
 
 ## Windows-specific notes
 
-- **Read `~/.claude.json` as UTF-8**, it contains non-ASCII paths; the default GBK decode crashes.
+- Any approved no-echo helper that reads Claude settings must decode `~/.claude.json` as UTF-8;
+  non-ASCII paths can fail under a legacy encoding. Never return the raw settings.
 - **Prefer HTTP-transport MCPs**; stdio `npx`/`uvx` are flaky (path/shell). If you must use stdio,
   use absolute paths and test in a plain shell first.
-- **PowerShell** for clipboard secret piping: `Get-Clipboard`.
-- Prefer `claude mcp get`/`list` over raw JSON parsing when possible.
+- Keep PowerShell clipboard access inside an approved no-echo transfer; do not print its value.
+- Discover callable operations in the active host and use selected-server, value-free diagnostics.
+  Do not dump raw MCP configuration or listings.
 
 ## When an install is missing mid-research (non-blocking protocol)
 
 Never block on install. If a topic clearly depends on a missing source, tell the user the one-line
-`claude mcp add` (or the `tools/<slug>.md` install) + cost, note that **it won't work until session
+host-specific setup path (or the `tools/<slug>.md` install); secret values stay in local settings + cost, note that **it won't work until session
 restart**, then **proceed with a fallback source and flag the gap** in the report (SKILL.md guardrail
 #4, no silent degradation).

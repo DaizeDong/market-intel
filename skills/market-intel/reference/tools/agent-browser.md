@@ -4,7 +4,7 @@
 - **Barrier route:** ④ · **Source tier:** L2 · **Ready MCP:** no, but agent-native, ships a native CLI + a `.claude-plugin` (Claude Code plugin), so the agent drives it directly without an MCP server
 - **Cost:** free (self-host OSS) [github.com/vercel-labs/agent-browser, fetched 2026-06]
 - **Repo / Provider:** github.com/vercel-labs/agent-browser, `vercel-labs/agent-browser (42.1k★, gh-api 2026-09-06)`; license Apache-2.0, active (pushed 2026-09-06)
-- **Top pick for its domain:** no (the already-connected **playwright MCP** is the default; agent-browser is the token-efficient fast peer you reach for when context budget matters)
+- **Top pick for its domain:** no (**playwright MCP** after current-session verification is the default; agent-browser is the token-efficient fast peer you reach for when context budget matters)
 
 ## What it does / when to pick it
 A native (Rust) browser-automation CLI built for LLM agents: it bundles its own Chrome and exposes a **token-efficient snapshot + `@ref`** model, instead of dumping a huge DOM, it returns a compact accessibility snapshot where each element has a short `@ref` handle you act on. **Decision rule:** pick agent-browser over playwright MCP when (a) you are burning too much context on `browser_snapshot` of heavy pages, or (b) you want a fast standalone CLI peer rather than an MCP round-trip. It is *not* MCP-native, so it does not show up in `claude mcp list`; you invoke its CLI (or install its plugin). For the standard "act like a human on one logged-in page" job, **playwright MCP** is still the default first tool, agent-browser is the optimization. For AI-goal-driven natural-language extraction use **browser-use**; for fingerprint-blocked targets escalate to **camoufox / camofox-browser**.
@@ -43,6 +43,6 @@ The `@ref` indirection is the whole point: the model passes back a short handle 
 - **Bundled Chrome = a real GUI Chromium:** on a headless server pass the headless flag; on Windows the bundled binary is large, first run downloads/extracts it.
 
 ## Failure signals & fallback
-Failed when: the CLI can't launch its bundled Chrome (missing binary / build), a `@ref` action errors with "ref not found" (stale snapshot, re-snapshot), or the target serves a bot interstitial (fingerprint block, agent-browser can't bypass it). **Fallback ladder:** (1) default back to the already-connected **playwright MCP** for the same act-like-human task; (2) for natural-language goal extraction, **browser-use**; (3) for fingerprint blocks, **camoufox**, **jo-inc/camofox-browser**, or **patchright**; (4) for vision-robust workflows resilient to layout changes, **Skyvern**.
+Failed when: the CLI can't launch its bundled Chrome (missing binary / build), a `@ref` action errors with "ref not found" (stale snapshot, re-snapshot), or the target serves a bot interstitial (fingerprint block, agent-browser can't bypass it). **Fallback ladder:** (1) default back to **playwright MCP** after current-session verification for the same act-like-human task; (2) for natural-language goal extraction, **browser-use**; (3) for fingerprint blocks, **camoufox**, **jo-inc/camofox-browser**, or **patchright**; (4) for vision-robust workflows resilient to layout changes, **Skyvern**.
 
-## Last verified: 2026-09 (repo facts, existence, stars, activity, re-pulled from gh api; usage/gotcha notes carried forward unchanged from the prior check)
+## Last verified: 2026-09 (repository existence, stars and activity checked through gh api; usage/gotcha notes carried forward unchanged from the prior check)

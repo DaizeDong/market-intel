@@ -18,7 +18,7 @@ Cross-platform compare → PriceAPI, plus free official eBay/Shopify Storefront 
 ## ④ Browser/OSS route (free, self-host)
 | repo | route | note |
 |---|---|---|
-| **jez500/pricebuddy** (1026★) | ④ self-host | Docker Compose Laravel app, multi-store price tracker (Amazon/eBay/AliExpress), most active OSS pick in this table (NEW top pick 2026-07, doc+registry already existed, this row closes the gap) |
+| **jez500/pricebuddy** (1369★) | ④ self-host | Stars checked 2026-10-03. Docker Compose Laravel app, multi-store price tracker (Amazon/eBay/AliExpress), most active OSS pick in this table (NEW top pick 2026-07, doc+registry already existed, this row closes the gap) |
 | **Cybrarist/Discount-Bandit** (697★) | ④ self-host | multi-store price tracker (Amazon/AliExpress/eBay), **self-built Keepa**: it records history from your deploy day (717★ at last gh-api check, 2026-07-22) |
 | omkarcloud/amazon-scraper (220★) | ④ | 24 Amazon sites, search/detail/reviews, built-in anti-detect browser (226★ at last gh-api check, 2026-07-22) |
 | playwright MCP | ④ | bespoke price/stock checks on any store, real rendered page |

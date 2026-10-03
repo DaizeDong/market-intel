@@ -10,24 +10,20 @@
 A LangGraph **agent for sourcing, curating, and scheduling** social posts with **human-in-the-loop** review, it ingests content (URLs/feeds), drafts posts, pauses for human approval, then schedules. **Decision rule:** pick it when the job is the *whole content pipeline* (find → write → approve → schedule), not just "post this string." It sits **a tier above the post APIs**: it does not replace them, it *drives* them, pair it with **Buffer** / **Postiz** (or Arcade/Twitter integrations) as the actual publishing backend. If you only need to push a known post to platforms, skip this and call **Buffer** (① free) / **Blotato** / **Postiz** directly. If you want a packaged Postiz-only front-end instead of a full pipeline, see `postiz-agent`.
 
 ## Install
-Clone and run the LangGraph app (Node/TS, plus a LangGraph runtime); supply the keys it needs (LLM + content-ingest + a posting backend). Exact, time-stamped line: `reference/volatile/pricing-install.md → social-publishing` ("langchain-ai/social-media-agent (2.6k★): clone + keys (content pipeline)"). It is **not** an MCP, there is no `claude mcp add` one-liner; it runs as its own service and you interact via its UI/LangGraph endpoints. Windows: it expects a Node + LangGraph dev environment; prefer running it under WSL/Docker if stdio/path issues bite. L0 mechanics (secret hygiene, transports): `reference/install-guide.md`.
+Prepare the LangGraph app (Node/TS, plus a LangGraph runtime) using the installed version's instructions. Execution remains at the model-adapter and private-persistence setup boundary below. It is **not** an MCP server; its own service exposes UI/LangGraph endpoints. Windows needs a compatible Node + LangGraph environment. L0 mechanics: `reference/install-guide.md`.
 
-## Auth / keys
-Multiple keys depending on wiring: an **LLM key** (Anthropic/OpenAI), **content-ingest keys** (e.g. FireCrawl/Arcade for URL→post), and a **posting backend** (Twitter/LinkedIn via Arcade, or Buffer/Postiz). Secret-hygiene (one line): never echo or paste the user's keys into the transcript, have the user place them in the app's own `.env`, and never `browser_snapshot` a key page; full procedure in `reference/install-guide.md`.
+## Model integration and private setup
+All model or external-agent work must use installed `llmcall`, inheriting its current routing, model, timeout and fallback policy. No supported adapter for this LangGraph app is supplied or verified here. Verify an actual installed-version adapter and its tool-I/O contract before running the graph; otherwise stop at setup. Do not add direct provider clients or a separate model ladder.
+
+Keep ingest and posting credentials in approved PRIVATE configuration with no transcript echo. Resolve feed history, drafts, checkpoints, logs and scheduling state to verified PRIVATE versioned DATA. Confirm that the installed app supports those destinations before starting it; no checkout or loose home-directory fallback is permitted.
 
 ## Usage, call examples
-Not a tool you call per-MCP, you run the graph. Typical loop: drop a source URL → agent generates a draft → **human approves/edits in the loop** → agent schedules to the configured backend. Conceptual entry:
-```
-# from the cloned repo
-yarn install && yarn dev   # starts the LangGraph agent + studio
-# then submit a content URL via the studio / API; review the drafted post; approve to schedule
-```
-The actual publish step is delegated to whatever posting integration you configured (Arcade-Twitter/LinkedIn, or Buffer/Postiz).
+Once the adapter, private storage and selected-operation checks pass, submit a source URL to prepare a private draft. Review and edit that concrete draft before requesting scheduling or publication authorization. A configured backend or an app approval node does not itself authorize sending. The posting integration must expose a verified operation for the authorized destination.
 
 ## General experience & gotchas (踩坑)
 - **It does not post by itself**, it needs a posting backend wired in; treating it as a one-stop publisher is the main misread. Budget for Buffer/Postiz **plus** this.
 - **Human-in-the-loop is a feature, not optional**, it intentionally pauses for approval; an unattended/auto-run setup defeats its purpose and can be brittle.
-- **Heaviest setup in this domain**, LangGraph runtime + LLM key + ingest key + post backend; far more moving parts than a single post-MCP. Only worth it when curation/quality gating is the actual goal.
+- **Heaviest setup in this domain**, LangGraph runtime + verified llmcall adapter + ingest integration + post backend; far more moving parts than a single post-MCP. Only worth it when curation/quality gating is the actual goal.
 - LLM + ingest API costs are **per-run and yours**, the OSS is free, the pipeline calls are not; watch token/ingest spend on large feeds.
 - X link-posts still cost **$0.20 each** at the platform level (shard cost trap) when X is the chosen backend, the agent doesn't remove platform write costs.
 - Maintained by LangChain and active (pushed 2026-06-09, 2.6k★), but it tracks the fast-moving LangGraph/integration surface, pin versions and re-check the README's required integrations before a run.

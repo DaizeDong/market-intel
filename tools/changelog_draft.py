@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-changelog_draft.py — draft a CHANGELOG entry via `claude -p` (headless Claude
-Code), so the human author reviews + edits + commits.
+changelog_draft.py — draft a CHANGELOG entry via installed llmcall defaults,
+so the human author reviews, edits and commits.
 
 Why this exists:
     Every release the human author hand-crafts a CHANGELOG entry. The pattern
@@ -18,7 +18,7 @@ This is a DRAFT helper, NOT a gate.
 CLI:
     python tools/changelog_draft.py --since v0.24.0
     python tools/changelog_draft.py --since HEAD~5
-    python tools/changelog_draft.py --since v0.24.0 --out tmp/changelog-draft.md
+    python tools/changelog_draft.py --since v0.24.0 --out <private-companion>/reports/changelog-draft.md
 
 Default --since:
     Parses the most recent `## [<version>]` header from CHANGELOG.md and
@@ -26,13 +26,12 @@ Default --since:
     instead.)
 
 Default --out:
-    stdout. With --out PATH, also write to file.
+    stdout. With --out PATH, also write inside a verified PRIVATE companion.
 
 Exit codes:
     0 — success
-    1 — git log empty (no commits in range, nothing to draft)
-    2 — claude -p errored
-    3 — `claude` CLI not available
+    1 — git collection failed or git log empty (nothing to draft)
+    2 — llmcall errored
 """
 
 from __future__ import annotations
@@ -41,12 +40,13 @@ import argparse
 import datetime as _dt
 import os
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 from typing import Optional
+
+import private_inventory
 
 
 # --------------------------------------------------------------------------- #
@@ -164,13 +164,21 @@ def collect_git_data(since: str) -> Optional[dict]:
     if not log_text:
         return {"log": "", "stat": "", "name_status": ""}
 
-    _, stat_out, _ = _git(["diff", f"{since}..HEAD", "--stat"])
+    rc, stat_out, stat_err = _git(["diff", f"{since}..HEAD", "--stat"])
+    if rc != 0:
+        print(f"[error] git diff {since}..HEAD --stat failed:", file=sys.stderr)
+        print(stat_err.strip(), file=sys.stderr)
+        return None
     stat_lines = stat_out.strip().splitlines()
     if len(stat_lines) > 30:
         stat_lines = stat_lines[:30] + [f"... ({len(stat_lines) - 30} more)"]
     stat_text = "\n".join(stat_lines)
 
-    _, ns_out, _ = _git(["diff", f"{since}..HEAD", "--name-status"])
+    rc, ns_out, ns_err = _git(["diff", f"{since}..HEAD", "--name-status"])
+    if rc != 0:
+        print(f"[error] git diff {since}..HEAD --name-status failed:", file=sys.stderr)
+        print(ns_err.strip(), file=sys.stderr)
+        return None
     ns_lines = ns_out.strip().splitlines()
     if len(ns_lines) > 50:
         ns_lines = ns_lines[:50] + [f"... ({len(ns_lines) - 50} more)"]
@@ -243,25 +251,18 @@ def build_prompt(
 # Claude invocation                                                           #
 # --------------------------------------------------------------------------- #
 
-from llmcall import call as _llmcall  # noqa: E402
-
-
-def find_claude_cli() -> Optional[str]:
-    """Preflight: is ANY llmcall provider (codex/cc/claude) reachable? Returns the first found, else
-    None (the draft now runs through the codex -> cc -> claude chain, not claude alone)."""
-    for name in ("codex", "cc", "claude"):
-        p = shutil.which(name)
-        if p:
-            return p
-    return None
+from model_adapter import ModelUnavailable, call as _llmcall, require_call  # noqa: E402
 
 
 def run_claude(prompt: str) -> tuple[int, str, str]:
-    """Draft the entry via the shared llmcall chain (codex -> cc -> claude; read-only, one-shot). The
-    (rc, stdout, stderr) shape is preserved so main() is unchanged: rc 0 + text on success, nonzero +
-    error on total failure. The prompt (several KB) goes on stdin inside llmcall, dodging arg limits."""
-    r = _llmcall(prompt)
-    return (0, r.text, "") if r else (2, "", r.error or "llmcall chain failed")
+    """Draft with installed llmcall routing/defaults and safe failure diagnostics."""
+    try:
+        r = _llmcall(prompt)
+    except ModelUnavailable as exc:
+        return 3, "", str(exc)
+    except Exception:
+        return 2, "", "llmcall failed; inspect private provider diagnostics"
+    return (0, r.text, "") if r else (2, "", "llmcall failed; inspect private provider diagnostics")
 
 
 # --------------------------------------------------------------------------- #
@@ -281,7 +282,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     _reconfigure_stdout_utf8()
 
     parser = argparse.ArgumentParser(
-        description="Draft a CHANGELOG entry via claude -p (headless Claude Code).",
+        description="Draft a CHANGELOG entry via installed llmcall defaults.",
     )
     parser.add_argument(
         "--since",
@@ -294,18 +295,23 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument(
         "--out",
         default=None,
-        help="Also write draft to this path (default: stdout only).",
+        help="Also write draft inside a verified PRIVATE companion (default: stdout only).",
     )
     args = parser.parse_args(argv)
 
-    # Locate `claude` CLI early
-    if find_claude_cli() is None:
-        print(
-            "[error] `claude` CLI not found on PATH. Install Claude Code "
-            "(https://claude.ai/code) and ensure `claude` is on PATH.",
-            file=sys.stderr,
-        )
+    try:
+        require_call()
+    except ModelUnavailable as exc:
+        print(str(exc), file=sys.stderr)
         return 3
+
+    destination = None
+    if args.out:
+        try:
+            destination = private_inventory.resolve_destination("reports/changelog-draft.md", path=args.out)
+        except private_inventory.InventoryError as exc:
+            print(f"[error] draft destination refused: {exc}", file=sys.stderr)
+            return 2
 
     # Resolve --since default
     previous_version = parse_latest_changelog_version()
@@ -364,10 +370,10 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     rc, stdout, stderr = run_claude(prompt)
     if rc != 0:
-        print(f"[error] `claude -p` exited with code {rc}:", file=sys.stderr)
+        print(f"[error] `llmcall` exited with code {rc}:", file=sys.stderr)
         if stderr.strip():
             print(stderr.strip(), file=sys.stderr)
-        return 2
+        return rc
 
     draft = stdout.rstrip() + "\n" + FOOTER
 
@@ -376,13 +382,13 @@ def main(argv: Optional[list[str]] = None) -> int:
     sys.stdout.flush()
 
     # Also write to file if requested
-    if args.out:
-        out_path = Path(args.out)
-        if not out_path.is_absolute():
-            out_path = REPO_ROOT / out_path
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(draft, encoding="utf-8")
-        print(f"\n[info] draft also written to {out_path}", file=sys.stderr)
+    if destination is not None:
+        try:
+            saved = private_inventory.write_text(draft, "reports/changelog-draft.md", destination)
+        except private_inventory.InventoryError as exc:
+            print(f"[error] draft persistence failed: {exc}", file=sys.stderr)
+            return 2
+        print(f"\n[info] draft written; PRIVATE companion {saved.identity}", file=sys.stderr)
 
     return 0
 

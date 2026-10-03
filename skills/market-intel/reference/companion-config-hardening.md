@@ -1,277 +1,173 @@
 # Companion config repo, hardening runbook
 
-When setting up a companion config repo from scratch (see
-[`companion-config-spec.md`](companion-config-spec.md) for the structural contract), the
-default GitHub configuration is **dangerously permissive** for a repo that may hold API
-keys, ops state, or per-tool registration metadata. This runbook walks every setting that
-matters, with the rationale and the exact path / `gh` CLI command to flip each.
+Use this runbook to review a PRIVATE companion's access and automation before adding
+runtime state or credentials. The [structural contract](companion-config-spec.md)
+describes its contents. Existing repository and organization security policy remains
+in force; creating a companion does not authorize changing that policy.
 
-Apply this checklist **before** committing the first secret.
+Record current settings first. Optional features and integrations are operator choices,
+based on their purpose and permissions. Keep required security scanners, protection
+rules, backup jobs and validation workflows enabled. Never delete workflows as a group.
 
-> 💡 Time budget: ~15 minutes the first time, ~5 minutes per subsequent personal repo once
-> you know the flow. Most settings are one-time.
+## Threats and controls
 
----
-
-## Threat model (what this runbook defends against)
-
-| Threat | Mitigation |
+| Threat | Control to verify |
 |---|---|
-| Repo accidentally made public | Visibility checked + verified at creation |
-| AI tool (ChatGPT Codex, Devin, etc.) silently scans this repo because it has "all repos" access | GitHub Apps audit + restrict scope or uninstall |
-| GitHub uses your code to train Copilot / future AI models | Account-level Copilot data sharing **disabled** |
-| Compromised GitHub Action exfiltrates secrets via outbound HTTP | Actions **disabled** (no CI on this repo) |
-| Dependabot opens PRs that touch secrets | Dependabot **disabled** |
-| Webhook → external service hands credentials to an attacker | Webhooks **empty** |
-| Deploy key compromise enables clone outside your control | Deploy keys **empty** |
-| Inadvertent collaborator added during a help session | Collaborators **empty** + verified after each support interaction |
-| Public-facing surface (Wikis / Issues / Pages / Discussions) leaks via search-engine index | All four **disabled** |
+| A companion is published accidentally | Authenticated PRIVATE visibility and all publication destinations |
+| An integration reads more data than intended | Reviewed repository scope and least necessary permissions |
+| A workflow exposes credentials | Reviewed jobs, trusted actions, limited token permissions and controlled outputs |
+| A credential is exposed or revoked | Existing scanning and push protection, followed by actual credential rotation |
+| An old collaborator, webhook or key retains access | An access inventory with an owner and current purpose for each grant |
+| A support export carries private history | Fresh generator-owned synthetic output with no Git metadata or private input |
 
----
+## Step 1, Create and verify the PRIVATE repository
 
-## Step 1, Create the repo as PRIVATE
+For a new repository selected by the operator:
 
 ```bash
-gh repo create <your-user>/market-intel-config \
-  --private \
-  --description "Private companion config repo for market-intel — ops state + (optionally) secrets" \
-  --confirm
+gh repo create <your-user>/market-intel-config --private
+gh repo view <your-user>/market-intel-config --json nameWithOwner,visibility
 ```
 
-Or via web UI: <https://github.com/new> → **Private** radio selected before pressing Create.
+Require the intended repository identity and explicit `PRIVATE` visibility. An
+unauthenticated 404 alone cannot distinguish a private repository from an absent one.
+Stop initialization if visibility is public or cannot be established. Review every
+configured fetch and push destination, including alternate remotes, before runtime
+writers use the companion.
 
-**Verification**: visit `https://github.com/<your-user>/<repo>` while signed-out (in an
-incognito window). You should see a "Page not found", that confirms private. If you see the
-repo contents, **stop immediately and flip to private**.
+## Step 2, Preserve the chosen credential-storage policy
 
----
+Follow the storage mode and backup policy in
+[companion-config-spec.md](companion-config-spec.md). A designated PRIVATE versioned
+credential backup may contain credentials when the operator's policy allows it. Public
+source, support exports and public examples contain only generated synthetic data.
 
-## Step 2, Decide your secret-storage mode
+Storing credentials privately does not waive existing scanning, push protection or
+workflow requirements. Resolve a blocked operation under the applicable policy using a
+narrow, reviewed exception where that policy permits one. Do not disable a scanner to
+make a commit succeed. An exposed or revoked credential requires rotation of the
+credential itself; editing a file does not remove its historical exposure.
 
-See [`companion-config-spec.md`](companion-config-spec.md) §5.3 for the formal trade-off
-between Mode A (secrets committed) and Mode B (secrets gitignored + out-of-band backup).
-The hardening steps below are **identical for both modes**, Mode A just has a stricter
-"any single compromise = all keys exposed" residual risk that you accept consciously.
+## Step 3, Review optional repository features
 
----
+Inspect `Settings > General > Features`. Keep features with a current purpose. The
+operator may choose to disable an unused wiki, issues, projects or discussions after
+checking their consumers. Do not infer that a personal companion must have every
+feature disabled, or that private collaboration features are automatically public.
 
-## Step 3, Lock down repo-level Features
+## Step 4, Keep required code-security controls
 
-Path: `Settings → General → Features`.
+Inspect `Settings > Code security` and the policies inherited from the organization or
+account. Preserve enabled secret scanning, push protection, code scanning and other
+required checks. Their availability and controls depend on the current GitHub plan.
 
-Disable everything you don't actively use. For a personal ops-state repo this is usually
-ALL of them:
+Review dependency manifests before deciding which Dependabot features are useful.
+Alerts, security updates and scheduled version updates serve different purposes; an
+operator may change an optional setting for a specific documented reason. The presence
+of privately stored credentials is not a reason to turn all code-security features off.
 
-| Feature | Default | Recommended for config repo |
-|---|---|---|
-| Wikis | ✓ on | ✗ **off**, no docs surface to leak |
-| Issues | ✓ on | ✗ **off**, no need; you're the only user |
-| Sponsorships | ✗ off | leave off |
-| Discussions | ✗ off | leave off |
-| Projects | ✓ on | ✗ **off**, no need |
-| Preserve this repository | varies | leave default |
+## Step 5, Review Actions without removing existing gates
 
-These are auto-saved on click; no Save button.
+Inventory the existing workflows and required checks before changing Actions settings.
+Keep security scanners, DATA-boundary checks, history checks, validation, synchronization
+and backup jobs required by the repository's policy. Review each job's triggers, token
+permissions, secret access, action versions and external destinations.
 
----
+Use the repository's approved action allowlist and least necessary permissions. If the
+operator wants to retire one optional workflow, identify that workflow and its callers,
+confirm the remaining checks and backups still run, and make a scoped change. Do not
+remove every file under `.github/workflows/` or disable Actions as an automatic companion
+setup step. If all Actions are to be disabled by an explicit policy decision, first
+establish how required checks and backups will continue to run.
 
-## Step 4, Disable Dependabot + all Code Security
+## Step 6, Check publishing surfaces
 
-Path: `Settings → Code security`.
+Inspect `Settings > Pages` and any other publishing integration. A private source
+repository does not establish the access policy of a published site or artifact.
+Keep a publishing surface only for an explicit operator-selected purpose and verify its
+actual audience. Disable an unused surface through a scoped operator decision.
 
-For free personal accounts, the only available controls on private repos are Dependabot
-features. **Leave them all disabled**:
+## Step 7, Review webhooks, deploy keys and service credentials
 
-- Dependency graph: Disabled
-- Dependabot alerts: Disabled
-- Dependabot security updates: Disabled
-- Grouped security updates: Disabled
-- Dependabot version updates: Disabled
-- Dependabot on self-hosted runners: Disabled
+Inventory webhooks, deploy keys, and Actions, Codespaces or Dependabot secrets without
+printing their values. Each entry needs a current owner, purpose and access scope.
+Keep legitimate integrations and the credentials their approved workflows require.
+Revoke an unnecessary grant or rotate a compromised credential through the relevant
+service; an empty list is not a universal requirement for a PRIVATE companion.
 
-Rationale: this repo has no application dependencies in the conventional sense, the
-"dependencies" are MCP server packages that are pulled live at apply time, not pinned
-manifest files. Dependabot scanning adds zero value and surface area only.
+## Step 8, Limit collaborator access and prepare synthetic support exports
 
-If you're on a paid plan that exposes "Secret Scanning" / "Push protection" / "Code
-scanning" panels here, **also disable** them for your private companion repo. The point of
-Mode A is that you've consciously accepted holding secrets here; provider auto-revoke from
-those scans (especially Push Protection) would block legitimate commits.
+Review `Settings > Collaborators`. Grant only the access needed for the operator's
+chosen collaboration. Repository access can expose historical commits, including old
+credentials, so a temporary invitation is not a narrow file-sharing mechanism.
 
----
-
-## Step 5, Disable Actions entirely
-
-Path: `Settings → Actions → General → Actions permissions`.
-
-Set the radio to **"Disable actions"** and click Save.
-
-Rationale: this repo has no CI to run. Leaving Actions enabled with the default "Allow all
-actions" means a compromised marketplace action could exfiltrate `secrets/*.env` files via
-an outbound HTTP request the moment someone tricks you into running it. With Actions
-disabled, that whole attack surface is closed.
-
-If you previously shipped a `no-secret-leak.yml` style gate, **delete the workflow file**
-before disabling Actions (it would just silently stop running otherwise):
+For a public support example, generate new synthetic output from the public tool's
+`tools/make_fixtures.py`. Start with a new empty output directory outside the PRIVATE
+companion, its backups and any existing Git worktree. From the public tool checkout:
 
 ```bash
-rm .github/workflows/*.yml
-git add . && git commit -m "remove all workflows (Actions disabled at repo level)"
+python -B tools/make_fixtures.py --out <new-empty-export-directory>
+python -B tools/make_fixtures.py --out <new-empty-export-directory> --check
 ```
 
----
+The generator writes a flat set of synthetic examples, test sources and a manifest;
+`--check` verifies those outputs against the generator. If the problem needs another
+example, add a synthetic recipe to the generator and regenerate it. Never construct the
+example by reading, masking or copying a real private record.
 
-## Step 6, Disable Pages
+Review the generated files needed for the support case, then package those files only.
+The export must contain no `.git` metadata, private configuration, live DATA, credentials
+or copied private history. Prepare it locally and obtain the operator's approval for the
+specific destination before sharing. Do not create a public fork or branch from the
+PRIVATE companion, even after deleting credential files: the history remains available.
 
-Path: `Settings → Pages`.
+## Step 9, Review account-level data-use settings
 
-Source: **None**.
+Inspect the account's current Copilot and other provider data-use settings and terms.
+Their names, availability and scope can change. The operator chooses optional sharing
+settings under the applicable account or organization policy; this runbook does not
+make or authorize an account-wide change.
 
-A personal config repo has no reason to serve a public site. Leaving Pages with a default
-branch source could in extreme edge cases publish README content to the open web.
+## Step 10, Audit installed GitHub Apps
 
----
+For each installed app, review repository selection and its actual permissions. Prefer
+access only to repositories needed for its approved purpose. Apply the same review to
+coding assistants, automation, issue trackers and update services; the vendor name alone
+does not establish the appropriate access scope.
 
-## Step 7, Verify Webhooks / Deploy keys / Actions secrets are empty
+Before narrowing, suspending or removing an integration, identify which repositories
+and workflows depend on it. Preserve the operator's approved integrations and record
+any scoped change in private audit notes. Do not silently uninstall an app or remove a
+companion from its repository selection.
 
-Paths to check (each should show "no items" or equivalent):
+## Step 11, Preserve branch and repository protection
 
-- `Settings → Webhooks`, no webhooks. (Some integrations auto-add these; audit periodically.)
-- `Settings → Deploy keys`, no deploy keys. (SSH keys here grant non-revocable git access.)
-- `Settings → Secrets and variables → Actions`, no Actions secrets. (Real secrets live in
-  `secrets/<slug>.env` per the spec, not in Actions secret storage which is meant for CI.)
-- `Settings → Secrets and variables → Codespaces`, same: empty.
-- `Settings → Secrets and variables → Dependabot`, same: empty.
+Inspect existing rulesets, branch protections, required reviews and required checks.
+Keep applicable protections for both solo and collaborative use. An optional additional
+rule is an operator choice after confirming that the normal maintenance and backup
+processes can satisfy it.
 
----
+## Step 12, Recheck access when it changes
 
-## Step 8, Verify Collaborators is empty
+Repeat the access review after adding an integration or collaborator, changing a
+workflow, or changing repository visibility. The operator may also choose a recurring
+review interval. Keep audit output in the PRIVATE companion; avoid exporting access
+inventories or configuration values into public issues.
 
-Path: `Settings → Collaborators`.
-
-There should be **zero** collaborators on a personal config repo. Every collaborator you
-add gets access to **all historical commits**, including any secrets you committed in the
-past (rotated or not).
-
-If you ever need to share help with this repo with someone, prefer:
-1. A temporary read-only branch + `gh repo create` a stripped-down public fork manually,
-   OR
-2. A one-off invite that you revoke immediately after the help session,
-   AND
-3. Rotate every secret in the repo before re-pushing, because the helper saw them.
-
----
-
-## Step 9, Account-level Copilot data sharing opt-out
-
-Path: <https://github.com/settings/copilot/features>
-
-Find **"Allow GitHub to use my data for AI model training"** and set it to **Disabled**.
-
-This is the canonical "do not train on my code" opt-out. It applies account-wide (covers
-all your repos, public + private) regardless of whether you have a Copilot subscription.
-
-> ⚠️ This setting is **account-wide**, not repo-level. There's currently no per-repo
-> opt-out for AI training on personal accounts. The repo-level Code security panel covers
-> Copilot Workspace / Copilot Code Indexing for paid org plans; personal-free repos rely on
-> this account-level toggle.
-
-`gh` CLI does not currently have a documented command for this; use the web UI.
-
----
-
-## Step 10, Audit your installed GitHub Apps
-
-Path: `https://github.com/<your-user>/<repo>/settings/installations`
-
-This is **the most overlooked step** and often the most consequential. GitHub Apps you've
-installed at the account level may have access to **all your repositories** by default,
-including this private one with all your secrets.
-
-For every installed app, click `Configure` and check:
-
-1. **Repository access**: is it "All repositories" or "Only select repositories"?
-2. **Permissions**: how broad? (Read code? Write code? Webhooks? PRs?)
-
-For each AI / automation app, decide:
-
-| App | Action |
-|---|---|
-| Claude (Anthropic) | Keep if you use Claude Code (it needs repo access for some features). |
-| ChatGPT Codex Connector (OpenAI) | **Uninstall**, or restrict to "Only select repositories" excluding your config repo. Codex has Read+Write code access. |
-| Devin.ai Integration | **Uninstall** or restrict. Devin is an autonomous AI agent that browses + edits repo content. |
-| Cursor / Continue / other AI coding assistants | Restrict access scope; do NOT grant access to config repo. |
-| Linear, Slack, Notion, etc. | Usually fine; verify they don't have code read permission. |
-| Dependabot Preview / Renovate | Disabled by default for your repo if Dependabot is off (Step 4). |
-
-The "Uninstall" button at the bottom of each Configure page is **reversible**, just
-re-install if you change your mind. "Suspend" is a softer version that pauses access
-without removing the app.
-
-**Important**: changing an app from "All repositories" to "Only select repositories"
-requires you to **explicitly list** which repos the app keeps access to. Use this to KEEP
-the app for repos where you want it, and SILENTLY remove it from your config repo.
-
----
-
-## Step 11, (Optional) Branch protection
-
-If you ever bring in a collaborator: `Settings → Branches → Add classic branch protection
-rule` → require PR review before merge to main.
-
-For solo use, skip.
-
----
-
-## Step 12, Periodic re-audit (every 30 to 90 days)
-
-Schedule a recurring reminder to redo Steps 7 to 10. New GitHub Apps may auto-install if you
-authorize an integration somewhere else (e.g., GitHub's marketplace, third-party tool
-prompts). New webhooks may appear if you connect this repo to anything. Periodic re-audit
-catches drift.
+Read-only visibility and feature metadata can be inspected with:
 
 ```bash
-# Quick audit script
-gh api /user/installations --jq '.installations[] | {app_slug, app_id, account: .account.login, repository_selection}'
-gh repo view <your-user>/<repo> --json visibility,hasIssuesEnabled,hasWikiEnabled,hasProjectsEnabled,hasDiscussionsEnabled
-gh api /repos/<your-user>/<repo>/hooks --jq 'length'
-gh api /repos/<your-user>/<repo>/keys --jq 'length'
-gh api /repos/<your-user>/<repo>/collaborators --jq 'length'
+gh repo view <your-user>/<repo> --json nameWithOwner,visibility,hasIssuesEnabled,hasWikiEnabled,hasProjectsEnabled,hasDiscussionsEnabled
 ```
 
----
+Record which settings were inspected, which optional changes the operator selected,
+and whether the required scanners, checks and backups still run. A setting being
+present is not evidence that its workflow has executed successfully.
 
-## Quick-reference checklist
+## Why this runbook lives with the public tool
 
-Copy this to a sticky note when bootstrapping a fresh companion config repo:
-
-```
-□ Repo created PRIVATE (verify in incognito)
-□ Features: Wikis OFF / Issues OFF / Projects OFF / Discussions OFF
-□ Code security: all Dependabot OFF
-□ Actions: Disabled (radio: Disable actions; Save)
-□ Pages: Source None
-□ Webhooks: empty
-□ Deploy keys: empty
-□ Actions / Codespaces / Dependabot secrets: empty
-□ Collaborators: empty
-□ Copilot data sharing: Disabled (account-level)
-□ GitHub Apps: each audited, AI tools uninstalled or restricted
-```
-
-Total time investment ≈ 15 min the first time. Future repos using the same convention can
-reuse most of these settings as defaults.
-
----
-
-## Why this doc lives in market-intel, not in the companion config repo itself
-
-The companion config repo is **generated from scratch by each user**. The doc you're reading
-now is the runbook that tells them *how* to do that generation safely. Putting the runbook
-inside the companion repo would create a chicken-and-egg problem (you can't read it until
-you've created the thing it's instructing you to create).
-
-This is also why `companion-config-spec.md` (the structural contract) and
-`companion-config-repo.md` (the overview + tutorial) live here too. Together with this
-hardening runbook they form the complete "how to set up a companion config repo" L3 reading
-package referenced from `install-guide.md`.
+Each operator creates their own PRIVATE companion. The public tool provides the setup
+procedure and synthetic examples; the companion contains the actual configuration,
+runtime state and approved credential backups. See
+[companion-config-repo.md](companion-config-repo.md) for the overview and
+[companion-config-spec.md](companion-config-spec.md) for the structural contract.

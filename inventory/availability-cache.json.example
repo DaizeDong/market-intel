@@ -1,0 +1,28 @@
+{
+  "clis": {
+    "gh": "C:/Synthetic Tools/gh.exe"
+  },
+  "companion": {
+    "present": true,
+    "tools": {
+      "github-mcp": {
+        "installed": true
+      }
+    }
+  },
+  "generated": "2031-01-02T03:04:05+00:00",
+  "host": "fixture-machine",
+  "mcp": {
+    "ran": true,
+    "servers": [
+      {
+        "connected": true,
+        "name": "github"
+      }
+    ]
+  },
+  "py_modules": {
+    "ccxt": true
+  },
+  "schema_version": 1
+}

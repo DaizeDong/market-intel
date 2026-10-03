@@ -25,8 +25,9 @@
 
 This is the **formal contract** between the market-intel skill (and sister skills following the
 same pattern) and any companion config repo the user maintains. Conforming repos can be
-mechanically read by SKILL.md's Step 3 detection logic, by future automation, and by an agent
-that needs to know what the user installed without reading 15 free-form READMEs.
+mechanically read by inventory tooling and by an agent that needs configuration
+history. Current operation availability follows SKILL.md Step 2 and
+`host-capabilities.md`; registry conformance cannot substitute for that evidence.
 
 The companion repo concept + rationale is in [`companion-config-repo.md`](companion-config-repo.md);
 this file is the spec. The GitHub-side repo lockdown (visibility, Actions, Apps, Copilot
@@ -41,14 +42,18 @@ that checklist **before** committing the first secret.
 
 ## 1. Discovery
 
-The skill MUST probe these paths in order; the first that exists is the active companion repo:
+Configuration discovery checks these candidate paths in order, then validates the
+selected configuration. Existence alone does not establish PRIVATE storage or readiness:
 
 1. **`$MARKET_INTEL_CONFIG`** env var (highest priority, location-independent).
 2. **`~/.market-intel-config/`** (dotfile-in-home, universal fallback).
 3. **`~/.config/market-intel-config/`** (XDG-style, Linux/macOS).
 
-If none exists, skills MUST degrade to matrix-only mode and continue functioning. Companion
-repo is **never required**, only optional and recommended.
+If none exists, catalog browsing MUST remain usable. A companion is optional for
+reading the public matrix. Writing real configuration or runtime DATA requires a
+resolved verified PRIVATE repository; PUBLIC or unknown remote visibility MUST block
+the write. There is no public-checkout fallback. An explicitly selected invalid
+configuration MUST be reported rather than silently replaced.
 
 ---
 
@@ -61,7 +66,7 @@ repo is **never required**, only optional and recommended.
 │   └── <slug>/                                # OPTIONAL (zero or more)
 │       ├── claude.json.template               # REQUIRED if <slug>/ exists
 │       └── env.template                       # REQUIRED if <slug>/ exists
-└── secrets/                                   # REQUIRED (gitignored by .gitignore)
+└── secrets/                                   # REQUIRED (storage mode declared in §5.3)
     └── <slug>.env                             # OPTIONAL (only when tool has env vars)
 ```
 
@@ -74,11 +79,11 @@ part of the spec, they're tooling concerns specific to the user's workflow.
 |---|---|---|
 | `registry.json` | REQUIRED | Machine-readable index. See §3. |
 | `tools/` | REQUIRED | Directory containing per-tool subdirs. May be empty when no tools installed. |
-| `secrets/` | REQUIRED | Gitignored directory holding secret env files. May be empty. |
+| `secrets/` | REQUIRED | Private credential directory under the declared storage mode. May be empty. |
 
 ### 2.2 Required gitignore patterns
 
-A conforming repo's `.gitignore` MUST exclude:
+Under Mode B, a conforming repo's `.gitignore` MUST exclude:
 
 ```
 secrets/*
@@ -91,8 +96,9 @@ claude.json
 .claude.json
 ```
 
-The intent: real `.env` files and any live `~/.claude.json` MUST never enter git. Defense in
-depth via additional patterns (`*.key`, `*_token`, etc.) is RECOMMENDED.
+Under Mode B, real `.env` files and live host configuration MUST stay out of git.
+Mode A instead versions credentials only in a verified PRIVATE repository (§5.3).
+Additional Mode B ignore patterns (`*.key`, `*_token`, etc.) are RECOMMENDED.
 
 ---
 
@@ -132,9 +138,9 @@ Skills SHOULD:
   "tier": "string",               // OPTIONAL — short summary: "free" | "freemium" | "paid"
   "transport": "string",          // OPTIONAL — "stdio" | "http" | "sse" | "rest" | "python-lib"
                                   //            | "brokerage"
-                                  //            "rest"        = REST-only credential (no MCP, no
-                                  //                            claude.json.template; loaded via
-                                  //                            os.environ in subagent code).
+                                  //            "rest"        = REST-only credential (no MCP server;
+                                  //                            empty mcpServers template per §4.1;
+                                  //                            loaded via os.environ in subagent code).
                                   //            "python-lib"  = installable Python library that
                                   //                            uses creds from secrets/<slug>.env
                                   //                            via its own auth (e.g. atproto,
@@ -151,11 +157,13 @@ Skills SHOULD:
                                   //            "credential_ready" | "verified" | "installed" |
                                   //            "deprecated"
                                   //            (credential_ready: secret captured but not exercised;
-                                  //             verified: REST call or library import confirmed;
+                                  //             verified: historical verification; scope and
+                                  //             evidence must be recorded separately. An import
+                                  //             proves only library availability;
                                   //             installed: python-lib pip-installed locally;
                                   //             deprecated: upstream matrix tombstoned this tool,
                                   //             see `deprecation_code`)
-  "health_checked": "ISO8601",    // OPTIONAL — when health_last was last verified
+  "health_checked": "ISO8601",    // OPTIONAL — when the historical observation was made
   "expires": "string",            // OPTIONAL — "never" or "YYYY-MM-DD (reason)" — platform-
                                   //            enforced expiration of the credential.
   "rotate_after": "string",       // OPTIONAL — "YYYY-MM-DD (reason)" or "annual" — voluntary
@@ -259,7 +267,7 @@ When `tools/<slug>/` exists, it MUST contain at minimum:
 
 | File | Status | Purpose |
 |---|---|---|
-| `claude.json.template` | REQUIRED | JSON snippet to merge into `~/.claude.json` mcpServers section. See §4.1. |
+| `claude.json.template` | REQUIRED | MCP configuration, or an empty `mcpServers` map for a non-MCP transport. See §4.1. |
 | `env.template` | REQUIRED | KEY=VALUE skeleton documenting required env vars. See §4.2. |
 | `README.md` | RECOMMENDED | Human-readable doc with tier, register URL, rotation history. Free-form. |
 | `manifest.json` | OPTIONAL (future) | Structured per-tool metadata. Spec reserved for v2; not yet defined. |
@@ -292,6 +300,12 @@ A standalone JSON document containing an `mcpServers` partial. Two valid shapes:
 ```
 
 Skills implementing apply-like behavior MUST accept both shapes; tooling SHOULD emit Shape A.
+For `rest`, `python-lib` and any `brokerage` entry without an MCP endpoint, the required template
+uses Shape A with an empty `mcpServers` object. It declares that there is no server to activate.
+Apply tooling MUST skip MCP creation for these entries; their actual API/library operation
+needs separate verification. Verify that the selected companion implements this behavior
+before applying it; otherwise retain a setup gap. The bundled configuration doctor does not
+validate per-tool templates or prove apply support.
 
 **Placeholder syntax**: a token of the form `<NAME>` where `NAME` matches `[A-Z][A-Z0-9_]*`
 (UPPER_SNAKE_CASE) is a placeholder for substitution from `secrets/<slug>.env`. A placeholder
@@ -323,8 +337,10 @@ REQUIRED_VAR_2=
 **MUST**: UTF-8 **without BOM**. PowerShell 5's `Set-Content -Encoding UTF8` writes BOM and
 breaks parsers; tooling that writes env files MUST use BOM-less UTF-8.
 
-**MUST**: keys MUST match the UPPER_SNAKE_CASE placeholder names used in
-`claude.json.template`.
+**MUST**: keys use UPPER_SNAKE_CASE. Keys substituted into MCP configuration MUST
+match the placeholder names in `claude.json.template`. Non-MCP entries MAY document
+transport-specific env keys even though their empty `mcpServers` template has no
+placeholders; verify how the selected API/library consumer loads those keys.
 
 For tools with no env vars, `env.template` SHOULD still exist as a one-line marker:
 
@@ -343,7 +359,8 @@ absence):
 - `## Reinstall on a new machine`, typically just `python3 scripts/apply.py --tool <slug>`.
 
 Per-account identifying info (email, username, phone, account IDs) MUST NOT appear in this
-README, that information belongs in `secrets/_account-info.env` (gitignored, see §5.1).
+README; that information belongs in `secrets/_account-info.env` under the selected
+Mode A or Mode B storage policy (see §5.1).
 
 ---
 
@@ -353,7 +370,7 @@ README, that information belongs in `secrets/_account-info.env` (gitignored, see
 
 | File | Status | Purpose |
 |---|---|---|
-| `secrets/<slug>.env` | OPTIONAL per slug | Real env values for `tools/<slug>/`. Gitignored. |
+| `secrets/<slug>.env` | OPTIONAL per slug | Real env values for `tools/<slug>/`; versioned in Mode A, gitignored in Mode B. |
 | `secrets/_account-info.env` | OPTIONAL | Cross-service metadata (default email/username/auth-method preference, per-service registration log). Leading underscore = "not-a-tool". |
 | `secrets/README.md` | RECOMMENDED | Human-readable note explaining the directory. |
 | `secrets/.gitkeep` | RECOMMENDED | Ensures the dir exists after fresh clone. |
@@ -382,10 +399,9 @@ threat model.
   repos too, partner providers (OpenAI `sk-`, Anthropic `sk-ant-`, AWS `AKIA`, Stripe
   `sk_live_`, GitHub `ghp_`, Slack `xox`, etc.) are notified on detection and may
   **auto-revoke** the key.
-- **When appropriate**: the repo is genuinely private (no collaborators), all keys are
-  data-API tier from non-partnership providers (Tavily, Etherscan, FRED, Finnhub,
-  CoinGecko, etc.), and the user accepts the residual risk for the simpler workflow.
-- **When NOT appropriate**: any partnership-provider key. Those WILL auto-revoke.
+- **When appropriate**: the operator has chosen credential versioning in a verified
+  PRIVATE repository and its supported tooling follows that policy. Check current
+  provider and Git-host behavior; a token prefix alone does not prove auto-revocation.
 
 #### Mode B, gitignored + out-of-band backup
 
@@ -407,8 +423,16 @@ threat model.
 
 #### Declaring the mode
 
-A conforming repo's `secrets/README.md` SHOULD state which mode it uses at the top so future
-maintainers / agent consumers know whether to expect `*.env` files in git or not.
+Declare `Active storage mode: A` or `Active storage mode: B` near the top of
+`secrets/README.md`. The bundled doctor reads this marker first. Without the marker,
+it checks the first nonempty line for a legacy `Mode A` or `Mode B` declaration; if
+that line has no mode declaration, it defaults to Mode B. Missing `secrets/README.md`
+also defaults to Mode B. Invalid or conflicting declarations are errors.
+
+The bundled initializer supports Mode B only and refuses Mode A. Its doctor checks
+configuration shape and the declared mode's ignore policy; a successful result does not
+prove PRIVATE visibility, credential backup durability, template validity or host readiness.
+Verify those requirements separately before writing credentials or applying configuration.
 
 ### 5.4 Backup
 
@@ -431,19 +455,26 @@ A conforming companion repo SHOULD ship a script (canonically `scripts/apply.py`
 | **Merge semantics** | merge each tool's rendered snippet into `~/.claude.json`'s `mcpServers` section without touching other top-level fields. |
 | **Atomic write** | write via a temp file + atomic rename. |
 
-The reference `apply.py` in DaizeDong/market-intel-config satisfies all of these.
+Check the selected companion's `apply.py` against this contract, including the
+non-MCP behavior in §4.1, before applying configuration. A doctor result alone
+does not establish apply conformance.
 
 ---
 
-## 7. The "verify" contract
+## 7. Inventory checks and current-operation verification
 
-A conforming companion repo SHOULD ship a script (canonically `scripts/verify.sh`) that:
+A companion MAY ship installation diagnostics such as `scripts/verify.sh`. Its
+inventory observations MUST retain their source, scope and timestamp. A subprocess
+listing, import or transport handshake MUST NOT be relabeled as current selected
+operation readiness. Commands that could print credentials require a supported
+no-echo inspection mechanism; masking after disclosure is insufficient.
 
-- Runs `claude mcp list` and masks tokens before any display.
-- Updates `registry.json` `tools[].health_last` from the live output.
-- Updates `registry.json` `tools[].health_checked` with an ISO8601 timestamp.
-- Tolerates MCPs in `claude mcp list` that aren't in `registry.json` (they're session-wide
-  context, not config-tracked).
+Current readiness MUST come from the active host/session with exact source and
+capability attribution, successful execution, valid authentication and usable
+response content, as defined by `host-capabilities.md`. Record this evidence in
+verified PRIVATE DATA. Unknown tools in the active host need not be added to the
+companion before they can be examined; missing inventory is a configuration gap,
+not proof of unsupported capability.
 
 ---
 
@@ -466,12 +497,15 @@ spec itself.
 
 A repo conforms to this spec when:
 
-- [ ] `.gitignore` contains the patterns in §2.2 (real `.env` files cannot be committed).
+- [ ] The storage mode is declared as in §5.3. Mode B uses the §2.2 ignore patterns and
+      a separately verified backup. Mode A versions credentials in a verified PRIVATE
+      repository; confirm that its history and private backup preserve those files.
 - [ ] `registry.json` exists at the repo root and has `schema_version: 1` (or higher that's
       backward-compat with v1).
 - [ ] Every entry in `registry.json` `tools[]` has REQUIRED fields `slug` and `installed`.
 - [ ] For every `slug` in `tools[]`, `tools/<slug>/` exists and contains
-      `claude.json.template` + `env.template`.
+      `claude.json.template` + `env.template`. Non-MCP transports use the empty
+      `mcpServers` map from §4.1 and do not create a host MCP server.
 - [ ] Every `claude.json.template` parses as valid JSON after placeholder substitution from
       the corresponding `secrets/<slug>.env`.
 - [ ] All `.env` files (real and template) are UTF-8 without BOM.

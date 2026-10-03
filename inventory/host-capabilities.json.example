@@ -1,0 +1,25 @@
+{
+  "capabilities": [
+    {
+      "authentication": "authenticated",
+      "capability_id": "search",
+      "execution": "success",
+      "exposed": true,
+      "host": "codex",
+      "observed_at": "2031-01-02T03:04:05+00:00",
+      "response_valid": true,
+      "session_id": "fixture-session",
+      "source_id": "github-mcp",
+      "supported": true
+    }
+  ],
+  "host": "codex",
+  "provenance": {
+    "host": "codex",
+    "observation_method": "current-session-adapter",
+    "observed_at": "2031-01-02T03:04:05+00:00",
+    "session_id": "fixture-session"
+  },
+  "schema_version": 1,
+  "session_id": "fixture-session"
+}

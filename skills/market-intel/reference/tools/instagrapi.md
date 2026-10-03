@@ -20,16 +20,38 @@ tool. Volatile line: `reference/volatile/pricing-install.md` → social-publishi
 ## Auth / keys
 Logs in with **real IG username + password** (and handles 2FA / challenge). Persist the session with
 `cl.dump_settings()` / `cl.load_settings()` so you don't re-login every run (re-login spikes ban
-risk). No API key. Treat the password as a secret, have the USER supply it via env var, never echo
-it; see `reference/install-guide.md` (Secret-handling hygiene).
+risk). No API key. Have the user supply credentials through environment variables or approved
+private configuration, with no transcript output. Credentials and sessions belong in a verified
+PRIVATE versioned companion; private credential backups are allowed. See
+`reference/install-guide.md` (Secret-handling hygiene).
 
 ## Usage, call examples
+Make the full Market checkout importable. Initialize an existing `runtime/instagrapi` directory
+under the configured PRIVATE companion data root and provide a fresh visibility receipt before
+running this example. The shared resolver checks local Git configuration and the receipt; it does
+not query GitHub live. Missing or unproven storage stops setup, with no source-tree fallback.
+
 ```python
+import os
 from instagrapi import Client
-cl = Client(); cl.load_settings("session.json"); cl.login(USER, PASS)
-cl.photo_upload("img.jpg", "caption #tag")      # post a photo
-cl.user_info_by_username("nasa")                # read a profile
+from tools.private_inventory import resolve_directory, resolve_destination
+
+runtime = resolve_directory("runtime/instagrapi")
+session = resolve_destination(path=runtime.path / "session.json")
+cl = Client()
+if session.path.exists():
+    cl.load_settings(str(resolve_destination(path=session.path).path))
+cl.login(os.environ["INSTAGRAM_USERNAME"], os.environ["INSTAGRAM_PASSWORD"])
+cl.dump_settings(str(resolve_destination(path=session.path).path))
+profile = cl.user_info_by_username(os.environ["INSTAGRAM_TARGET_USERNAME"])
 ```
+
+This verifies only the selected read operation and session destination. Before launch, redirect
+every other enabled SDK writer (downloads, caches and logs) through supported private paths;
+session redirection alone does not prove the whole runtime is private. Keep setup-only if the
+installed version cannot redirect a writer. Publishing is a separate, explicitly authorized
+action, for example `cl.photo_upload(approved_private_image_path, approved_caption)`; never post
+as an installation check.
 
 ## General experience & gotchas (踩坑)
 - **Violates IG ToS, write/post is far more ban-prone than read.** Use a **throwaway account**, residential

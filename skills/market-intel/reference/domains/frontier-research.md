@@ -11,7 +11,7 @@ conference (NeurIPS/ICLR/ICML/ACL), citations, 论文/前沿研究/学术.
 
 | source | route | capability | detect | note/risk |
 |---|---|---|---|---|
-| **arXiv API** (+ arxiv-mcp-server, blazickjp) | ① free | search + recent by category (cs.AI/cs.LG/cs.CL/cs.CV/stat.ML) | `claude mcp list` → connected? else REST, no key | no key; rate-limit ~1 req/3s, be polite |
+| **arXiv API** (+ arxiv-mcp-server, blazickjp) | ① free | search + recent by category (cs.AI/cs.LG/cs.CL/cs.CV/stat.ML) | probe the selected arXiv operation in the active host session; otherwise REST, no key | no key; rate-limit ~1 req/3s, be polite |
 | **Hugging Face, Daily Papers + Hub API** (official HF MCP) | ① free | curated daily papers, trending models/datasets | connected, or REST | no key for read; HF token only for write/private |
 | **Semantic Scholar Graph API** (+ semantic-scholar MCP) | ① free | citations, influentialCitationCount, references/citations graph | REST or MCP | free key (raises rate limit); unauth is throttled |
 | ~~Papers with Code API~~ | ① | SOTA leaderboards | REST → **302 to huggingface.co/papers** | **D-404, Meta sunset the API 2025-07-24/25** (verified 2026-06; domain now redirects to HF Trending Papers); the SOTA-leaderboard signal is LOST, HF Papers trending = weak proxy |
@@ -24,7 +24,7 @@ conference (NeurIPS/ICLR/ICML/ACL), citations, 论文/前沿研究/学术.
 | **AINews (smol.ai) / The Batch / Import AI** | ④ RSS | curated daily/weekly roundups | RSS reader / playwright | L2 curation; good for "what mattered this week" |
 | **alphaXiv / arxiv-sanity-lite** | ③/④ | community comments + recommender over arXiv | self-host (arxiv-sanity-lite) or browser (alphaXiv) | community signal (L4); ⚠ arxiv-sanity-lite **D-STALE** (last push 2023) but still self-hosts free |
 | **Connected Papers / ResearchRabbit** | ④ browser | citation-graph exploration around a seed paper | playwright MCP | UI-driven, no official API; for visual neighborhood mapping |
-| **→ `research-lit` skill** | (delegate) | deep multi-paper synthesis / lit-review | skill present | this domain is SOURCE ROUTING/discovery, not re-implementing lit-review, hand off for synthesis |
+| **→ `research-lit` skill** | (delegate) | deep multi-paper synthesis / lit-review | discover in the active host's skill catalog and read its installed instructions | optional sibling; if absent, report the missing workflow and use a verified alternative or prepare installation |
 
 **Default pick:** Recent papers → arXiv API + HF Daily Papers (free). Significance/citation signal →
 Semantic Scholar (+ paper-search-mcp for biomed/multi-venue). **SOTA leaderboards partial-recovery
@@ -40,7 +40,8 @@ browser route.
 
 **Notes:** Most sources here are **free / no-key** (arXiv, HF read, Papers with Code, OpenReview);
 Semantic Scholar's free key only lifts rate limits. For deep multi-paper synthesis don't re-build a
-lit-review here, **delegate to `research-lit`**.
+lit-review here. Discover `research-lit` and read its installed instructions before delegating;
+if absent, follow the setup/verified-alternative guidance in [its card](../tools/research-lit-skill.md).
 
 **Install guidance:** `reference/volatile/pricing-install.md` → frontier-research (most are
 free/no-key).

@@ -14,10 +14,11 @@ arXiv (recency), Semantic Scholar (citations), and HF (model/dataset trending). 
 (GitHub trending), but see the launch-day inflation gotcha; stars are noisy.
 
 ## Install
-HTTP MCP (preferred on Windows): the official GitHub MCP, `claude mcp add --transport http --scope user
-github https://api.githubcopilot.com/mcp/ --header "Authorization: Bearer <PAT>"`. Or skip the MCP and use
-the **`gh` CLI** (already an environment prerequisite, authenticated) / REST `api.github.com`. Exact line:
-`reference/volatile/pricing-install.md#frontier-research`. L0 mechanics: `reference/install-guide.md`.
+The hosted MCP endpoint is `https://api.githubcopilot.com/mcp/`. Configure its PAT
+through the selected host's supported secret settings with a no-echo transfer.
+Never include it in MCP-add arguments. A separately authenticated `gh` CLI or
+REST caller is another possible route; verify its exact operation in this session.
+See `reference/install-guide.md` for host activation and secret handling.
 
 ## Auth / keys
 A GitHub **Personal Access Token (PAT)**, fine-grained, read-only scopes are enough for scouting. Unauth
@@ -27,10 +28,10 @@ token page, see `reference/install-guide.md`. The `gh` CLI already holds your au
 often the cleanest no-leak path.
 
 ## Usage, call examples
-- `gh` CLI (no MCP needed): `gh api repos/<owner>/<repo> --jq '{stars:.stargazers_count,pushed:.pushed_at,archived:.archived}'`
+- `gh` CLI (no MCP needed): `gh api --hostname github.com repos/<owner>/<repo> --jq '{stars:.stargazers_count,pushed:.pushed_at,archived:.archived}'`
 , this is the exact verification call this skill uses.
-- Releases: `gh api repos/<owner>/<repo>/releases?per_page=5`. Stargazers over time:
-  `gh api "repos/<owner>/<repo>/stargazers" -H "Accept: application/vnd.github.star+json"` (timestamps).
+- Releases: `gh api --hostname github.com repos/<owner>/<repo>/releases?per_page=5`. Stargazers over time:
+  `gh api --hostname github.com "repos/<owner>/<repo>/stargazers" -H "Accept: application/vnd.github.star+json"` (timestamps).
 - MCP: `search_repositories`, `get_repository`, `list_releases`, etc.
 
 ## General experience & gotchas (踩坑)

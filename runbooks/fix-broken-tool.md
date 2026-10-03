@@ -11,57 +11,46 @@ into a permanent matrix improvement plus a feedback-loop record, without silent 
 
 ## 1. Log to the live-run ledger (`<data>/metrics/live-runs.jsonl`, PRIVATE store, not this repo)
 
-Append one JSON line. Schema:
+Use the incident helper to append one record through the verified PRIVATE
+destination and its locked update transaction. Never append by shell redirection.
+The canonical schema is
+[`live-run-schema.json`](../skills/market-intel/reference/live-run-schema.json),
+and [generated examples](../skills/market-intel/metrics/live-runs.jsonl.example)
+cover all supported outcomes. Both are produced by `tools/make_fixtures.py`.
 
-```
-{"ts":"YYYY-MM-DDTHH:MM:SSZ","domain":"<shard>","source":"<slug>","route":"①②③④","outcome":"<one of 6>","detail":"<≤200 chars, evidence>","user_correction":null|"<user verbatim>"}
-```
-
-`outcome` MUST be one of these six (any other string fails Step -1 bucket parsing in
-`refresh-protocol.md`):
-
-| outcome | when to use | example detail |
-|---|---|---|
-| `dead` | repo 404 / archived / endpoint gone | `gh api repos/kukapay/funding-rates-mcp → 404 since 2025-04` |
-| `barrier_found` | new paywall / captcha / TOS hostility | `Etherscan free-tier dropped chain X; needs paid Pro $99/mo` |
-| `coverage_gap` | user question the matrix can't answer | `no shard covers Telegram channel scraping for SEA markets` |
-| `price_mismatch` | shard price / rank / capability blurb wrong vs official site | `shard says €19 Keepa Basic, official page says €24 as of 2026-06` |
-| `verified` | tool was actually used and worked | `pulled live Amazon LP6 Pro price via brightdata scrape_as_markdown OK` |
-| `user_correction` | user manually overrode our inference | (set `user_correction` field to the quoted user text) |
-
-Append with redirection, do not pretty-print, do not reorder existing lines, one line per entry.
-
-**Verify:** `tail -1 "$(python tools/datadir.py --path market-intel metrics/live-runs.jsonl)" | python -c "import json,sys; json.loads(sys.stdin.read())"` exits 0.
-
-**Common mistake:** logging the outcome as `fallback_used` or `unverifiable` (legacy free-form
-strings present in older entries). Step -1's bucket table only knows the six above; anything
-else is silently dropped and the incident loses its feedback-loop weight. Use the closest of
-the six. If a tool fell back, it's usually `coverage_gap` (matrix couldn't cover the need) or
-`barrier_found` (a barrier blocked the route).
+The supported outcomes and their meanings are defined in the
+[live-run contract](../skills/market-intel/reference/live-run-contract.json),
+including distinct transport, authentication, quota and content failures.
+Keep the actual observation; do not relabel a fallback or unverified result as a
+confirmed failure. The feedback reader preserves those two outcomes as open
+questions without granting verification credit or inventing a barrier. A non-null
+user correction remains a priority signal. Failed persistence is a storage error,
+not a completed incident record.
 
 ## 2. Identify the D-code
 
-Pick the death code per `skills/market-intel/reference/refresh-protocol.md` §防退化协议 step 3
-and §R3. The five canonical codes:
+Use the evidence thresholds in [`CONSTITUTION.md` C4](../CONSTITUTION.md#c4-deletion-is-a-high-privilege-act-the-burden-of-proof-is-on-removal),
+then apply the refresh protocol's retained-tombstone procedure. The five canonical codes:
 
 | code | meaning | trigger |
 |---|---|---|
-| `D-404` | repo / endpoint gone | `gh api` returns 404, DNS NXDOMAIN, dead URL |
-| `D-PRICE` | priced out of usefulness | free tier killed, paywall added, price jumped past the domain's affordability threshold |
-| `D-STALE` | abandoned but technically reachable | last commit >12mo, no releases, issues piling up unanswered |
-| `D-TOS` | TOS / legal hostility | platform actively bans scraping, captcha walls, account bans on usage |
-| `D-SUPERSEDED` | replaced by a clearly better thing | newer official MCP exists, upstream moved, fork took over |
+| `D-404` | repo / endpoint gone | confirmed API 404 or archived repository |
+| `D-PRICE` | route now paywalled | official price page proves the paywall, with URL and date |
+| `D-STALE` | stale route with a replacement | more than 18 months without a push AND a verified replacement added |
+| `D-TOS` | official policy killed the route | official-policy evidence that this route is no longer permitted |
+| `D-SUPERSEDED` | verified better source replaces it | name the verified replacement and retain supporting evidence |
 
 **Verify:** the code matches the evidence in Step 1's `detail` field. A `D-404` entry should
 cite an HTTP 404 / `gh api` error; a `D-PRICE` should quote the new price page; etc.
 
-**Common mistake:** using `D-SUPERSEDED` when there is no documented successor yet, that's
-`D-STALE` or `D-404`. Reserve `D-SUPERSEDED` for cases where you can name the replacement.
+A temporary challenge, account failure, DNS failure or uncertain diagnosis remains an
+observation/setup gap until a C4 predicate is proved. No verified successor does not imply
+`D-STALE` or `D-404`; keep the entry and report the unresolved evidence.
 
 ## 3. Edit the shard
 
-Open `skills/market-intel/reference/domains/<domain>.md`. Find the row for the broken tool.
-Replace it with a tombstone row:
+Only after Step 2 establishes a C4 death code, open
+`skills/market-intel/reference/domains/<domain>.md` and mark the existing row as a tombstone:
 
 ```
 | ~~<original name>~~ | ~~<route>~~ | ⚠ Avoid (dead, D-<code>) — <one-line reason + URL/evidence> | — | — |
@@ -77,10 +66,17 @@ row, keep both visible so the dead entry isn't re-hallucinated next sweep, per R
 If the broken tool was the **default pick** at the bottom of the shard, update the
 "Default pick:" line to name the successor (or a fallback if there is none).
 
-**Verify:** open the file, confirm the old name is struck through, the D-code appears, and
-the row count matches (tombstone + optional successor). Run
-`python skills/market-intel/tools/verify_matrix.py` and confirm STRUCT / REPO / FRESH all
-pass; STALE may WARN until §R2 re-verify advances `## Last verified`.
+Complete the catalog change before verification: retain and mark the old row in
+`skills/market-intel/reference/tools/index.md`, retain the per-tool card with its death banner,
+and keep its `tools/registry.json` record with synchronized metadata. A successor needs its
+own canonical registry record, index row and per-tool card before it can become a default.
+Apply the same synchronization to a rename.
+
+**Verify:** confirm the retained shard/index/card tombstones and registry consistency, including
+the optional successor's registration. Run
+`python tools/verify_matrix.py --no-cache --base <baseline-ref>` from the full consumer
+checkout, using the verified prior commit as the baseline, and confirm STRUCT / REPO / FRESH /
+TOOLS / REGISTRY pass. Advance `## Last verified` only after the required scope was rechecked.
 
 **Common mistake:** deleting the row instead of tombstoning. Silent deletion lets the next
 Discovery sweep re-find the dead tool and "rediscover" it as new (R3). Always leave the
@@ -105,27 +101,29 @@ ahead of the shard. Touch it only when the shard's default actually moved.
 
 ## 5. (If companion-config installed) update config side
 
-Skip this step entirely if there is no companion `market-intel-config` repo on this machine
-(check with `ls C:\Users\<username>\CodesClaude\market-intel-config`, if absent, jump to Step 6).
+Resolve the active companion using [the discovery convention](../CONFIG.md#discovery-convention-how-the-skill-finds-your-config-e2):
+`MARKET_INTEL_CONFIG` first (with `MARKET_INTEL_CONFIG_DIR` as its supported alias), then
+`~/.market-intel-config/`, then `~/.config/market-intel-config/`. Report an explicitly selected
+missing or invalid path instead of falling back or skipping. Skip to Step 6 only when discovery
+establishes that no companion is configured.
 
-When present, run the drift checker from the config repo:
+For a resolved companion, run its checker without reading or printing secret values:
 
 ```
-python C:\Users\<username>\CodesClaude\market-intel-config\scripts\sync-check.py
+python "<resolved-companion>/scripts/sync-check.py"
 ```
 
-The tombstone you just added in Step 3 will surface in **bucket C** ("Config points to a
-skill doc tombstoned `⚠ Avoid (dead, D-xxx)`"). Follow the per-D-code action per
-`market-intel-config/runbooks/sync-with-skill.md` §C, typically: remove the tool's row from
-`registry.json`, delete its `secrets/<slug>.env`, and (if there's a successor) point
-`replacement_for: "<successor-slug>"` from the old entry to the new one. Buckets D / E
-(orphan secret / orphan MCP) may follow once the registry row is gone, clear those too.
+A missing checker or failed command is an unresolved synchronization gap.
 
-**Verify:** re-run `python scripts/sync-check.py`; the C bucket count for this slug is now 0.
+Step 3 creates the retained tool-card tombstone used by **bucket C** ("Config points to a
+skill doc tombstoned `⚠ Avoid (dead, D-xxx)`"). Inspect the actual report and follow the
+resolved companion's `runbooks/sync-with-skill.md` §C. Preserve versioned retirement and
+replacement metadata. Update configured install state before changing its dependent host
+configuration, and handle credentials under the selected storage and rotation policy. A
+catalog retirement alone does not authorize deleting credentials or changing a live host.
 
-**Common mistake:** clearing bucket C by deleting the secret first and the registry row
-second, leaves the registry pointing at a non-existent secret file for a window. Do
-registry first, then secrets, then re-run the check.
+**Verify:** rerun the resolved checker and confirm the intended retirement/replacement is
+recorded and the reported buckets are addressed. Keep any unresolved sync findings explicit.
 
 ## 6. Commit with prefix `incident: <slug> D-<code>`
 
@@ -149,56 +147,9 @@ during a sweep.
 
 ---
 
-## Worked example, `kukapay/funding-rates-mcp` stale in a crypto-defi sweep
+## Synthetic examples
 
-Suppose a `crypto-defi` weekly Discovery sweep flags `kukapay/funding-rates-mcp` as
-unreachable: `gh api repos/kukapay/funding-rates-mcp` returns 404, last release Apr 2025.
-
-**Step 1, log:**
-
-```
-{"ts":"2026-06-17T14:22:00Z","domain":"crypto-defi","source":"kukapay/funding-rates-mcp","route":"①","outcome":"dead","detail":"gh api 404; repo last seen 2025-04; vooi-app/mcp confirmed as live replacement","user_correction":null}
-```
-
-**Step 2, D-code:** repo is gone (404) AND a successor is named, pick `D-SUPERSEDED`
-(not `D-404`, because the supersession story is the cleaner record; if `vooi-app/mcp`
-didn't exist we'd use `D-404`).
-
-**Step 3, shard edit** at `skills/market-intel/reference/domains/crypto-defi.md`:
-
-```
-| **vooi-app/mcp** (active 2026-06) | ① | perp/DEX-aggregator MCP — funding-rate divergence + cross-venue spreads | hosted MCP, MIT | (already present, no change)
-| ~~kukapay/funding-rates-mcp~~ | ~~①~~ | ⚠ Avoid (dead, D-SUPERSEDED) — repo gone 2025-04, replaced by vooi-app/mcp | — | — |
-```
-
-(The `vooi-app/mcp` row was already present from an earlier sweep, only the kukapay row
-gets the tombstone treatment.)
-
-**Step 4, sources-index.md:** the `crypto-defi` top pick line already names vooi-app for
-funding rates, so **no edit**. Skip.
-
-**Step 5, companion-config:**
-
-```
-$ python C:\Users\<username>\CodesClaude\market-intel-config\scripts\sync-check.py
-Bucket C: 1 entry
-  - kukapay-funding-rates-mcp → D-SUPERSEDED (successor: vooi-app-mcp)
-```
-
-Per `sync-with-skill.md §C`: drop kukapay row from `registry.json`, delete
-`secrets/kukapay-funding-rates-mcp.env` if present, set `replacement_for: "vooi-app-mcp"`
-in any lingering references. Re-run, bucket C clears.
-
-**Step 6, commit:**
-
-```
-incident: kukapay-funding-rates-mcp D-SUPERSEDED — repo gone 2025-04, vooi-app/mcp live
-
-Found dead in crypto-defi weekly Discovery; gh api 404, last seen 2025-04.
-Successor vooi-app/mcp (already in shard since 2026-06) confirmed working.
-Tombstoned shard row, cleared config bucket C (1 entry).
-```
-
-Push. Done, the next monthly sweep will see this entry in `live-runs.jsonl` under
-`outcome:dead`, the `crypto-defi` domain will get hot-mode Discovery budget ×2, and
-`git log --grep="^incident:"` now lists this incident for posterity.
+Use the generated ledger linked above to learn the record shape. Real incident
+details, target identifiers and user quotations belong only in the PRIVATE
+companion. Publication should describe a reviewed tool-level correction without
+copying the underlying user's research record.

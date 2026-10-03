@@ -6,19 +6,23 @@
 | source | route | capability | detect | risk |
 |---|---|---|---|---|
 | **erithwik/mcp-hn** (HN) | ① free | top/new/ask/show, search, comments | mcp list / `uvx mcp-hn` | none, Algolia API, no key |
-| **karanb192/reddit-mcp-buddy** (702★) | ① official | browse/search/post-details/user-analysis; zero-setup anon (10/min) → app-id (60) → login (100) tiers | `npx -y reddit-mcp-buddy` | free; repo active (756★ at last gh-api check, 2026-07-22), but **⚠ anon tier currently non-functional** (Reddit is 403-blocking the unauthenticated JSON API since ~2026-06-03, upstream issue #58, fix PR #60 open/unmerged 6+wks; live-tested 2026-07-22, still forbidden). Use the app-id/login tier (OAuth, not the blocked anon path) or route to reddit-research-mcp below until #60 merges |
+| **karanb192/reddit-mcp-buddy** (702★) | ① free | browse/search/post-details/user-analysis; app-id/login access, anonymous access only after demonstrated recovery | `npx -y reddit-mcp-buddy` + current-session authorization and read probe | historical record: 756★ and anonymous JSON HTTP 403 on 2026-07-22; issue #58 / fix PR #60 remained unresolved at that check. Use verified app-id/login access or reddit-research-mcp; no new outage test is asserted here |
 | GridfireAI/reddit-mcp | ① official | submissions, search, subreddit (read-only) | connected + Reddit client id/secret | **D-SUPERSEDED** by reddit-mcp-buddy (stale 2025-03, 18★), kept as minimal fallback |
-| **king-of-the-grackles/reddit-research-mcp** (224★) | ① official | semantic subreddit discovery (ChromaDB, 20k+ subs) beyond Reddit's 250-result cap; citation-backed, hosted OAuth needs no creds | hosted OAuth, no creds | confirmed working 2026-07-22 (224★ at last gh-api check, 2026-08-01); **currently the only no-cred Reddit route that works**, given buddy's anon-tier outage above, elevated to co-top-pick until #58/#60 resolve |
+| **king-of-the-grackles/reddit-research-mcp** (224★) | ① free | semantic subreddit discovery (ChromaDB, 20k+ subs) beyond Reddit's 250-result cap; citation-backed, no Reddit credentials to manage | hosted OAuth + current-session read probe | historical success on 2026-07-22 (224★ checked 2026-08-01); preferred no-credential route while buddy's recorded anonymous outage remains unresolved, with fresh operation verification required |
 | dancolta/subscope (21★) | ④ | keyless public-RSS buyer-intent scoring, local SQLite (post-GummySearch) | self-host | thin adoption (21★), niche |
 | Apify (Quora/forums/Reddit monitor) | ② resale | Quora, forums, brand monitor + sentiment | apify MCP | pay-per-use; SSE deprecated, use HTTP |
 | midodimori stack-overflow-mcp | ① free | SE search/answers | connected + SE key (raises 300→10k/day) | none |
 | **ArthurHeitmann/arctic_shift** (1.5k★) | ③ archive | Pushshift successor: bulk historical Reddit dumps + JSON API + hosted web UI (arctic-shift.photon-reddit.com); monthly dump refresh | self-host or use hosted UI | active 2026-06, MIT-style, **solo maintainer** (bus-factor risk worth flagging) |
-| **SaseQ/discord-mcp** (502★) | ① bot-token | Bot-token Discord MCP (JDA-based, Docker) for own/admin servers, ToS-compliant | bot token + `docker run :8085/mcp` | MIT, active 2026-04 |
+| **SaseQ/discord-mcp** (475★) | ① bot-token | Bot-token Discord MCP (JDA-based, Docker) for own/admin servers, ToS-compliant | bot token + `docker run :8085/mcp` | MIT, active 2026-04 |
 | elyxlz/discord-mcp | ④ browser | read/scrape via your user session | self-host | ⚠ violates Discord ToS, ban risk, prefer SaseQ/discord-mcp for own servers |
 
-**Default pick:** mcp-hn (free) for HN; Reddit → **reddit-research-mcp** (currently the only working
-no-cred route, see anon-tier outage note above) or reddit-mcp-buddy on its app-id/login tier; both
-replace stale GridfireAI/reddit-mcp. Revert to reddit-mcp-buddy anon as default once upstream #60 lands.
+**Default pick:** HN → erithwik/mcp-hn (HN); Reddit → king-of-the-grackles/reddit-research-mcp or karanb192/reddit-mcp-buddy.
+
+**Required access checks for the Reddit defaults:** Use reddit-research-mcp only
+after hosted OAuth and a successful current-session read. Use reddit-mcp-buddy only with
+verified app-id/login access. Both replace stale GridfireAI/reddit-mcp. Restore buddy's
+anonymous route only after current-session recovery is demonstrated; an upstream merge
+alone does not establish usable Reddit access.
 
 **④ Browser/OSS route:** Reddit official API (PRAW, praw-dev/praw 4.1k★) is still free enough, no
 real need to browser-scrape. For 中文社区 (微博/抖音/B站/知乎/贴吧) use **NanmiCoder/MediaCrawler**

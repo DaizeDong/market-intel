@@ -25,43 +25,81 @@ repo is always optional, never a hard crash. (The bundled `scripts/` also accept
 
 ### Where real-run output goes: the private companion repo, versioned
 
-`tools/datadir.py` resolves real-run **output** to `data/` inside your companion config repo. It
-follows the same pointer this page already describes:
-
-1. `$MARKET_INTEL_DATA_DIR`, an explicit override.
-2. `$MARKET_INTEL_CONFIG` (or `$MARKET_INTEL_CONFIG_DIR`), the companion repo: `data/` under it
-   when that exists, the repo root otherwise.
-3. `~/.market-intel-config/data/`, the companion repo at its default dotfile path.
-4. `~/.market-intel-data/`, standalone.
-5. None, meaning the tool is **uninitialized**, which is the correct state for a fresh clone.
-
-Print it rather than retyping it:
+`guards/tools/datadir.py` provides the shared DATA path discovery. It is a path
+resolver; writers must still establish that the final destination is a PRIVATE
+versioned companion before writing. An explicit missing destination is an error,
+not permission to create an unmanaged fallback.
 
 ```bash
-python tools/datadir.py --path market-intel metrics/live-runs.jsonl
+python guards/tools/datadir.py --path market-intel metrics/live-runs.jsonl
 ```
 
-**This is a deliberate policy, decided 2026-07-31. Do not "fix" it back.** The rule the data
-boundary enforces is *real-run output must never reach a **public** repo, and a public repo never
-has an in-repo fallback*. It was never *data must not be in git*. Those are different predicates,
-and the second one condemns the correct answer: a **private** repo is exactly where a person's real
-data legitimately lives, and it is the only place it gets history, diffs and a backup. The
-alternative, a loose directory in `$HOME`, leaves the one artifact that records your real research
-runs as the one artifact with no version control at all.
+For inventory, set `MARKET_INTEL_DATA_DIR` to an existing directory in a private
+companion, or set `MARKET_INTEL_CONFIG` (alias `MARKET_INTEL_CONFIG_DIR`) to that
+companion. The shared convention uses `data/` when present and otherwise the
+companion root. `console.py --refresh` validates the final canonical containing
+repository, existing history, every physical and effective fetch/push destination,
+fresh local PRIVATE visibility receipts and Git ignore status before collecting
+inventory or creating directories. It refuses public, unknown, unmanaged, missing
+and consumer-tree destinations.
 
-This is also the fleet shape, not a market-intel special case: `daily-hotspots` keeps its
-opportunity ledger tracked in its own private companion repo the same way.
+Visibility proof reads the installed guard's `~/.pii-guard/visibility.json` receipt;
+the console does not query GitHub or refresh that receipt. The shared guard requires
+a valid timestamp, age within its accepted window (currently 30 days), and PRIVATE
+entries for every destination. Use the installed guard's authenticated visibility
+refresh workflow before first use, after changing destinations or repository
+visibility, and whenever the receipt is missing, expired or invalid. Rerun the
+console only after that refresh succeeds; never create a PRIVATE receipt by hand.
 
-An earlier revision of this section said the opposite, and it cost something real: a check written
-to the git-vs-not-git predicate failed this skill for keeping its ledger where the doctrine says it
-belongs, and the ledger was moved out to an unversioned directory to satisfy it.
+Inventory snapshots live at `inventory/availability-cache.json` below the resolved
+DATA directory. Atomic replacement preserves the earlier valid snapshot on failure;
+failed writes return nonzero. The console reports the verified companion identity
+and never edits `.gitignore`. Commit the snapshot through the companion's existing
+versioning workflow; the console does not commit automatically.
 
-`fleet_check`'s `databoundary` row now asserts the predicate that matches the harm: it **FAILS** if
-the resolved data dir is inside a repo whose remote is **PUBLIC**, and fails closed if the
-visibility cannot be established at all. Inside a **PRIVATE** repo it **PASSES**, and the row names
-the repo, so you can tell "the control looked at this and approved it" from "the control skipped
-it". Real-run output is still physically absent from **this** repo; the public repo ships only
-`skills/market-intel/metrics/live-runs.jsonl.example`.
+Incident writes use the same verifier for `metrics/live-runs.jsonl` below DATA.
+The helper verifies the final containing PRIVATE repository before reading or
+creating the ledger, and rechecks it before atomic replacement. It reports the
+verified repository identity on success and returns nonzero on persistence failure.
+
+Ordinary catalog reads need no DATA initialization and collect no inventory. For
+current operation evidence, set `MARKET_INTEL_HOST`, `MARKET_INTEL_SESSION_ID` and
+`MARKET_INTEL_CAPABILITIES` (an explicit JSON file path). The
+[host capability contract](skills/market-intel/reference/host-capabilities.md)
+defines schema v1, freshness, authentication failures and selected operation proof.
+Keep these real observations in the PRIVATE companion. Generated examples in
+`inventory/*.example` illustrate the schema without asserting real readiness.
+
+## Model adapter
+
+Core Python commands install with `python -m pip install -r requirements.txt`.
+The development requirements add pytest and run without a model adapter.
+`incident_helper.py` and `changelog_draft.py` require the operator's separately
+configured `llmcall` Python package. The public requirements intentionally do not
+depend on a private repository or select a provider.
+
+Use the same Python environment for setup and execution. Install the configured
+package from a trusted wheel or checkout supplied by the operator, then check its
+interface:
+
+```bash
+python -m pip install /absolute/path/to/configured-llmcall-package
+python tools/model_adapter.py --check
+```
+
+The path is a placeholder for that existing package, not a package name to fetch
+from a public index. Follow its own installation and private configuration guide
+for provider access. Market-intel forwards the prompt and requested response
+schema and inherits that package's routing, model, timeout and fallback policy.
+
+The doctor checks that `llmcall.call` is importable and callable. It performs no
+model request and does not establish provider authentication or execution. A
+missing or incompatible import reports `UNINITIALIZED` and exits 3; model draft
+commands also stop with that status before reading input or writing output.
+Provider execution failures remain separate failures with private diagnostics.
+The changelog helper prints its draft by default. Optional `--out` paths must be
+inside a verified PRIVATE versioned companion; destination or write failures exit
+nonzero and preserve the previous file.
 
 ## Schema, `registry.json` (E1)
 

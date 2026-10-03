@@ -7,7 +7,7 @@
 - **Top pick for its domain:** no (twitterapi.io ② stays the top pick for *search/timeline/followers*; FxEmbed owns the narrower, very common slot: **resolve ONE post's full content as clean JSON, free, no key**)
 
 ## What it does / when to pick it
-FxEmbed rewrites an X/Twitter or Bluesky post URL into a fixed embed and exposes the same post as structured JSON: text, all media (multi-image, video, poll), author, and public metrics. **Decision rule:** when you already have a specific tweet/thread URL or ID and just need its *content* (not a search), hit FxEmbed instead of standing up twikit/twscrape (account-based scrapers) or paying twitterapi.io per call. It is the cheapest, lowest-friction way to turn "here's a link" into machine-readable text+media. Escalate to **twitterapi.io** (②) or **twikit** (③④) the moment you need *search, timelines, followers, or write*, FxEmbed only reads a post you can already name.
+FxEmbed rewrites an X/Twitter or Bluesky post URL into a fixed embed and exposes the same post as structured JSON: text, all media (multi-image, video, poll), author, and public metrics. **Decision rule:** when you already have a specific post URL or ID and just need that post's *content* (not a search), hit FxEmbed instead of standing up twikit/twscrape (account-based scrapers) or paying twitterapi.io per call. It is the cheapest, lowest-friction way to turn "here's a link" into machine-readable text+media. Escalate to **twitterapi.io** (②) or **twikit** (③④) the moment you need *search, timelines, followers, or write*, FxEmbed only reads a post you can already name.
 
 ## Install
 Nothing to install for the public instance, it is an HTTP endpoint. Optional self-host: clone the repo and `npm install && npm run deploy` to a Cloudflare Workers account (removes the public-instance dependency; recommended for anything you run on a schedule). Volatile install line: none.
@@ -22,7 +22,7 @@ curl -s "https://api.fxtwitter.com/i/status/<TWEET_ID>" | jq '.tweet | {text, au
 # Bluesky post
 curl -s "https://api.fxembed.com/<handle>/post/<rkey>"
 ```
-The response includes the full post text, media URLs, author handle/name, and public counts, enough to summarize a thread without an account.
+Treat the returned text, media URLs, author information and public counts as evidence for the addressed post only. For a thread summary, identify and retrieve its constituent posts through currently verified operations, record which posts were obtained, and state incomplete thread coverage if any remain unavailable. A single-post response does not establish full thread coverage.
 
 ## General experience & gotchas (踩坑)
 > Not yet exercised in a live market-intel run, notes are from the repo docs + API shape, gh-api verified 2026-07-15; harden with a `live-runs.jsonl` entry after first real use (R4).

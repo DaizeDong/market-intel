@@ -42,6 +42,6 @@ suggestions = r.json()[1]
 - **Ideas only, zero metrics.** No volume, no CPC, no difficulty, no SERP. Do not infer demand from suggestion order; it is roughly popularity-ranked but not a number.
 
 ## Failure signals & fallback
-Empty `[seed, []]`, HTTP 403/429, or XML where you expected JSON = throttled or the endpoint/format changed. Back off + add proxies + confirm `client=firefox`. If it stays unreliable or you need actual volume/CPC, fall back to **Google Ads Keyword Planner** ① (free, real volume + CPC, needs a dev token) or **DataForSEO** ② (Sandbox first; has a keyword-suggestions endpoint with metrics). For SERP results rather than query suggestions, use **SearXNG** ④ or **playwright MCP**.
+Empty `[seed, []]`, HTTP 403/429, or XML where you expected JSON = throttled or the endpoint/format changed. Back off + add proxies + confirm `client=firefox`. If it stays unreliable or you need actual volume/CPC, fall back to **Google Ads Keyword Planner** ① (free, real volume + CPC, needs a dev token) or **DataForSEO** ② with authenticated production access to the relevant keyword endpoint. Its Sandbox can check request/response wiring with mock data, but it provides no live keyword or demand evidence; report the gap until production metrics are available. For SERP results rather than query suggestions, use **SearXNG** ④ or **playwright MCP**.
 
 ## Last verified: 2026-06

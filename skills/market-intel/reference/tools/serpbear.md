@@ -10,21 +10,32 @@
 SerpBear is a self-hosted **keyword rank tracker**: add domains + keywords, and it records daily SERP position over time with email/Slack/webhook alerts and a small REST API. It **replaces paid rank-monitoring** (the rank-tracking slice of Semrush/SE Ranking/Ahrefs) at zero subscription cost. Pick it when the deliverable is "track where my/competitor keywords rank over days/weeks", not one-off SERP pulls. For ad-hoc SERP scraping use SearXNG; for search *volume*/difficulty/backlinks use DataForSEO/SE Ranking/Ahrefs (SerpBear tracks position only). It pairs naturally with SearXNG, which can act as its scraping backend.
 
 ## Install
-Self-host via Docker (no MCP package):
-```
-docker run --rm -d -p 3000:3000 -e USER=admin -e PASSWORD=<pw> -e SECRET=<rand> -e APIKEY=<rand> -v "${PWD}/serpbear_data:/app/data" towfiqi/serpbear
-```
-Then open `http://localhost:3000`, add a domain + keywords, and configure a scraper (see Auth). No MCP transport, read data via its REST API. See `reference/install-guide.md` for route-④ Docker prerequisites + Windows notes; confirm the current command in `reference/volatile/pricing-install.md` → seo-keywords.
+Before any real run, resolve the full consumer checkout and use
+`tools/private_inventory.py`'s `resolve_destination(path=...)` for individual
+config/output files and `resolve_directory(path=...)` for existing runtime or
+browser-profile directories. Pass the final absolute path. Each check proves the
+containing repository, including a repository rooted at the directory itself,
+and PRIVATE visibility for every effective
+publication destination. Stop on missing, PUBLIC or unknown proof.
+Keep runtime files versioned in that PRIVATE companion. An ignored directory in
+this public checkout is not a valid destination. A later real run must repeat the
+check; this recipe is not a live destination attestation.
+
+Use the upstream Docker image from a verified PRIVATE runtime directory. Bind an
+absolute verified PRIVATE host data directory to `/app/data`; do not derive the
+mount from the caller's current working directory. Store credentials in the
+approved PRIVATE configuration and supply them without echoing values. Confirm
+the upstream image's current environment and persistence contract before launch.
+Then open the local UI, configure a scraper and inspect operation results.
 
 ## Auth / keys
 App login is `USER`/`PASSWORD`; the REST API uses the self-generated `APIKEY` header (you set it at deploy time). The **SERP scraping backend** is separate: SerpBear needs a source to read Google positions, either a paid scraper (ScrapingRobot/SerpApi/SpaceSerp key) or **point it at your self-hosted SearXNG** to stay fully free. Since all keys here are *your own* self-generated secrets in your container env, the only hygiene rule is the standard one, keys live plaintext in env/`~/.claude.json`; never commit or screenshot. One-line pointer: `reference/install-guide.md` § secret hygiene.
 
-## Usage, call examples
-Read tracked keywords for a domain via REST:
-```
-curl -H "Authorization: <APIKEY>" "http://localhost:3000/api/keywords?domain=example.com"
-```
-Returns each keyword's current `position`, `history` (dated positions), `url`, and `lastUpdated`. Add keywords via `POST /api/keywords`.
+## Usage
+Read tracked keywords with the documented `/api/keywords` endpoint using a
+no-echo authenticated client. Save the response only to a verified PRIVATE
+report path. It contains keyword positions, dated history, URLs and timestamps.
+Adding keywords through POST is a separate state-changing operation.
 
 ## General experience & gotchas (踩坑)
 - **No scraper = no data.** SerpBear itself does NOT scrape; out of the box positions stay blank until you wire a scraping source. The free path is to set SearXNG/your scraper as the backend, otherwise you're back to a paid SERP key, defeating the free-route purpose.

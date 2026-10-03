@@ -15,7 +15,7 @@ is also the **weak proxy** for SOTA now that Papers-with-Code is dead, but it's 
 
 ## Install
 HTTP MCP (Windows-friendly, preferred): `claude mcp add --transport http --scope user huggingface https://huggingface.co/mcp`
-(add `--header "Authorization: Bearer <HF_TOKEN>"` only if you need write/private/gated). For read-only
+(for private or gated access, configure the token through host secret settings with a no-echo transfer; never add a secret-bearing CLI header). For read-only
 you can skip the MCP entirely and hit REST: `https://huggingface.co/api/daily_papers` and the Hub API.
 Exact command + token notes: `reference/volatile/pricing-install.md#frontier-research`. L0 mechanics:
 `reference/install-guide.md`.

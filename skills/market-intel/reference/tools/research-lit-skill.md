@@ -3,17 +3,17 @@
 - **Domain(s):** frontier-research (also: none)
 - **Barrier route:**, (delegation, not a data source) · **Source tier:** L1 (synthesis layer) · **Ready MCP:** no, it's a **skill** (`research-lit`), invoked, not added
 - **Cost:** **free**, it's a local skill; cost is only whatever underlying paper sources/LLM calls it makes. (No pricing page; provider docs at https://docs.claude.com.)
-- **Repo / Provider:** the `research-lit` skill (ships in this skill set). Reference: https://docs.claude.com. (Non-GitHub; it's an in-environment skill.)
+- **Repo / Provider:** the separately installed `research-lit` skill. Discover its availability and instructions in the current host; this catalog does not install or attest it.
 - **Top pick for its domain:** no (it's the *hand-off target*, not a source you query for raw data)
 
 ## What it does / when to pick it
 `research-lit` is the **deep multi-paper synthesis / literature-review** skill. **Decision rule (shard, hard rule):** this domain (`frontier-research`) is about **source routing / discovery**, finding the right papers and signals. The moment the task becomes **"synthesize across many papers / write a related-work / produce a lit-review,"** STOP routing and **delegate to `research-lit`**, do **NOT** re-implement a lit-review inside the market-intel flow. Use the discovery tools (arXiv, HF Daily Papers, Semantic Scholar, OpenReview) to *gather and triage*; use `research-lit` to *read deeply and synthesize*.
 
 ## Install
-Nothing to install, it's a skill already available in this environment (see the skills list). Invoke it via the Skill mechanism / `/research-lit`. Not an MCP, so no `claude mcp add`, no restart. See `reference/install-guide.md` (L0) for how skills differ from MCP sources.
+Check the active host's skill catalog for `research-lit` and read its installed instructions before invoking it. If absent, report the missing workflow and use only a verified alternative or prepare installation. It is not an MCP server. See `reference/install-guide.md` (L0) for how skills differ from MCP sources. Any model or external-agent invocation must use installed `llmcall` with its current routing, model, timeout and fallback policy; agent work uses `mode="agent"`.
 
 ## Auth / keys
-None to invoke the skill itself. Any keys it needs for underlying sources are handled inside that skill, nothing extra enters this transcript. (No secret-hygiene concern at this layer.)
+No source credential is implied by installing a skill. Verify each selected underlying operation separately, keep credentials in approved PRIVATE configuration, and keep raw research outputs in verified PRIVATE versioned DATA. Never print credentials or private configuration during setup.
 
 ## Usage, call examples
 - Hand off when the deliverable is synthesis: invoke the `research-lit` skill with the research question / seed papers / topic.
@@ -28,6 +28,6 @@ None to invoke the skill itself. Any keys it needs for underlying sources are ha
 - It may itself need to fetch full text, for grounded full-text QA over PDFs, `Future-House/paper-qa` is the complementary primitive.
 
 ## Failure signals & fallback
-"Failure" here is mostly a routing mistake: you're hand-rolling a review in market-intel instead of delegating, fix by invoking `research-lit`. If `research-lit` isn't available in the skill set, fall back to **Future-House/paper-qa** ④ (grounded full-text deep-research) layered on a Semantic-Scholar/arXiv-gathered corpus, or the local **arxiv** / **semantic-scholar** skills for narrower passes.
+If synthesis is required, discover `research-lit` in the active host and follow its installed instructions. If absent, report the missing workflow and prepare installation or use a verified **Future-House/paper-qa** operation over a Semantic-Scholar/arXiv-gathered corpus. For narrower passes, separately discover and read the **arxiv** / **semantic-scholar** skills before invoking them; this catalog does not install those siblings.
 
 ## Last verified: 2026-06

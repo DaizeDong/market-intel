@@ -2,7 +2,7 @@
 
 - **Domain(s):** finance-markets
 - **Barrier route:** 1 official API (self-hosted MCP over upstream provider APIs) · **Source tier:** free OSS plus paid provider keys · **Ready MCP:** yes (official, self-hosted at `openbb_platform/extensions/mcp_server`)
-- **Top pick for its domain:** no (consolidation play, pick when juggling many finance MCPs, not as first-line)
+- **Top pick for its domain:** yes for consolidating several finance MCPs; the first-line free-start picks remain SEC EDGAR + FRED + Finnhub.
 
 ## What it does / when to pick it
 Self-hosted MCP that exposes the full **OpenBB Platform** (~100 data providers, FMP, FRED, BLS, IMF, Polygon, yfinance, SEC, Intrinio, and more) behind a single MCP endpoint. **Connect once, dynamic tool activation per query**, the server surfaces only the relevant tools for what the agent is asking, instead of dumping all 100 providers into the tool list. Upstream repo (OpenBB-finance/OpenBB) sits at ~69k stars with active commits (last push 2026-06-16), so the project is healthy.

@@ -13,9 +13,14 @@ posting, it's lower ban-risk than write tools because it only reads. If you need
 DM**, this can't do it → use **instagrapi** ③ instead.
 
 ## Install
-`pip install instaloader` (Python ≥ 3.10). Ships a CLI (`instaloader profile <name>`) and a Python
+`pip install instaloader` (Python ≥ 3.10). Ships a CLI (`instaloader <name>`) and a Python
 API. No ready MCP. Volatile line: `reference/volatile/pricing-install.md` → social-publishing /
 browser-automation.
+
+## Private runtime and outputs
+Before any collection or login below, use `tools/private_inventory.py` from the full consumer checkout. Select an existing absolute runtime directory with `runtime = resolve_directory("runtime/instaloader")`. This proves the final directory's repository, including a nested repository at that directory, and every effective publication destination is PRIVATE and versioned. Stop if it is missing, PUBLIC or unknown. Revalidate `resolve_directory(path=runtime.path)` immediately before launching the caller with that directory as its working directory.
+
+Check the installed version's supported output and storage settings before use. Route every download, transcript, dataset, request queue, cache, session, cookie file and export through that verified PRIVATE runtime or an absolute file destination checked with `resolve_destination`. Settings that default elsewhere must be explicitly redirected with supported installed-version options. If any output cannot be located and redirected, keep the tool in setup status. Capture metadata stdout only into a verified PRIVATE file; do not redirect it into the consumer checkout. Credential values belong in the designated PRIVATE versioned companion and its approved backup.
 
 ## Auth / keys
 Anonymous works for public profiles (very rate-limited). For private/followed content or higher
@@ -26,9 +31,9 @@ password is a secret, user supplies it; never echo it (see `reference/install-gu
 ```python
 import instaloader
 L = instaloader.Instaloader()
-L.download_profile("nasa", profile_pic_only=False)   # CLI: instaloader nasa
+L.download_profile("example_profile", profile_pic_only=False)   # synthetic profile
 ```
-Iterate `Profile.from_username(L.context, "nasa").get_posts()` for metadata without downloading media.
+Iterate `Profile.from_username(L.context, "example_profile").get_posts()` for metadata without downloading media.
 
 ## General experience & gotchas (踩坑)
 - Read-only ≠ ban-proof, **anonymous scraping is aggressively rate-limited** and IG throws 401/429

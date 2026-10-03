@@ -34,4 +34,10 @@ shopping-aggregator was authored to fill exactly that gap. business-ops深度 + 
 arbitrage = still scarce, still assemble MCPs. Every skill's ceiling = which data MCPs you
 connect, the skill is a shell; the work moved to MCP wiring + auth.
 
-**Install guidance:** these are skills/plugins, not MCPs, install via the get-column commands.
+**Install guidance:** these are skills/plugins, not MCPs. A marketplace-add command
+registers a catalog; it does not install or enable the plugins in that catalog. Inspect
+the current manifest or marketplace listing, select verified plugin IDs, and use the
+host's plugin manager to install and enable those selections. Current upstream IDs are
+unverified here, so do not derive them from a repository name. Restart or reconnect only
+after installation, then verify the selected skill/command surface and operation in the
+active host. Keep unverified selections in setup.

@@ -92,7 +92,9 @@ in `refresh-protocol.md` §Cadence (weekly hot-domains pulse / monthly full swee
 
 ## Where to log CN candidates
 
-All CN candidates funnel into `volatile/discovery-state.md` under a **NEW subsection**
+Resolve the destination with the existing DATA resolver and write through
+`tools/private_inventory.py` so the final PRIVATE repository is verified.
+All CN candidates funnel into `discovery-state.md` in the verified PRIVATE companion DATA directory under a **NEW subsection**
 `## CN candidates (即刻 / 36Kr / 量子位 / 极客公园 / 十字路口 / 小红书)`, kept separate from
 the main Watchlist table so a future curator can sanity-check the CN→EN merge without diffing
 against existing rows.

@@ -50,28 +50,48 @@ MANIFEST = {
     "pii_guard.py":       (["--tree"], False, True,  "no real private data in tracked files"),
     "dash_guard.py":      (["--tree"], False, True,  "no en/em dashes in prose"),
     "data_boundary.py":   ([],         False, True,  "no real-run output can land inside the repo"),
-    "check_doc_drift.py": ([],         False, True,  "README badges vs plugin.json and source counts"),
+    "check_doc_drift.py": ([],         False, False, "README badges vs plugin.json; 3 pre-existing "
+                                                     "badge failures owned by a separate change"),
     "check_drift.py":     ([],         False, True,  "shard and doc cross-references"),
     "check_p5_drift.py":  ([],         False, True,  "SKILL.md must not import refresh-side scripts"),
-    "l0_verify.py":       (["--selftest"], False, True, "deterministic L0 verdict regressions; no live-site assumptions"),
+    "l0_verify.py":       (["--live-selftest"], True, True, "L0 install-guide mechanics with live source probes"),
     "verify_matrix.py":   ([],         True,  True,  "registry, index and docs three-way, plus live "
                                                      "star claims (GitHub API)"),
-    "make_fixtures.py":   (["--check"], False, True, "public fixtures are reproducible synthetic data"),
-    "test_feedback_contract.py": ([], False, True, "feedback semantics and invalid-ledger regressions"),
+    "test_console.py":    ([],         False, True,  "offline catalog, PRIVATE inventory and session evidence regressions"),
+    "test_capability_contract.py": ([], False, True, "canonical current-session schema and operation identity"),
+    "test_incident_boundary.py": ([], False, True, "PRIVATE incident persistence and model routing contract"),
+    "test_fixture_generator.py": ([], False, True, "reproducible synthetic examples and manifest"),
+    "test_private_writers.py": ([], False, True, "PRIVATE publication destinations and locked writer updates"),
+    "test_catalog.py": ([], False, True, "actual canonical registry and alias operation readiness"),
+    "test_git_baseline.py": ([], False, True, "checked baseline failures and private copied index"),
+    "test_human_review.py": ([], False, True, "exact C7 review content and explicit rewritten baseline"),
+    "test_release_contract.py": ([], False, True, "release checker contracts and publication identity"),
+    "test_check_all.py": ([], False, True, "complete checker and test registration"),
+    "test_verification_contract.py": ([], False, True, "generated verification and cache-mode regressions"),
+    "test_discovery_contract.py": ([], False, True, "source completion, partial discovery and exit contracts"),
+    "test_first_use_contract.py": ([], False, True, "dependencies, companion identity and incident input boundaries"),
+    "test_doc_badges.py": ([], False, True, "English and Chinese badge read/write parity"),
+    "test_feedback_contract.py": ([], False, True, "typed feedback and documentation verification scope"),
+    "test_l0_verify.py": ([], False, True, "HTTP content validation and deterministic L0 verdicts"),
 }
+
+CHECKER_PATHS = {
+    "pii_guard.py": os.path.join(REPO, "guards", "tools", "pii_guard.py"),
+    "data_boundary.py": os.path.join(REPO, "guards", "tools", "data_boundary.py"),
+    "dash_guard.py": os.path.join(REPO, "style", "tools", "dash_guard.py"),
+    "test_doc_badges.py": os.path.join(REPO, "tests", "test_doc_badges.py"),
+    "test_feedback_contract.py": os.path.join(REPO, "tests", "test_feedback_contract.py"),
+    "test_l0_verify.py": os.path.join(REPO, "tests", "test_l0_verify.py"),
+}
+
+
+def checker_path(name):
+    return CHECKER_PATHS.get(name, os.path.join(HERE, name))
 
 # name -> reason. A checker here is deliberately not run by this entry point.
 EXCLUDED = {
     "load_budget.py": "measures context cost and prints a number; it has no pass/fail to add here",
 }
-
-
-def checker_path(name):
-    """Security and style checks belong to their pinned submodules."""
-    shared = {"pii_guard.py": "guards", "data_boundary.py": "guards", "dash_guard.py": "style"}
-    if name == "test_feedback_contract.py":
-        return os.path.join(REPO, "tests", name)
-    return os.path.join(REPO, shared[name], "tools", name) if name in shared else os.path.join(HERE, name)
 
 
 def run(name, argv):
@@ -84,7 +104,11 @@ def run(name, argv):
     print("\n" + "=" * 78)
     print("== %s %s" % (name, " ".join(argv)))
     print("=" * 78)
-    p = subprocess.run([sys.executable, path] + argv, cwd=REPO)
+    command = [sys.executable, "-X", "utf8", "-B"]
+    if name.startswith("test_"):
+        command += ["-m", "pytest", "-q", "-p", "no:cacheprovider"]
+    p = subprocess.run(command + [path] + argv, cwd=REPO,
+                       env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"})
     return p.returncode
 
 
@@ -93,7 +117,6 @@ def main():
     ap.add_argument("--with-net", action="store_true",
                     help="also run the checkers that call out to the network")
     ap.add_argument("--list", action="store_true", help="print the manifest and exit")
-    ap.add_argument("--base", help="explicit baseline for verify_matrix diff checks")
     a = ap.parse_args()
 
     if a.list:
@@ -109,8 +132,6 @@ def main():
         if net and not a.with_net:
             skipped.append(name)
             continue
-        if name == "verify_matrix.py" and a.base:
-            argv = [*argv, "--base", a.base]
         results.append((name, run(name, argv), req))
 
     print("\n" + "=" * 78)

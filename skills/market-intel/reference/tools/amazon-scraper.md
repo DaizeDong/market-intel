@@ -10,7 +10,19 @@
 Free Amazon scraper covering **24 Amazon sites** (.com/.co.uk/.de/.co.jp/…): search, product detail, and reviews, with a **built-in anti-detect browser** so you don't assemble your own stealth stack. **Decision rule:** pick it when you need current Amazon listing data (titles, prices, ratings, reviews) across regions at low/zero cost and don't need history, it's the Amazon-specialist of the free route. Choose **Keepa** ① instead for price/BSR/Buy-Box *history*; choose **Bright Data** ② when you want a provider to absorb the anti-bot barrier at scale instead of running the browser yourself; choose **Discount-Bandit** ④ when you want *ongoing* multi-store tracking rather than ad-hoc pulls.
 
 ## Install
-`pip install` the package (it's a Python library, confirm the exact package/usage from the live repo README, as the entry point can change). It ships a built-in anti-detect browser, so first run may download a browser binary. Not an MCP, call it from a script and feed results to the agent, or wrap it. Prereqs (Python ≥3.10) & route-④ mechanics: `reference/install-guide.md`. Exact L1 line: `reference/volatile/pricing-install.md → ecommerce-arbitrage`. Verify the install/usage against the current README before running.
+Clone the selected `omkarcloud/amazon-scraper` repository into a source directory and
+inspect that version's README before installing its dependencies in the chosen Python
+environment. Do not substitute the similarly named PyPI package; it is a different
+project, as the [botasaurus notes](botasaurus.md) explain. Exact dependencies, Python
+requirements and entrypoint names remain unverified here until checked against the
+selected version.
+
+Before launching, use the full Market checkout's `tools/private_inventory.py` to verify
+an existing PRIVATE versioned runtime. Check the selected scraper's supported paths
+for result files, browser downloads, profiles, cookies and caches. Launch only through
+an adapter that directs those writes to that absolute private runtime. If the entrypoint
+can only write beside public source, keep the tool in setup until the writers can be
+redirected. Installation alone does not establish an authenticated, usable operation.
 
 ## Auth / keys
 No API key for the scraper itself → **no secret-hygiene key concern**. At scale you'll supply your own **proxy pool** (Amazon anti-bot is strong; software is free, proxies aren't, shard). No Amazon account needed for public search/detail/review reads.

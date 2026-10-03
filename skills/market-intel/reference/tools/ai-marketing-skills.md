@@ -1,7 +1,7 @@
 # Tool: ericosiu/ai-marketing-skills
 
 - **Domain(s):** ready-skills (also: none, skill bundle, not an MCP)
-- **Barrier route:**, (no data barrier; it's prompt/skill scaffolding) · **Source tier:** L2 · **Ready MCP:** no, installs as Claude *skills* via `git clone` + `pip` + `cp` (**NOT** `npx skills add`)
+- **Barrier route:**, (no data barrier; it's prompt/skill scaffolding) · **Source tier:** L2 · **Ready MCP:** no, installs as Claude *skills* via `git clone` + per-skill dependencies (**NOT** `npx skills add`); runtime integration still requires verification
 - **Cost:** free (MIT) [github.com/ericosiu/ai-marketing-skills, gh-api 2026-06]
 - **Repo / Provider:** github.com/ericosiu/ai-marketing-skills, `ericosiu/ai-marketing-skills (3.5k★, gh-api 2026-06)`; active (pushed 2026-06-07, not archived, MIT)
 - **Top pick for its domain:** no (specialist that fills the business-ops gap, not the default marketing reach)
@@ -15,24 +15,23 @@
 git clone https://github.com/ericosiu/ai-marketing-skills.git
 cd ai-marketing-skills/<skill-name>      # e.g. revenue-intelligence
 pip install -r requirements.txt
-cp .env.example .env                     # then edit .env with the keys that skill needs
 ```
-Each skill category has its own README + requirements + `.env`. Exact one-liner is in shard `reference/domains/ready-skills.md` and `reference/volatile/pricing-install.md → ready-skills`. Skills take effect on session restart. L0 mechanics: `reference/install-guide.md`.
+Read the selected category's README, requirements and `.env.example` to identify its inputs. Before supplying real keys or CRM data, resolve an existing PRIVATE versioned runtime with `tools/private_inventory.py` from the full Market checkout, for example `resolve_directory("runtime/ai-marketing-skills")`. Verify the installed version's supported configuration and output options, and use an adapter that points every config, cache, session and output to that absolute private runtime. If the category only supports files beside its public source and no safe adapter exists, keep it in setup status. The public clone must remain uninitialized. Per-domain references: `reference/domains/ready-skills.md` and `reference/volatile/pricing-install.md → ready-skills`; host mechanics: `reference/install-guide.md`.
 
 ## Auth / keys
-The skills themselves are scaffolding, but **unlike the no-key `marketingskills` bundle, several of these skills DO carry keys**, `.env.example → .env` is part of the standard setup, and business-ops skills (revenue-intel, outbound, lead-dossier) expect data-source/CRM/enrichment keys to be useful. Secret hygiene: have the **user** paste keys into `.env` themselves; `.env` is plaintext on disk, add it to `.gitignore` and never commit/screenshot it (`.env.example` ships only placeholders). The real ceiling, per shard "Judgment", is which data sources you wire behind each skill.
+Business-ops categories such as revenue-intelligence, outbound and lead-dossier need data-source, CRM or enrichment credentials. Have the user enter these through the supported private configuration path, without returning values to the transcript. Real inputs and generated ops reports belong in the verified PRIVATE versioned companion and its approved backup. `.gitignore` does not make a public clone a safe runtime directory. The available data sources determine which business questions the skill can answer.
 
 ## Usage, call examples
-After `pip install` + `.env` for a chosen category, restart, then invoke that skill (e.g. revenue-intelligence, sales-pipeline, finance-ops) on your account/topic. Minimal flow: clone → `cd revenue-intelligence` → `pip install -r requirements.txt` → `cp .env.example .env` (fill keys) → restart → invoke. Treat the output as a structured ops draft to be grounded against your real CRM/finance data, not finished numbers.
+After dependency installation and private adapter setup, reconnect the selected host if needed. Verify a read operation with the intended CRM or finance source before invoking the chosen category. Store source observations and generated reports through the verified PRIVATE runtime. Treat the output as a draft until its figures are checked against those source observations; installation alone does not establish usable data access.
 
 ## General experience & gotchas (踩坑)
-- **Install trap: this is NOT `npx skills add`**, the master/shard explicitly tag it `git clone + pip + cp (NOT npx)`. Trying the npx path silently does nothing; you must clone and pip-install per skill.
-- **Per-skill setup, not one install**, each category has its own `requirements.txt` and `.env`; there's no single "install everything" command. Set up only the skill you need.
-- **Keys live in `.env` on disk** (plaintext), a different hygiene surface from MCP `~/.claude.json` keys; keep `.env` gitignored.
+- **Install trap: this is NOT `npx skills add`**, the install path is `git clone` plus per-skill dependencies. Trying the npx path silently does nothing; you must clone and pip-install per skill.
+- **Per-skill setup, not one install**, each category declares its own dependencies and configuration inputs; there's no single "install everything" command. Set up only the skill you need.
+- **Private configuration is required.** A supported env-file option or adapter must load credentials outside the public clone. Recheck that all runtime writers use the same PRIVATE versioned destination before launch.
 - **Python repo, not packaged skills**, heavier than the pip-free `coreyhaines31` bundle; the payoff is the scarce business-ops coverage, so only reach here when that's the actual need.
-- Free MIT, 2.6k★, actively pushed (2026-06), safe to recommend without a staleness caveat.
+- The license and repository facts above are dated 2026-06. Recheck activity and installation requirements when adopting a category.
 
 ## Failure signals & fallback
-Failure looks like: `npx skills add` doing nothing (wrong install path, use git clone); a skill erroring on a missing `.env` key; or ungrounded ops output (no CRM/finance source wired). **Fallbacks:** general marketing/competitor/content shell → `coreyhaines31/marketingskills`; SEO depth → `claude-seo`; packaged 6-stage market-research pipeline → `ishwarjha/claude-marketing-research-skill`; first-party CRM data behind it → `hubspot-mcp` / `salesforce-mcp` / `apollo`; can't find a skill → discovery via `ComposioHQ/awesome-claude-skills` catalog.
+Failure looks like: `npx skills add` doing nothing (wrong install path, use git clone); a skill erroring on a missing private configuration key; or ungrounded ops output (no CRM/finance source wired). **Fallbacks:** general marketing/competitor/content shell → `coreyhaines31/marketingskills`; SEO depth → `claude-seo`; packaged 6-stage market-research pipeline → `ishwarjha/claude-marketing-research-skill`; first-party CRM data behind it → `hubspot-mcp` / `salesforce-mcp` / `apollo`; can't find a skill → discovery via `ComposioHQ/awesome-claude-skills` catalog.
 
 ## Last verified: 2026-06
