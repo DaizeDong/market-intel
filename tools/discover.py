@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Weekly discovery sweep — poll the 6 high-signal "E-class" surfaces from
 `skills/market-intel/reference/refresh-protocol.md` §D1.E, dedupe, and append
-candidates to the skill's `discovery-state.md` inbox.
+candidates to the verified PRIVATE companion's discovery inbox.
 
 The 6 surfaces (per refresh-protocol D1.E):
   E1  PulseMCP newsletter RSS               (https://www.pulsemcp.com/feed.xml)
@@ -22,11 +22,11 @@ When to run:
   - One-shot ad-hoc when investigating a domain that flipped to `hot`.
 
 Exit codes:
-  0   ran cleanly (some channels may have warned + skipped — that's fine)
-  1   all six channels failed (network down / proxy block / etc.)
+  0   at least one selected channel completed, including valid empty results
+  1   every selected channel failed or had no usable configured source
   2   bad args (e.g. unknown --channel)
 
-Deps: stdlib + `requests` (already installed; pinned in market-intel env). No new deps.
+Deps: stdlib + `requests`, declared in requirements.txt.
 """
 from __future__ import annotations
 
@@ -42,6 +42,7 @@ import xml.etree.ElementTree as ET
 from typing import Callable
 
 import requests
+import private_inventory
 
 # ─── stdout UTF-8 safety (Windows) ────────────────────────────────────────────
 try:
@@ -51,41 +52,7 @@ except Exception:
 
 # ─── paths ────────────────────────────────────────────────────────────────────
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-def _companion_root():
-    """Where this skill's private companion is, via tools/datadir.py. None when there is none."""
-    p = os.path.join(ROOT, "tools", "datadir.py")
-    if not os.path.isfile(p):
-        return None
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("_dd_for_discover", p)
-    if spec is None or spec.loader is None:
-        return None
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    fn = getattr(mod, "resolve_companion_root", None)
-    return str(fn("market-intel")) if fn and fn("market-intel") else None
-
-
-def _default_out():
-    """Where a discovery sweep writes its state. The companion, not this repo.
-
-    This defaulted to skills/market-intel/reference/discovery-state.md: a TRACKED file, inside the
-    public repo, with no gitignore entry and no class declared for it in .dataclass.json. Every
-    sweep appended what the operator was researching, on the public side of the boundary, and the
-    only reason it never tripped the guard is that check 4 recognises shapes and this one wears the
-    shape of a document.
-
-    Falls back to the repo path ONLY when no companion resolves, and that fallback is exactly what
-    check 4 is there to catch, so an uninitialized machine produces a violation rather than a quiet
-    write. Better to be caught than to be silent.
-    """
-    root = _companion_root()
-    if root:
-        return os.path.join(root, "data", "discovery-state.md")
-    return os.path.join(ROOT, "skills", "market-intel", "reference", "discovery-state.md")
-
-
-DEFAULT_OUT = _default_out()
+DISCOVERY_RELATIVE = "discovery-state.md"
 
 # ─── config: what to track ────────────────────────────────────────────────────
 # E2: GitHub topics scanned for "new + already stary" repos.
@@ -145,6 +112,26 @@ def _today() -> str:
     return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
 
 
+def _json_records(response, channel: str, key: str | None = None, *,
+                  reject_incomplete: bool = False) -> list[dict]:
+    """Validate the response envelope and requested completeness before counting it."""
+    payload = response.json()
+    incomplete = False
+    if key is not None:
+        if not isinstance(payload, dict) or key not in payload:
+            raise ValueError(f"{channel}: expected an object containing {key!r}")
+        if reject_incomplete:
+            incomplete = payload.get("incomplete_results", False)
+        payload = payload[key]
+    if not isinstance(payload, list) or any(not isinstance(row, dict) for row in payload):
+        raise ValueError(f"{channel}: expected an array of objects")
+    if not isinstance(incomplete, bool):
+        raise ValueError(f"{channel}: expected boolean incomplete_results")
+    if incomplete:
+        raise ValueError(f"{channel}: incomplete_results=true; response is incomplete")
+    return payload
+
+
 def channel_e1_pulsemcp(since: dt.date) -> list[dict]:
     """E1 — PulseMCP newsletter RSS.
 
@@ -168,12 +155,18 @@ def channel_e1_pulsemcp(since: dt.date) -> list[dict]:
         r.raise_for_status()
 
     root = ET.fromstring(r.text)
-    # Strip namespaces for simpler XPath
+    if root.tag == "rss" and len(root.findall("channel")) == 1:
+        feed, item_tag = root.find("channel"), "item"
+    elif root.tag in ("feed", "{http://www.w3.org/2005/Atom}feed"):
+        feed, item_tag = root, "entry"
+    else:
+        raise ValueError("E1: expected an RSS channel or Atom feed")
+    # Validate the feed envelope before simplifying namespaces for extraction.
     for el in root.iter():
         if "}" in el.tag:
             el.tag = el.tag.split("}", 1)[1]
 
-    items = root.findall(".//item") or root.findall(".//entry")
+    items = feed.findall(item_tag)
     out: list[dict] = []
     for it in items:
         title = (it.findtext("title") or "").strip()
@@ -211,7 +204,8 @@ def channel_e2_github(since: dt.date) -> list[dict]:
     """E2 — GitHub Search velocity API.
 
     Endpoint: https://api.github.com/search/repositories?q=created:>YYYY-MM-DD+stars:>N+topic:T
-    Response: {items: [{full_name, html_url, stargazers_count, created_at, description, ...}]}
+    Response: {incomplete_results: false, items: [{full_name, html_url, ...}]}.
+    Explicitly incomplete responses fail that topic; completed topics are retained.
     Extraction per item: full_name -> name, html_url -> url,
       signal = f"stars:{n} age:{days}d topic:{topic}", description -> pitch.
     Unauth rate limit is 10 req/min — we use 3 topics × 1 req each, well under.
@@ -220,29 +214,45 @@ def channel_e2_github(since: dt.date) -> list[dict]:
     if os.environ.get("GITHUB_TOKEN"):
         headers["Authorization"] = f"Bearer {os.environ['GITHUB_TOKEN']}"
     out: list[dict] = []
+    topics = [topic.strip() for topic in GITHUB_TOPICS
+              if isinstance(topic, str) and topic.strip()]
+    completed = 0
     since_str = since.strftime("%Y-%m-%d")
-    for topic in GITHUB_TOPICS:
+    for topic in topics:
         q = f"created:>{since_str} stars:>{GITHUB_STARS_MIN} topic:{topic}"
         url = f"https://api.github.com/search/repositories?q={urllib.parse.quote(q)}&sort=stars&order=desc&per_page=30"
-        r = requests.get(url, headers=headers, timeout=HTTP_TIMEOUT)
-        if r.status_code != 200:
-            raise RuntimeError(f"E2 topic={topic}: {r.status_code} {r.text[:200]}")
-        for it in r.json().get("items", []):
-            created = it.get("created_at", "")[:10]
-            try:
-                age_days = (dt.date.today() - dt.date.fromisoformat(created)).days if created else None
-            except ValueError:
-                age_days = None
-            stars = it.get("stargazers_count", 0)
-            signal = f"stars:{stars} age:{age_days}d topic:{topic}" if age_days is not None else f"stars:{stars} topic:{topic}"
-            out.append({
-                "discovered_at": _today(),
-                "surface": "E2",
-                "name": it.get("full_name", "?"),
-                "url": it.get("html_url", ""),
-                "signal": signal,
-                "one_line_pitch": (it.get("description") or "(no description)")[:200],
-            })
+        try:
+            r = requests.get(url, headers=headers, timeout=HTTP_TIMEOUT)
+            if r.status_code != 200:
+                raise ValueError(f"HTTP {r.status_code}")
+            rows = _json_records(r, "E2", "items", reject_incomplete=True)
+            topic_rows = []
+            for it in rows:
+                created = it.get("created_at", "")[:10]
+                try:
+                    age_days = (dt.date.today() - dt.date.fromisoformat(created)).days if created else None
+                except ValueError:
+                    age_days = None
+                stars = it.get("stargazers_count", 0)
+                signal = f"stars:{stars} age:{age_days}d topic:{topic}" if age_days is not None else f"stars:{stars} topic:{topic}"
+                topic_rows.append({
+                    "discovered_at": _today(),
+                    "surface": "E2",
+                    "name": it.get("full_name", "?"),
+                    "url": it.get("html_url", ""),
+                    "signal": signal,
+                    "one_line_pitch": (it.get("description") or "(no description)")[:200],
+                })
+        except (requests.RequestException, ValueError, TypeError, AttributeError) as exc:
+            print(f"  [E2] topic={topic}: failed ({type(exc).__name__}: {exc})", file=sys.stderr)
+            continue
+        # A malformed, incomplete or unavailable topic cannot erase completed topics.
+        completed += 1
+        out.extend(topic_rows)
+    coverage = f"configured={len(topics)} attempted={len(topics)} completed={completed}"
+    print(f"  [E2] topics: {coverage}", file=sys.stderr)
+    if not completed:
+        raise RuntimeError(f"E2: no usable GitHub topic responses ({coverage}); configure topics and check response availability")
     return out
 
 
@@ -260,7 +270,7 @@ def channel_e3_hf_spaces(since: dt.date) -> list[dict]:
     r = requests.get(HF_SPACES_URL, headers=headers, timeout=HTTP_TIMEOUT)
     r.raise_for_status()
     out: list[dict] = []
-    for sp in r.json():
+    for sp in _json_records(r, "E3"):
         space_id = sp.get("id", "")
         if not space_id:
             continue
@@ -287,37 +297,39 @@ def channel_e3_hf_spaces(since: dt.date) -> list[dict]:
 
 
 def channel_e4_npm(since: dt.date) -> list[dict]:
-    """E4 — npm download velocity.
-
-    Endpoints:
-      https://api.npmjs.org/downloads/range/last-week/<pkg>
-      https://api.npmjs.org/downloads/range/last-month/<pkg>
-    Response: {start, end, package, downloads:[{day, downloads}, ...]}
-    Calc: weekly = sum(last-week.downloads); monthly_avg_weekly = sum(last-month) * 7/30.
-    Emit only when weekly >= NPM_WEEKLY_MIN AND weekly / monthly_avg_weekly >= NPM_WOW_RATIO_MIN.
-    Signal: f"weekly:{w} WoW:{r:.1f}x".
-    `since` is unused (npm endpoint is a fixed last-week window) but kept for signature uniformity.
-    """
+    """E4 tracks download velocity; a valid package pair may yield no candidate."""
     del since  # signature uniformity
     headers = {"User-Agent": UA, "Accept": "application/json"}
 
+    def _total(response):
+        payload = response.json()
+        if not isinstance(payload, dict) or not isinstance(payload.get("downloads"), list):
+            raise ValueError("expected npm downloads array")
+        total = 0
+        for row in payload["downloads"]:
+            count = row.get("downloads") if isinstance(row, dict) else None
+            if type(count) is not int or count < 0:
+                raise ValueError("expected nonnegative integer npm download counts")
+            total += count
+        return total
+
     def _one(pkg):
-        # Two independent npm HTTP calls per package -> pure IO. Returns (record_or_None, log_or_None);
-        # the caller emits both SERIALLY in NPM_PACKAGES order so output stays deterministic.
+        # Package failures stay local; pool.map preserves package and diagnostic order.
         enc = urllib.parse.quote(pkg, safe="@/")
-        wk = requests.get(f"https://api.npmjs.org/downloads/range/last-week/{enc}",
-                          headers=headers, timeout=HTTP_TIMEOUT)
-        mo = requests.get(f"https://api.npmjs.org/downloads/range/last-month/{enc}",
-                          headers=headers, timeout=HTTP_TIMEOUT)
-        if wk.status_code != 200 or mo.status_code != 200:
-            # Single-pkg miss is not fatal, log and continue.
-            return None, f"  [E4] {pkg}: skipped (week={wk.status_code} month={mo.status_code})"
-        wk_total = sum(d.get("downloads", 0) for d in wk.json().get("downloads", []))
-        mo_total = sum(d.get("downloads", 0) for d in mo.json().get("downloads", []))
+        try:
+            wk = requests.get(f"https://api.npmjs.org/downloads/range/last-week/{enc}",
+                              headers=headers, timeout=HTTP_TIMEOUT)
+            mo = requests.get(f"https://api.npmjs.org/downloads/range/last-month/{enc}",
+                              headers=headers, timeout=HTTP_TIMEOUT)
+            if wk.status_code != 200 or mo.status_code != 200:
+                return None, f"  [E4] {pkg}: failed (week={wk.status_code} month={mo.status_code})", False
+            wk_total, mo_total = _total(wk), _total(mo)
+        except (requests.RequestException, ValueError) as exc:
+            return None, f"  [E4] {pkg}: failed ({type(exc).__name__}: {exc})", False
         mo_weekly_avg = (mo_total * 7 / 30) if mo_total else 0
         ratio = (wk_total / mo_weekly_avg) if mo_weekly_avg else float("inf") if wk_total else 0
         if wk_total < NPM_WEEKLY_MIN or ratio < NPM_WOW_RATIO_MIN:
-            return None, None
+            return None, None, True
         return {
             "discovered_at": _today(),
             "surface": "E4",
@@ -325,10 +337,8 @@ def channel_e4_npm(since: dt.date) -> list[dict]:
             "url": f"https://www.npmjs.com/package/{pkg}",
             "signal": f"weekly:{wk_total} WoW:{ratio:.1f}x",
             "one_line_pitch": f"npm download velocity surge ({wk_total}/wk, {ratio:.1f}x last-month avg)",
-        }, None
+        }, None, True
 
-    # Each package is independent IO; fetch them in parallel. pool.map preserves input order, so the
-    # serial emit below yields byte-for-byte the same output (and stderr log lines) as the old loop.
     pkgs = list(NPM_PACKAGES)
     workers = max(1, min(8, len(pkgs)))
     if workers <= 1:
@@ -338,11 +348,17 @@ def channel_e4_npm(since: dt.date) -> list[dict]:
             results = list(pool.map(_one, pkgs))
 
     out: list[dict] = []
-    for rec, log in results:
+    completed = 0
+    for rec, log, observed in results:
+        completed += observed
         if log:
             print(log, file=sys.stderr)
         if rec is not None:
             out.append(rec)
+    coverage = f"configured={len(pkgs)} attempted={len(results)} completed={completed}"
+    print(f"  [E4] package pairs: {coverage}", file=sys.stderr)
+    if not completed:
+        raise RuntimeError(f"E4: no usable npm response pairs ({coverage}); check packages and network access")
     return out
 
 
@@ -368,7 +384,7 @@ def channel_e5_show_hn(since: dt.date) -> list[dict]:
     r = requests.get(HN_API, params=params, headers=headers, timeout=HTTP_TIMEOUT)
     r.raise_for_status()
     out: list[dict] = []
-    for h in r.json().get("hits", []):
+    for h in _json_records(r, "E5", "hits"):
         points = h.get("points") or 0
         comments = h.get("num_comments") or 0
         if points < 30 and comments < 10:
@@ -389,31 +405,33 @@ def channel_e5_show_hn(since: dt.date) -> list[dict]:
 
 
 def channel_e6_youtube(since: dt.date) -> list[dict]:
-    """E6 — AI YouTube channel RSS feeds.
-
-    Endpoint per channel: https://www.youtube.com/feeds/videos.xml?channel_id=<UCID>
-    Response: Atom feed; <entry><title/><link href=.../><published/><media:description/></entry>
-    Extraction per entry: title -> name, link -> url, published (filter by since),
-      signal = f"channel:{handle} published:{date}",
-      pitch = first sentence of media:description.
-    Skips channels whose UCID is still a TODO placeholder.
-    """
+    """E6 returns candidates from recognized Atom feeds and reports source coverage."""
     headers = {"User-Agent": UA, "Accept": "application/atom+xml, application/xml, */*"}
     out: list[dict] = []
-    skipped_todo = []
+    skipped = []
+    configured = attempted = completed = 0
     for handle, ucid in YOUTUBE_CHANNELS:
-        if ucid.startswith("TODO"):
-            skipped_todo.append(handle)
+        if not isinstance(ucid, str) or not ucid.strip() or ucid.strip().startswith("TODO"):
+            skipped.append(handle)
             continue
-        url = f"https://www.youtube.com/feeds/videos.xml?channel_id={ucid}"
-        r = requests.get(url, headers=headers, timeout=HTTP_TIMEOUT)
-        if r.status_code != 200:
-            print(f"  [E6] {handle} ({ucid}): {r.status_code}", file=sys.stderr)
+        configured += 1
+        attempted += 1
+        url = f"https://www.youtube.com/feeds/videos.xml?channel_id={ucid.strip()}"
+        try:
+            r = requests.get(url, headers=headers, timeout=HTTP_TIMEOUT)
+            if r.status_code != 200:
+                print(f"  [E6] {handle}: failed (HTTP {r.status_code})", file=sys.stderr)
+                continue
+            root = ET.fromstring(r.text)
+            for el in root.iter():
+                if "}" in el.tag:
+                    el.tag = el.tag.split("}", 1)[1]
+            if root.tag != "feed":
+                raise ValueError("expected an Atom feed")
+        except (requests.RequestException, ET.ParseError, ValueError) as exc:
+            print(f"  [E6] {handle}: failed ({type(exc).__name__}: {exc})", file=sys.stderr)
             continue
-        root = ET.fromstring(r.text)
-        for el in root.iter():
-            if "}" in el.tag:
-                el.tag = el.tag.split("}", 1)[1]
+        completed += 1
         for entry in root.findall(".//entry"):
             title = (entry.findtext("title") or "").strip()
             link_el = entry.find("link")
@@ -434,8 +452,14 @@ def channel_e6_youtube(since: dt.date) -> list[dict]:
                 "signal": f"channel:{handle} published:{published[:10]}",
                 "one_line_pitch": pitch,
             })
-    if skipped_todo:
-        print(f"  [E6] skipped (UCID TODO): {', '.join(skipped_todo)}", file=sys.stderr)
+    if skipped:
+        print(f"  [E6] skipped (UCID unconfigured): {', '.join(skipped)}", file=sys.stderr)
+    coverage = f"configured={configured} attempted={attempted} completed={completed}"
+    print(f"  [E6] feeds: {coverage}", file=sys.stderr)
+    if not configured:
+        raise RuntimeError(f"E6: no configured channel IDs ({coverage}); set verified UCIDs in YOUTUBE_CHANNELS")
+    if not completed:
+        raise RuntimeError(f"E6: no usable Atom feeds ({coverage}); check channel IDs and network access")
     return out
 
 
@@ -505,27 +529,18 @@ def _render_inbox_block(date_str: str, by_channel: dict[str, list[dict]]) -> str
     return "\n".join(lines).rstrip() + "\n"
 
 
-def _append_to_inbox(out_path: str, block: str) -> None:
-    """Insert the block immediately under `## Inbox` in the target file.
-    Preserves the rest of the file. UTF-8 with no BOM rewrite.
-    """
-    with open(out_path, encoding="utf-8") as f:
-        body = f.read()
-    marker = "## Inbox"
-    idx = body.find(marker)
-    if idx < 0:
-        # No inbox section yet, append one at end.
-        new = body.rstrip() + f"\n\n## Inbox\n\n{block}\n"
-    else:
-        # Find end of the inbox heading line + intro paragraph: insert after the
-        # first blank line that follows the marker.
-        head_end = body.find("\n", idx)
-        # find the first occurrence of the next H3 or H2 after marker
-        # to keep prior sweeps intact, we just insert right after the heading.
-        insert_at = head_end + 1
-        new = body[:insert_at] + "\n" + block + "\n" + body[insert_at:]
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write(new)
+def _append_to_inbox(destination, block: str) -> None:
+    """Insert a sweep under Inbox while holding the private ledger update lock."""
+    def insert(body):
+        marker = "## Inbox"
+        idx = body.find(marker)
+        if idx < 0:
+            return body.rstrip() + f"\n\n## Inbox\n\n{block}\n"
+        end = body.find("\n", idx)
+        if end < 0:
+            return body + "\n\n" + block + "\n"
+        return body[:end + 1] + "\n" + block + "\n" + body[end + 1:]
+    private_inventory.update_text(insert, DISCOVERY_RELATIVE, destination)
 
 
 # ═══════════════ main ═════════════════════════════════════════════════════════
@@ -534,13 +549,18 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--since", default=None,
                     help="YYYY-MM-DD; only emit candidates dated >= this (default: 30 days ago)")
-    ap.add_argument("--out", default=DEFAULT_OUT,
-                    help=f"path to discovery-state.md (default: {DEFAULT_OUT})")
+    ap.add_argument("--out", default=None,
+                    help="optional final output path inside a verified PRIVATE versioned companion")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the block that would be appended, don't write")
     ap.add_argument("--channel", default=None,
                     help="run only one channel: e1|e2|e3|e4|e5|e6")
     args = ap.parse_args(argv)
+    try:
+        destination = private_inventory.resolve_destination(DISCOVERY_RELATIVE, path=args.out)
+    except private_inventory.InventoryError as exc:
+        print(f"Discovery destination refused: {exc}", file=sys.stderr)
+        return 2
 
     if args.since:
         since = dt.date.fromisoformat(args.since)
@@ -578,7 +598,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # summary
     print("=" * 60)
-    print(f"Discovery sweep — since {since.isoformat()}, out={args.out}")
+    print(f"Discovery sweep — since {since.isoformat()}, PRIVATE companion {destination.identity}")
     print("=" * 60)
     for ch in ("E1", "E2", "E3", "E4", "E5", "E6"):
         if ch in failures:
@@ -602,8 +622,12 @@ def main(argv: list[str] | None = None) -> int:
         print(block)
         return 0
 
-    _append_to_inbox(args.out, block)
-    print(f"\nAppended {total} candidates to {args.out}")
+    try:
+        _append_to_inbox(destination, block)
+    except private_inventory.InventoryError as exc:
+        print(f"Discovery persistence failed: {exc}", file=sys.stderr)
+        return 2
+    print(f"\nAppended {total} candidates; PRIVATE companion {destination.identity}")
     return 0
 
 

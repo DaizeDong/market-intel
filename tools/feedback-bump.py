@@ -31,7 +31,7 @@ Usage:
     python tools/feedback-bump.py
 
     # 90-day catch-up window, dump JSON
-    python tools/feedback-bump.py --since 2026-03-16 --out feedback-report.json
+    python tools/feedback-bump.py --since 2026-03-16 --out <absolute-private-companion-report-path>
 
     # actually mutate tool docs (cleanup pass auto-bump)
     python tools/feedback-bump.py --mode bump --since 2026-03-16
@@ -65,6 +65,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
                                 "guards", "tools"))
 from datadir import resolve_data_dir  # noqa: E402
 from live_run_contract import VALID_OUTCOMES, REVIEW_OUTCOMES, documentation_verified
+from document_io import DocumentError, read_document, replace_document
+import private_inventory
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TOOLS_DIR = REPO_ROOT / "skills" / "market-intel" / "reference" / "tools"
@@ -103,6 +105,17 @@ def reconfigure_stdout_utf8() -> None:
 
 # --- jsonl loader ----------------------------------------------------------
 
+def timestamp_utc(value: str) -> datetime:
+    """Interpret legacy date-only/naive values as UTC and normalize offsets."""
+    stamp = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if stamp.tzinfo is None:
+        stamp = stamp.replace(tzinfo=timezone.utc)
+    try:
+        return stamp.astimezone(timezone.utc)
+    except OverflowError as exc:
+        raise ValueError("timestamp is outside the supported UTC range") from exc
+
+
 def load_live_runs(path: Path, since: str) -> list[dict]:
     """Read live-runs.jsonl, tolerate UTF-8 BOM, and filter by ts >= since.
 
@@ -114,6 +127,7 @@ def load_live_runs(path: Path, since: str) -> list[dict]:
         return []
 
     entries: list[dict] = []
+    boundary = timestamp_utc(since)
     # utf-8-sig swallows a BOM if present; plain utf-8 lines pass through unchanged.
     with open(path, "r", encoding="utf-8-sig", errors="replace") as f:
         for lineno, raw in enumerate(f, start=1):
@@ -125,16 +139,13 @@ def load_live_runs(path: Path, since: str) -> list[dict]:
                 if not isinstance(obj, dict) or any(not isinstance(obj.get(k), str)
                         for k in ('ts', 'domain', 'source', 'outcome')):
                     raise ValueError('invalid record shape')
-                stamp = datetime.fromisoformat(obj['ts'].replace('Z', '+00:00'))
-                stamp = stamp.replace(tzinfo=timezone.utc) if stamp.tzinfo is None else stamp
+                stamp = timestamp_utc(obj['ts'])
             except (ValueError, TypeError):
                 obj = {'ts': since, 'source': '', 'domain': '', 'outcome': 'invalid_record',
                        'detail': f'Ledger line {lineno} needs review'}
                 print(f"WARN: ledger line {lineno} is invalid; recorded for review", file=sys.stderr)
                 entries.append(obj)
                 continue
-            boundary = datetime.fromisoformat(since.replace('Z', '+00:00'))
-            boundary = boundary.replace(tzinfo=timezone.utc) if boundary.tzinfo is None else boundary
             if stamp >= boundary:
                 entries.append(obj)
     return entries
@@ -251,6 +262,9 @@ def bucket_entries(entries: list[dict]) -> dict:
     unresolved_sources: list[dict] = []
     unknown_outcomes: list[dict] = []
     verification_observations: list[dict] = []
+    timestamp_issues: list[dict] = []
+    latest_instants: dict[str, datetime] = {}
+    now = datetime.now(timezone.utc)
 
     for e in entries:
         outcome = e.get("outcome") or ""
@@ -260,6 +274,17 @@ def bucket_entries(entries: list[dict]) -> dict:
         user_correction = e.get("user_correction")
 
         by_outcome[outcome] += 1
+        try:
+            stamp = timestamp_utc(ts)
+            time_issue = "future_timestamp" if stamp > now else None
+        except (ValueError, TypeError, AttributeError):
+            stamp = None
+            time_issue = "invalid_timestamp"
+        if time_issue:
+            timestamp_issues.append({"ts": ts, "source": source, "outcome": outcome,
+                                     "reason": time_issue})
+            if domain:
+                hot_domains.add(domain)
 
         # user_correction always wins (highest priority signal)
         if user_correction is not None or outcome == "user_correction":
@@ -309,11 +334,12 @@ def bucket_entries(entries: list[dict]) -> dict:
             verification_observations.append({"ts": ts, "source": source,
                 "capability": e.get("capability"), "verification_scope": e.get("verification_scope"),
                 "evidence_ref": e.get("evidence_ref")})
-            if slug and documentation_verified(e):
+            if slug and documentation_verified(e) and time_issue is None:
                 # keep the latest ts for this slug
-                prev = auto_bump_slugs.get(slug)
-                if prev is None or ts > prev:
+                prev = latest_instants.get(slug)
+                if prev is None or stamp > prev:
                     auto_bump_slugs[slug] = ts
+                    latest_instants[slug] = stamp
 
     return {
         "by_outcome": dict(by_outcome),
@@ -326,6 +352,7 @@ def bucket_entries(entries: list[dict]) -> dict:
         "unresolved_sources": unresolved_sources,
         "unknown_outcomes": unknown_outcomes,
         "verification_observations": verification_observations,
+        "timestamp_issues": timestamp_issues,
     }
 
 
@@ -347,6 +374,7 @@ def build_report(buckets: dict, since: str, total: int) -> dict:
         "unresolved_sources": buckets["unresolved_sources"],
         "unknown_outcomes": buckets["unknown_outcomes"],
         "verification_observations": buckets["verification_observations"],
+        "timestamp_issues": buckets["timestamp_issues"],
     }
 
 
@@ -393,6 +421,8 @@ def print_report(report: dict) -> None:
             print(f"  - {u['ts']} [{u['outcome']}] {u['source']!r}")
     if report["unknown_outcomes"]:
         print(f"\nWARN: {len(report['unknown_outcomes'])} unknown outcome(s); review writer contract")
+    if report["timestamp_issues"]:
+        print(f"\nWARN: {len(report['timestamp_issues'])} future or invalid timestamp(s); review required")
 
 
 # --- p2 trigger ------------------------------------------------------------
@@ -418,10 +448,10 @@ def check_p2_trigger(price_pressure: dict, since: str) -> bool:
 def _resolve_doc_path(slug: str) -> Path | None:
     """Find tools/<slug>.md or tools/<slug>.core.md (in that order)."""
     bare = TOOLS_DIR / f"{slug}.md"
-    if bare.exists():
+    if os.path.lexists(bare):
         return bare
     core = TOOLS_DIR / f"{slug}.core.md"
-    if core.exists():
+    if os.path.lexists(core):
         return core
     return None
 
@@ -435,8 +465,18 @@ def bump_last_verified(auto_bump: dict[str, str]) -> list[dict]:
     Returns a list of {slug, path, old, new, status} records.
     """
     results: list[dict] = []
+    now = datetime.now(timezone.utc)
     for slug, ts in sorted(auto_bump.items()):
-        target_month = ts[:7]  # YYYY-MM
+        try:
+            stamp = timestamp_utc(ts)
+            eligible = stamp <= now
+        except (ValueError, TypeError, AttributeError):
+            eligible = False
+        if not eligible:
+            results.append({"slug": slug, "path": None, "old": None, "new": None,
+                            "status": "review_required"})
+            continue
+        target_month = stamp.strftime("%Y-%m")
         doc = _resolve_doc_path(slug)
         if doc is None:
             results.append(
@@ -445,7 +485,7 @@ def bump_last_verified(auto_bump: dict[str, str]) -> list[dict]:
             )
             continue
 
-        text = doc.read_text(encoding="utf-8-sig", errors="replace")
+        text, expected = read_document(doc, TOOLS_DIR)
         m = LAST_VERIFIED_RE.search(text)
         if not m:
             results.append(
@@ -465,7 +505,7 @@ def bump_last_verified(auto_bump: dict[str, str]) -> list[dict]:
         new_text = LAST_VERIFIED_RE.sub(
             lambda mm, nm=target_month: f"{mm.group(1)}{nm}", text, count=1
         )
-        doc.write_text(new_text, encoding="utf-8", newline="")
+        replace_document(doc, TOOLS_DIR, new_text, expected)
         results.append(
             {"slug": slug, "path": str(doc), "old": old_month, "new": target_month,
              "status": "bumped"}
@@ -517,7 +557,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument(
         "--out",
         default=None,
-        help="Optional path: write the structured report as JSON.",
+        help="Optional report path inside a verified PRIVATE versioned companion.",
     )
     return p.parse_args(argv)
 
@@ -534,6 +574,13 @@ def main(argv: list[str] | None = None) -> int:
         print(f"ERROR: --since must be YYYY-MM-DD, got {args.since!r}", file=sys.stderr)
         return 64
 
+    destination = None
+    if args.out:
+        try:
+            destination = private_inventory.resolve_destination("reports/feedback.json", path=args.out)
+        except private_inventory.InventoryError as exc:
+            print(f"ERROR: report destination refused: {exc}", file=sys.stderr)
+            return 2
     lr = live_runs_path()
     if lr is None:
         print("market-intel is uninitialized: no private data dir, so there is no live-run ledger")
@@ -553,23 +600,22 @@ def main(argv: list[str] | None = None) -> int:
     p2 = check_p2_trigger(buckets["price_pressure"], args.since)
 
     if args.mode == "bump":
-        results = bump_last_verified(buckets["auto_bump_slugs"])
+        try:
+            results = bump_last_verified(buckets["auto_bump_slugs"])
+        except DocumentError as exc:
+            print(f"ERROR: document edit refused: {exc}", file=sys.stderr)
+            return 2
         print_bump_results(results)
         report["bump_results"] = results
 
     if args.out:
-        data_root = resolve_data_dir(SKILL)
-        if data_root is None:
-            raise RuntimeError("private companion DATA must be initialized before writing feedback")
-        data_root = data_root.resolve()
-        out_path = Path(args.out).expanduser()
-        out_path = (out_path if out_path.is_absolute() else data_root / out_path).resolve()
-        if out_path == data_root or not out_path.is_relative_to(data_root):
-            raise ValueError("feedback report must be beneath private companion DATA")
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(json.dumps(report, indent=2, ensure_ascii=False),
-                            encoding="utf-8")
-        print(f"\nReport written: {out_path}")
+        try:
+            saved = private_inventory.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n",
+                                                 "reports/feedback.json", destination)
+        except private_inventory.InventoryError as exc:
+            print(f"ERROR: report persistence failed: {exc}", file=sys.stderr)
+            return 2
+        print(f"\nReport written; PRIVATE companion {saved.identity}")
 
     # exit-code policy:
     #   2 if P2 trigger fires (highest priority signal)
@@ -577,7 +623,7 @@ def main(argv: list[str] | None = None) -> int:
     #   0 otherwise
     if p2:
         return 2
-    if report["hot_domains"] or report["unknown_outcomes"]:
+    if report["hot_domains"] or report["unknown_outcomes"] or report["timestamp_issues"]:
         return 1
     return 0
 

@@ -12,11 +12,13 @@ Uses an LLM **+ computer vision** to run whole browser *workflows* (multi-step f
 ## Install
 Self-host: `git clone` the repo and run via Docker / `docker compose` (server + UI), then drive through its REST API or MCP. Needs Docker (see `install-guide.md` prereqs). Heavier setup than a one-line MCP, stand it up only when vision-robust workflows justify it. Exact compose steps live in the repo README; L1 pointer in `reference/volatile/pricing-install.md#browser-automation`. ⚠ **AGPL-3.0**, note the license before embedding in anything you redistribute.
 
-## Auth / keys
-Self-host server has no service key, but the planner **needs an LLM API key** (OpenAI/Anthropic vision-capable model) set in the server env. Target-site auth = credentials/cookies you provide to the workflow. Key-bearing: put the LLM key in the server's env file, never in the transcript (see `install-guide.md` secret hygiene); Skyvern Cloud adds its own API key if you use the hosted option.
+## Model integration and private setup
+The vision planner requires model integration. All model or external-agent work must use installed `llmcall`, inheriting its current routing, model, timeout and fallback policy. No supported Skyvern adapter is supplied or verified here. Before starting planner tasks, verify an actual installed-version adapter and its tool-I/O contract; otherwise stop at setup. Direct provider keys or a second routing ladder are not a substitute.
+
+Resolve profiles, cookies, workflow state, traces and outputs to verified PRIVATE versioned DATA before starting the server. Target-site credentials and any hosted-service key belong in approved PRIVATE configuration and must not appear in transcripts. Confirm upstream persistence settings support these destinations; otherwise keep this route at setup.
 
 ## Usage, call examples
-Run a task via REST (exact path/fields unverified, confirm against the API spec at docs.skyvern.com): the current cloud API is `POST https://api.skyvern.com/v1/run/tasks` taking a single natural-language `prompt` (+ optional `url`, `webhook_url`); the legacy self-host route was `POST /api/v1/tasks` with `navigation_goal`/`data_extraction_goal` fields, your self-hosted version may expose either, so check its `/docs` (OpenAPI) before scripting. Or define a reusable **workflow** (YAML) and trigger it by ID. The MCP exposes task/workflow run + status tools once the server is up.
+After the adapter and private persistence checks pass, inspect the installed server's OpenAPI or active-session MCP tool schema, then verify a bounded read-only workflow and its returned fields. API paths and workflow schemas vary by version; this card does not establish an executable task contract. Writing to target sites requires authorization for the specific action.
 
 ## General experience & gotchas (踩坑)
 - **Vision = slower and pricier per step** than DOM-based tools. Its edge is resilience to layout change, not speed/cost, don't use it where a stable selector script (playwright) or bulk crawler (crawl4ai) would do.

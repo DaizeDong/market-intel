@@ -26,6 +26,6 @@ Tools map to Directus items/collections: list collections, read items (with filt
 - **SEO命门:** headless, if a rendered site syndicates Directus content, set the canonical URL on the front-end, not in the CMS row.
 
 ## Failure signals & fallback
-Empty results / 403 (token role not granted the collection), connection timeout (Directus instance unreachable / wrong URL), or schema-mismatch errors (MCP vs Directus version skew). Verify `✓ Connected` in `claude mcp list`. Fallback within domain: **Strapi 5 native MCP** (the other self-host headless option, token-scoped per content type), or **Sanity hosted MCP** / **Contentful MCP** if you'd rather not run your own instance.
+Empty results / 403 (token role not granted the collection), connection timeout (Directus instance unreachable / wrong URL), or schema-mismatch errors (MCP vs Directus version skew). Use a supported value-free diagnostic for the selected server that returns only allowlisted name, connection status and authentication state; report those states as unverified if unavailable. Verify the selected operation in the active host session before claiming readiness. Fallback within domain: **Strapi 5 native MCP** (the other self-host headless option, token-scoped per content type), or **Sanity hosted MCP** / **Contentful MCP** if you'd rather not run your own instance.
 
 ## Last verified: 2026-06

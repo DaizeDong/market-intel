@@ -15,29 +15,25 @@ Verdict rules per type:
   npm          registry.npmjs.org/<pkg>: time.modified within 12mo, not deprecated
   pypi         pypi.org/pypi/<pkg>/json: has releases, latest release within 12mo
 
-Cache: github checks share metrics/gh-api-cache.json (verify_matrix.py schema; L0
+Cache: github checks share the PRIVATE companion's cache/gh-api-cache.json (verify_matrix.py schema; L0
 re-verdicts on read because verify_matrix WARNs >12mo stale, L0 BLOCKs it).
-HTTP/npm/pypi use metrics/l0-cache.json (7-day TTL, keyed by URL/pkg).
+HTTP/npm/pypi use its cache/l0-cache.json (7-day TTL, keyed by URL/pkg).
 
 CLI: python tools/l0_verify.py --url <url> [--type <type>]
      exit 0 if PASS, 1 if BLOCK, 2 if UNCERTAIN.
-Run with --selftest (or no args) for deterministic synthetic regression tests.
-Use --live-selftest for the historical live-site expectations; an external outage
-is an observation, not a deterministic unit-test fixture.
+Run with --selftest (or no args) for the canonical fixtures.
 """
 from __future__ import annotations
-import argparse, datetime, io, json, os, re, socket, ssl, subprocess, sys
+import argparse, datetime, json, os, re, socket, ssl, subprocess, sys
 from urllib.parse import urlparse
 
 import requests
 
-# BOM-safe Windows stdout, matches verify_matrix.py / discover.py convention
-if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+from github_activity import months_old
+from private_cache import GH_CACHE_PATH, L0_CACHE_PATH, load_cache, prepare_write, save_entries
+from private_inventory import InventoryError
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-GH_CACHE_PATH = os.path.join(ROOT, "metrics", "gh-api-cache.json")
-L0_CACHE_PATH = os.path.join(ROOT, "metrics", "l0-cache.json")
 CACHE_TTL_DAYS = 7
 STALE_MONTHS = 12
 HTTP_TIMEOUT = 10
@@ -50,23 +46,14 @@ _now_iso = _now.isoformat()
 
 # ---------------- cache + probes ----------------
 
-def _load_cache(path: str) -> dict:
-    if not os.path.exists(path): return {}
-    try:
-        with open(path, encoding="utf-8") as f: return json.load(f)
-    except Exception: return {}
-
-def _save_cache(path: str, data: dict) -> None:
-    try:
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2, sort_keys=True)
-    except Exception: pass
-
 def _cache_fresh(entry: dict) -> bool:
+    if not isinstance(entry, dict):
+        return False
     try:
         ts = datetime.datetime.fromisoformat(entry["checked_at"])
-        return (_now - ts).days <= CACHE_TTL_DAYS
+        if ts.tzinfo is not None:
+            ts = ts.astimezone(datetime.timezone.utc).replace(tzinfo=None)
+        return 0 <= (_now - ts).total_seconds() <= CACHE_TTL_DAYS * 86400
     except Exception: return False
 
 def _dns_resolves(host: str) -> bool:
@@ -99,43 +86,65 @@ def _parse_last_modified(v: str | None) -> datetime.datetime | None:
         except ValueError: continue
     return None
 
-def _months_old(iso10: str) -> float:
-    try:
-        return (_now - datetime.datetime.strptime(iso10[:10], "%Y-%m-%d")).days / 30.44
-    except Exception:
-        return 0.0
+def _last_modified_fresh(value: str | None) -> bool:
+    if not isinstance(value, str):
+        return False
+    modified = _parse_last_modified(value)
+    return (modified is not None
+            and 0 <= (_now - modified).total_seconds() <= STALE_MONTHS * 30 * 86400)
+
+def _months_old(timestamp: str) -> float | None:
+    return months_old(timestamp, _now)
 
 def _result(entry: dict) -> dict:
     v = entry["verdict"]
     if v in ("RATE_LIMITED", "WARN"): v = "UNCERTAIN"  # legacy verify_matrix verdicts
     return {"verdict": v, "evidence": entry.get("reason", ""), "details": entry}
 
-TRANSIENT_REASONS = ("timeout", "transient HTTP", "unreachable", "indeterminate",
-                     "no response", "no freshness signal")
+TRANSIENT_REASONS = ("timeout", "transient http", "unreachable", "indeterminate",
+                     "no response", "no freshness signal", "body inspection failed")
+
+def _http_status(entry: dict) -> int | None:
+    status = entry.get("status")
+    if type(status) is int:
+        return status
+    # Old registry cache entries recorded HTTP status only in their reason.
+    match = re.search(r"\bhttp\s+(\d{3})\b", entry.get("reason") or "", re.IGNORECASE)
+    return int(match.group(1)) if match else None
+
+
+def _is_rate_limited(entry: dict) -> bool:
+    return entry.get("verdict") == "RATE_LIMITED" or _http_status(entry) == 429
+
 
 def _is_transient(entry: dict) -> bool:
     reason = (entry.get("reason") or "").lower()
-    return (entry.get("verdict") == "UNCERTAIN"
-            and any(t in reason for t in TRANSIENT_REASONS))
+    status = _http_status(entry)
+    return (_is_rate_limited(entry)
+            or (entry.get("verdict") == "UNCERTAIN"
+                and ((status is not None and 500 <= status < 600)
+                     or any(t in reason for t in TRANSIENT_REASONS))))
 
 def _cached_or(path: str, key: str, fn) -> dict:
     """Return cached fresh entry as a result, else run fn() -> entry, persist, return.
-    Transient UNCERTAINs (timeout / 5xx / unreachable) are NOT cached — a flake on
-    one run shouldn't poison the cache for the next 7 days. Run fn up to twice on
-    transient outcomes; the second attempt closes the typical TLS-handshake flake."""
-    cache = _load_cache(path)
+    Transient UNCERTAINs (timeout / 5xx / unreachable) are not cached and get one
+    retry. HTTP 429 is also not cached, but returns without an immediate retry so
+    the next scheduled run can respect the provider's rate allowance."""
+    destination, cache = load_cache(path)
     entry = cache.get(key)
     if entry and _cache_fresh(entry) and entry.get("verdict") not in ("RATE_LIMITED",):
-        if not _is_transient(entry):
+        # Old ordinary-web PASS entries may have accepted future Last-Modified dates.
+        invalid_web_freshness = (key.startswith("web:") and entry.get("verdict") == "PASS"
+                                 and _http_status(entry) in (401, 403)
+                                 and not _last_modified_fresh(entry.get("last_modified")))
+        if not _is_transient(entry) and not invalid_web_freshness:
             return _result(entry)
+    prepare_write(path, destination)
     entry = fn()
-    if _is_transient(entry):
-        retry = fn()
-        if not _is_transient(retry):
-            entry = retry
+    if _is_transient(entry) and not _is_rate_limited(entry):
+        entry = fn()
     if not _is_transient(entry):
-        cache[key] = entry
-        _save_cache(path, cache)
+        save_entries(path, {key: entry}, destination)
     return _result(entry)
 
 
@@ -145,11 +154,13 @@ def _reverdict_github(entry: dict) -> dict:
     """Recompute verdict from pushed_at/archived per L0's stricter rules.
     verify_matrix.py records >12mo stale as WARN; L0 must surface BLOCK."""
     if entry.get("verdict") == "BLOCK": return entry
-    if entry.get("archived"):
+    if entry.get("archived") is True:
         return {**entry, "verdict": "BLOCK", "reason": "archived upstream"}
     pa = entry.get("pushed_at")
-    if not pa: return entry
     mo = _months_old(pa)
+    if entry.get("archived") is not False or mo is None:
+        return {**entry, "verdict": "UNCERTAIN",
+                "reason": "missing, invalid or future GitHub activity evidence"}
     if mo > STALE_MONTHS:
         return {**entry, "verdict": "BLOCK",
                 "reason": f"stale: pushed_at={pa[:10]} (~{int(mo)}mo)"}
@@ -181,13 +192,15 @@ def _check_github(url: str) -> dict:
     if repo.endswith(".git"): repo = repo[:-4]
     slug = f"{owner}/{repo}"
 
-    cache = _load_cache(GH_CACHE_PATH)
+    destination, cache = load_cache(GH_CACHE_PATH)
     cached = cache.get(slug)
-    if cached and _cache_fresh(cached) and cached.get("verdict") != "RATE_LIMITED":
+    if (cached and _cache_fresh(cached) and cached.get("hostname") == "github.com"
+            and cached.get("verdict") != "RATE_LIMITED"):
         return _result(_reverdict_github(cached))
 
+    prepare_write(GH_CACHE_PATH, destination)
     res = subprocess.run(
-        ["gh", "api", f"repos/{slug}", "--jq", "{pushed_at:.pushed_at,archived:.archived}"],
+        ["gh", "api", "--hostname", "github.com", f"repos/{slug}", "--jq", "{pushed_at:.pushed_at,archived:.archived}"],
         capture_output=True, text=True, encoding="utf-8")
     if res.returncode != 0:
         err = res.stderr or ""
@@ -206,14 +219,14 @@ def _check_github(url: str) -> dict:
             d = json.loads(res.stdout)
             entry = _reverdict_github({"repo": slug,
                                        "pushed_at": d.get("pushed_at"),
-                                       "archived": bool(d.get("archived")),
-                                       "verdict": "PASS", "reason": ""})
+                                       "archived": d.get("archived"),
+                                       "verdict": "UNCERTAIN", "reason": ""})
         except Exception:
             entry = {"repo": slug, "pushed_at": None, "archived": None,
                      "verdict": "RATE_LIMITED", "reason": "unparseable gh response"}
     entry["checked_at"] = _now_iso
-    cache[slug] = entry
-    _save_cache(GH_CACHE_PATH, cache)
+    entry["hostname"] = "github.com"
+    save_entries(GH_CACHE_PATH, {slug: entry}, destination)
     return _result(entry)
 
 
@@ -260,41 +273,42 @@ def _check_web(url: str, registry: bool = False) -> dict:
         cert = (_cert_check(host) if parsed.scheme == "https" and dns_ok
                 else {"ok": False, "expires": None, "reason": "skipped"})
 
+        body_issue = None
         if status is not None and 200 <= status < 300:
-            # E3 (edges fork 2026-06-17): body content sniff, 200 OK does not mean alive.
-            # Pages can return 200 with "maintenance" / "domain parking" / "coming soon".
-            # Attempt cheap GET of first ~2KB; flag if known dead-page keywords appear.
+            # Inspect the response actually serving the content, including its status and URL.
             try:
                 r_body = requests.get(url, headers=headers, timeout=HTTP_TIMEOUT,
                                       allow_redirects=True, stream=True)
-                first_chunk = r_body.raw.read(2048, decode_content=True).decode(
-                    "utf-8", errors="replace").lower()
-                r_body.close()
-                # Distinctive substrings for dead/maintenance pages; restrictive enough not
-                # to false-positive on real product pages that mention these words in nav/footer.
-                dead_signals = [
-                    "site is under maintenance",
-                    "scheduled maintenance",
-                    "service is currently down",
-                    "this domain is for sale",
-                    "domain parking",
-                    "buy this domain",
-                    "coming soon, stay tuned",
-                ]
-                hit = next((s for s in dead_signals if s in first_chunk), None)
-                if hit:
-                    verdict, reason = "UNCERTAIN", f"HTTP {status} but body signals '{hit}'"
-                else:
-                    verdict, reason = "PASS", f"HTTP {status}"
+                try:
+                    status = r_body.status_code
+                    final_url = r_body.url
+                    last_modified = r_body.headers.get("Last-Modified") or last_modified
+                    if 200 <= status < 300:
+                        first_chunk = next(r_body.iter_content(chunk_size=2048), b"").decode(
+                            "utf-8", errors="replace").lower()
+                        dead_signals = (
+                            "site is under maintenance", "scheduled maintenance",
+                            "service is currently down", "this domain is for sale",
+                            "domain parking", "buy this domain", "coming soon, stay tuned",
+                        )
+                        hit = next((signal for signal in dead_signals if signal in first_chunk), None)
+                        if hit:
+                            body_issue = f"body signals '{hit}'"
+                finally:
+                    r_body.close()
             except requests.exceptions.RequestException:
-                verdict, reason = "UNCERTAIN", f"HTTP {status} but body inspection failed"
+                body_issue = "body inspection failed"
+
+        if status is not None and 200 <= status < 300:
+            verdict = "UNCERTAIN" if body_issue else "PASS"
+            reason = f"HTTP {status}" + (f" but {body_issue}" if body_issue else "")
         elif status in (301, 302, 307, 308):
             verdict, reason = "UNCERTAIN", f"redirect chain unresolved ({status})"
         elif status == 404:
             verdict, reason = "BLOCK", "HTTP 404"
         elif status in (401, 403):
             lm_dt = _parse_last_modified(last_modified)
-            lm_ok = lm_dt and (_now - lm_dt).days <= STALE_MONTHS * 30
+            lm_ok = _last_modified_fresh(last_modified)
             if registry and dns_ok and cert["ok"]:
                 verdict, reason = "PASS", f"registry anti-bot {status} but DNS+cert healthy"
             elif dns_ok and cert["ok"] and lm_ok:
@@ -347,28 +361,46 @@ def _check_npm(pkg: str) -> dict:
             return {"pkg": pkg, "verdict": "BLOCK", "reason": "npm 404", "checked_at": _now_iso}
         if r.status_code != 200:
             return {"pkg": pkg, "verdict": "UNCERTAIN",
-                    "reason": f"npm HTTP {r.status_code}", "checked_at": _now_iso}
+                    "reason": f"npm HTTP {r.status_code}", "status": r.status_code,
+                    "checked_at": _now_iso}
         try: d = r.json()
         except Exception:
             return {"pkg": pkg, "verdict": "UNCERTAIN", "reason": "npm unparseable",
                     "checked_at": _now_iso}
-        modified = (d.get("time") or {}).get("modified")
-        if d.get("deprecated"):
+        tags = d.get("dist-tags") if isinstance(d, dict) else None
+        latest = tags.get("latest") if isinstance(tags, dict) else None
+        versions = d.get("versions") if isinstance(d, dict) else None
+        release = (versions.get(latest) if isinstance(versions, dict)
+                   and isinstance(latest, str) and latest.strip() else None)
+        if not isinstance(release, dict) or release.get("version") != latest:
+            return {"pkg": pkg, "verdict": "UNCERTAIN",
+                    "reason": "missing or invalid latest version metadata", "checked_at": _now_iso}
+        deprecated = release.get("deprecated", "")
+        if not isinstance(deprecated, str):
+            return {"pkg": pkg, "verdict": "UNCERTAIN",
+                    "reason": "invalid latest version deprecation evidence", "checked_at": _now_iso}
+        time_data = d.get("time")
+        modified = time_data.get("modified") if isinstance(time_data, dict) else None
+        if deprecated:
             return {"pkg": pkg, "verdict": "BLOCK",
-                    "reason": f"deprecated: {str(d['deprecated'])[:60]}",
-                    "modified": modified, "checked_at": _now_iso}
+                    "reason": f"latest {latest} deprecated: {deprecated[:60]}",
+                    "latest_version": latest, "modified": modified, "checked_at": _now_iso}
         if not modified:
             return {"pkg": pkg, "verdict": "UNCERTAIN", "reason": "no time.modified",
                     "checked_at": _now_iso}
         mo = _months_old(modified)
+        if mo is None:
+            return {"pkg": pkg, "verdict": "UNCERTAIN", "reason": "invalid or future time.modified",
+                    "modified": modified, "checked_at": _now_iso}
         if mo > STALE_MONTHS:
             return {"pkg": pkg, "verdict": "BLOCK",
                     "reason": f"stale: time.modified={modified[:10]} (~{int(mo)}mo)",
                     "modified": modified, "checked_at": _now_iso}
         return {"pkg": pkg, "verdict": "PASS",
                 "reason": f"time.modified {modified[:10]} within {STALE_MONTHS}mo",
-                "modified": modified, "checked_at": _now_iso}
-    return _cached_or(L0_CACHE_PATH, f"npm:{pkg}", probe)
+                "latest_version": latest, "modified": modified, "checked_at": _now_iso}
+    # Prior npm entries never checked the selected release's deprecation metadata.
+    return _cached_or(L0_CACHE_PATH, f"npm-v2:{pkg}", probe)
 
 def _check_pypi(pkg: str) -> dict:
     def probe() -> dict:
@@ -382,7 +414,8 @@ def _check_pypi(pkg: str) -> dict:
             return {"pkg": pkg, "verdict": "BLOCK", "reason": "pypi 404", "checked_at": _now_iso}
         if r.status_code != 200:
             return {"pkg": pkg, "verdict": "UNCERTAIN",
-                    "reason": f"pypi HTTP {r.status_code}", "checked_at": _now_iso}
+                    "reason": f"pypi HTTP {r.status_code}", "status": r.status_code,
+                    "checked_at": _now_iso}
         try: d = r.json()
         except Exception:
             return {"pkg": pkg, "verdict": "UNCERTAIN", "reason": "pypi unparseable",
@@ -395,16 +428,22 @@ def _check_pypi(pkg: str) -> dict:
         latest = None
         for files in releases.values():
             for f in files or []:
-                ut = f.get("upload_time")
+                ut = f.get("upload_time_iso_8601") or f.get("upload_time")
                 if not ut: continue
                 try:
-                    dt = datetime.datetime.strptime(ut[:10], "%Y-%m-%d")
+                    dt = datetime.datetime.fromisoformat(ut.replace("Z", "+00:00"))
+                    # PyPI's legacy upload_time is UTC without an explicit timezone.
+                    if dt.tzinfo is not None:
+                        dt = dt.astimezone(datetime.timezone.utc).replace(tzinfo=None)
                     if latest is None or dt > latest: latest = dt
                 except Exception: pass
         if latest is None:
             return {"pkg": pkg, "verdict": "UNCERTAIN",
                     "reason": "releases present but no upload_time", "checked_at": _now_iso}
-        mo = (_now - latest).days / 30.44
+        if latest > _now:
+            return {"pkg": pkg, "verdict": "UNCERTAIN",
+                    "reason": "future release upload_time", "checked_at": _now_iso}
+        mo = (_now - latest).total_seconds() / (86400 * 30.44)
         if mo > STALE_MONTHS:
             return {"pkg": pkg, "verdict": "BLOCK",
                     "reason": f"stale: latest release {latest.date()} (~{int(mo)}mo)",
@@ -512,18 +551,25 @@ def main() -> int:
     ap.add_argument("--type", default="auto",
                     choices=["auto", "github", "web", "web-registry", "npm", "pypi"])
     ap.add_argument("--selftest", action="store_true",
-                    help="run deterministic regression tests instead of a single URL")
-    ap.add_argument("--live-selftest", action="store_true", help="check historical expectations against live sites")
+                    help="run deterministic regressions instead of a single URL")
+    ap.add_argument("--live-selftest", action="store_true",
+                    help="check historical expectations against live sites")
     args = ap.parse_args()
 
     if args.live_selftest:
         return _live_selftest()
     if args.selftest or not args.url:
         return _selftest()
-    result = verify(args.url, args.type)
+    try:
+        result = verify(args.url, args.type)
+    except InventoryError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return 2
     print(json.dumps(result, ensure_ascii=False, indent=2, default=str))
     v = result["verdict"]
     return 0 if v == "PASS" else (1 if v == "BLOCK" else 2)
 
 if __name__ == "__main__":
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.exit(main())

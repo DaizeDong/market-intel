@@ -17,7 +17,7 @@ Full market-data API: realtime + ~20 years of history across stocks/options/indi
 - **Tier pricing rots**, re-verify on massive.com before committing spend. Snapshot dates in `polygon.auto.md`.
 - **Rate-limit shape matters:** free is 5 req/min (easy to trip in a loop); paid tiers remove the per-minute cap. Batch and back off on the free tier.
 - It's a quote/market-data source, **not fundamentals**, for filings use SEC EDGAR, for macro use FRED.
-- **PyPI MCP wrappers are unstable** (confirmed 2026-06), community packages `polygon-mcp` / `polygon-mcp-server` have flaky installs and break across uvx versions. Recommendation: **keep the API key in `secrets/polygon.env` and call REST directly from a subagent** rather than chasing a stable MCP install.
+- **PyPI MCP wrappers are unstable** (confirmed 2026-06), community packages `polygon-mcp` / `polygon-mcp-server` have flaky installs and break across uvx versions. Recommendation: **load the API key through supported configuration at a verified absolute path in an initialized PRIVATE versioned companion and call REST through the approved client**. Follow the private-destination checks in [the install snapshot](polygon.auto.md); keep setup pending if the client cannot use that configuration. Never fall back to a credential file relative to public source.
 
 ## Failure signals & fallback
 Failure looks like: HTTP 429 (free 5/min exceeded), delayed data when you expected realtime (wrong tier), or auth errors after the rebrand (key should still work, re-check the dashboard).

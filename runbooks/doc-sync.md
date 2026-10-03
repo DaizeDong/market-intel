@@ -31,12 +31,13 @@ These get **warning-level** flags from `check_doc_drift.py` when heuristics sugg
 
 ## Per-release workflow (auto + manual gates)
 
-`release.ps1` will gain two new steps after the existing version-bump logic:
+Prepare the complete release commit before running `release.ps1`, as described in
+[release.md](release.md):
 
-1. Bump `plugin.json` version (canonical, existing step).
-2. Validate CHANGELOG entry, human-written, date-format checked (existing step 2).
-3. **NEW step 5c**: run `check_doc_drift.py`. Any **fail-level** drift aborts the release. The author fixes and re-runs.
-4. **NEW step 5d (optional)**: run `check_doc_drift.py --fix` to auto-bump README badges and counts. Re-check after; if clean, proceed to tag.
+1. Update the plugin version and corresponding changelog entry during preparation.
+2. Run `check_doc_drift.py --fix --no-cache` when derived fields need updating, then review the diff.
+3. Commit the prepared source through the normal hooks. The release script requires a clean commit and does not edit, stage or automatically fix source.
+4. Run the release dry run. Its read-only drift check rejects fail-level drift; fix and commit any issue before retrying. Publish only when authorized.
 
 Steps the release author MUST eyeball before tagging, these are the things the checker can't decide:
 
@@ -47,7 +48,7 @@ Steps the release author MUST eyeball before tagging, these are the things the c
 
 ## Per-refresh-sweep workflow (cleanup pass extension)
 
-`runbooks/refresh-protocol.md` already covers domain shards and per-tool doc decay. Extend its cleanup pass with three new checks:
+[`refresh-protocol.md`](../skills/market-intel/reference/refresh-protocol.md) covers domain shards and per-tool doc decay. Its cleanup pass includes these checks:
 
 - **Top-level doc freshness sweep**: read mtime of PHILOSOPHY.md, ROADMAP.md, EVOLUTION.md, CONSTITUTION.md. If any has been untouched for >12 months AND CHANGELOG has accumulated ≥5 entries in that window, surface as "stale narrative, needs human review".
 - **README narrative vs reality**: spawn a fork agent to read README + SKILL.md + `sources-index.md`, then judge whether the README still describes the system honestly. Output is binary: "PASS" or "drift between README and reality at section X, concrete description". This is the catch-all for the things the checker can't enforce.

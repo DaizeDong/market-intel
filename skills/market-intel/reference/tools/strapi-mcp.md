@@ -26,6 +26,6 @@ Tools are scoped per content type: list/create/update/publish entries for the ty
 - **SEO命门:** headless, set canonical on the rendered front-end if content syndicates.
 
 ## Failure signals & fallback
-403 / empty results (token not scoped to the type), timeouts (instance unreachable), or "can't upload media" (by design). Verify `✓ Connected` in `claude mcp list`. Fallback within domain: **Sanity hosted MCP** or **Contentful MCP** if you'd rather not self-host; **directus/mcp** for a SQL-backed self-host alternative.
+403 / empty results (token not scoped to the type), timeouts (instance unreachable), or "can't upload media" (by design). Use a supported value-free diagnostic for the selected server that returns only allowlisted name, connection status and authentication state; report those states as unverified if unavailable. Verify the selected operation in the active host session before claiming readiness. Fallback within domain: **Sanity hosted MCP** or **Contentful MCP** if you'd rather not self-host; **directus/mcp** for a SQL-backed self-host alternative.
 
 ## Last verified: 2026-06

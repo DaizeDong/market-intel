@@ -1,2 +1,3 @@
-# CLI tools (changelog_draft, incident_helper) draft via the shared llmcall chain.
-llmcall @ git+https://github.com/DaizeDong/llmcall.git
+# Core catalog, discovery and validation dependencies.
+# Model drafting uses the operator's optional llmcall installation (CONFIG.md#model-adapter).
+requests

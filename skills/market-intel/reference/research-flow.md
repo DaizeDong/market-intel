@@ -59,28 +59,24 @@ saturate don't fixed-stop; report coverage) and the **~40 call / ~6 round cost c
 it is a stated choice, and the uncovered remainder becomes an explicit gap, never a silent truncate.
 A numeric override (`{domains, tools_per_domain, queries_per_tool, stop}`) wins if the user gives one.
 
-## 4. Detect + availability-gate (the task-time classifier)
+## 4. Verify the selected operation in the active host
 
-Run `claude mcp list` and parse the three-state health output, a source is usable only if it shows
-`✓ Connected`; treat `✗ Failed` / `! Needs authentication` as not available. Tool-name prefix
-matching is a cross-check only, never the primary signal (`SKILL.md` Step 2). Then check whether a
-**companion config repo** exists (discovery order: `$MARKET_INTEL_CONFIG` → `~/.market-intel-config/`
-→ `~/.config/market-intel-config/`; spec: `reference/companion-config-spec.md`). If present, read its
-`registry.json` for `installed` / `tier` / `transport` / `mcp_server_name` / `health_last`, that is
-the authoritative "what the user has." Never read `secrets/<slug>.env`.
+Use the current Claude or Codex session's callable tools to identify the exact
+source and operation. A separate host listing, companion `installed` flag, local
+import or keyless catalog label is an inventory hint. None establishes readiness.
+Apply [host-capabilities.md](host-capabilities.md) without invoking maintenance
+scripts on the research path.
 
-Now run **Step 2b**, for the triaged domains' relevant tools, classify each **at this moment** into
-one of three buckets using **query-side signals only** (no refresh/ops-script import, stay
-P5-clean):
-
-| bucket | signal | action |
+| bucket | required evidence | action |
 |---|---|---|
-| **available-now** | `✓ Connected`, or keyless/no-auth, or local lib installed, or companion `installed:true` + `mcp_server_name` Connected | fan out at SCALE (step 5) |
-| **configurable-with-setup** | not live now, but a free/cheap recipe exists (companion has it un-applied, or `activation-recipes.md` lists a free-key/free-tier/install-no-key path) | JIT-suggest in report (step 6); do NOT call this turn |
-| **hard-gap** | only paid/enterprise unlocks it, or tombstoned (`D-404`/`D-PRICE`/`D-TOS`/dead) | explicit gap; suggest only if theme truly needs the paid depth, flagged paid |
+| **available-now** | Current host/session/source/operation attribution, supported exposure, successful execution, authenticated or confirmed not-required auth, and usable response content | use at the selected scale |
+| **setup** | Missing, stale, malformed or failed operation evidence | report the specific gap and host-appropriate setup path |
+| **hard-gap** | Current attributed evidence explicitly says the selected operation is unsupported | report the unsupported operation and alternatives |
 
-Live state wins for *can-I-call-it-now*; companion tier informs *is-it-free-to-activate*. This is
-warn-level (Side A/B/C), it shapes fan-out and recommendations, it never refuses to run.
+Evidence expires after 900 seconds and permits 60 seconds of future skew, both
+inclusive. A newer authentication failure defeats older success. A paid plan,
+tombstone or missing installation alone cannot establish current unsupported
+capability. Price and recipe metadata guide setup; they never grant readiness.
 
 ## 5. Fan out to available-now tools, at scale
 
@@ -88,7 +84,7 @@ Hand the **available-now** sources + sub-questions to the heavy harness (`SKILL.
 subagent per sub-question via the Agent tool (each told to load its target MCP via ToolSearch
 first, subagents inherit MCPs only in deferred form), or `deep-research` for the web portion, or
 `research-lit`'s `— sources:` detect-or-skip routing for source-routed retrieval. Prefer the free
-browser-automation route (④, playwright already connected) over paid APIs when it fits; reach for
+browser-automation route (④, playwright available only after current-session operation verification) over paid APIs when it fits; reach for
 paid ①/② only for history the browser can't backfill, scale reliability, or compliance.
 
 Every subagent returns a **structured evidence unit**, not prose:
@@ -98,14 +94,15 @@ insert a combiner layer (each merges 3 to 4 workers) so the main context never h
 
 ## 6. JIT-surface config gaps for the rest (theme-driven, at task-time)
 
-For every `configurable-with-setup` (and any theme-critical `hard-gap`) tool: **do not silently
+For every `setup` (and any theme-critical `hard-gap`) tool: **do not silently
 skip**. Emit a one-line, theme-specific suggestion naming what the missing tool would deepen, its
 cost class, and the exact activation path (from `reference/activation-recipes.md`):
 
 **Copy the canonical wording from [`report-template.md`](./report-template.md)** ("configure for
 deeper data"); it is not restated here, because a template line living in three files drifts in three
-directions. It names the tool, its cost tier, the `console.py connect <slug>` command, the key
-source, and that a reconnect will not help the current turn.
+directions. It names the tool, its cost tier, the canonical connection command, the key source,
+and the selected host activation and fresh-operation checks. Report any actual activation
+limitation; a source verified in this session can be used in this session.
 
 Configuration is recommended **at task-time, driven by the theme**, not pre-done. These lines feed
 the report's Coverage-gaps → "Configure for deeper data" block (`reference/report-template.md`).
@@ -135,7 +132,7 @@ matrix, risks & counter-evidence, then the **Coverage-gaps** ledger, which makes
 *verifiable, not asserted*:
 
 - tool coverage `invoked N / M available-now in scope` per domain + total, at the chosen SCALE;
-- the **availability-gate classification** for this run (available-now / configurable-with-setup /
+- the **availability-gate classification** for this run (available-now / setup /
   hard-gap);
 - uncovered tools as explicit gaps (reason each);
 - the JIT theme-tied "configure for deeper data" suggestions from step 6;
@@ -147,10 +144,12 @@ Append one line per source actually touched to the live-run ledger (reuses guard
 near-zero extra cost). This is the highest-value error signal for the next refresh sweep, a source
 flagged `dead` in real use auto-nominates for the deletion path.
 
-The ledger lives OUTSIDE this repo, `~/.market-intel-config/data/metrics/live-runs.jsonl`, resolved
-by `tools/datadir.py`, because an entry records what you were actually researching. If the data dir
-does not exist, note the observations in the reply so they aren't lost; never write them into the
-repo. Shape: `metrics/live-runs.jsonl.example`.
+The incident helper appends to `metrics/live-runs.jsonl` below verified PRIVATE
+DATA. It holds a lock across the read/modify/replace transaction and returns a
+storage error if persistence cannot be verified. Keep observations in the reply
+until the companion is initialized; never fall back to a public source path.
+Use the [generated schema](live-run-schema.json) and
+[generated examples](../metrics/live-runs.jsonl.example) for the outcome vocabulary.
 
 ---
 
@@ -161,8 +160,8 @@ repo. Shape: `metrics/live-runs.jsonl.example`.
 1. intake: theme + decision question (sets decision-grade bar)
 2. triage: sources-index.md -> real domains (skip meta-domains)
 3. SCALE: scan | standard | deep(default) | exhaustive  (+ 3 iron rules, ~40-call ceiling)
-4. detect + GATE: claude mcp list (+ companion registry.json) -> bucket each tool now:
-      available-now | configurable-with-setup | hard-gap   (query-side signals only; P5-clean)
+4. verify exact current host/session/source/operation evidence -> bucket each tool now:
+      available-now | setup | hard-gap   (query-side signals only; P5-clean)
 5. fan out: available-now ONLY, at SCALE; structured evidence units; combiner if >5
 6. JIT gaps: theme-tied "configure <tool> to deepen <aspect>" for configurable/hard-gap
 7. verify: 8 guardrails (citation gate, >=2 indep, tiers, no silent degrade, timestamps,

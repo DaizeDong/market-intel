@@ -16,8 +16,9 @@ Hosted HTTP MCP, nothing to clone.
 
 ```
 claude mcp add -t http -s user skillsmp https://skillsmp.com/mcp
-claude mcp get skillsmp
 ```
+
+After reconnecting, use a supported value-free diagnostic for the selected server, returning only allowlisted name, connection status and authentication state. If that diagnostic is unavailable, report those states as unverified. Discover the tools in the active host session and verify the selected operation with usable results before claiming readiness; a connected label alone is insufficient. See the [installation guide](../install-guide.md).
 
 `-s user` is required; `claude mcp add` defaults to the local scope and would write it into the current project instead of the shared config. The site's own docs give `"type": "streamable-http"`, which Claude Code does not accept and which yields a server that silently never connects. The correct value is `"http"`.
 

@@ -9,24 +9,36 @@
 ## What it does / when to pick it
 A focused crawler for **微博 (Weibo)**: pull a given user's posts (text, images, video links, reposts), post metadata (likes/comments/reposts counts, timestamps), and basic profile info, exporting to CSV/JSON/MySQL/MongoDB/SQLite. **Pick it when the target is specific Weibo users/accounts** and you want a ready config-driven pull. For multi-platform Chinese coverage (also 抖音/小红书/B站/快手/知乎/贴吧) prefer **NanmiCoder/MediaCrawler** (50k★); use weibo-crawler when Weibo is the whole job and you want the lighter single-purpose tool.
 
-## Install
-`git clone https://github.com/dataabc/weibo-crawler && pip install -r requirements.txt`, then edit `config.json` (target user IDs, fields, date range, output format). Run `python weibo.py`. Python ≥3.x. Not an MCP, driven by config + script. L1 line: `reference/volatile/pricing-install.md#browser-automation`. Works on native Windows (pure-Python requests, no Playwright). README/config are in Chinese.
+## Install in a PRIVATE runtime checkout
+Before any real run, resolve the full consumer checkout and use
+`tools/private_inventory.py`'s `resolve_destination(path=...)` for individual
+config/output files and `resolve_directory(path=...)` for existing runtime or
+browser-profile directories. Pass the final absolute path. Each check proves the
+containing repository, including a repository rooted at the directory itself,
+and PRIVATE visibility for every effective
+publication destination. Stop on missing, PUBLIC or unknown proof.
+Keep runtime files versioned in that PRIVATE companion. An ignored directory in
+this public checkout is not a valid destination. A later real run must repeat the
+check; this recipe is not a live destination attestation.
+
+This upstream project uses repository-relative runtime paths. Do not clone or
+launch its real workload under the public market-intel checkout. Prepare a
+runtime source copy inside the verified PRIVATE companion, with no nested
+PUBLIC upstream Git repository; verify the final containing repository after
+preparation. Keep upstream version/license metadata with the private copy.
+Install dependencies there using the upstream instructions. Only then launch
+`weibo.py` from that PRIVATE runtime directory. The known output/config shapes
+are `weibo/`, target lists, `config.json` and cookie state; inspect the installed version for additional outputs before use.
 
 ## Auth / keys
-No service key. It reads Weibo's m.weibo.cn endpoints; for anything beyond public/limited data you must supply a **logged-in cookie** in `config.json` (`cookie` field). The cookie is a session secret, treat like a key: user supplies it themselves, don't echo/commit it (see `install-guide.md` secret hygiene). **Use a throwaway Weibo account**, this is route ④, ToS-violating, ban risk on the account whose cookie you use.
+No service key. It reads Weibo's m.weibo.cn endpoints; for anything beyond public/limited data you must supply a **logged-in cookie** in `config.json` (`cookie` field). The cookie is a session secret, treat like a key: user supplies it themselves, never echo it; follow the PRIVATE credential backup policy (see `install-guide.md` secret hygiene). **Use a throwaway Weibo account**, this is route ④, ToS-violating, ban risk on the account whose cookie you use.
 
-## Usage, call examples
-```jsonc
-// config.json (excerpt)
-{ "user_id_list": ["1234567890"],   // target Weibo UID(s)
-  "since_date": "2026-01-01",
-  "write_mode": ["csv", "json"],
-  "cookie": "<your logged-in cookie>" }
-```
-```bash
-python weibo.py        # crawls per config.json, writes to ./weibo/<uid>/
-```
-Drop a `user_id_list.txt` for batch targets; output lands per-user under `./weibo/`.
+## Usage
+Keep target identifiers, queries and authentication inputs in the PRIVATE runtime
+configuration. Use the installed upstream `weibo.py` CLI help for supported
+options; this guide does not assume an output-redirection flag exists. Run only
+from the verified PRIVATE runtime copy so `weibo/`, target lists, `config.json` and cookie state stay private and versioned.
+Validate actual content and record gaps before accepting a run.
 
 ## General experience & gotchas (踩坑)
 - **Cookie is mandatory for real coverage.** Without a logged-in cookie you get a thin/empty pull; with one you risk that account, always a throwaway, never a primary.

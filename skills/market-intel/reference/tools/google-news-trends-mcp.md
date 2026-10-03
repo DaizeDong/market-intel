@@ -1,7 +1,7 @@
 # Tool: jmanek/google-news-trends-mcp
 
 - **Domain(s):** trends-discovery (also: none)
-- **Barrier route:** ① official (free, no auth, self-host) · **Source tier:** L2 · **Ready MCP:** yes, self-host MCP server, no key (5 tools)
+- **Barrier route:** ③ self-host wrapper (public Google News RSS + unofficial Trends endpoints) · **Source tier:** L2 · **Ready MCP:** yes, self-host MCP server, no key (5 tools)
 - **Cost:** free, no key, no quota (you pay only your own hosting) [https://github.com/jmanek/google-news-trends-mcp, fetched 2026-06]
 - **Repo / Provider:** github.com/jmanek/google-news-trends-mcp, `jmanek/google-news-trends-mcp (81★, gh-api 2026-06)` (MIT; not archived; last push 2026-03-29)
 - **Top pick for its domain:** no, GDELT/Trends MCP/Product Hunt lead; this is a free no-key complement for Google-native trending terms
@@ -19,12 +19,12 @@ None. No API key, no account, no quota, the secret-hygiene script does **not** a
 After connecting, the 5 tools cover: search Google News by keyword, get top/topic headlines, and pull Google Trends trending keywords (optionally by geo). Typical flow: pull `trending keywords` for a region → for an interesting term, call the news-search tool to read the articles driving it → feed both into your report. List the exact tool names with your client after connecting, do not assume signatures from memory.
 
 ## General experience & gotchas (踩坑)
-- **It rides Google's undocumented/unofficial endpoints** (News RSS + Trends), the same fragility class as the now-archived pytrends. Google can throttle (HTTP 429) or change response shape with no notice, a previously-working query can start returning empty/garbled. Verify a live call before trusting a run; add backoff for batches.
+- **News and Trends use different operations:** news tools read public Google News RSS feeds; Trends tools rely on undocumented/unofficial endpoints. This wrapper does not establish a supported official Trends API. Google can throttle (HTTP 429) or change response shape with no notice, a previously-working query can start returning empty/garbled. Verify each selected operation and its returned content in the current session before trusting a run; add backoff for batches.
 - **Google Trends values are relative (0 to 100 index), not absolute volume.** Good for "is this rising vs. its own baseline," useless for "how many people search this." For absolute volume use Google Ads Keyword Planner / DataForSEO.
 - **RSS feeds are headline-level, not full text**, you get title/source/link/snippet; fetch the article separately (web-scraping shard) if you need body content.
 - **Geo/locale matters**, trending terms are region-scoped; set the geo explicitly or you'll get US-default trends and misread a non-US market.
-- **Single-author repo (81★, MIT).** It works and is recently maintained (push 2026-03), but it's thin, no SLA, breakage is yours to fix.
-- **L1 free, route ①**, per CONSTITUTION C2, reach for it before any paid Trends source.
+- **Single-author repo (81★, MIT; push 2026-03).** Thin adoption and no SLA mean current operation still needs verification; breakage is yours to fix.
+- **Free L2 wrapper, route ③:** consider it before paid Trends sources when the selected operation and required content have been verified in the current session. Free access does not make it an official API or L1 source.
 
 ## Failure signals & fallback
 Failure looks like: empty trending-keyword list or HTTP 429 from Google (throttled), or malformed parses after a Google response change. **Fallbacks:** for global multilingual news tone use **GDELT MCP** (free, no auth); for structured Google Trends JSON use **SerpApi Google Trends** (free 250/mo, confirmed `serpapi.com/pricing` 2026-06); for normalized cross-platform acceleration use **Trends MCP**; for the OSS Trends-only route use **flack0x/trendspyg / sdil87/trendspy** (browser-automation shard, post-pytrends).

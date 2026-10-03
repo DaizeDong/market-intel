@@ -1,7 +1,7 @@
 # Tool: ccxt (library)
 
 - **Domain(s):** crypto-defi (also: none)
-- **Barrier route:**, (it's a library, not a barrier route) · **Source tier:** L1 · **Ready MCP:** no, Python/JS/PHP library you call directly
+- **Barrier route:**, (it's a library, not a barrier route) · **Source tier:** L1 · **Ready MCP:** this card covers the direct Python/JS/PHP library; a separate `ccxt-mcp` route is recorded in the dated installation notes
 - **Cost:** free, open-source (MIT)
 - **Repo / Provider:** github.com/ccxt/ccxt, `ccxt/ccxt (42.9k★, gh-api 2026-06)`, MIT, active (pushed 2026-06-08)
 - **Top pick for its domain:** yes (the base layer for any cross-exchange spread / arb logic)
@@ -10,7 +10,7 @@
 Unified API over 100+ CEX exchanges (Binance, OKX, Bybit, Coinbase, Kraken, …): one interface for tickers, order books, OHLCV, balances, and order placement. Pick it whenever you need to **compare the same pair across exchanges** (spread monitor) or build the data layer for an arbitrage check, it normalizes each exchange's quirky API into one call shape. It is the default building block the shard names for cross-exchange logic; for read-only single-source price, CoinGecko MCP is lighter.
 
 ## Install
-`pip install ccxt` (Python) or `npm i ccxt` (JS). It's a **library, not an MCP**, you write a small script, there is no `claude mcp add`. Cross-link: `reference/volatile/pricing-install.md` → crypto-defi. No Windows transport concerns (no MCP process).
+`pip install ccxt` (Python) or `npm i ccxt` (JS) installs the direct library described here. Use it from a script. The later [crypto-defi installation notes](../volatile/pricing-install.md#crypto-defi) also list a separate `ccxt-mcp` option; assess that package and its active host operations separately. This card has not verified the MCP's current installation or runtime. The direct library has no MCP transport requirement.
 
 ## Auth / keys
 None for **public** market data (tickers, order books, OHLCV), fetch spreads with no key. API key + secret are needed only for **private** endpoints (balances, placing orders). If you wire in keys: keep them in env vars the user sets (`-e KEY=$VAR` form), never in the transcript or committed code, see `reference/install-guide.md` → Secret-handling hygiene. Use a small test wallet and never enable withdrawal permission on a trading key.

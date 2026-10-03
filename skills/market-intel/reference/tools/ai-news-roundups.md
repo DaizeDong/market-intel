@@ -10,7 +10,7 @@
 Human/LLM-curated daily and weekly digests of what happened in AI, model launches, notable papers, debates, tooling. **Decision rule (shard):** reach for these when the question is **"what mattered this week / recently"** and you want a fast, pre-filtered overview rather than raw search. They're excellent for *orientation and lead-generation* (which launches/papers to then verify), but they are **L2 curation**, treat the items as leads and follow each through to its **L1 primary source** (the lab blog or arXiv paper) before citing. For exhaustive recent-paper discovery use arXiv + HF Daily Papers instead.
 
 ## Install
-Nothing to install. Read the RSS/Atom feed (AINews and Substack-based ones expose feeds) via a fetcher, or drive the site with the **playwright MCP** (already connected). See `reference/install-guide.md` → "④ browser / act-like-human". No L1 install line (free, no MCP package).
+Nothing to install. Read the RSS/Atom feed (AINews and Substack-based ones expose feeds) via a fetcher, or drive the site with the **playwright MCP** (available only after current-session operation verification). See `reference/install-guide.md` → "④ browser / act-like-human". No L1 install line (free, no MCP package).
 
 ## Auth / keys
 None for reading, public web/RSS. (Some newsletters offer an email subscription, but the archive/feed is readable without a key. No secret-hygiene concern.)

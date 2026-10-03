@@ -17,7 +17,7 @@ opportunity, news sentiment, alt-data signals, 趋势/选题/产品机会/舆情
 | Finnhub MCP | ① | news + Reddit/Twitter sentiment + congress trades | connected + free key | scarce alt-data, free 60/min |
 | idea-reality-MCP (mnemox-ai 718★) | ① free | scan GitHub/HN/npm/PyPI/PH → reality_signal 0-100 | self-host | "is this idea saturated" (761★ at last gh-api check, 2026-07-22) |
 | **claude-world/trend-pulse** (58★) | ① free | 20-source aggregator + velocity + EMERGING/PEAK/DECLINING lifecycle | self-host | free no-key, unlimited (vs trendsmcp 100/mo cap); thin adoption, single-author |
-| **jmanek/google-news-trends-mcp** (81★) | ① free | Google News RSS + Google Trends trending keywords (5 tools) | self-host | free no-key; complements GDELT with Google-native trending terms |
+| **jmanek/google-news-trends-mcp** (81★) | ③ L2 wrapper | Google News RSS + Google Trends trending keywords (5 tools) | self-host | free no-key; News RSS and unofficial Trends endpoints require separate current-operation checks; no official-API assurance |
 
 **Default pick:** Trends → Trends MCP (or SerpApi for clean JSON, pytrends if free-but-shaky).
 Products → Product Hunt MCP + idea-reality-MCP. News/sentiment → GDELT MCP (free) + Finnhub.

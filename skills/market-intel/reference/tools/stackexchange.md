@@ -19,7 +19,10 @@ developer chatter.
 
 ## Install
 
-**No MCP exists**, it's REST-only. Register an App at https://stackapps.com to get an
+This card covers the **direct REST route**. For an optional community MCP wrapper, see
+[stack-overflow-mcp](stack-overflow-mcp.md); its low adoption warrants caution, and its
+selected operation must be verified in the current host/session before use. Catalog
+presence does not establish availability. For direct REST, register an App at https://stackapps.com to get an
 **API key** (NOT OAuth). Without the key your IP gets 300 req/day; with it the limit
 jumps to 10k req/day. No SDK needed; `curl` + `jq` or `requests` works.
 
@@ -55,13 +58,17 @@ curl "https://api.stackexchange.com/2.3/questions?tagged=rust&order=desc&sort=ho
 # Tag metadata + question count
 curl "https://api.stackexchange.com/2.3/tags/rust/info?site=stackoverflow&key=$KEY"
 
-# Site-wide trending tags (top by week)
+# Current popular tags by cumulative question count (no weekly window)
 curl "https://api.stackexchange.com/2.3/tags?order=desc&sort=popular&pagesize=30&site=stackoverflow&key=$KEY"
 ```
 
 Pagination via `page=` + `pagesize=` (max 100). Filters via the `filter=` param, use
 `!*x*` for sparse "give me everything" set; the API's filter system is its biggest
 gotcha (see below).
+
+The popular-tags request supplies no weekly window or trend comparison. Weekly trend
+claims require dated question counts, a stated window and pagination coverage, plus a
+comparison window for growth or velocity.
 
 ## General experience & gotchas (踩坑)
 
@@ -92,7 +99,7 @@ gotcha (see below).
 
 **Fallbacks:**
 - HackerNews instead of Stack Overflow → **mcp-hn** (shard reddit-community top free pick).
-- Reddit dev-subreddit signal → **reddit-mcp-buddy** (anonymous tier free).
+- Reddit dev-subreddit signal → **reddit-mcp-buddy** with verified app-id/login access or demonstrated anonymous recovery; without Reddit credentials, use **reddit-research-mcp** after hosted OAuth and operation verification.
 - arxiv preprint pulse → frontier-research arxiv MCP.
 
 ## Last verified: 2026-06

@@ -19,7 +19,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # Same shape the fleet inventory uses. Kept here rather than imported so a change to check_all.py
 # cannot quietly change what this test considers a checker.
 CHECKER = re.compile(r"(check|verify|guard|gate|budget|boundary)[a-z_0-9]*\.py$", re.I)
-SELF = {"check_all.py", "test_check_all.py"}
+SELF = {"check_all.py"}
 
 failures = []
 
@@ -42,8 +42,12 @@ def load():
 def main():
     ca = load()
     on_disk = {f for f in os.listdir(HERE)
-               if f.endswith(".py") and CHECKER.search(f)
-               and not f.startswith("test_") and f not in SELF}
+               if f.endswith(".py") and (CHECKER.search(f) or f.startswith("test_"))
+               and f not in SELF}
+    tests_dir = os.path.join(os.path.dirname(HERE), "tests")
+    baseline_tests = {f: os.path.join(tests_dir, f) for f in os.listdir(tests_dir)
+                      if f.startswith("test_") and f.endswith(".py")}
+    on_disk.update(baseline_tests)
     registered = set(ca.MANIFEST) | set(ca.EXCLUDED)
 
     # 1. THE DEFECT THIS FILE EXISTS FOR.
@@ -53,12 +57,15 @@ def main():
 
     # 2. The mirror: a manifest entry with no file is a broken manifest, and check_all returns 2 for
     #    it at runtime. Catch it here instead, where the message is cheaper to read.
-    ghosts = sorted(n for n in ca.MANIFEST if not os.path.isfile(ca.checker_path(n)))
+    shared = {"pii_guard.py": "guards", "data_boundary.py": "guards", "dash_guard.py": "style"}
+    expected = {n: os.path.join(os.path.dirname(HERE), kit, "tools", n) for n, kit in shared.items()}
+    expected.update(baseline_tests)
+    ghosts = sorted(n for n in ca.MANIFEST if not os.path.isfile(expected.get(n, os.path.join(HERE, n))))
     check("every MANIFEST entry exists on disk", not ghosts, "missing files: " + ", ".join(ghosts))
-    for name, kit in (("pii_guard.py", "guards"), ("data_boundary.py", "guards"), ("dash_guard.py", "style")):
-        expected = os.path.join(os.path.dirname(HERE), kit, "tools", name)
-        check("shared checker %s uses its pinned submodule" % name, ca.checker_path(name) == expected)
-    check("missing checker remains a failure", ca.run("check_missing_synthetic.py", []) == 2)
+    for name, path in expected.items():
+        check(name + " resolves to its declared suite location", ca.checker_path(name) == path)
+    check("offline console regressions are required", ca.MANIFEST["test_console.py"][2])
+    check("L0 live probes require explicit network mode", ca.MANIFEST["l0_verify.py"][1])
 
     # 3. An exclusion without a reason is an orphan with extra steps.
     unreasoned = sorted(n for n, why in ca.EXCLUDED.items() if not (why or "").strip())
@@ -89,6 +96,12 @@ def main():
     print("test_check_all: all cases passed (%d checker(s) on disk, %d registered)"
           % (len(on_disk), len(registered)))
     return 0
+
+
+def test_checker_manifest():
+    """Run the standalone manifest assertions during ordinary pytest collection."""
+    failures.clear()
+    assert main() == 0
 
 
 if __name__ == "__main__":

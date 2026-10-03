@@ -16,10 +16,16 @@ headless CMS, 发博客/内容发布.
 | microcmsio/microcms-mcp-server (21★ official) | ① | JP-market headless CMS MCP | connected | thin adoption but actively maintained; niche JP-market pick, not a top-pick change |
 | kontent-ai/mcp-server (9★ official) | ① | Kontent.ai headless CMS MCP | connected | thin adoption but actively maintained; niche pick, not a top-pick change |
 | **Pipepost** (multi-platform) | ① | Dev.to+Hashnode+Ghost+WP+Medium + social broadcast | connected | handles canonical + SEO |
-| Static blog (Hugo/Astro) + claude-blog skill | n/a | write MD/frontmatter → git push → Vercel deploy | skill present | zero platform fee |
+| Static blog (Hugo/Astro) + claude-blog skill | free/local | write MD/frontmatter → local preview/build → authorized deployment | discover installed writing skills and verify the selected deployment operation | historical source label; `claude-blog` is optional and unverified; hosting/account setup depends on the destination |
 
-**Default pick:** Own controllable blog → static (Hugo/Astro + claude-blog skill + git + `/vercel:deploy`,
-zero fee). CMS backend → WordPress MCP / Sanity hosted MCP. Cross-platform syndication → Pipepost.
+**Default pick:** Own controllable blog → Static blog (Hugo/Astro) + claude-blog skill (optional).
+
+Use local preview/build. Discover writing skills in the active host; this catalog does not establish that `claude-blog`, a deployment
+command or a hosting account is available. Prepare locally, verify the selected deployment operation
+and destination, then obtain publication authorization. See [static-blog](../tools/static-blog.md).
+
+**Conditional choices:** Require task fit and current operation, cost and permission checks.
+CMS backend → WordPress MCP / Sanity hosted MCP. Cross-platform syndication → Pipepost.
 
 **SEO命门:** any cross-platform syndication MUST set canonical URL to your own original, or get
 dedup-penalized. Rate limits: Webflow publish 1/min, Notion ~3 req/s.

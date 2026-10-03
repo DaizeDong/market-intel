@@ -5,7 +5,7 @@ shard(s) in `domains/`. Do not read shards you didn't match.
 
 | domain | triage signals | top pick (barrier route) | shard |
 |---|---|---|---|
-| x-twitter | tweets, X sentiment, influencer, viral, 推特舆情 | twscrape ④③ free · playwright ④ (twitterapi.io ② resale if paid) | `domains/x-twitter.md` |
+| x-twitter | tweets, X sentiment, influencer, viral, 推特舆情 | twscrape ③ free · playwright ④ (twitterapi.io ② resale if paid) | `domains/x-twitter.md` |
 | reddit-community | Reddit/HN/Discord/forum pain points, 社区调研 | HN MCP ① free · reddit-mcp-buddy ① | `domains/reddit-community.md` |
 | web-scraping | general SERP, crawl, JS site, break paywall, 抓取 | Tavily/Exa + Firecrawl + Bright Data | `domains/web-scraping.md` |
 | ecommerce-arbitrage | Amazon/eBay price, BSR, retail arbitrage, 选品比价 | Keepa ① official | `domains/ecommerce-arbitrage.md` |
@@ -20,6 +20,10 @@ shard(s) in `domains/`. Do not read shards you didn't match.
 | ready-skills | "is there a ready skill for marketing/SEO/research" | coreyhaines31/marketingskills | `domains/ready-skills.md` |
 | **browser-automation** | API too costly/walled, want real-browser "act like human", free | playwright MCP + browser-use/crawl4ai | `domains/browser-automation.md` |
 | **consumer-price-compare** | "I'm buying X, find me the cheapest", coupon stack, 历史价, 比价, 凑单 | DaizeDong/shopping-aggregator (sister skill, delegates here) | `domains/consumer-price-compare.md` |
+
+For X, twikit remains a conditional fallback only after a fresh operation check; its
+staleness and fallback limits are documented in [the X shard](domains/x-twitter.md).
+
 ### Meta-domains, NOT for triage (read by refresh-protocol Discovery only)
 
 These are infrastructure shards, not research targets. Triage logic MUST NOT route a user's
@@ -47,8 +51,8 @@ domain placeholders".
 | `on-chain-intel-private` | TEE / zk privacy on-chain data (Chainlink Functions / Nillion / EigenLayer) | reserved, populate when privacy-data MCPs >3 |
 
 Barrier-route legend (see each shard for detail):
-① official API, compliant, often paid/limited, no ban risk
-② resale API, provider absorbs the barrier, cheap pay-per-use, gray-area
+① supported official API, often paid/limited; account scopes, platform rules and rate limits still apply
+② resale API, provider handles upstream access; caller obligations and provider/platform limits still apply
 ③ self-host scrape (reverse-engineered API), free, you supply accounts+proxies, ban risk
 ④ **browser automation / act-like-human**, real logged-in browser (playwright MCP + OSS repos);
    FIRST-CLASS, not last resort. Often **richer data** (rendered/logged-in view, fields APIs hide)

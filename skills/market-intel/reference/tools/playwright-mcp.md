@@ -1,7 +1,7 @@
 # Tool: playwright MCP
 
 - **Domain(s):** browser-automation (also: x-twitter, web-scraping, ecommerce-arbitrage, seo-keywords, frontier-research)
-- **Barrier route:** ④ · **Source tier:** L2 · **Ready MCP:** yes, already connected (verify `claude mcp list` → playwright ✓)
+- **Barrier route:** ④ · **Source tier:** L2 · **Ready MCP:** cataloged; current host exposure and operation must be verified
 - **Cost:** free (open source; your own machine/session). No API fee.
 - **Repo / Provider:** github.com/microsoft/playwright-mcp, `microsoft/playwright-mcp (33.7k★, gh-api 2026-06)`, Apache-2.0, pushed 2026-06
 - **Top pick for its domain:** yes
@@ -10,10 +10,13 @@
 Drives a real Chromium with your logged-in session: navigate, click, fill forms, screenshot, read the rendered DOM (`browser_snapshot`), run JS. It is the **default first tool** for any bespoke "act like a human" task, reach for it before any paid API when (a) the API is expensive/quota-capped, (b) you need the real logged-in/rendered view, or (c) no ready repo covers the target. Escalate away from it only when it's too low-level (use browser-use / crawl4ai for AI-goal-driven extraction) or gets fingerprint-blocked (escalate to camoufox/nodriver).
 
 ## Install
-Already connected in this environment, nothing to install. Verify with `claude mcp list` (look for `playwright ✓ Connected`). If absent, it's the official MS package; see `reference/install-guide.md` for MCP-add mechanics. No key, no proxy for basic use.
+Discover the official package through the selected host's supported MCP setup.
+No installation or browser connection is assumed. After activation, verify the
+exact browser operation and target-site response in this session. Consult
+`reference/install-guide.md` and `reference/host-capabilities.md`.
 
 ## Auth / keys
-No API key. Auth is **per-site session state** in the browser profile (cookies). For logged-in targets, the user logs in once in the driven browser; the session persists in the profile. No secret-hygiene concern (no key), but treat the browser profile as sensitive, it carries live login cookies.
+No API key. Auth is **per-site session state** in the browser profile (cookies). For logged-in targets, the user logs in once in the driven browser; persistence depends on the active host profile/storage configuration; verify it before relying on a saved login. Treat browser output and the profile as sensitive; it carries live login cookies.
 
 ## Usage, call examples
 MCP tools (prefix `mcp__plugin_playwright_playwright__`): `browser_navigate`, `browser_snapshot` (accessibility-tree text, cheaper than a screenshot), `browser_click`, `browser_type`, `browser_fill_form`, `browser_take_screenshot`, `browser_evaluate`, `browser_wait_for`, `browser_network_requests`.

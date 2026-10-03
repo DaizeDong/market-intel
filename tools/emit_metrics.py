@@ -30,6 +30,22 @@ def count_rows(text):
             n += 1
     return n
 
+def pricing_date(pricing, domain):
+    """Read a domain's date only within its exact heading section."""
+    headings = list(re.finditer(r"(?m)^ {0,3}(#{1,6})(?=[ \t\r\n]|$)[ \t]*([^\r\n]*)", pricing))
+    for index, heading in enumerate(headings):
+        title = heading.group(2).split(maxsplit=1)
+        if not title or title[0] != domain:
+            continue
+        end = len(pricing)
+        for following in headings[index + 1:]:
+            if len(following.group(1)) <= len(heading.group(1)):
+                end = following.start()
+                break
+        date = re.search(r"last_verified:\s*(\d{4}-\d{2})", pricing[heading.start():end])
+        return date.group(1) if date else None
+    return None
+
 def git_sha():
     try:
         return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT,
@@ -53,12 +69,11 @@ for f in sorted(os.listdir(DOMAINS)):
     free_tokens_g += free
     paid_tokens_g += paid
     # last_verified for this domain's pricing section (if present)
-    m = re.search(rf"##\s*{re.escape(d)}.*?last_verified:\s*(\d{{4}}-\d{{2}})", pricing, re.S)
     per_domain[d] = {
         "sources": rows,
         "free_route_tokens": free,
         "paid_route_tokens": paid,
-        "last_verified": m.group(1) if m else None,
+        "last_verified": pricing_date(pricing, d),
     }
 
 snapshot = {

@@ -16,7 +16,7 @@ No MCP ships. Register a **private (self-authorized) app** in Seller Central →
 LWA (Login with Amazon) OAuth: register the private app → get **LWA client id/secret + a refresh token** scoped to your seller account (newer flow no longer needs the AWS IAM/STS role-assumption dance for most sellers, confirm in current docs). Key-bearing → hygiene one-liner: keep client-secret/refresh-token out of the transcript; store in env / direct `~/.claude.json` edit, never echo. See `reference/install-guide.md` (Secret-handling hygiene).
 
 ## Usage, call examples
-REST against `https://sellingpartnerapi-na.amazon.com` (or eu/fe host). Minimal: `GET /products/fees/v0/items/{ASIN}/feesEstimate` → referral + FBA fee estimate; `GET /fba/inventory/v1/summaries` → your stock; Reports API for settlement/finance pulls. Each call needs the LWA access token (minted from the refresh token) in the `x-amz-access-token` header.
+REST against `https://sellingpartnerapi-na.amazon.com` (or eu/fe host). Use `POST /products/fees/v0/items/{Asin}/feesEstimate` with the request body defined by Amazon's [getMyFeesEstimateForASIN operation](https://developer-docs.amazon.com/sp-api/reference/getmyfeesestimateforasin), including its `FeesEstimateRequest` object, to obtain a referral + FBA fee estimate. Use `GET /fba/inventory/v1/summaries` for your stock, and the Reports API for settlement/finance pulls. Each call needs the LWA access token (minted from the refresh token) in the `x-amz-access-token` header.
 
 ## General experience & gotchas (踩坑)
 - **Private vs public is the whole trick:** a *private* app for your own account dodges the public developer registration/fee. Don't register public unless you're building for other sellers.

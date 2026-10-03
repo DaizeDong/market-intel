@@ -30,43 +30,35 @@ permissions:
 jobs:
   verify-matrix:
     runs-on: ubuntu-latest
+    env:
+      GIT_OPTIONAL_LOCKS: '0'
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0          # COVER/CHURN/CONST need to diff against base main
-      - run: git fetch origin main:main || true
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install checker dependency
-        run: python -m pip install "requests>=2.32,<3"
+      - name: Install test dependencies
+        run: python -m pip install -r requirements-dev.txt
+      - name: Run all consumer regressions
+        run: python -X utf8 -B -m pytest -q -p no:cacheprovider tools tests
       - name: Resolve the diff baseline
         id: baseline
+        env:
+          MARKET_INTEL_C7_REVIEW: ${{ vars.MARKET_INTEL_C7_REVIEW }}
         run: |
-          # COVER, CHURN and PRICE and CONST are DIFF checks. On a pull_request the baseline is main,
-          # which is a different commit, so they compare something. On a push to main, main IS the
-          # commit under test: --base main would resolve to HEAD, every diff would come back empty,
-          # and those four checks would report green while having examined nothing. That is a
-          # disarmed gate wearing a passing badge, which is the exact failure this repo keeps
-          # relearning, so the baseline is chosen per event instead of assumed.
-          #
-          # github.event.before is the previous tip of main, and it is PROBED, never trusted: it is
-          # all zeroes on a branch's first push, and after a force push it can name a commit that no
-          # longer exists in this clone. Each fallback is narrower than the last, and the chosen ref
-          # is echoed so a run can never leave you guessing what it compared against.
+          set -eu
           if [ "${{ github.event_name }}" = "push" ]; then
-            cand="${{ github.event.before }}"
-            if [ -n "$cand" ] && git cat-file -e "$cand^{commit}" 2>/dev/null; then
-              base="$cand"
-            elif git rev-parse -q --verify "HEAD~1^{commit}" >/dev/null; then
-              base="$(git rev-parse HEAD~1)"
-            else
-              base=HEAD
-            fi
+            base="${{ github.event.before }}"
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
           else
-            base=main
+            base="HEAD~1"
           fi
+          # Rewritten history requires an explicit operator mapping and verified single parent.
+          base=$(python tools/human_review.py --resolve-base "$base" --candidate "$GITHUB_SHA")
           echo "ref=$base" >> "$GITHUB_OUTPUT"
           echo "event=${{ github.event_name }} baseline=$base"
       - name: Run anti-regression gate
@@ -85,14 +77,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}   # public repo: gh api repos/* needs only read
           PYTHONIOENCODING: utf-8
+          MARKET_INTEL_C7_REVIEW: ${{ vars.MARKET_INTEL_C7_REVIEW }}
         run: |
           set -o pipefail
-          python tools/verify_matrix.py --base "${{ steps.baseline.outputs.ref }}" | tee gate-output.log
-      - name: Unified local checks and regression tests
-        run: |
-          python tools/test_check_all.py
-          python tools/check_all.py
-          python -m unittest discover -s tests
+          # CI checks current public catalog evidence without persisting a PRIVATE cache.
+          python tools/verify_matrix.py --no-cache --base "${{ steps.baseline.outputs.ref }}" | tee gate-output.log
       - name: Upload gate log
         if: always()
         uses: actions/upload-artifact@v4

@@ -15,6 +15,7 @@ Stdlib only. Never echoes secret values (only presence / length).
 import argparse
 import json
 import os
+import re
 import sys
 
 PASS, FAIL = "PASS", "FAIL"
@@ -55,6 +56,30 @@ def discover(skill, override):
         if os.path.isdir(d):
             return d, "default:%s" % d
     return None, None
+
+
+def storage_mode(config):
+    """Read the declared policy, retaining Mode B for older undeclared configs."""
+    readme = os.path.join(config, "secrets", "README.md")
+    if not os.path.isfile(readme):
+        return "B"
+    with open(readme, "r", encoding="utf-8-sig") as stream:
+        text = stream.read()
+    declarations = re.findall(r"^\s*Active storage mode:\s*(.*)$", text, re.I | re.M)
+    if not declarations:
+        first_line = next((line for line in text.splitlines() if line.strip()), "")
+        declarations = re.findall(r"\bMode\s+([A-Z])\b", first_line, re.I)
+    if not declarations:
+        return "B"
+    modes = set()
+    for declaration in declarations:
+        match = re.match(r"(?:Mode\s+)?([AB])\b", declaration.strip(" *`"), re.I)
+        if not match:
+            raise ValueError("declare Active storage mode: A or B in secrets/README.md")
+        modes.add(match.group(1).upper())
+    if len(modes) != 1:
+        raise ValueError("conflicting storage modes in secrets/README.md")
+    return modes.pop()
 
 
 def main():
@@ -106,13 +131,23 @@ def main():
     sec = os.path.join(cfg, "secrets")
     check("secrets/ dir present", os.path.isdir(sec))
 
+    mode = None
+    try:
+        mode = storage_mode(cfg)
+        check("credential storage mode: %s" % mode, True)
+    except (OSError, UnicodeError, ValueError):
+        check("credential storage mode is valid", False,
+              "declare one readable Active storage mode: A or B in secrets/README.md")
+
     gi = os.path.join(cfg, ".gitignore")
     gi_ok = os.path.isfile(gi)
-    check(".gitignore present", gi_ok)
-    if gi_ok:
-        txt = open(gi, "r", encoding="utf-8", errors="replace").read()
-        check(".gitignore blocks secrets (secrets/* + *.env)",
-              "secrets/" in txt and "*.env" in txt)
+    if mode == "B":
+        check(".gitignore present", gi_ok)
+        if gi_ok:
+            with open(gi, "r", encoding="utf-8", errors="replace") as stream:
+                txt = stream.read()
+            check("Mode B .gitignore blocks secrets (secrets/* + *.env)",
+                  "secrets/" in txt and "*.env" in txt)
 
     # self-contained check (E5): no absolute-path leakage in committed config files.
     leak = []
@@ -133,9 +168,13 @@ def main():
         print(line)
     print("-" * 60)
     if n_fail:
-        print("NOT READY: %d check(s) failed. Fix the above (or re-run init_config.py)." % n_fail)
+        print("NOT READY: %d check(s) failed. Fix the above for the selected storage mode." % n_fail)
         return 1
     print("READY: config at %s conforms. Add tools/<slug>/ + secrets/<slug>.env to populate it." % cfg)
+    if mode == "A":
+        print("Mode A uses PRIVATE Git for credential backup; verify remote visibility and backup durability separately.")
+    else:
+        print("Mode B requires a separate credential backup; verify its recovery separately.")
     return 0
 
 

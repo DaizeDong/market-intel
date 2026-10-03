@@ -12,6 +12,11 @@ A scraping **framework** (not an AI agent): unifies Playwright / Puppeteer / Che
 ## Install
 `npm i crawlee` (Node ≥18; install the browser engine you use, e.g. `npx playwright install`). A Python `crawlee` port also exists (`pip install crawlee`). Not an MCP, you write a Node/TS (or Python) scraper script. L1 line: `reference/volatile/pricing-install.md#browser-automation`. On Windows, prefer the Cheerio (HTTP) crawler where possible to avoid native browser-engine path quirks (see `install-guide.md`).
 
+## Private runtime and outputs
+Before any collection or login below, use `tools/private_inventory.py` from the full consumer checkout. Select an existing absolute runtime directory with `runtime = resolve_directory("runtime/crawlee")`. This proves the final directory's repository, including a nested repository at that directory, and every effective publication destination is PRIVATE and versioned. Stop if it is missing, PUBLIC or unknown. Revalidate `resolve_directory(path=runtime.path)` immediately before launching the caller with that directory as its working directory.
+
+Check the installed version's supported output and storage settings before use. Route every download, transcript, dataset, request queue, cache, session, cookie file and export through that verified PRIVATE runtime or an absolute file destination checked with `resolve_destination`. Settings that default elsewhere must be explicitly redirected with supported installed-version options. If any output cannot be located and redirected, keep the tool in setup status. Capture metadata stdout only into a verified PRIVATE file; do not redirect it into the consumer checkout. Credential values belong in the designated PRIVATE versioned companion and its approved backup.
+
 ## Auth / keys
 No service key. Target-site auth = sessions/cookies you manage (Crawlee has built-in session pool + cookie handling). Proxy credentials (if you use a paid proxy pool) go in its proxy config, those *are* secrets; set via env, keep them out of the transcript (see `install-guide.md` secret hygiene). No LLM key (it's not AI-driven).
 
@@ -25,7 +30,7 @@ const crawler = new PlaywrightCrawler({
     await enqueueLinks();             // follow + queue links
   },
 });
-await crawler.run(['https://site']);
+await crawler.run(['https://example.com']);
 ```
 Choose `CheerioCrawler` (fast, no browser) for static HTML, `PlaywrightCrawler`/`PuppeteerCrawler` for JS-rendered pages.
 

@@ -13,7 +13,9 @@ Agent-optimized semantic web search that returns ranked results with snippets (a
 Hosted HTTP MCP, Windows-friendly (no local Node process). Exact command in the volatile L1 line `reference/volatile/pricing-install.md → web-scraping` (it changes when the URL/param format shifts; do not hardcode from memory). The key rides in the URL as `?tavilyApiKey=...`. L0 transport/secret/Windows mechanics: `reference/install-guide.md`. A newly added MCP only works after session restart / `/mcp` reconnect.
 
 ## Auth / keys
-Free API key from the Tavily dashboard (1,000 credits/mo, no credit card). The key is a query param in the MCP URL, so it lands plaintext in `~/.claude.json`. **Secret hygiene (one line):** do NOT `claude mcp add` a secret-bearing URL (it echoes the key into the transcript), edit `~/.claude.json` from the clipboard, and mask `token=`/`tavilyApiKey=` when verifying with `claude mcp list`. Full procedure: `reference/install-guide.md`.
+Obtain a key through the Tavily dashboard and verify current plan terms; the free-tier figures above are historical notes. Keep the value in the selected host's approved private secret configuration and backup. Do not put a secret-bearing URL or header into a command that echoes it.
+
+Verify through a supported value-free diagnostic for the selected server. Its output may contain only allowlisted name, connection status and authentication state, following the [installation guide](../install-guide.md). Do not return raw listings or configuration and try to mask particular token names afterward. If no supported diagnostic is available, report connection/authentication as unverified. A successful configuration check still requires execution of the selected operation and usable content before readiness is claimed.
 
 ## Usage, call examples
 MCP exposes a Tavily search tool (`tavily-search` / `tavily-extract`). Minimal call: a search tool taking `query`, plus optional `search_depth` (basic|advanced), `max_results`, `include_domains` / `exclude_domains`, and `time_range` / `days` for recency. List the exact tool names with your client after connecting; `advanced` depth costs more credits than `basic`.

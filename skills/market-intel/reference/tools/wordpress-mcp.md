@@ -26,6 +26,6 @@ MCP tools cover create/update/publish posts, upload media, manage categories. Mi
 - **SEO命门 (cross-post):** if you syndicate the same post elsewhere, set the canonical URL to your WP original or eat a dedup penalty.
 
 ## Failure signals & fallback
-401/403 on writes (header stripped or app-password revoked) → verify with `claude mcp list` (only `✓ Connected` is usable). If the host blocks the REST/MCP surface entirely, fall back to **Pipepost** (multi-platform, also pushes to WP) or, for a controllable target, **static blog** (Hugo/Astro + claude-blog).
+401/403 on writes (header stripped or app-password revoked) → use a supported value-free diagnostic for the selected server that returns only allowlisted name, connection status and authentication state; report those states as unverified if unavailable. A connected label is only a diagnostic; verify the selected operation in the active host session. If the host blocks the REST/MCP surface entirely, fall back to **Pipepost** (multi-platform, also pushes to WP) or, for a controllable target, **static blog** (Hugo/Astro + claude-blog).
 
 ## Last verified: 2026-06

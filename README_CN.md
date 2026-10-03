@@ -3,7 +3,6 @@
 把商业课题在 15 个数据方向上分诊、自动检测对的专业数据源，再把繁重的检索·验证·合成委托给你已有的调研引擎。
 
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-orange?style=flat)](https://docs.anthropic.com/en/docs/claude-code)
-[![Version](https://img.shields.io/badge/version-0.30.0-purple)](.claude-plugin/plugin.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![源矩阵](https://img.shields.io/badge/%E6%BA%90%E7%9F%A9%E9%98%B5-15%20%E4%B8%AA%E6%96%B9%E5%90%91-green?style=flat)](skills/market-intel/reference/sources-index.md)
 [![工具文档](https://img.shields.io/badge/%E5%B7%A5%E5%85%B7%E6%96%87%E6%A1%A3-%E9%80%90%E5%B7%A5%E5%85%B7%E6%93%8D%E4%BD%9C-green?style=flat)](skills/market-intel/reference/tools/index.md)
@@ -34,7 +33,7 @@ Claude Code 已经内置了 `deep-research`（fan-out → 抓取 → 验证 → 
 `market-intel` 就是补这个缺口的**瘦层**。它**只做三件别人不做的事**，其余全部委托出去：
 
 1. **分诊**, 把商业课题映射到 15 个数据方向中的 1~N 个。
-2. **检测 + 引导安装**, 用 `claude mcp list`（不是靠工具名瞎猜）查哪些专业 MCP 真的连上了；关键源缺失时，直接给你那条 `claude mcp add` 命令,或打开它的**逐工具操作文档**（[`reference/tools/`](skills/market-intel/reference/tools/index.md)）查安装 + 鉴权 + 用法 + 踩坑，由[多层安装指南](skills/market-intel/reference/install-guide.md)引导。
+2. **检测 + 引导安装**, 在当前 Claude 或 Codex 会话中核验选定操作，分别检查工具是否开放、执行是否成功、鉴权是否通过，以及返回内容是否可用。证据不足时说明要补什么；安装和鉴权步骤见[逐工具文档](skills/market-intel/reference/tools/index.md)。
 3. **质量护栏**, 引用回验、源等级、多源印证、强制反方检索、显式缺口。
 
 真正的 fan-out、抓取、对抗式验证、带引用合成，**委托**给 `deep-research` / `research-lit`。不重造引擎，不抢触发。
@@ -50,7 +49,7 @@ Claude Code 已经内置了 `deep-research`（fan-out → 抓取 → 验证 → 
 或手动克隆：
 
 ```bash
-git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market-intel
+git clone --recurse-submodules https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market-intel
 ```
 
 遇到 `市场调研`、`竞品分析`、`调研这个市场`、`找套利机会`、`X/推特舆情`、`SEO 情报`、`产品趋势` 等会自动触发。单点查询或纯网页报告它会主动让位（用普通搜索 / `deep-research`）；学术文献则交给 `research-lit`。
@@ -58,6 +57,11 @@ git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market
 ---
 
 ## 配置
+
+Resolve the full consumer checkout before running maintenance commands. Replace
+`<absolute-market-intel-checkout>` with that absolute directory and confirm its
+`tools/console.py` and `.claude-plugin/plugin.json` exist. Plugin installation does
+not make these scripts relative to the current project.
 
 `market-intel` 是**带 config 的 skill**, 它从一个**独立、私有**的伴随 config 仓读取每用户状态(密钥、已装工具
 注册表)。仓根契约见 [CONFIG.md](CONFIG.md);权威深规范见
@@ -67,9 +71,9 @@ git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market
   `~/.config/market-intel-config/`。命中第一个即用;都没有则降级为纯矩阵模式照常运行。
 - **首次配置:**
   ```bash
-  python scripts/init_config.py        # 生成符合规范的 config 骨架(确定性)
+  python "<absolute-market-intel-checkout>/scripts/init_config.py"        # 生成符合规范的 config 骨架(确定性)
   export MARKET_INTEL_CONFIG=~/.market-intel-config  # 或给 init 传 --out <dir>
-  python scripts/verify_config.py       # doctor:逐项 PASS/FAIL,明确报缺什么
+  python "<absolute-market-intel-checkout>/scripts/verify_config.py"       # doctor:逐项 PASS/FAIL,明确报缺什么
   ```
 - **切换 config(即插即用):** 把环境变量指向另一个 config 目录即可, config 自包含,无需别的改动:
   `export MARKET_INTEL_CONFIG=~/configs/work` ↔ `~/configs/personal`。
@@ -77,24 +81,38 @@ git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market
 
 ---
 
+## 目录浏览与当前操作状态
+
+维护控制台保留 `status`、`tool <slug>`、`connect <slug>`。浏览目录不要求初始化
+DATA，不探测机器清单，也不写文件。`--capability` 为目录中的 `source_id` 指定操作，默认使用该条目的 `capability_id`。
+当前证据通过 `MARKET_INTEL_HOST`、`MARKET_INTEL_SESSION_ID` 和
+`MARKET_INTEL_CAPABILITIES` 提供。[schema v1 说明](skills/market-intel/reference/host-capabilities.md)
+列出了 `available-now`、带原因的 `setup` 和有证据支持的 `hard-gap` 的判定条件。
+
+只有显式 `--refresh` 才采集机器清单，并写入已核验为 PRIVATE、已有版本历史的
+伴生仓。写入失败会返回非零状态，保留先前快照。离线回归测试不能证明真实调研、
+已安装宿主或服务商当前可用。
+
 ## 快速开始, 装免费无密钥三件套（3 分钟）
 
 不想配 API key 也想试用?先装这 3 个免费无密钥的 MCP, 覆盖 HN / Reddit 风格社区 + 全球趋势 + AI 论文,零成本:
 
 ```bash
 # 1. Hacker News (社区)
-claude mcp add -s user mcp-hn 'uvx mcp-hn'
+claude mcp add -s user mcp-hn -- uvx mcp-hn
 
 # 2. GDELT (全球新闻 + 趋势,无 key)
-claude mcp add -s user gdelt 'uvx gdelt-mcp'
+claude mcp add -s user gdelt -- uvx gdelt-mcp
 
 # 3. arXiv (研究论文,无 key)
-claude mcp add -s user arxiv 'uvx arxiv-mcp-server'
+claude mcp add -s user arxiv -- uvx arxiv-mcp-server
 ```
 
-然后**重启 Claude 会话**(`claude` 退出重进; MCP 只在会话启动时注册)。
+然后**重启 Claude 会话**，核验这个会话中的选定操作。
+使用 **Codex** 时，在 Codex 的 MCP 设置或已安装 app 中启用来源，重连后检查 Codex
+当前可调用的工具。Claude 的配置不能证明 Codex 可用。详见[宿主证据说明](skills/market-intel/reference/host-capabilities.md)。
 
-接着说: `调研一下 AI agent 工具生态的趋势`。skill 会 fan-out 子任务用这三个源, 社区信号 + 趋势 + 论文, 出一份带引用的报告。无 key,无注册,30 秒出第一条发现。
+接着说: `调研一下 AI agent 工具生态的趋势`。skill 会用通过核验的来源检索社区信号、趋势和论文，再生成带引用的报告。只有选定来源通过当前操作和内容核验后，才把它计为可用。
 
 之后,看下面 [60 秒演示](#60-秒演示)了解**专用 MCP**(付费 X 数据、Bright Data、Keepa 等), 那些才是 skill 真正设计的高质量路线。
 
@@ -123,7 +141,7 @@ claude mcp add -s user arxiv 'uvx arxiv-mcp-server'
 会发生：
 
 1. **分诊** → 映射到 `x-twitter`、`trends-discovery`、`ecommerce-arbitrage`；选定深度档位并绑死上限（fan-out 不会失控）。
-2. **检测** → 跑 `claude mcp list`，发现 X/电商相关 MCP 一个都没连，记下来。
+2. **检测** → 检查当前宿主会话开放的工具，核验选定的 X 或电商操作，并说明还缺哪些配置或证据。
 3. **引导安装**（不阻塞）→ "这依赖真实 X 数据。装 twitterapi.io：`claude mcp add -s user ...`, 注意需重连会话才生效。本轮先用网页兜底并标注缺口。"
 4. **委托** → fan-out 子任务 / 调 `deep-research`，每个返回**结构化证据单元**（`论断·来源·原文引用·等级·日期·置信度`），而非原始网页堆。
 5. **护栏** → 独立 verifier 重新 fetch 每条引用 URL；决策级结论需 ≥2 个独立源；专门的反向检索子任务去挖风险/失败案例。
@@ -134,7 +152,7 @@ claude mcp add -s user arxiv 'uvx arxiv-mcp-server'
 装完上面的快速开始后，试试用一个具体课题触发 skill：
 
 - `调研一下 AI agent 工具生态最近一个月的趋势`, 跑 趋势 + 社区 + 前沿研究
-- `compare the top 3 hosted MCP marketplaces (Smithery / Glama / PulseMCP) — coverage, pricing, signal-to-noise`, 跑 mcp-ecosystem
+- `compare the top 3 hosted MCP marketplaces (Smithery / Glama / PulseMCP) — coverage, pricing, signal-to-noise`，跑 trends-discovery + web-scraping
 - `find me 3 underrated open-source web-scraping tools released in 2026 with > 200 stars`, 跑 web-scraping + GitHub 星速发现
 - `who's been launching credible LLM eval skills in the last 3 months`, 跑 ready-skills + 前沿研究
 
@@ -150,7 +168,7 @@ claude mcp add -s user arxiv 'uvx arxiv-mcp-server'
 
 | 方向 | 首选（壁垒路线） |
 |---|---|
-| [x-twitter](skills/market-intel/reference/domains/x-twitter.md) | twikit ④③ · twitterapi.io ② 转售 |
+| [x-twitter](skills/market-intel/reference/domains/x-twitter.md) | twscrape ③ · playwright ④ · twitterapi.io ② 转售 |
 | [reddit-community](skills/market-intel/reference/domains/reddit-community.md) | HN MCP ① · reddit-mcp-buddy ① |
 | [web-scraping](skills/market-intel/reference/domains/web-scraping.md) | Tavily/Exa + Firecrawl + Bright Data |
 | [ecommerce-arbitrage](skills/market-intel/reference/domains/ecommerce-arbitrage.md) | Keepa ① 官方（卖家侧） |

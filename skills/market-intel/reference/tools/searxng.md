@@ -10,14 +10,11 @@
 SearXNG is a self-hosted privacy meta-search engine that aggregates dozens of upstream engines (Google, Bing, DuckDuckGo, Brave, Startpage…) and returns a clean JSON SERP via `&format=json`. Effectively a **private SerpApi at zero cost**. Pick it when you need raw SERP results / competitor-rank scraping / keyword-context discovery and don't want to pay per query. It's the free-route DEFAULT for this domain together with serpbear (rank tracking). Use the paid ① route (GSC for your own site) or ②/① keyword APIs (DataForSEO, SE Ranking) only when you need real search *volume*/CPC or backlink data, which SearXNG cannot provide.
 
 ## Install
-Self-host via Docker (no MCP package):
-```
-docker run --rm -d -p 8080:8080 -v "${PWD}/searxng:/etc/searxng" searxng/searxng
-```
+Self-host via Docker (no MCP package). First resolve and verify a PRIVATE companion runtime directory through the configured DATA resolver. Bind that absolute private directory to `/etc/searxng`, and keep logs and search outputs in verified PRIVATE versioned DATA. Do not use a caller-relative checkout directory or start the service until the destination and upstream persistence settings are confirmed. Follow the installed version's Docker instructions and bind its local listener only where needed.
 Then enable JSON output: in `settings.yml` add `json` under `search.formats:` (it's off by default), and restart. Query: `http://localhost:8080/search?q=<kw>&format=json`. No MCP transport, call the URL from playwright MCP / Bash / an HTTP-wrapper MCP. See `reference/install-guide.md` for the route-④ self-host prerequisites (Docker) and Windows notes. Exact command may drift, confirm in `reference/volatile/pricing-install.md` → seo-keywords.
 
 ## Auth / keys
-None. No account, no API key. (No secret-hygiene concern, nothing to leak.)
+No account or API key is required for basic self-hosted search. Queries, logs, results and any configured proxy credentials can still be private; keep them in the verified PRIVATE runtime and credential stores.
 
 ## Usage, call examples
 Minimal JSON SERP call:
@@ -34,6 +31,6 @@ Returns `results[]` with `title`, `url`, `content` (snippet), `engine`, plus `su
 - Public SearXNG instances exist but rate-limit aggressively and often disable JSON; self-host for reliable automation.
 
 ## Failure signals & fallback
-Empty `results[]`, 403/429, or a named engine missing from results = upstream throttle or JSON disabled. Fix JSON format first; then add proxies. If SearXNG can't break through for a target site, fall back to **playwright MCP** (drive the SERP directly) or a route-② SERP API (**DataForSEO** Sandbox, or **SerpApi** free 250/mo). For your own site's real traffic, **GSC MCP** (①) is irreplaceable and unaffected.
+Empty `results[]`, 403/429, or a named engine missing from results = upstream throttle or JSON disabled. Fix JSON format first; then add proxies. If SearXNG can't break through for a target site, fall back to **playwright MCP** (drive the SERP directly) or a production SERP API such as **DataForSEO** or **SerpApi**, with current access/quota and usable live results verified. DataForSEO Sandbox is a mock service for wiring tests, not a live SERP fallback. Keep the research coverage gap explicit until a production source returns the needed observations. For your own site's real traffic, use **GSC MCP** (①) with the required account access.
 
 ## Last verified: 2026-06

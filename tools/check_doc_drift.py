@@ -30,22 +30,12 @@ from __future__ import annotations
 import argparse
 import glob
 import hashlib
-import io
 import json
 import os
 import re
 import sys
 from datetime import date, datetime
 from typing import Any
-
-# ---------------------------------------------------------------------------
-# Windows stdout: force UTF-8 so badge characters (,, ⭐, ①…) don't crash on
-# cp1252 consoles. BOM-safe: we never emit a BOM ourselves.
-# ---------------------------------------------------------------------------
-try:
-    sys.stdout.reconfigure(encoding="utf-8")  # py3.7+
-except Exception:
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -156,15 +146,26 @@ def _find_line(path: str, regex: re.Pattern[str]) -> tuple[str | None, int | Non
     return None, None, None
 
 
-def get_readme_version_badge(readme_path: str) -> tuple[str | None, int | None]:
-    """Extract version from shields.io Version badge.
+VERSION_BADGE = re.compile(
+    r'img\.shields\.io/badge/version-([0-9][A-Za-z0-9.+_-]*)-'
+    r'[A-Za-z0-9%#]+(?=[?/\s)"<>]|$)'
+)
 
-    Matches the URL fragment: `version-<x.y.z>-purple` (the dash-separated label
-    syntax shields.io uses). Tolerates the surrounding markdown.
-    """
-    pat = re.compile(r"img\.shields\.io/badge/version-([0-9][^-\s)]*)-")
-    v, ln, _ = _find_line(readme_path, pat)
-    return v, ln
+
+def get_readme_version_badge(readme_path: str) -> tuple[str | None, int | None]:
+    """Read stable/prerelease versions, decoding Shields' doubled hyphens."""
+    value, line, _ = _find_line(readme_path, VERSION_BADGE)
+    return value.replace("--", "-") if value is not None else None, line
+
+
+def replace_version_badge(text: str, version: str) -> str:
+    """Change only the badge value, preserving its color and surrounding Markdown."""
+    def replace(match):
+        start, end = match.span(1)
+        relative_start, relative_end = start - match.start(), end - match.start()
+        return (match[0][:relative_start] + version.replace("-", "--")
+                + match[0][relative_end:])
+    return VERSION_BADGE.sub(replace, text, count=1)
 
 
 def get_readme_domain_badge(readme_path: str) -> tuple[int | None, int | None]:
@@ -281,7 +282,7 @@ def _months_between(then: date, now: date) -> int:
     return (now.year - then.year) * 12 + (now.month - then.month)
 
 
-def check_warnings() -> list[dict[str, Any]]:
+def check_warnings(*, update_cache=True) -> list[dict[str, Any]]:
     """Warn-level drift on narrative fields (human-judgment-required)."""
     drifts: list[dict[str, Any]] = []
     today = date.today()
@@ -343,7 +344,8 @@ def check_warnings() -> list[dict[str, Any]]:
                     "first_seen": now_iso,
                     "release_count_at_first_seen": release_count,
                 }
-                _save_cache(cache_path, cache)
+                if update_cache:
+                    _save_cache(cache_path, cache)
             else:
                 first_seen = datetime.strptime(entry["first_seen"], "%Y-%m-%d").date()
                 months = _months_between(first_seen, today)
@@ -420,8 +422,8 @@ def _save_cache(path: str, data: dict[str, Any]) -> None:
         json.dump(data, f, indent=2, sort_keys=True)
 
 
-def check_drift() -> list[dict[str, Any]]:
-    return check_derived() + check_warnings()
+def check_drift(*, update_cache=True) -> list[dict[str, Any]]:
+    return check_derived() + check_warnings(update_cache=update_cache)
 
 
 # ---------------------------------------------------------------------------
@@ -452,12 +454,7 @@ def fix_drift(drifts: list[dict[str, Any]]) -> list[str]:
 
         field = d["field"]
         if field.endswith("version badge"):
-            new_text = re.sub(
-                r"(img\.shields\.io/badge/version-)([0-9][^-\s)]*)(-)",
-                lambda m: m.group(1) + canonical_version + m.group(3),
-                new_text,
-                count=1,
-            )
+            new_text = replace_version_badge(new_text, canonical_version)
         elif field.endswith("domain count badge"):
             new_text = re.sub(
                 r"(badge/(?:Source%20Matrix|%E6%BA%90%E7%9F%A9%E9%98%B5)-)(\d+)(%20(?:domains|%E4%B8%AA%E6%96%B9%E5%90%91))",
@@ -526,16 +523,17 @@ def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     p.add_argument("--fix", action="store_true", help="auto-bump derived fields where possible, then re-check")
     p.add_argument("--json", action="store_true", help="emit machine-readable JSON to stdout")
+    p.add_argument("--no-cache", action="store_true", help="read-only cache handling for release preflight")
     args = p.parse_args(argv)
 
-    drifts = check_drift()
+    drifts = check_drift(update_cache=not args.no_cache)
 
     if args.fix:
         applied = fix_drift(drifts)
         for line in applied:
             print(line)
         # Re-check after fix.
-        drifts = check_drift()
+        drifts = check_drift(update_cache=not args.no_cache)
 
     if args.json:
         out = {
@@ -555,4 +553,6 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.exit(main())

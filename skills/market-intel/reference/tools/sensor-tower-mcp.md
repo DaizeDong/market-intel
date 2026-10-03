@@ -10,11 +10,11 @@
 Sensor Tower is the market-leading source for **mobile app download & revenue ESTIMATES** (plus advertising/usage intelligence) across App Store and Google Play. **Pick it only when the question genuinely needs estimated installs/revenue or competitive download trends**, e.g. "how much is competitor X's app earning", "is this category's downloads growing". For everything you can get from public store metadata (rankings, reviews, ratings, descriptions), do NOT pay, use the free ③ route first. This is the paid escape hatch for the one thing the free tools cannot estimate.
 
 ## Install
-HTTP/MCP per Sensor Tower's docs once you have a token. Conceptually:
-```
-claude mcp add --transport http -s user sensor-tower <ST_MCP_URL> --header "Authorization: Bearer <ST_TOKEN>"
-```
-Confirm the exact endpoint + transport in the ST dashboard / their MCP docs (URL not pinned here because it is behind the paid account). Prefer HTTP transport on Windows. L1 line: `reference/volatile/pricing-install.md` → trends-discovery ("Sensor Tower MCP: connected + ST token, needs pricey ST sub"). MCP only takes effect after session restart / `/mcp` reconnect.
+Confirm the hosted endpoint in the provider dashboard. Configure the Authorization
+header through the selected host's supported secret settings using a user-side or
+approved no-echo transfer. Never pass the token in an MCP-add command, URL or tool
+result. Reconnect the host if required, then verify the selected operation.
+See `reference/install-guide.md` for the transfer procedure.
 
 ## Auth / keys
 Token comes from your paid Sensor Tower account/dashboard. **Secret hygiene (key-bearing):** never `browser_snapshot` the page that shows the token; have the user copy it and edit `~/.claude.json` headers from clipboard rather than `claude mcp add` (which echoes the key into the transcript). One line + see `reference/install-guide.md` (Secret-handling hygiene).

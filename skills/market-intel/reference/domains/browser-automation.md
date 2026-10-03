@@ -10,11 +10,15 @@ Trade-offs: needs a logged-in session/cookies, usually a **proxy pool at scale**
 proxies are the hidden cost), and most platform-specific scraping **violates that platform's ToS**
 (ban risk, use throwaway accounts for write/scrape-heavy work). Verified stars/activity 2026-06-01.
 
-## You already have: playwright MCP
-`claude mcp list` → playwright connected. It drives a real Chromium with your session, navigate,
+## First check: Playwright availability
+After current-session navigation and page-content verification, Playwright can navigate,
 click, fill, screenshot, read rendered DOM. **Default first tool** for any bespoke "act like a
 human" task before reaching for a paid API. Add specialized repos below when playwright alone is
 too low-level or gets fingerprint-blocked.
+
+| source | route | capability | verify |
+|---|---|---|---|
+| **Playwright MCP** | ④ | navigate, click, fill, screenshot and read the rendered DOM | requires the current-session checks above; local browser/session, no installed tool or usable login assumed |
 
 ## General AI/LLM browser frameworks
 | repo | what | Claude fit | note |
@@ -35,9 +39,12 @@ too low-level or gets fingerprint-blocked.
 | **daijro/camoufox** (11.7k★) | anti-fingerprint Firefox build | strongest fingerprint spoofing |
 | **steel-dev/steel-browser** (7.1k★) | open-source browser infra for AI agents, self-host | hosted-browser alternative |
 | **jo-inc/camofox-browser** (9.1k★) | C++-level fingerprint spoofing on Camoufox base, REST API + plugin | free MIT (key only gates cookie-import) |
-| **Kaliiiiiiiiii-Vinyzu/patchright** (4657★) | undetected-Playwright patch, passes Cloudflare/DataDome/Akamai/Kasada/F5 | free Apache-2.0, keeps full Playwright API; `reference/tools/patchright.md` |
+| **Kaliiiiiiiiii-Vinyzu/patchright** (4.4k★) | undetected-Playwright patch, passes Cloudflare/DataDome/Akamai/Kasada/F5 | free Apache-2.0, keeps full Playwright API; `reference/tools/patchright.md` |
 
-**Default pick:** start with the already-connected **playwright MCP**; for AI-goal-driven extraction
+**Default pick:** start with **Playwright MCP** after current-session verification.
+
+**Conditional choices:** Not automatic alternatives; check task fit, current operation, cost and permissions.
+For AI-goal-driven extraction,
 add **browser-use** or **crawl4ai**; if fingerprint-blocked escalate to **camoufox/nodriver**;
 for vision-robust workflows use **skyvern**. Platform-specific repos live in each domain shard.
 

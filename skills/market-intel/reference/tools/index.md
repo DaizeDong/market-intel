@@ -9,17 +9,17 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 
 ## x-twitter
 - ★ [twitterapi.io](twitterapi-io.md), ② · resale X search/users/replies/trends, pay-per-use, native MCP
-- [twikit (+ mcp-twikit)](twikit.md), ③④ · free self-host X read+write+DM, ready MCP
+- [twikit (+ mcp-twikit)](twikit.md), ③④ · self-host X read+write+DM; see maintenance caveat in the domain shard
 - ★ [twscrape](twscrape.md), ③ · self-host X search with account rotation
-- [X official API](x-official-api.md), ① · official read+write incl media, needs Basic $200/mo+
+- [X official API](x-official-api.md), ① · official read+write including media; verify current endpoint pricing
 - [Panniantong/Agent-Reach](agent-reach.md), ④③ · free multi-platform read/search router (X+Reddit+YT+GitHub+Bili+XHS), zero API fees (NEW 2026-07)
 - [FxEmbed](fxembed.md), ②③ · free zero-auth single post/thread JSON resolver (text+media+metrics), no key (NEW 2026-07)
 
 ## reddit-community
 - ★ [mcp-hn](mcp-hn.md), ① · free no-key Hacker News top/new/ask/search/comments
-- ★ [reddit-mcp-buddy](reddit-mcp-buddy.md), ① · zero-setup Reddit, anon/app-id/login tiers (new top pick)
+- ★ [reddit-mcp-buddy](reddit-mcp-buddy.md), ① · direct Reddit reads with verified app-id/login access; recorded anonymous 403 outage
 - [GridfireAI/reddit-mcp](reddit-mcp.md), ① · official-API Reddit read-only (D-SUPERSEDED → fallback)
-- [reddit-research-mcp](reddit-research-mcp.md), ① · semantic subreddit discovery beyond the 250-cap
+- ★ [reddit-research-mcp](reddit-research-mcp.md), ① · no Reddit credentials to manage; hosted OAuth and verified reads, semantic subreddit discovery beyond the 250-cap
 - [subscope](subscope.md), ④ · keyless buyer-intent scoring (post-GummySearch)
 - [praw](praw.md), ① · mature Python Reddit API client
 - [stack-overflow-mcp](stack-overflow-mcp.md), ① · Stack Exchange search/answers
@@ -34,7 +34,6 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 - ★ [Bright Data](brightdata.md), ② · strongest barrier-breaker, free 5k/mo no card
 - [DataForSEO](dataforseo.md), ② · cheap large-scale SERP/keywords/backlinks
 - [Apify](apify.md), ② · 3000+ prebuilt scraper actors
-- [Apify (auto)](apify.auto.md), ② · mechanical install/auth/usage companion to apify.md
 - [Patchright](patchright.md), ④ · undetected-Playwright, passes Cloudflare/DataDome (free)
 - [crawl4ai](crawl4ai.md), ③ · zero-cost self-host LLM crawler (primary doc under browser-automation)
 - [D4Vinci/Scrapling](scrapling.md), ③④ · free adaptive stealth scraper + built-in MCP, auto-Cloudflare (NEW 2026-07)
@@ -57,7 +56,6 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 - ★ [SEC EDGAR MCP](sec-edgar-mcp.md), ① · free no-key 13M+ filings, XBRL, insider
 - ★ [FRED MCP](fred-mcp.md), ① · free 800k+ macro series
 - [Polygon.io](polygon.md), ① · realtime + 20yr history + WebSocket
-- [Polygon.io (auto)](polygon.auto.md), ① · mechanical install/auth/usage/pricing companion to polygon.md
 - [Finnhub](finnhub.md), ① · fundamentals + alt-data sentiment, free 60/min
 - [Twelve Data](twelve-data.md), ① · multi-asset realtime, free 800/day
 - [Financial Modeling Prep](fmp.md), ① · financials/valuation, free 250/day
@@ -112,8 +110,8 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 - [linkedin-mcp-server](linkedin-mcp-server.md), ④ · ready LinkedIn MCP, highest ban risk
 - [TikTok-Api](tiktok-api.md), ④ · Playwright-signed TikTok scrape+search
 - ★ [xiaohongshu-mcp](xiaohongshu-mcp.md), ④ · 小红书 browser MCP, can post
-- [atproto (Bluesky)](atproto.md), ① · official Bluesky SDK, no ban
-- [Mastodon.py](mastodon-py.md), ① · official Mastodon lib, no ban
+- [atproto (Bluesky)](atproto.md), ① · supported Bluesky API; account rules and rate limits apply
+- [Mastodon.py](mastodon-py.md), ① · supported Mastodon API; instance rules and rate limits apply
 - [postiz-agent](postiz-agent.md), ③ · official Postiz agent front-end, 28+ platforms
 - [social-media-agent](social-media-agent.md), ③ · source/curate/schedule agent (content pipeline)
 - [yikart/AiToEarn](aitoearn.md), ①④ · free OSS desktop multi-publish incl. CN majors (Douyin/XHS/Kuaishou), GUI handoff (NEW 2026-07)
@@ -159,7 +157,7 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 - [Sensor Tower MCP](sensor-tower-mcp.md), ② · download/revenue estimates
 - [idea-reality-MCP](idea-reality-mcp.md), ① · scan GitHub/HN/npm → saturation signal
 - [trend-pulse](trend-pulse.md), ① · free no-key 20-source aggregator + lifecycle
-- [google-news-trends-mcp](google-news-trends-mcp.md), ① · free Google News RSS + Trends keywords
+- [google-news-trends-mcp](google-news-trends-mcp.md), ③ L2 · self-host wrapper for News RSS + unofficial Trends endpoints; verify each operation
 
 ## frontier-research
 - ★ [arXiv API (+ MCP)](arxiv.md), ① · free no-key paper search + recent by category
@@ -171,14 +169,14 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 - [AI lab blogs](ai-lab-blogs.md), ④ · canonical L1 model-launch source
 - [AI news roundups](ai-news-roundups.md), ④ · AINews/The Batch/Import AI
 - [alphaXiv](alphaxiv.md), ③④ · community comments + LLM summaries (skill alphaxiv)
-- [arxiv-sanity-lite](arxiv-sanity-lite.md), ③ · self-host recommender, free (D-STALE, last push 2023, still runs)
+- [arxiv-sanity-lite](arxiv-sanity-lite.md), ③ · self-host recommender, free (D-STALE, last push 2023; installation/runtime unverified, setup required)
 - [Connected Papers / ResearchRabbit](connected-papers-researchrabbit.md), ④ · citation-graph explore
 - [research-lit skill](research-lit-skill.md),, · delegate deep multi-paper synthesis
 - [paper-search-mcp](paper-search-mcp.md), ① · multi-venue (arXiv+PubMed+bioRxiv) paper search
 - [paper-qa (PaperQA2)](paper-qa.md), ④ · grounded full-text PDF deep-research w/ citations
 
 ## browser-automation
-- ★ [playwright MCP](playwright-mcp.md), ④ · default act-like-human, already connected
+- ★ [playwright MCP](playwright-mcp.md), ④ · default act-like-human, available only after current-session operation verification
 - ★ [browser-use](browser-use.md), ④ · most popular, LLM drives browser by NL goal
 - [stagehand](stagehand.md), ④ · act/extract/observe over Playwright (TS)
 - [skyvern](skyvern.md), ④ · LLM + vision, robust to UI changes
@@ -228,3 +226,5 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 ## mcp-ecosystem (added 2026-06-17)
 - [GitHub MCP Registry](github-mcp-registry.md), github.com/mcp · official discovery hub
 - [ChatGPT Apps Directory](chatgpt-apps-directory.md), chatgpt.com/apps · OpenAI side
+
+Mechanical `.auto.md` siblings belong to their canonical source entries. They do not add tools or activations; see `registry.json` aliases and documentation metadata.

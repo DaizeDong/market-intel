@@ -10,22 +10,23 @@
 Drop-in Python framework for writing scrapers that pass most anti-bot stacks (Cloudflare, DataDome, Akamai). Wraps a stealthed Chromium driver with built-in proxy rotation, captcha solving, and a `@request`/`@browser` decorator API. **Decision rule:** if you're cloning `omkarcloud/<X>-scraper` (the omkarcloud Amazon / Maps / etc. repos), you need botasaurus installed as their foundation. For standalone use, prefer **patchright** (more current undetected-Playwright patch) unless you specifically want botasaurus's batteries-included proxy + captcha plumbing.
 
 ## Install
-`pip install botasaurus`. Python ≥ 3.10. First run downloads its Chromium. To use one of omkarcloud's single-target scrapers: `git clone https://github.com/omkarcloud/<scraper>-scraper && python main.py`. The scrapers are repos, not pip packages, only the framework ships on PyPI.
+`pip install botasaurus`. Python ≥ 3.10. First run downloads its Chromium. For a single-target scraper, clone the selected repository, enter its directory with `cd <scraper>-scraper`, and install the dependencies specified by that version before considering its `main.py` entrypoint. The scrapers are repositories, not pip packages; only the framework ships on PyPI. Before launch, use the full Market checkout's `tools/private_inventory.py` to resolve an existing PRIVATE versioned runtime and verify the scraper's supported options for browser profiles, cookies, caches and output paths. Launch through an adapter that uses that absolute runtime; if the entrypoint can only write beside public source files, leave it in setup until those writers can be redirected.
 
 ## Auth / keys
-None for the framework. The scrapers built on top may need site cookies (Amazon scraper for `Buy Box` data, etc.), keep those out of git per `install-guide.md` secret hygiene.
+None for the framework. The scrapers built on top may need site cookies (Amazon scraper for `Buy Box` data, etc.), keep credentials and sessions in the designated PRIVATE versioned companion and approved backup, never in the public clone or transcript; see `install-guide.md`.
 
 ## Usage, call examples
 ```python
-from botasaurus.browser import browser, Driver
+from botasaurus.browser import Driver
 
-@browser(headless=False, block_images=True)
-def scrape(driver: Driver, link):
+def read_heading(driver: Driver, link):
     driver.google_get(link, bypass_cloudflare=True)
     return driver.get_text("h1")
-
-scrape("https://target.example/product/123")
 ```
+
+Call this function only with a driver created by the configured private runtime adapter, and
+persist its result there. The `@browser` wrapper can write outputs and browser state; verify the
+installed version's supported paths before enabling that wrapper or calling a scraper entrypoint.
 
 ## General experience & gotchas (踩坑)
 - **Heavy install:** Chromium download + framework deps add ~500MB.

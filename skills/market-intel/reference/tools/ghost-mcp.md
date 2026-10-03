@@ -26,6 +26,6 @@ Tools cover post/page CRUD + publish, members list/create, newsletters, tiers. M
 - **SEO命门:** cross-posting Ghost content elsewhere → set canonical to the Ghost original.
 
 ## Failure signals & fallback
-Persistent 401 (clock skew or revoked key) or missing membership tools (older Ghost) → verify with `claude mcp list`. Fallback: **Pipepost** also publishes to Ghost as part of multi-platform syndication; for a fully owned target, **static blog** (Hugo/Astro + claude-blog).
+Persistent 401 (clock skew or revoked key) or missing membership tools (older Ghost) → use a supported value-free diagnostic for the selected server that returns only allowlisted name, connection status and authentication state; report those states as unverified if unavailable. Verify the selected operation in the active host session before claiming readiness. Fallback: **Pipepost** also publishes to Ghost as part of multi-platform syndication; for a fully owned target, **static blog** (Hugo/Astro + claude-blog).
 
 ## Last verified: 2026-06

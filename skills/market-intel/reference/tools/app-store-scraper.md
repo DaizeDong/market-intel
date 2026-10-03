@@ -17,11 +17,18 @@ None. No API key, no account, no quota. Hidden cost only at scale: heavy review 
 
 ## Usage, call examples
 ```js
-const store = require('app-store-scraper');
-await store.app({ id: 553834731 });                               // by trackId; or { appId: 'com.midasplayer.apps.candycrushsaga' }
-await store.reviews({ id: 553834731, sort: store.sort.RECENT, page: 1, country: 'us' });
-await store.search({ term: 'meditation', num: 50, country: 'us' });
-await store.list({ collection: store.collection.TOP_FREE_IOS, category: store.category.HEALTH_AND_FITNESS });
+async function main() {
+  const store = require('app-store-scraper');
+  await store.app({ id: 553834731 });                             // by trackId; or { appId: 'com.midasplayer.apps.candycrushsaga' }
+  await store.reviews({ id: 553834731, sort: store.sort.RECENT, page: 1, country: 'us' });
+  await store.search({ term: 'meditation', num: 50, country: 'us' });
+  await store.list({ collection: store.collection.TOP_FREE_IOS, category: store.category.HEALTH_AND_FITNESS });
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
 ```
 (Check the installed version's README, exports/signatures are stable but verify before a batch.)
 

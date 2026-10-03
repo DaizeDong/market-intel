@@ -10,7 +10,7 @@
 Given **one seed paper**, both build a **visual citation/similarity graph** of its neighborhood, prior work, derivative work, and co-cited papers, so you can see the cluster a paper sits in. **Decision rule:** pick this for **visual "what's around this paper" / neighborhood mapping** when you have a seed and want to find the surrounding literature cluster fast. For *quantitative* citation signal (counts, influentialCitationCount, programmatic reference/citation lists) prefer the **Semantic Scholar Graph API** ①, it's free, scriptable, and doesn't need a browser. For deep multi-paper synthesis, delegate to **`research-lit`**. Use Connected Papers / ResearchRabbit when the *visual map* itself is the deliverable.
 
 ## Install
-Nothing to install, **no official API**. Drive the site with the **playwright MCP** (already connected, verify `claude mcp list`): navigate, enter the seed paper, read the resulting graph/related list from the DOM. See `reference/install-guide.md` → "④ browser / act-like-human" and `reference/domains/browser-automation.md`. No L1 install line (browser route, no package).
+Nothing to install, **no official API**. Drive the site with the **playwright MCP** (available only after current-session operation verification): navigate, enter the seed paper, read the resulting graph/related list from the DOM. See `reference/install-guide.md` → "④ browser / act-like-human" and `reference/domains/browser-automation.md`. No L1 install line (browser route, no package).
 
 ## Auth / keys
 None required for the free tier of either. (ResearchRabbit needs a free account to save collections; Connected Papers works anonymously for a limited number of graphs.) No API key, no secret-hygiene concern.

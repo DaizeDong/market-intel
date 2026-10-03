@@ -14,7 +14,7 @@ spec.loader.exec_module(l0)
 class L0VerdictTests(unittest.TestCase):
     def web(self, status, body=b'Example service documentation', *, registry=False, body_error=False):
         response = SimpleNamespace(status_code=status, headers={}, url='https://example.com/docs',
-            raw=SimpleNamespace(read=lambda *args, **kwargs: body), close=lambda: None)
+            iter_content=lambda **kwargs: iter([body]), close=lambda: None)
         with patch.object(l0, '_cached_or', side_effect=lambda path, key, fn: l0._result(fn())), \
              patch.object(l0, '_dns_resolves', return_value=True), \
              patch.object(l0, '_cert_check', return_value={'ok':True,'expires':None}), \

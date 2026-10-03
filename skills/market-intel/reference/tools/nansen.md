@@ -16,7 +16,7 @@ Official Nansen MCP + REST API gated behind a paid subscription. Connection guid
 API key issued from the Nansen dashboard once on a qualifying plan. Key-bearing: do NOT `claude mcp add` (it echoes the key to the transcript); have the user copy the key and edit `~/.claude.json` directly. Never `browser_snapshot` the key page. Full procedure in `reference/install-guide.md` → Secret-handling hygiene.
 
 ## Usage, call examples
-REST: categories Smart Money, Profiler, Token Screener, Portfolio, Hyperliquid, Agent, Prediction Markets (see docs.nansen.ai). Typical flow: token god-mode → smart-money net flow + top labeled holders over a window. MCP exposes these as named tools after reconnect; list via `claude mcp get nansen` once connected.
+REST: categories Smart Money, Profiler, Token Screener, Portfolio, Hyperliquid, Agent, Prediction Markets (see docs.nansen.ai). Typical flow: token god-mode → smart-money net flow + top labeled holders over a window. After reconnect, discover callable tools through the active host/session and verify the selected read-only operation and returned fields. Configuration inspection is not tool discovery and may expose credentials.
 
 ## General experience & gotchas (踩坑)
 - The ONLY differentiated value is the **labels**. If your finding doesn't depend on labeled entities, you are overpaying, drop to free CoinGecko/Etherscan/DefiLlama (CONSTITUTION C2 free-first).
@@ -25,6 +25,6 @@ REST: categories Smart Money, Profiler, Token Screener, Portfolio, Hyperliquid, 
 - Paid quota/credits can be burned fast by broad token screens, scope queries to specific tokens/wallets.
 
 ## Failure signals & fallback
-Failure = `! Needs authentication` / `✗ Failed` in `claude mcp list`, 401/403 (expired or under-tier key), or empty label fields. Fallback: raw flows via **Etherscan MCP** / **Blockscout MCP** (free), protocol-level TVL/flows via **DefiLlama API** (free, no-key); accept you lose the entity labels and say so in the report.
+Failure = the selected operation is unavailable in the current session, returns 401/403 (expired or under-tier key), or lacks required label fields. A saved connection inventory alone cannot establish readiness. Fallback: raw flows via **Etherscan MCP** / **Blockscout MCP** (free), protocol-level TVL/flows via **DefiLlama API** (free, no-key), after verifying that route; accept you lose the entity labels and say so in the report.
 
 ## Last verified: 2026-06

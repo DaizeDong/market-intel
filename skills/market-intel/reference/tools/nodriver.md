@@ -22,7 +22,7 @@ async def main():
     browser = await uc.start()           # launches undetected Chrome
     page = await browser.get("https://site/guarded")
     el = await page.select("div.price")
-    print(await el.text_all)
+    print(el.text_all)
 uc.loop().run_until_complete(main())
 ```
 Pass `user_data_dir=` to reuse a logged-in profile; combine with a residential proxy for guarded targets.

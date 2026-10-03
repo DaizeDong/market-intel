@@ -2,7 +2,7 @@
 
 - **Domain(s):** web-scraping (also: browser-automation)
 - **Barrier route:** ③/④ · **Source tier:** L2 · **Ready MCP:** **yes**, the project *is* an MCP server (also REST + SDK); listed in the official MCP registry as `io.github.KnockOutEZ/wigolo`
-- **Cost:** free, open-source, **no API key and no per-query bill** for the core tools (search, fetch, crawl, extract, cache, find-similar). Reranker and embeddings run on-device; everything stays under `~/.wigolo/`
+- **Cost:** open-source core tools; upstream describes local reranker and embedding models. Model execution and private persistence require the verified setup described below.
 - **Repo / Provider:** github.com/KnockOutEZ/wigolo, `KnockOutEZ/wigolo (5.1k★, gh-api 2026-09-06)`, not archived, pushed 2026-09-06, created 2026-04-12, 411 forks / 21 watchers / 60 open issues. **AGPL-3.0** (the gh API reports `NOASSERTION` because the LICENSE file opens with a project header, but the body reads "GNU Affero General Public License version 3", verified in the LICENSE blob 2026-09-06)
 - **Top pick for its domain:** no. Bright Data ② remains the barrier-breaker and Tavily/Exa ② remain the search picks for hard/managed work; wigolo is the shard's first **free, keyless search** row
 
@@ -12,19 +12,33 @@ One MCP surface for the whole read-the-web loop: **search, fetch, crawl, extract
 **Decision rule:** reach for wigolo when you want a search layer that costs nothing per query and needs no key, especially for high-volume or exploratory querying where Tavily's free tier (1,000 credits/mo) runs out mid-task. Keep **Tavily/Exa ②** where you want a managed SLA or their specific ranking, and go to **Bright Data ②** the moment the target is a real anti-bot wall (see below, wigolo labels those rather than solving them).
 
 ## Install
-```bash
-npx wigolo init --agents=claude-code     # unattended by default, safe in scripts/CI
-wigolo doctor                            # per-component health report
-```
-Also on Docker Hub as `towhid69420/wigolo` (`:full` preinstalls the browser engine; the slim image lazy-loads models into the volume). An 11-pack agent-skill catalog is installed by `init` and managed with `wigolo skills add|list|remove`.
+First inspect the installed version's supported runtime, model, browser-profile and
+cache path settings. Redirect real query history, cached pages, profiles, traces and
+outputs into verified PRIVATE versioned DATA before initialization or collection.
+A loose home directory is not an approved persistence destination. No supported path
+adapter is supplied or verified by this card; if the required paths cannot be
+redirected, stop at setup. Do not treat an unattended initializer as harmless.
+
+All model or external-agent work must use installed `llmcall` with its current routing,
+model, timeout and fallback policy. This includes model-dependent reranking, embedding
+or research modes. Verify an actual installed-version adapter and its tool-I/O contract
+before using those modes; otherwise keep them at setup. A deterministic operation is
+usable only after confirming that its installed configuration performs no model work
+and respects the private persistence contract.
 
 ⚠ **The npm channel lags the repo.** npm `wigolo` is pinned at **0.2.1, published 2026-07-19** (registry checked 2026-09-06) while the repo was pushed 2026-09-06, roughly seven weeks of drift. If you need a recent fix, install from source rather than npm.
 
 ## Auth / keys
-None for the core tools, which is the whole point of the row. No account, no API key, no cloud round-trip. Optional keys only buy optional engines. The one credential you may add is a proxy (below), and that is opt-in.
+Upstream describes keyless core search, but search requests still contact external
+sources and optional engines or proxies may require credentials. Keep those credentials
+in approved PRIVATE configuration. Keyless operation does not make query history public.
 
 ## Usage, call examples
-After `init`, the tools appear to the agent directly (`search`, `fetch`, `crawl`, `extract`, `find_similar`, `research`). Every response carries per-result scoring, and weak results are flagged as junk by wigolo's own scorer rather than passed through silently. Full per-tool response contracts live in the repo's `docs/tools.md`.
+After the required private storage and model checks pass, discover callable tools in
+the active host and verify one selected read-only operation and its returned fields.
+Installation alone does not establish exposure or content validity. Inspect the
+installed version's `docs/tools.md` for response contracts and preserve source failures,
+challenge responses and partial coverage in the research report.
 
 ## General experience & gotchas (踩坑)
 > Not yet exercised in a live market-intel run. The notes below come from the repo's own README/LICENSE and the npm registry, all fetched 2026-09-06; harden them with a `live-runs.jsonl` entry after first real use (R4).

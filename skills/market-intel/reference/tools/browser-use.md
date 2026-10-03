@@ -12,21 +12,20 @@ An LLM drives the browser toward a **natural-language goal** ("log in, go to ord
 ## Install
 `pip install browser-use` (Python ≥3.11; installs Playwright browsers on first run, `playwright install chromium` if it doesn't auto-fetch). Not an MCP, call from a short Python harness. See L1 line in `reference/volatile/pricing-install.md#browser-automation`. On Windows prefer running it in WSL or a clean venv; native Windows Playwright path quirks bite (see `install-guide.md` Windows notes).
 
-## Auth / keys
-No service key for browser-use itself. It **needs an LLM API key** (OpenAI/Anthropic/etc.) to plan actions, set via env (e.g. `ANTHROPIC_API_KEY`/`OPENAI_API_KEY`). Target-site auth = a logged-in browser session/cookies you supply. Key-bearing: keep the LLM key out of the transcript, user sets the env var themselves; never echo it (see `install-guide.md` secret hygiene).
+## Model integration status
+This source is cataloged as requiring setup. The upstream direct-provider example
+does not satisfy this workspace's shared model interface. No supported `llmcall`
+adapter for this library is supplied or verified here, so do not instantiate a
+provider client or pin a planner model from this page.
 
-## Usage, call examples
-```python
-from browser_use import Agent
-from browser_use.llm import ChatAnthropic  # or ChatOpenAI
-agent = Agent(task="Go to <site>, log in with saved cookies, extract product titles+prices to JSON",
-              llm=ChatAnthropic(model="claude-..."))
-result = await agent.run()
-```
-Pass a persistent browser profile for logged-in targets; cap with `max_steps` to bound token cost.
+All model or external-agent work must use installed `llmcall`, inheriting its
+current routing, model, timeout and fallback policy. Verify an actual supported
+adapter and its tool-I/O contract before using this library. Until then, use a
+current-session verified deterministic browser/extractor route. Keep resulting
+content, cookies, profiles and traces in verified PRIVATE versioned DATA.
 
 ## General experience & gotchas (踩坑)
-- **Token cost is the real cost, not a license.** Each step is an LLM call reading the DOM; long pages × many steps = expensive fast. Cap `max_steps`, narrow the goal, prefer cheaper planner models for navigation.
+- **Token cost is the real cost, not a license.** Each step is an LLM call reading the DOM; long pages × many steps = expensive fast. Cap `max_steps`, narrow the goal, inherit llmcall's selected planner policy.
 - **Non-deterministic.** Same goal can take a different path / occasionally fail; for a fixed repeatable extraction, a hand-written playwright/crawl4ai script is cheaper and more reliable. Use browser-use to *discover* the path, then harden it into a script.
 - **Same fingerprint ceiling as plain Playwright.** Hardened anti-bot (Cloudflare/DataDome) still blocks it, signals: CAPTCHA loop, 403, the agent "can't find" elements that exist. Escalate to patchright/nodriver/camoufox or hand the barrier to Bright Data ②.
 - **Login walls:** supply cookies up front; don't let the agent attempt fresh logins on the user's primary account (ban/lockout risk), throwaway accounts for scrape-heavy work.

@@ -34,6 +34,6 @@ news = DDGS().news("ev charging market", max_results=10)
 - Lighter and flakier than SearXNG: fewer knobs, no self-hosted control plane, more exposed to upstream throttling.
 
 ## Failure signals & fallback
-Empty result list, `RatelimitException`, or a 202/429 = throttled or a broken backend. First `pip install -U ddgs`; then add proxies/delays. If it stays unreliable, fall back to self-hosted **SearXNG** (④, your own proxies, more stable) or a route-② SERP API (**DataForSEO** Sandbox / **SerpApi** free 250/mo). For your own site's metrics, **GSC MCP** (①).
+Empty result list, `RatelimitException`, or a 202/429 = throttled or a broken backend. First `pip install -U ddgs`; then add proxies/delays. If it stays unreliable, fall back to self-hosted **SearXNG** (④, your own proxies, more stable) or a production SERP API such as **DataForSEO** or **SerpApi**, after checking current access, quota and the returned live listings. DataForSEO Sandbox supplies mock responses for request/response wiring tests; it cannot replace missing live SERP observations. If no production source works, preserve that evidence gap. For your own site's metrics, **GSC MCP** (①).
 
 ## Last verified: 2026-06

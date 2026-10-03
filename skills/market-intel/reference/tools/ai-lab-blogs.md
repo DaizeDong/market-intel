@@ -1,7 +1,7 @@
 # Tool: AI lab blogs (OpenAI / Anthropic / DeepMind / Meta AI / Mistral / Qwen / DeepSeek)
 
 - **Domain(s):** frontier-research (also: none)
-- **Barrier route:** ④ (browser / RSS, no API) · **Source tier:** L1 (the canonical primary source for a launch) · **Ready MCP:** no, drive with the already-connected **playwright MCP** + RSS where the blog exposes a feed
+- **Barrier route:** ④ (browser / RSS, no API) · **Source tier:** L1 (the canonical primary source for a launch) · **Ready MCP:** no, drive with **playwright MCP** after current-session verification + RSS where the blog exposes a feed
 - **Cost:** **free**, public blogs, no key, no quota. (No pricing page to fetch; these are open marketing/research posts.)
 - **Repo / Provider:** official lab sites, https://openai.com/news · https://www.anthropic.com/news · https://deepmind.google/discover/blog · https://ai.meta.com/blog · https://mistral.ai/news · https://qwen.ai (Qwen) · https://api-docs.deepseek.com / DeepSeek blog. (Non-GitHub; these are first-party sites.)
 - **Top pick for its domain:** no (it's the *authority* source for launches, but not the everyday discovery default, that's arXiv + HF Daily Papers)
@@ -10,7 +10,7 @@
 The official release posts where a lab *first* announces a model, benchmark, or capability. **Decision rule (shard):** when the question is about a specific **model launch / official capability claim**, the lab's own blog is the **L1 source, cite it over secondhand** roundups, X threads, or news rewrites. Use it to nail down the canonical date, the official benchmark numbers, license/availability, and exact model names. For *discovering* what's new across the field (not one known launch), start with arXiv + HF Daily Papers; for "what mattered this week" use the roundups (`ai-news-roundups`).
 
 ## Install
-Nothing to install. Use the **playwright MCP** (already connected, verify with `claude mcp list`) to navigate the blog and read the DOM, or subscribe to the blog's RSS feed where one exists (most labs expose `/rss` or an Atom feed). See `reference/install-guide.md` → "④ browser / act-like-human" and `reference/domains/browser-automation.md` for the general browser route. No L1 install line needed (free, no MCP package).
+Nothing to install. Use the **playwright MCP** (verify the operation in the active host session) to navigate the blog and read the DOM, or subscribe to the blog's RSS feed where one exists (most labs expose `/rss` or an Atom feed). See `reference/install-guide.md` → "④ browser / act-like-human" and `reference/domains/browser-automation.md` for the general browser route. No L1 install line needed (free, no MCP package).
 
 ## Auth / keys
 None, public pages, no account, no API key. (No secret-hygiene concern.)

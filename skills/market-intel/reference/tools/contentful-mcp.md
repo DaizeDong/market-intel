@@ -28,6 +28,6 @@ Tools cover entry/asset create-update-publish, content-type introspection, and l
 - **CMA token (Content Management API), not Content Delivery, is what you want for read+write.** It lives at Settings → API keys → "Add API key" inside a space (so a space must exist first). The displayed "Personal Access Tokens" UI under user profile is a different surface, also valid for management, scoped to your user not a space.
 
 ## Failure signals & fallback
-401 (revoked/space-mismatched CMA token) or validation errors on localized fields → verify `✓ Connected` in `claude mcp list` and confirm the space/environment. Fallback within domain: **Sanity hosted MCP** (the other major headless option), or **WordPress MCP** for a non-headless blog target.
+401 (revoked/space-mismatched CMA token) or validation errors on localized fields → use a supported value-free diagnostic for the selected server that returns only allowlisted name, connection status and authentication state; report those states as unverified if unavailable. Confirm the intended space/environment in private configuration and verify the selected operation in the active host session before claiming readiness. Fallback within domain: **Sanity hosted MCP** (the other major headless option), or **WordPress MCP** for a non-headless blog target.
 
 ## Last verified: 2026-06

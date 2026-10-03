@@ -16,7 +16,7 @@ Checks (the real failure modes of an unattended LLM refresh):
   STAR     every star count in the corpus that can be attributed to a repo is within tolerance of
            the live API value; the run PRINTS what fraction of star-carrying rows it attributed, and
            WARNs with the rows it could not (see star_claims: the old shape-matcher saw 20%)
-  FRESH    every `last_verified:`/`Last verified:` is real + non-future (shards, pricing, AND tool docs)
+  FRESH    verification dates are valid, non-future, and never regress from the verified baseline
   STALE    (WARN) a tool doc not re-verified in >9 months is nominated for re-check (anti-rot)
   DOCCOVER (WARN) a github repo in a LIVE (non-tombstone) shard row with no per-tool doc (anti-lost-tracking)
   METH     SKILL.md still contains the 8 numbered guardrails, L1/L5 tiers, and ①②③④ route legend
@@ -27,10 +27,18 @@ Checks (the real failure modes of an unattended LLM refresh):
            (`AUDIT: <model> verdict=<pass|hold>`) — P4 editor!=verifier; WARN-tier launch, BLOCK later
   CONST    CONSTITUTION.md exists and was not modified by this run (scope guard)
 
-Usage: python tools/verify_matrix.py [--no-net] [--base main]
+Usage: python tools/verify_matrix.py [--no-net] [--no-cache] [--base main]
+Default cache persistence requires a verified PRIVATE companion. Use --no-cache to skip
+cache reads and writes intentionally while retaining current network checks.
 Run from the repo root (~/market-intel).
 """
 import json, re, subprocess, sys, os
+from git_baseline import Baseline, BaselineError
+from domain_changes import historical_domains, check_coverage, check_domain_diff, count_table_rows
+from github_activity import activity_results
+from private_cache import GH_CACHE_PATH, load_cache, prepare_write, save_entries
+from private_inventory import InventoryError
+from human_review import REVIEW_ENV, ReviewError, load_review
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKILL = os.path.join(ROOT, "skills", "market-intel")
@@ -48,9 +56,20 @@ COVER_GLOBAL_DROP = 0.10 # total source rows may not drop >10%
 COVER_SHARD_DROP = 0.30  # no single shard may lose >30% of its rows
 
 NO_NET = "--no-net" in sys.argv
+CACHE_ENABLED = "--no-cache" not in sys.argv
 BASE = "main"
 if "--base" in sys.argv:
-    BASE = sys.argv[sys.argv.index("--base") + 1]
+    try:
+        BASE = sys.argv[sys.argv.index("--base") + 1]
+    except IndexError:
+        print("RESULT: NOT_EXAMINED --base requires a commit reference", file=sys.stderr)
+        sys.exit(2)
+try:
+    human_review = load_review(os.environ.get(REVIEW_ENV))
+    comparison = Baseline(ROOT, BASE)
+except (BaselineError, ReviewError) as exc:
+    print(f"RESULT: {exc}", file=sys.stderr)
+    sys.exit(2)
 
 fails, warns = [], []
 def block(code, msg): fails.append(f"[{code}] {msg}")
@@ -62,10 +81,10 @@ def read(p):
 
 def git_show(ref, relpath):
     try:
-        return subprocess.run(["git", "show", f"{ref}:{relpath}"], cwd=ROOT,
-                              capture_output=True, text=True, encoding="utf-8").stdout
-    except Exception:
-        return ""
+        return comparison.show(relpath)
+    except BaselineError as exc:
+        print(f"RESULT: {exc}", file=sys.stderr)
+        sys.exit(2)
 
 REPO_RE = re.compile(r"github\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)")
 # canonical bare owner/name slug (registry `repo` field for kind=repo tools)
@@ -151,16 +170,6 @@ def star_claims(line):
             last_claim = (c.end(), repo)
     return out
 
-def count_table_rows(text):
-    """Count markdown source-table rows (lines starting with '|' that aren't header/sep)."""
-    n = 0
-    for ln in text.splitlines():
-        s = ln.strip()
-        if s.startswith("|") and not re.match(r"^\|[\s:|-]+\|?$", s) and "---" not in s:
-            # skip header rows that contain the literal column names
-            if not re.search(r"\|\s*(source|repo|tool|name)\s*\|", s, re.I):
-                n += 1
-    return n
 
 # ---- STRUCT ----
 idx = read(INDEX)
@@ -187,7 +196,8 @@ if os.path.isdir(TOOLS_DIR):
         tools_idx = read(TOOLS_INDEX)
     # allow a dot inside the slug so companion "auto" docs (e.g. apify.auto.md) are extractable
     idx_slugs = set(re.findall(r"\(([a-z0-9][a-z0-9.-]*?)\.md\)", tools_idx))
-    fs_slugs = {f[:-3] for f in os.listdir(TOOLS_DIR) if f.endswith(".md") and f != "index.md"}
+    fs_slugs = {f[:-3] for f in os.listdir(TOOLS_DIR)
+                if f.endswith(".md") and f != "index.md" and not f.endswith(".auto.md")}
     miss_docs = idx_slugs - fs_slugs
     orphan_docs = fs_slugs - idx_slugs
     if miss_docs: block("TOOLS", f"tools/index.md references missing docs: {sorted(miss_docs)}")
@@ -283,7 +293,7 @@ def _fetch_repo_api(r):
     res = None
     for attempt in range(3):
         res = subprocess.run(
-            ["gh", "api", f"repos/{r}", "--jq", "{s:.stargazers_count,a:.archived,p:.pushed_at}"],
+            ["gh", "api", "--hostname", "github.com", f"repos/{r}", "--jq", "{s:.stargazers_count,a:.archived,p:.pushed_at}"],
             capture_output=True, text=True, encoding="utf-8")
         if res.returncode == 0:
             break
@@ -297,12 +307,21 @@ def _fetch_repo_api(r):
         return {"ok": False, "err": "transient", "stderr": stderr}
     try:
         d = json.loads(res.stdout)
-        return {"ok": True, "stars": d.get("s"), "archived": bool(d.get("a")), "pushed_at": d.get("p")}
+        return {"ok": True, "stars": d.get("s"), "archived": d.get("a"), "pushed_at": d.get("p")}
     except Exception:
         return {"ok": False, "err": "unparseable", "stderr": stderr}
 
 repo_api = {}
+gh_destination, gh_cache = None, {}
 if not NO_NET:
+    try:
+        gh_destination, gh_cache = load_cache(GH_CACHE_PATH, enabled=CACHE_ENABLED)
+        prepare_write(GH_CACHE_PATH, gh_destination, enabled=CACHE_ENABLED)
+    except InventoryError as exc:
+        print(f"RESULT: NOT_EXAMINED private verification cache: {exc}", file=sys.stderr)
+        sys.exit(2)
+    if not CACHE_ENABLED:
+        print("CACHE: disabled (--no-cache); current network checks remain enabled")
     import concurrent.futures as _cf
     # Star anchors join the fetch set. They are NOT added to repo_set: repo_set drives the 404
     # hard-BLOCK, and the widened matcher can legitimately anchor on a prose token that merely looks
@@ -397,111 +416,25 @@ else:
                            f"bring one into the gate: {_u}{' …' if len(star_unpaired) > 8 else ''}")
 
 # ---- GHACTIVE (P4 deterministic activity gate) ----
-# WHY: LLM-judgment lenses (existence, freshness, top_pick_impact) confidently passed a candidate
-# (BigGo, 2026-06-17 sweep) whose repo was 13 months stale. PHILOSOPHY §4 demands an independent
-# deterministic source, gh api `pushed_at` + `archived`. Inviolable, not optional.
-# 404                  -> BLOCK (URL fabricated or dead)
-# archived=true        -> BLOCK (formally retired upstream)
-# pushed_at >12mo old  -> WARN  (silent rot; same severity class as STALE)
-# rate-limited         -> RATE_LIMITED (do NOT block on transient external state; surfaces as WARN)
-# Cache results to metrics/gh-api-cache.json keyed by owner/repo with timestamp; entries older
-# than 7d are refetched. This avoids hammering the API on every refresh.
+# Decide from the combined current fetch, then share evidence in the PRIVATE cache.
+# 404/archived remain BLOCK, stale remains WARN, and unavailable evidence remains a warning.
 import datetime
-GH_CACHE = os.path.join(ROOT, "metrics", "gh-api-cache.json")
-GH_CACHE_MAX_AGE_DAYS = 7
-GHACTIVE_STALE_MONTHS = 12
 _now_ts = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
-_now_iso = _now_ts.isoformat()
-gh_cache = {}
-if os.path.exists(GH_CACHE):
-    try:
-        gh_cache = json.loads(read(GH_CACHE))
-    except Exception:
-        gh_cache = {}
 ghactive_results = []
 if NO_NET:
     warn("GHACTIVE", "skipped GitHub activity verification (--no-net)")
 else:
-    for r in repos:
-        # cache hit if entry exists and is fresh enough
-        c = gh_cache.get(r)
-        if c and "checked_at" in c:
-            try:
-                age = (_now_ts - datetime.datetime.fromisoformat(c["checked_at"])).days
-            except Exception:
-                age = 999
-            if age <= GH_CACHE_MAX_AGE_DAYS and c.get("verdict") != "RATE_LIMITED":
-                ghactive_results.append(c)
-                continue
-        # Read the combined fetch (repo_api) instead of a second gh call. Verdict/cache/message
-        # logic is unchanged: only the network round-trip moved to the parallel phase above.
-        a = repo_api.get(r) or {"ok": False, "err": "transient", "stderr": ""}
-        if not a["ok"]:
-            stderr = a.get("stderr") or ""
-            if a["err"] == "404":
-                entry = {"repo": r, "pushed_at": None, "archived": None,
-                         "verdict": "BLOCK", "reason": "404 not found", "checked_at": _now_iso}
-                block("GHACTIVE", f"{r}: 404 not found (URL fabricated, deleted, or moved)")
-            elif a["err"] == "unparseable":
-                entry = {"repo": r, "pushed_at": None, "archived": None,
-                         "verdict": "RATE_LIMITED", "reason": "unparseable response",
-                         "checked_at": _now_iso}
-                warn("GHACTIVE", f"{r}: unparseable activity response")
-            elif "rate limit" in stderr.lower() or "API rate" in stderr or "403" in stderr:
-                # Rate-limit is transient external state; per the philosophy we must not gate the
-                # gate on it. Surface as WARN and skip, re-run will pick it up.
-                entry = {"repo": r, "pushed_at": None, "archived": None,
-                         "verdict": "RATE_LIMITED", "reason": "gh api rate-limited",
-                         "checked_at": _now_iso}
-                warn("GHACTIVE", f"{r}: rate-limited — re-run when quota resets (not blocking)")
-            else:
-                # Other transient errors: surface as WARN, do not block (REPO gate already
-                # fail-closed on existence; GHACTIVE is the activity layer, not the existence layer).
-                entry = {"repo": r, "pushed_at": None, "archived": None,
-                         "verdict": "RATE_LIMITED",
-                         "reason": f"gh error: {stderr.strip()[:60]}", "checked_at": _now_iso}
-                warn("GHACTIVE", f"{r}: could not check activity ({stderr.strip()[:60]})")
-            ghactive_results.append(entry)
-            gh_cache[r] = entry
-            continue
-        pushed_at = a["pushed_at"]
-        archived = bool(a["archived"])
-        if archived:
-            entry = {"repo": r, "pushed_at": pushed_at, "archived": True,
-                     "verdict": "BLOCK", "reason": "archived upstream", "checked_at": _now_iso}
-            block("GHACTIVE", f"{r}: archived=true (formally retired upstream — tombstone the row)")
-        else:
-            # parse pushed_at (RFC3339 like "2026-06-17T04:33:39Z")
-            try:
-                pushed_dt = datetime.datetime.strptime(pushed_at[:10], "%Y-%m-%d")
-                months_old = (_now_ts - pushed_dt).days / 30.44
-            except Exception:
-                months_old = 0
-            if months_old > GHACTIVE_STALE_MONTHS:
-                entry = {"repo": r, "pushed_at": pushed_at, "archived": False,
-                         "verdict": "WARN",
-                         "reason": f"pushed_at {pushed_at[:10]} is ~{int(months_old)}mo old (>{GHACTIVE_STALE_MONTHS}mo)",
-                         "checked_at": _now_iso}
-                warn("GHACTIVE", f"{r}: last push {pushed_at[:10]} (~{int(months_old)}mo ago, "
-                                 f">{GHACTIVE_STALE_MONTHS}mo) — re-verify still maintained")
-            else:
-                entry = {"repo": r, "pushed_at": pushed_at, "archived": False,
-                         "verdict": "PASS",
-                         "reason": f"pushed_at {pushed_at[:10]} within {GHACTIVE_STALE_MONTHS}mo",
-                         "checked_at": _now_iso}
-        ghactive_results.append(entry)
-        gh_cache[r] = entry
-    # persist cache (best-effort; cache miss is harmless)
+    ghactive_results = activity_results(repos, repo_api, gh_cache, _now_ts, block, warn)
+    for entry in ghactive_results:
+        entry["hostname"] = "github.com"
     try:
-        os.makedirs(os.path.dirname(GH_CACHE), exist_ok=True)
-        with open(GH_CACHE, "w", encoding="utf-8") as f:
-            json.dump(gh_cache, f, ensure_ascii=False, indent=2, sort_keys=True)
-    except Exception:
-        pass
-    # aggregate summary into the gate's output
+        save_entries(GH_CACHE_PATH, {entry["repo"]: entry for entry in ghactive_results},
+                     gh_destination, enabled=CACHE_ENABLED)
+    except InventoryError as exc:
+        block("GHACTIVE", f"private activity cache persistence failed: {exc}")
     _verdicts = {v: 0 for v in ("PASS", "WARN", "BLOCK", "RATE_LIMITED")}
-    for e in ghactive_results:
-        _verdicts[e["verdict"]] = _verdicts.get(e["verdict"], 0) + 1
+    for entry in ghactive_results:
+        _verdicts[entry["verdict"]] += 1
     print(f"GHACTIVE summary: {_verdicts['PASS']} PASS, {_verdicts['WARN']} WARN, "
           f"{_verdicts['BLOCK']} BLOCK, {_verdicts['RATE_LIMITED']} RATE_LIMITED "
           f"(of {len(ghactive_results)} repos checked)")
@@ -512,23 +445,80 @@ this_month = today.strftime("%Y-%m")
 def _ym_to_months(ym): return int(ym[:4]) * 12 + int(ym[5:7])
 this_m = _ym_to_months(this_month)
 STALE_MONTHS = 9          # a per-tool doc unchecked this long is nominated for re-verification (WARN)
-for m in re.finditer(r"last_verified:\s*(\d{4})-(\d{2})", all_text):
-    ym = f"{m.group(1)}-{m.group(2)}"
-    if ym > this_month:
-        block("FRESH", f"last_verified {ym} is in the future")
-# Per-tool doc freshness: every doc must carry a `Last verified: YYYY-MM`; future = BLOCK (a lie),
-# >STALE_MONTHS old = WARN (surfaced so a sweep re-verifies it, closes the silent-rot gap).
+VERIFIED_RE = re.compile(r"\blast[_ ]verified:\s*([^\s`*]+)", re.I)
+
+
+def _section_dates(text, *, card=False):
+    """Key shard markers by heading path; cards use one document-level marker."""
+    headings, sections = {}, {}
+    for line in text.splitlines():
+        heading = re.match(r"^\s{0,3}(#{1,6})\s+(.+?)\s*#*\s*$", line)
+        if heading and not card:
+            level = len(heading.group(1))
+            title = heading.group(2)
+            marker = VERIFIED_RE.search(title)
+            if marker:
+                title = title[:marker.start()]
+            title = re.sub(r"[*`~]", "", title).strip(" ()[]").casefold()
+            if title:
+                headings = {depth: value for depth, value in headings.items() if depth < level}
+                headings[level] = title
+        key = "document" if card else " / ".join(headings.values()) or "document"
+        for match in VERIFIED_RE.finditer(line):
+            sections.setdefault(key, []).append(match.group(1).rstrip(".,;)]"))
+    return sections
+
+
+def _validated_dates(sections, label, *, historical=False):
+    valid = {}
+    for section, values in sections.items():
+        for value in values:
+            try:
+                if not re.fullmatch(r"\d{4}-\d{2}(?:-\d{2})?", value):
+                    raise ValueError("invalid date shape")
+                day = datetime.date.fromisoformat(value + "-01" if len(value) == 7 else value)
+            except ValueError:
+                report = warn if historical else block
+                report("FRESH", f"{label} [{section}] has an invalid last_verified date")
+                continue
+            valid.setdefault(section, []).append(day)
+    return valid
+
+
+fresh_documents = {f"domains/{domain}.md": text for domain, text in shard_text.items()}
+fresh_documents.update({f"tools/{slug}.md": text for slug, text in tool_docs_text.items()})
+for relative, path in (("volatile/pricing-install.md", PRICING), ("install-guide.md", INSTALL_GUIDE)):
+    if os.path.isfile(path):
+        fresh_documents[relative] = read(path)
+
 stale_docs = []
-for slug, txt in tool_docs_text.items():
-    fm = re.search(r"Last verified:\s*(\d{4})-(\d{2})", txt)
-    if not fm:
-        warn("FRESH", f"tools/{slug}.md has no 'Last verified: YYYY-MM' line")
-        continue
-    ym = f"{fm.group(1)}-{fm.group(2)}"
-    if ym > this_month:
-        block("FRESH", f"tools/{slug}.md 'Last verified {ym}' is in the future")
-    elif this_m - _ym_to_months(ym) > STALE_MONTHS:
-        stale_docs.append((slug, ym))
+for relative, text in sorted(fresh_documents.items()):
+    card = relative.startswith("tools/")
+    current_sections = _section_dates(text, card=card)
+    if card and sum(map(len, current_sections.values())) > 1:
+        block("FRESH", f"{relative} has ambiguous verification markers; use one card-level Last verified marker")
+    current_dates = _validated_dates(current_sections, relative)
+    previous = git_show(BASE, "skills/market-intel/reference/" + relative) or ""
+    baseline_sections = _section_dates(previous, card=card)
+    if card and sum(map(len, baseline_sections.values())) > 1:
+        warn("FRESH", f"baseline {relative} has ambiguous verification markers")
+    baseline_dates = _validated_dates(baseline_sections, "baseline " + relative, historical=True)
+    for section, dates in current_dates.items():
+        if max(dates) > today:
+            block("FRESH", f"{relative} [{section}] last_verified is in the future")
+    for section, dates in baseline_dates.items():
+        current = current_dates.get(section)
+        if not current:
+            block("FRESH", f"{relative} [{section}] lost its baseline last_verified evidence")
+        elif max(current) < max(dates):
+            block("FRESH", f"{relative} [{section}] last_verified moved backward from "
+                           f"{max(dates).isoformat()} to {max(current).isoformat()}")
+    if card:
+        dates = [day for values in current_dates.values() for day in values]
+        if not dates:
+            warn("FRESH", f"{relative} has no valid 'Last verified: YYYY-MM' line")
+        elif this_m - _ym_to_months(max(dates).strftime("%Y-%m")) > STALE_MONTHS:
+            stale_docs.append((relative[6:-3], max(dates).strftime("%Y-%m")))
 if stale_docs:
     worst = sorted(stale_docs, key=lambda x: x[1])
     shown = ", ".join(f"{s}({y})" for s, y in worst[:10])
@@ -564,9 +554,11 @@ if tool_docs_text:
 # registry.json is THE list of tools; the gate enforces it equals the doc files and the index slugs,
 # so a SaaS tool can't lose its doc or fall out of the index without a hard BLOCK.
 REGISTRY = os.path.join(TOOLS_DIR, "registry.json")
+if not os.path.isfile(REGISTRY):
+    block("REGISTRY", "tools/registry.json is missing; authoritative catalog was not examined")
 if os.path.isdir(TOOLS_DIR) and 'fs_slugs' in dir():
     if not os.path.exists(REGISTRY):
-        warn("REGISTRY", "tools/registry.json absent — SaaS/non-repo tools have no deterministic net")
+        pass  # The required local input was blocked above, independently of network mode.
     else:
         try:
             reg = json.loads(read(REGISTRY))
@@ -623,106 +615,31 @@ if guardrail_nums < 8:
     warn("METH", f"SKILL.md numbered guardrails look reduced ({guardrail_nums} found, expect >=8)")
 
 # ---- COVER (vs baseline) ----
-base_total = 0
-cur_total = 0
-for d in fs_domains:
-    cur = count_table_rows(shard_text[d])
-    cur_total += cur
-    base_txt = git_show(BASE, f"skills/market-intel/reference/domains/{d}.md")
-    base = count_table_rows(base_txt) if base_txt else cur
-    base_total += base
-    if base and (base - cur) / base > COVER_SHARD_DROP:
-        block("COVER", f"{d}: source rows dropped {base}->{cur} (>{int(COVER_SHARD_DROP*100)}%) — possible mass deletion")
-if base_total and (base_total - cur_total) / base_total > COVER_GLOBAL_DROP:
-    block("COVER", f"total source rows dropped {base_total}->{cur_total} (>{int(COVER_GLOBAL_DROP*100)}%)")
+try:
+    baseline_domains = historical_domains(comparison, fs_domains)
+except BaselineError as exc:
+    print(f"RESULT: {exc}", file=sys.stderr)
+    sys.exit(2)
+cur_total, base_total = check_coverage(
+    shard_text, baseline_domains, count_table_rows, block, COVER_GLOBAL_DROP, COVER_SHARD_DROP)
 
 # ---- CHURN (C7: incremental edits, not rewrite) + DELETE (C4: deletion needs a death-code) ----
 def git_diff(relpath):
-    return subprocess.run(["git", "diff", BASE, "--", relpath], cwd=ROOT,
-                          capture_output=True, text=True, encoding="utf-8").stdout
+    try:
+        return comparison.diff(relpath)
+    except BaselineError as exc:
+        print(f"RESULT: {exc}", file=sys.stderr)
+        sys.exit(2)
 
-DEATH_CODES = ("D-404", "D-STALE", "D-PRICE", "D-TOS", "D-SUPERSEDED")
 changelog_added = "\n".join(l[1:] for l in git_diff("CHANGELOG.md").splitlines()
                             if l.startswith("+") and not l.startswith("+++"))
-genuinely_added_any = []   # AUDIT (P4): names of source rows that are NEW this sweep (not edits)
-for d in fs_domains:
+genuinely_added_any = []
+for d, base_text in baseline_domains.items():
     rel = f"skills/market-intel/reference/domains/{d}.md"
-    diff = git_diff(rel)
-    if not diff.strip():
-        continue                                  # untouched shard
-    added = [l for l in diff.splitlines() if l.startswith("+") and not l.startswith("+++")]
-    removed = [l for l in diff.splitlines() if l.startswith("-") and not l.startswith("---")]
-    base_lines = len(git_show(BASE, rel).splitlines()) or 1
-    churn = (len(added) + len(removed)) / base_lines
-    if churn > 0.40:
-        block("CHURN", f"{d}: {int(churn*100)}% of lines changed (>40%) — looks like a rewrite, not an "
-                       f"incremental edit (C7); route to human review")
-    def _row_name(line):
-        # first cell of a markdown table row = the source identity; strip markdown emphasis AND the
-        # volatile (NNk★) star annotation. A star-count refresh is an EDIT of an existing source, not
-        # a delete+add of a different one, so it must NOT change the row's identity -- otherwise fixing
-        # a stale star (required by the STAR check) trips the DELETE check (C4), the two contradicting
-        # each other on any star fix living in the identity cell. The STAR check still verifies the
-        # number independently; identity is the repo/tool name, never its (volatile) star count.
-        cells = [c.strip() for c in line.lstrip("+-").strip().strip("|").split("|")]
-        if not cells:
-            return ""
-        name = re.sub(r"[*`]", "", cells[0])
-        # Strip the star count in EVERY shape, via the same regex the STAR gate matches with. It
-        # used to strip only the literal `(NNk★)`, the same narrow assumption STAR itself made, so
-        # the moment STAR started catching a stale `(133★)` and the fix landed, DELETE saw the row's
-        # identity change and blocked the very edit STAR demanded. Two gates disagreeing about what
-        # a star annotation looks like is how a repo ends up unable to satisfy both.
-        name = STAR_CLAIM_RE.sub("", name)
-        name = re.sub(r"\(\s*[,;]?\s*\)", "", name)
-        return re.sub(r"\s{2,}", " ", name).strip().lower()
-    def _is_src_row(line):
-        s = line.lstrip("+-").strip()
-        return s.startswith("|") and "---" not in s and not re.search(r"\|\s*(source|repo|tool|name)\s*\|", s, re.I)
-    added_names = {_row_name(l) for l in added if _is_src_row(l)}
-    removed_names = {_row_name(l) for l in removed if _is_src_row(l)}
-    # an added table row whose source-name was NOT already present (removed line) = a genuinely NEW
-    # source row (mirror of genuinely_removed). Edits show as remove+add of the same name -> excluded.
-    genuinely_added_any += [n for n in added_names if n and n not in removed_names]
-    # a removed table row whose source-name still appears in an added row = MODIFICATION, not a
-    # deletion (git diff shows an edited line as remove+add). Only a name that's GONE is a real delete.
-    genuinely_removed = [l for l in removed if _is_src_row(l) and _row_name(l) and _row_name(l) not in added_names]
-    if genuinely_removed:
-        added_text = "\n".join(added)
-        if not any(c in changelog_added or c in added_text for c in DEATH_CODES):
-            block("DELETE", f"{d}: source row(s) removed without a death-code (C4: "
-                            f"D-404/D-STALE/D-PRICE/D-TOS/D-SUPERSEDED) in CHANGELOG or an Avoid(dead) line")
-
-    # ---- ROUTE (C2: a Default pick may not silently downgrade free/④③ -> paid ①②) ----
-    # A route downgrade is a MODIFICATION (the source name is present on BOTH the removed and added
-    # sides of the diff), NOT a deletion, so it lives at LOOP level as a sibling of DELETE, never
-    # nested under `if genuinely_removed:` (genuinely_removed is empty for a modification, so the
-    # check would silently never fire). Escape hatch: an intent-bearing CHANGELOG/row reason. We key
-    # on the MAX route glyph per side (a row can list several barrier routes; the best one is what a
-    # user gets), mirroring how DELETE keys on specific DEATH_CODES, not common prose words.
-    GLYPH_RANK = {"④": 4, "③": 3, "②": 2, "①": 1}
-    ROUTE_REASON = ("why paid", "paid because", "免费替代", "free route unavailable",
-                    "no free route", "free route blocked", "free route gone")
-    def _route_glyphs(line):
-        return [GLYPH_RANK[g] for g in line if g in GLYPH_RANK]
-    added_by_name = {}
-    for l in added:
-        if _is_src_row(l):
-            added_by_name.setdefault(_row_name(l), l)
-    for rl in removed:
-        if not _is_src_row(rl):
-            continue
-        name = _row_name(rl)
-        al = added_by_name.get(name)
-        if not name or not al:                        # only MODIFICATIONS (name in both sides)
-            continue
-        rem_routes, add_routes = _route_glyphs(rl), _route_glyphs(al)
-        if not rem_routes or not add_routes:
-            continue
-        if max(rem_routes) >= 3 and max(add_routes) <= 2:   # ④/③ -> ①/② downgrade
-            if not any(c in changelog_added or c in al for c in ROUTE_REASON):
-                block("ROUTE", f"{d}: '{name}' route downgraded free/④③ -> paid ①② without a "
-                               f"CHANGELOG reason (C2) — add why (route/why paid) or revert")
+    genuinely_added_any.extend(check_domain_diff(
+        d, git_diff(rel), base_text, changelog_added, STAR_CLAIM_RE, block,
+        current_text=shard_text.get(d, ""), human_review=human_review,
+        baseline_commit=comparison.commit))
 
 # ---- AUDIT (P4: editor != verifier, new source rows need an independent cross-model attestation) ----
 # EVOLUTION.md openly admits a P4 violation: the same headless LLM both edits AND verifies a refresh.
@@ -788,12 +705,12 @@ const_path = os.path.join(ROOT, "CONSTITUTION.md")
 if not os.path.exists(const_path):
     block("CONST", "CONSTITUTION.md missing")
 else:
-    diff = subprocess.run(["git", "diff", "--name-only", BASE, "--", "CONSTITUTION.md"],
-                          cwd=ROOT, capture_output=True, text=True, encoding="utf-8").stdout.strip()
+    diff = git_diff("CONSTITUTION.md").strip()
     if diff:
         block("CONST", "CONSTITUTION.md was modified — automation may not change the constitution")
 
 # ---- verdict ----
+comparison.close()
 print(f"market-intel verify_matrix: {len(repos)} repos checked, "
       f"{cur_total} source rows, base={BASE}")
 for w in warns: print("WARN", w)
