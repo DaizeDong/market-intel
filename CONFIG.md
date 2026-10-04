@@ -131,7 +131,8 @@ Machine-readable index at the companion-repo root. Full field reference: spec §
 Consumers MUST tolerate unknown top-level/entry fields (forward-compat) and degrade when optional
 fields are absent. Per tool that needs credentials, add
 `tools/<slug>/{claude.json.template, env.template}` (`<UPPER_SNAKE>` placeholders, **UTF-8 without
-BOM**, fail-loud on a missing value) and put real values in `secrets/<slug>.env` (gitignored).
+BOM**, fail-loud on a missing value) and put real values in `secrets/<slug>.env` under the
+companion's declared storage mode (versioned in PRIVATE Git for Mode A, gitignored for Mode B).
 Apply/verify contracts: spec §6 / §7.
 
 ## Companion-repo layout (spec §2)
@@ -143,8 +144,8 @@ Apply/verify contracts: spec §6 / §7.
 │   └── <slug>/                   # OPTIONAL
 │       ├── claude.json.template  # REQUIRED if <slug>/ exists
 │       └── env.template          # REQUIRED if <slug>/ exists
-└── secrets/                      # REQUIRED, gitignored
-    └── <slug>.env                # OPTIONAL (real values, never committed)
+└── secrets/                      # REQUIRED; declared Mode A or Mode B policy
+    └── <slug>.env                # OPTIONAL; private Git in A, gitignored in B
 ```
 
 ## Secrets and storage modes (E6)
