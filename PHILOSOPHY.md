@@ -144,7 +144,7 @@ Rationale STAYS always-loaded when it states the invariant whose violation is th
 exists to fix, or when it is a troubleshooting branch of the main flow rather than an appendix. **Do
 not refactor for tidiness; measure, and be willing to conclude "this one is already right".**
 
-**Mechanism, per P2:** `tools/load_budget.py` measures always-loaded lines and the cross-file prose
+**Mechanism, per P2:** the pinned Style kit's `style/tools/load_budget.py` measures always-loaded lines and the cross-file prose
 overlap (word shingles, code/tables/links excluded so structured repetition is not punished) and
 BLOCKs over threshold. Its known limit: it compares SKILL.md against references, so
 reference-to-reference duplication is invisible to it and stays a human judgement.
