@@ -147,11 +147,16 @@ Apply/verify contracts: spec §6 / §7.
     └── <slug>.env                # OPTIONAL (real values, never committed)
 ```
 
-## Secrets, Mode B (E6)
+## Secrets and storage modes (E6)
 
-The companion config repo is **separate and private** (reference deployment:
-`DaizeDong/market-intel-config`). `secrets/*` is **gitignored**, real values never enter git;
-back them up out-of-band. Neither this skill repo nor the config repo ever echoes secret values.
+The companion is separate and PRIVATE. Its declared storage mode governs credentials:
+Mode A versions them in verified PRIVATE Git; Mode B ignores them and requires a
+separate backup. Both keep secrets out of the public tool and command output.
+The bundled initializer supports Mode B only and refuses Mode A. That initializer
+default does not describe every existing deployment. Follow the declaration and
+recovery instructions in the selected companion; do not reinitialize it to change modes.
+See [the storage-mode specification](skills/market-intel/reference/companion-config-spec.md#53-storage-modes-mode-a-vs-mode-b)
+for declarations, checks and backup responsibilities.
 
 ## First-time setup (E3), succeeds on the first try
 

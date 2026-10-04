@@ -7,7 +7,7 @@ Triage a commercial topic across 15 data domains, auto-detect the right speciali
 [![Source Matrix](https://img.shields.io/badge/Source%20Matrix-15%20domains-green?style=flat)](skills/market-intel/reference/sources-index.md)
 [![Tool docs](https://img.shields.io/badge/Tool%20docs-per--tool%20how--to-green?style=flat)](skills/market-intel/reference/tools/index.md)
 [![Languages](https://img.shields.io/badge/Languages-EN%20%2F%20CN-blue?style=flat)](#languages)
-[![Roadmap](https://img.shields.io/badge/Roadmap-v0.29.0-purple?style=flat)](ROADMAP.md)
+[![Roadmap](https://img.shields.io/badge/Roadmap-v0.30.0-purple?style=flat)](ROADMAP.md)
 
 [English](README.md) | [中文版](README_CN.md)
 
@@ -15,16 +15,25 @@ Triage a commercial topic across 15 data domains, auto-detect the right speciali
 
 ## ⭐ Read this first, the design philosophy
 
-market-intel is built on one principle, **root-cause design, not incremental patching.** When
-something is wrong, we change the assumption underneath it, not the symptom on top. That single idea
-produced every decision here: browser-automation was promoted from footnote to a first-class route
-(not "add a few free tools"); this is a thin delegation layer (not "another deep-research"); updates
-run through a deterministic gate that can only let the matrix improve (not "set a reminder to
-refresh"). **The philosophy outranks any individual feature**, every future change must pass one
-test: *does it fix the framing, or just patch a symptom?*
+Commercial research often fails at source selection: a general search result cannot replace
+the required transaction history, platform data or authenticated operation. The tool owns source
+triage, setup guidance and evidence requirements, while the existing research harness performs
+retrieval and synthesis. Browser access is one supported route alongside official APIs and other
+sources; its availability must be checked in the active session.
 
-📜 **[Read the full design philosophy → PHILOSOPHY.md](PHILOSOPHY.md)** (6 principles, each with the
-patch-vs-root contrast and the real decision in this repo that it produced).
+This division keeps the research engine small, but makes coverage depend on the installed host,
+permissions and source behavior. Configuration, discovery, a successful call and usable content
+are separate evidence levels. A missing level stays visible as a setup need or coverage gap.
+Browsing the catalog needs no live probe; collecting current inventory is an explicit operation
+that writes only to a verified PRIVATE companion.
+
+Matrix changes pass deterministic checks for declared invariants and retain source evidence.
+Those checks can reject known forms of regression; they do not prove every recommendation is
+better or every provider is currently usable. Refreshes now require manual initiation, so their
+dates and coverage must remain visible to the reader.
+
+📜 **[Read the full design philosophy → PHILOSOPHY.md](PHILOSOPHY.md)** (seven principles explaining
+source selection, delegation, evidence, update controls and progressive loading).
 
 ---
 
@@ -85,8 +94,9 @@ deep spec: [`companion-config-spec.md`](skills/market-intel/reference/companion-
   ```
 - **Switch configs (hot-swap):** point the env var at another config dir, configs are self-contained,
   no other change needed: `export MARKET_INTEL_CONFIG=~/configs/work` ↔ `~/configs/personal`.
-- **Secrets:** Mode B, the companion repo is separate and private; `secrets/*` is gitignored and never
-  enters git; back up out-of-band.
+- **Secrets:** follow the companion's declared storage mode. Mode A versions credentials only in
+  verified PRIVATE Git; Mode B ignores them and requires a separate backup. The bundled initializer
+  supports Mode B only. Both modes keep secrets out of this public source; see [CONFIG.md](CONFIG.md#secrets-and-storage-modes-e6).
 
 ---
 
@@ -266,7 +276,7 @@ Hard rules applied during synthesis (see [SKILL.md](skills/market-intel/SKILL.md
 
 ## Limitations
 
-- **The matrix decays**, APIs go paid, tools get acquired, prices move. The [refresh protocol](skills/market-intel/reference/refresh-protocol.md) re-sweeps each domain (one subagent per domain → structured diff → incremental shard edits → `CHANGELOG.md` + version bump). **Default cadence is monthly** (v0.17.0); **weekly** for the fast-moving set (`crypto-defi`, `browser-automation`, `frontier-research`, `mcp-ecosystem`); **quarterly** is reserved for the Horizon scan (cross-domain new-territory discovery). Trigger manually with `刷新工具库` / `refresh the market-intel source matrix`, or wire a scheduled headless run (see [ROADMAP](ROADMAP.md)).
+- **The matrix decays:** APIs go paid, tools get acquired and prices move. The [refresh protocol](skills/market-intel/reference/refresh-protocol.md) rechecks domains, reviews evidence and records accepted changes. The scheduled monthly refresh and weekly surface poll were retired on 2026-10-01. Refreshes are manual: say `刷新工具库` / `refresh the market-intel source matrix`. Monthly domain review, weekly review of volatile sources and a quarterly Horizon scan are planning guidance, not running schedules. See [ROADMAP](ROADMAP.md).
 - **Web fallback is honest, not magic**, if no specialized MCP is connected, the skill says so and flags the gap rather than pretending the web answer is as deep.
 - **No reinvented engine**, the fan-out/verify/synthesize depth is delegated to `deep-research` / `research-lit`; market-intel is the routing + detection + guardrail seam, not a research engine of its own.
 

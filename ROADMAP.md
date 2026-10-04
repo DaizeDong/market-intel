@@ -1,6 +1,6 @@
 # Roadmap
 
-Current: **v0.29.0**
+Current: **v0.30.0**
 
 ## v0.1.0 (alpha), foundation
 
@@ -28,6 +28,17 @@ Current: **v0.29.0**
       **TOOLS** coverage check (index↔doc) and now also gh-api-verifies repos/stars cited inside tool
       docs. The refresh protocol keeps the docs in sync each sweep (step 3b).
 
+## Current maintenance and readiness contracts
+
+- [x] **Bounded GitHub retries.** `verify_matrix.py` attempts a repository lookup up to three
+      times, backs off after transient errors, stops immediately on 404 and classifies malformed
+      responses separately. Required repository and star verification still blocks if unverified.
+- [x] **Current-session capability evidence.** Configuration, exposure, execution, authentication
+      and content are distinct. Catalog browsing does not probe or write; explicit refresh writes
+      only to a verified PRIVATE companion. Offline checks do not prove live provider readiness.
+- [x] **Version alignment.** Package metadata, both badges and this current release declaration
+      use the already documented 0.30.0 release; subsequent contract repairs remain Unreleased.
+
 ## Next, deferred pieces of the 5-subagent design
 
 - [ ] **Machine-readable mirror block** per shard (YAML of {repo, stars, route, evidence_id}) so the
@@ -49,16 +60,12 @@ Current: **v0.29.0**
 - [ ] **Quarterly meta-loop**, reuse `meta-optimize`: review run history + CHANGELOG to improve
       `refresh-protocol.md` *itself*, PR-only, never auto-merge (immutable-core guarded).
 - [ ] **CHANGELOG/version automation** from the structured diff.
-- [ ] **Gate: distinguish transient fail-closed from real 404.** `verify_matrix.py` correctly fails
-      closed (can't verify → BLOCK), but a transient GitHub API rate-limit/network blip then discards
-      an otherwise-good refresh. Retry the gate once on non-404 network errors before blocking; only a
-      true 404 (hallucinated/dead repo) is an immediate hard block. (Observed during the v0.4.0 run.)
 - [ ] **Per-domain `last_verified` surfacing.** Show staleness in the report ("seo-keywords matrix
       last verified 2026-05, may be outdated").
 - [ ] **Install-state cache.** Optional snapshot of `claude mcp list` so triage can warn about
       `Failed`/`Needs auth` sources without re-running detection every time.
 - [ ] **More domains as the space grows** (e.g. video/creator analytics, app-store ASO, alt-data
-      marketplaces), only when a real research run hits a gap the current 12 don't cover.
+      marketplaces), only when a real research run hits a gap the current 15 don't cover.
 - [ ] **Delegation polish.** Tighten the hand-off contract to `deep-research` / `research-lit`
       (structured evidence-unit schema, combiner layer for large fan-outs).
 

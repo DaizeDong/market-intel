@@ -3,10 +3,10 @@
 > **设计理念, 从根本进行设计，而非小修小补**
 
 This is the organizing principle of market-intel. Every feature, every guardrail, every refactor in
-this repo exists because of the six principles below. They are not after-the-fact rationalizations,
+this repo exists because of the seven principles below. They are not after-the-fact rationalizations,
 they are the lens that produced each decision, and the test every future change must pass.
 
-> 这是 market-intel 的统领原则。本仓库里的每个功能、每道护栏、每次重构，都源于下面六条。它们不是事后
+> 这是 market-intel 的统领原则。本仓库里的每个功能、每道护栏、每次重构，都源于下面七条。它们不是事后
 > 总结的漂亮话，而是**催生了每个决定的透镜**，也是未来每次改动都必须通过的检验。
 
 **The one-sentence version:** when something is wrong, we change the assumption underneath it, not
@@ -51,18 +51,18 @@ decision that follows.
 ## P3, Monotonic evolution against default decay · 对抗默认腐化的单调进化
 
 - **The patch:** set up an auto-updater and trust it stays good.
-- **The root:** recognize that **the default trajectory of any auto-updater is decay**, hallucinated
-  entries, silent deletions, drifting quality. So design it so the system can *only move forward*:
-  guardrails only accumulate (never relax), coverage can't drop past a threshold, time only advances,
-  methodology is preserved, and every change must prove improve-or-hold before it can land.
-- **Why it matters:** "evolves automatically" is the easy promise; "cannot silently degrade" is the
-  hard guarantee, and the only one worth making.
+- **The root:** updates need controls for fabricated entries, silent deletions and drifting quality.
+  Preserve declared guardrails, coverage thresholds, evidence dates and methodology, then require
+  checks and review before a change lands. The scheduled updater is retired; the same constraints
+  apply when a person initiates a refresh.
+- **Why it matters:** these controls detect specified regressions. They do not prove semantic
+  improvement, complete coverage or current provider readiness; those need separate evidence.
 
 > - **补丁：** 搭个自动更新，然后相信它会一直好。
-> - **根本：** 认清**任何自动更新的默认走向都是腐化**,幻觉条目、静默删除、质量漂移。于是设计成系统
->   *只能向前*：护栏只增不减、覆盖度不得跌破阈值、时间只前进、方法论被保留、每次改动落地前必须证明
->   "变好或持平"。
-> - **为何重要：** "自动进化"是容易的承诺；"不会静默退化"才是难的保证,也是唯一值得做的保证。
+> - **根本：** 更新需要防范编造条目、静默删除和质量漂移。保留已声明的护栏、覆盖阈值、证据日期和
+>   方法要求，修改落地前通过检查与审查。原定时更新已退役，手动启动的刷新仍遵守这些约束。
+> - **为何重要：** 这些控制能发现已定义的退化，不能证明语义质量提升、覆盖完整或服务商当前可用；
+>   后三项需要各自的证据。
 
 ## P4, Facts over recall, evidence over assertion · 实测胜于记忆，证据胜于断言
 

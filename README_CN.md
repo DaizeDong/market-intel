@@ -7,28 +7,32 @@
 [![源矩阵](https://img.shields.io/badge/%E6%BA%90%E7%9F%A9%E9%98%B5-15%20%E4%B8%AA%E6%96%B9%E5%90%91-green?style=flat)](skills/market-intel/reference/sources-index.md)
 [![工具文档](https://img.shields.io/badge/%E5%B7%A5%E5%85%B7%E6%96%87%E6%A1%A3-%E9%80%90%E5%B7%A5%E5%85%B7%E6%93%8D%E4%BD%9C-green?style=flat)](skills/market-intel/reference/tools/index.md)
 [![语言](https://img.shields.io/badge/%E8%AF%AD%E8%A8%80-EN%20%2F%20CN-blue?style=flat)](#语言)
-[![Roadmap](https://img.shields.io/badge/Roadmap-v0.29.0-purple?style=flat)](ROADMAP.md)
+[![Roadmap](https://img.shields.io/badge/Roadmap-v0.30.0-purple?style=flat)](ROADMAP.md)
 
 [English](README.md) | [中文版](README_CN.md)
 
 ---
 
-## ⭐ 先读这个, 设计理念
+## ⭐ 先读这个， 设计理念
 
-market-intel 建立在一条原则上,**从根本进行设计，而非小修小补。** 出了问题，我们改的是它底下的假设，
-而不是它表面的症状。正是这一条催生了这里的每个决定：浏览器自动化被从脚注提升为一等路线（而不是"加几个
-免费工具"）；这是一个瘦委托层（而不是"又一个 deep-research"）；更新走一道只能让矩阵变好的确定性闸门
-（而不是"设个提醒去刷新"）。**理念的优先级高于任何单个功能**,未来每次改动都要通过一个检验：*它是在改
-框架，还是只在打补丁？*
+商业调研常在选源时就出了问题：普通搜索结果无法替代所需的交易历史、平台数据或鉴权操作。
+工具负责分诊、安装指引和证据要求，检索与综合交给已有调研引擎。浏览器访问与官方 API 等来源并列，
+但是否可用，必须在当前会话中核验。
 
-📜 **[阅读完整设计理念 → PHILOSOPHY.md](PHILOSOPHY.md)**（6 条原则，每条都给出"补丁 vs 根本"的对比，以及
-它在本仓库催生的真实决定）。
+这样可以减少重复维护，代价是覆盖范围取决于宿主、权限和数据源的实际行为。
+配置存在、发现工具、调用成功、内容可用是四种不同证据，缺哪一层就明确记录设置需求或覆盖缺口。
+只浏览目录无需在线探测；采集当前机器清单需要显式执行，结果只写入已核验的 PRIVATE 伴生仓。
+
+矩阵修改需要通过已声明规则的确定性检查，并保留来源证据。这些检查能拦住已定义的退化，
+不能证明每条推荐都更好，也不能证明服务商此刻可用。刷新现已改为手动启动，日期和覆盖范围必须留给读者判断。
+
+📜 **[阅读完整设计理念 → PHILOSOPHY.md](PHILOSOPHY.md)**（七条原则说明选源、委托、证据、更新检查和按需加载）。
 
 ---
 
 ## 它是什么（不是什么）
 
-Claude Code 已经内置了 `deep-research`（fan-out → 抓取 → 验证 → 合成）和 `research-lit`。这两个擅长**通用网页**和**学术**调研。但一旦课题需要**有信息壁垒的专业商业数据源**,真实的 X/推特数据、亚马逊历史价、链上数据、SEO 指标、社媒舆情、B2B 潜客,它们就够不着了。
+Claude Code 已经内置了 `deep-research`（fan-out → 抓取 → 验证 → 合成）和 `research-lit`。这两个擅长**通用网页**和**学术**调研。但一旦课题需要**有信息壁垒的专业商业数据源**,真实的 X/推特数据、亚马逊历史价、链上数据、SEO 指标、社媒舆情、B2B 潜客，它们就够不着了。
 
 `market-intel` 就是补这个缺口的**瘦层**。它**只做三件别人不做的事**，其余全部委托出去：
 
@@ -52,32 +56,37 @@ Claude Code 已经内置了 `deep-research`（fan-out → 抓取 → 验证 → 
 git clone --recurse-submodules https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market-intel
 ```
 
+在检出的工具仓中运行 `python -m pip install -r requirements.txt`，安装 Python 维护命令的依赖；
+离线测试依赖见 `requirements-dev.txt`。目录浏览、数据采集和确定性检查无需模型适配包。
+可选的事故说明和变更记录起草工具使用当前安装的 `llmcall`，配置步骤见[模型适配器说明](CONFIG.md#model-adapter)。
+
 遇到 `市场调研`、`竞品分析`、`调研这个市场`、`找套利机会`、`X/推特舆情`、`SEO 情报`、`产品趋势` 等会自动触发。单点查询或纯网页报告它会主动让位（用普通搜索 / `deep-research`）；学术文献则交给 `research-lit`。
 
 ---
 
 ## 配置
 
-Resolve the full consumer checkout before running maintenance commands. Replace
-`<absolute-market-intel-checkout>` with that absolute directory and confirm its
-`tools/console.py` and `.claude-plugin/plugin.json` exist. Plugin installation does
-not make these scripts relative to the current project.
+运行维护命令前，先找到完整的工具检出目录。把 `<absolute-market-intel-checkout>`
+替换为它的绝对路径，并确认其中存在 `tools/console.py` 和 `.claude-plugin/plugin.json`。
+安装插件不会让这些脚本出现在当前项目目录中。
 
 `market-intel` 是**带 config 的 skill**, 它从一个**独立、私有**的伴随 config 仓读取每用户状态(密钥、已装工具
 注册表)。仓根契约见 [CONFIG.md](CONFIG.md);权威深规范见
 [`companion-config-spec.md`](skills/market-intel/reference/companion-config-spec.md)(v1.3, STABLE)。
 
 - **挂载(发现顺序):** `$MARKET_INTEL_CONFIG` → `~/.market-intel-config/` →
-  `~/.config/market-intel-config/`。命中第一个即用;都没有则降级为纯矩阵模式照常运行。
-- **首次配置:**
+  `~/.config/market-intel-config/`。命中第一个即用；都没有则降级为纯矩阵模式照常运行。
+- **首次配置：**
   ```bash
   python "<absolute-market-intel-checkout>/scripts/init_config.py"        # 生成符合规范的 config 骨架(确定性)
   export MARKET_INTEL_CONFIG=~/.market-intel-config  # 或给 init 传 --out <dir>
   python "<absolute-market-intel-checkout>/scripts/verify_config.py"       # doctor:逐项 PASS/FAIL,明确报缺什么
   ```
-- **切换 config(即插即用):** 把环境变量指向另一个 config 目录即可, config 自包含,无需别的改动:
+- **切换 config(即插即用):** 把环境变量指向另一个 config 目录即可， config 自包含，无需别的改动：
   `export MARKET_INTEL_CONFIG=~/configs/work` ↔ `~/configs/personal`。
-- **密钥:** Mode B, 伴随 config 仓独立私有;`secrets/*` 已 gitignore,永不入库;请用库外备份。
+- **密钥：** 按伴生仓声明的存储模式维护。Mode A 仅在已核验的 PRIVATE Git 仓中记录凭据；
+  Mode B 忽略凭据文件，并要求另行备份。自带初始化工具只支持 Mode B。两种模式都禁止把密钥写进公开工具仓，
+  详见 [CONFIG.md](CONFIG.md#secrets-and-storage-modes-e6)。
 
 ---
 
@@ -93,9 +102,9 @@ DATA，不探测机器清单，也不写文件。`--capability` 为目录中的 
 伴生仓。写入失败会返回非零状态，保留先前快照。离线回归测试不能证明真实调研、
 已安装宿主或服务商当前可用。
 
-## 快速开始, 装免费无密钥三件套（3 分钟）
+## 快速开始， 装免费无密钥三件套（3 分钟）
 
-不想配 API key 也想试用?先装这 3 个免费无密钥的 MCP, 覆盖 HN / Reddit 风格社区 + 全球趋势 + AI 论文,零成本:
+不想配 API key 也想试用?先装这 3 个免费无密钥的 MCP, 覆盖 HN / Reddit 风格社区 + 全球趋势 + AI 论文，零成本：
 
 ```bash
 # 1. Hacker News (社区)
@@ -112,18 +121,18 @@ claude mcp add -s user arxiv -- uvx arxiv-mcp-server
 使用 **Codex** 时，在 Codex 的 MCP 设置或已安装 app 中启用来源，重连后检查 Codex
 当前可调用的工具。Claude 的配置不能证明 Codex 可用。详见[宿主证据说明](skills/market-intel/reference/host-capabilities.md)。
 
-接着说: `调研一下 AI agent 工具生态的趋势`。skill 会用通过核验的来源检索社区信号、趋势和论文，再生成带引用的报告。只有选定来源通过当前操作和内容核验后，才把它计为可用。
+接着说： `调研一下 AI agent 工具生态的趋势`。skill 会用通过核验的来源检索社区信号、趋势和论文，再生成带引用的报告。只有选定来源通过当前操作和内容核验后，才把它计为可用。
 
-之后,看下面 [60 秒演示](#60-秒演示)了解**专用 MCP**(付费 X 数据、Bright Data、Keepa 等), 那些才是 skill 真正设计的高质量路线。
+之后，看下面 [60 秒演示](#60-秒演示)了解**专用 MCP**(付费 X 数据、Bright Data、Keepa 等), 那些才是 skill 真正设计的高质量路线。
 
-### 装完之后, 该读哪个?
+### 装完之后， 该读哪个?
 
-按目的选一条:
+按目的选一条：
 
 | 你想做的… | 打开这个 |
 |---|---|
-| **直接用 skill**(让它自动触发跑研究) | 啥也不用读, skill 已加载,直接打研究问题。 |
-| **装第一个专用 MCP**(比如真 X 数据源 / 金融 API) | `skills/market-intel/reference/install-guide.md`, L0 装机机制;然后 `skills/market-intel/reference/tools/<slug>.md` 看你从下面源矩阵挑的那个工具。 |
+| **直接用 skill**(让它自动触发跑研究) | 啥也不用读， skill 已加载，直接打研究问题。 |
+| **装第一个专用 MCP**(比如真 X 数据源 / 金融 API) | `skills/market-intel/reference/install-guide.md`, L0 装机机制；然后 `skills/market-intel/reference/tools/<slug>.md` 看你从下面源矩阵挑的那个工具。 |
 | **建私有 companion config repo** 跨机持久化你的安装状态 + 密钥(>1 工具时推荐) | `skills/market-intel/reference/companion-config-repo.md`, 概述 + 教程。然后 `companion-config-spec.md`(正式契约)和 `companion-config-hardening.md`(首次推送**前**做 GitHub 端锁定)。 |
 
 大多数人先走路径 2,工具/机器累积到 >1 后再走路径 3。
@@ -156,7 +165,7 @@ claude mcp add -s user arxiv -- uvx arxiv-mcp-server
 - `find me 3 underrated open-source web-scraping tools released in 2026 with > 200 stars`, 跑 web-scraping + GitHub 星速发现
 - `who's been launching credible LLM eval skills in the last 3 months`, 跑 ready-skills + 前沿研究
 
-每个都会 fan-out 子任务、亮出带引用的证据，最后给一份"配了 <X> 源可更深"缺口清单。如果某个查询只出网页兜底，那是 skill 在诚实地说明它的覆盖范围,见 install-guide 加一个专用 MCP 拿更深的数据。
+每个都会 fan-out 子任务、亮出带引用的证据，最后给一份"配了 <X> 源可更深"缺口清单。如果某个查询只出网页兜底，那是 skill 在诚实地说明它的覆盖范围，见 install-guide 加一个专用 MCP 拿更深的数据。
 
 ---
 
@@ -195,7 +204,7 @@ Camelcamelcamel / 慢慢买 历史价 + Capital One Shopping / Karma / 购物党
 信任事件），market-intel 委托给姊妹 skill：
 **[`shopping-aggregator`](https://github.com/DaizeDong/shopping-aggregator)**。market-intel
 管广义商业调研+卖家侧 ecommerce-arbitrage；shopping-aggregator 管消费者购买决策。两个 skill 可
-共存,见 [`consumer-price-compare`
+共存，见 [`consumer-price-compare`
 shard](skills/market-intel/reference/domains/consumer-price-compare.md) 路由逻辑。
 
 ```
@@ -245,7 +254,7 @@ shard](skills/market-intel/reference/domains/consumer-price-compare.md) 路由�
 
 ## 局限
 
-- **矩阵会过时**, API 转付费、工具被收购、价格变动。[刷新协议](skills/market-intel/reference/refresh-protocol.md) 会对每个方向重新扫一遍（每方向一个子任务 → 结构化 diff → 增量改分片 → `CHANGELOG.md` + 升版本）。**默认每月**(v0.17.0 起);**周扫**用于快变方向(`crypto-defi`、`browser-automation`、`frontier-research`、`mcp-ecosystem`);**季扫**保留给 Horizon scan 跨域趋势扫描。手动触发说 `刷新工具库`，或接一个定时 headless 运行（见 [ROADMAP](ROADMAP.md)）。
+- **矩阵会过时：** API 转付费、工具被收购、价格变动，都需要按[刷新协议](skills/market-intel/reference/refresh-protocol.md)重新核验来源、审查证据并记录已接受的修改。原每月刷新任务和每周动态采集已于 2026-10-01 退役，现在通过 `刷新工具库` / `refresh the market-intel source matrix` 手动启动。每月复核方向、每周关注快变来源、每季度做 Horizon scan，只是安排复核时的参考频率，不表示有任务正在运行。见 [ROADMAP](ROADMAP.md)。
 - **网页兜底是诚实，不是魔法**, 没连专用 MCP 时，skill 会如实说明并标注缺口，而不是假装网页答案一样深。
 - **不重造引擎**, fan-out/验证/合成的深度委托给 `deep-research` / `research-lit`；market-intel 是路由 + 检测 + 护栏的接缝，不是它自己的调研引擎。
 
