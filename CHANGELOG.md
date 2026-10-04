@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Align plugin metadata, README badges and ROADMAP with the existing 0.30.0 release record.
+  The later catalog repair had reverted the manifest to 0.29.2 without a corresponding release
+  record; this corrects metadata consistency and does not declare a new capability release.
+- Record the current catalog/readiness contract: session-attributed operation evidence, browsing
+  without probes or writes, explicit inventory refresh and verified PRIVATE output destinations.
+- Move implemented bounded GitHub retries out of the backlog, correct the current domain count
+  to 15 and surface the scheduled-refresh retirement in both entry documents.
+- Explain source-selection tradeoffs and evidence limits before installation in both languages;
+  distinguish the Mode B initializer default from a companion's declared Mode A or Mode B policy.
+
+
 - Retire the scheduled monthly refresh. The Windows task `RefreshMarketIntel`, its local runner and the weekly surface poll that fed it were removed on 2026-10-01, so refreshes now run manually through the refresh protocol. The `heartbeat` workflow, which opened an issue whenever a month passed without a scheduled refresh, is removed with them; it would now fire every month.
 
 ## [0.30.0] - 2026-09-23
