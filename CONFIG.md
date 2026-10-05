@@ -185,3 +185,11 @@ export MARKET_INTEL_CONFIG=~/configs/personal   # config B — same skill, diffe
 Verify the swap: `python scripts/init_config.py --out ~/configs/work` and `--out ~/configs/personal`,
 run `verify_config.py` against each, then flip `$MARKET_INTEL_CONFIG` between them, both must
 verify READY.
+
+## Companion storage and retention
+
+[storage.contract.json](storage.contract.json) declares companion-relative paths, their producers, consumers, recovery requirements and retirement conditions. Existing domain schemas above remain authoritative for field validation. Privacy classification in `.dataclass.json` does not establish retention.
+
+The 64 MiB worktree budget is a review threshold, excluding Git metadata. Exceeding it requires examining dependencies, not discarding core data. Use the shared `skill-smith` storage-contract checker with this source checkout and its PRIVATE companion; no copy of the checker is vendored here. It inventories structure and retention declarations, not live provider readiness or recovery.
+
+Keep current configuration, pending discovery decisions, feedback records, selected final deliverables and referenced recovery evidence. Consolidate exact duplicate ledger copies without changing outcomes. Retain active launcher dependencies even when reproducible. Superseded credential snapshots require a verified retained reference and digest before retirement. Completed probe and research working trees may be retired after their final conclusions and required evidence are retained.

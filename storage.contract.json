@@ -1,0 +1,527 @@
+{
+  "schema_version": 1,
+  "tool": "market-intel",
+  "max_bytes": 67108864,
+  "artifacts": [
+    {
+      "artifact_id": "gitignore",
+      "path_pattern": ".gitignore",
+      "purpose": "Repository operation and current setup documentation",
+      "schema": "Git metadata or Markdown; CONFIG.md governs configuration",
+      "producer": "Repository maintainer",
+      "consumer_or_final_deliverable": "Companion setup, versioning and recovery",
+      "rebuild_or_restore": "Restore from the companion Git history",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep the current setup and recovery instructions; remove superseded development notes after extracting active decisions."
+      }
+    },
+    {
+      "artifact_id": "gitattributes",
+      "path_pattern": ".gitattributes",
+      "purpose": "Repository operation and current setup documentation",
+      "schema": "Git metadata or Markdown; CONFIG.md governs configuration",
+      "producer": "Repository maintainer",
+      "consumer_or_final_deliverable": "Companion setup, versioning and recovery",
+      "rebuild_or_restore": "Restore from the companion Git history",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep the current setup and recovery instructions; remove superseded development notes after extracting active decisions."
+      }
+    },
+    {
+      "artifact_id": "license",
+      "path_pattern": "LICENSE",
+      "purpose": "Repository operation and current setup documentation",
+      "schema": "Git metadata or Markdown; CONFIG.md governs configuration",
+      "producer": "Repository maintainer",
+      "consumer_or_final_deliverable": "Companion setup, versioning and recovery",
+      "rebuild_or_restore": "Restore from the companion Git history",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep the current setup and recovery instructions; remove superseded development notes after extracting active decisions."
+      }
+    },
+    {
+      "artifact_id": "root-documents",
+      "path_pattern": "*.md",
+      "purpose": "Repository operation and current setup documentation",
+      "schema": "Git metadata or Markdown; CONFIG.md governs configuration",
+      "producer": "Repository maintainer",
+      "consumer_or_final_deliverable": "Companion setup, versioning and recovery",
+      "rebuild_or_restore": "Restore from the companion Git history",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep the current setup and recovery instructions; remove superseded development notes after extracting active decisions."
+      }
+    },
+    {
+      "artifact_id": "registry",
+      "path_pattern": "registry.json",
+      "purpose": "Installed source configuration and scoped checks",
+      "schema": "skills/market-intel/reference/companion-config-spec.md section 3",
+      "producer": "Configuration and check import tools",
+      "consumer_or_final_deliverable": "Source selection and current operational checks",
+      "rebuild_or_restore": "Restore the private registry; new probes do not recreate past observations",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep active configuration and the latest relevant source checks. Retire superseded check detail only after preserving its current conclusion and necessary evidence."
+      }
+    },
+    {
+      "artifact_id": "credentials",
+      "path_pattern": "secrets/**",
+      "purpose": "Credentials for enabled sources",
+      "schema": "CONFIG.md storage modes and per-tool env.template",
+      "producer": "Credential setup and rotation",
+      "consumer_or_final_deliverable": "Enabled source authentication",
+      "rebuild_or_restore": "Restore through the private companion and its recovery procedure",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep current credentials and required rotation recovery material; retire invalidated copies after successful replacement."
+      }
+    },
+    {
+      "artifact_id": "tool-templates",
+      "path_pattern": "tools/*/*.template",
+      "purpose": "Per-source connection templates",
+      "schema": "skills/market-intel/reference/companion-config-spec.md sections 2 and 6",
+      "producer": "Configuration maintainer",
+      "consumer_or_final_deliverable": "Template rendering and client setup",
+      "rebuild_or_restore": "Restore from private Git",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep templates for configured sources until that source is retired."
+      }
+    },
+    {
+      "artifact_id": "tool-notes",
+      "path_pattern": "tools/*/*.md",
+      "purpose": "Current per-source setup and limitations",
+      "schema": "Markdown; companion-config-spec.md",
+      "producer": "Source setup maintainer",
+      "consumer_or_final_deliverable": "Operational recovery and scoped evidence interpretation",
+      "rebuild_or_restore": "Restore from private Git",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep current instructions and referenced proof; remove obsolete probe narratives after updating the current conclusion."
+      }
+    },
+    {
+      "artifact_id": "etherscan-launcher",
+      "path_pattern": "tools/etherscan-mcp/*.mjs",
+      "purpose": "Versioned transport adapter and its local tests",
+      "schema": "Node ES modules; tools/etherscan-mcp/README.md in companion",
+      "producer": "Route maintainer",
+      "consumer_or_final_deliverable": "Configured local source launcher",
+      "rebuild_or_restore": "Restore the files and locked dependencies",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep while this configured launcher is enabled."
+      }
+    },
+    {
+      "artifact_id": "etherscan-locks",
+      "path_pattern": "tools/etherscan-mcp/package*.json",
+      "purpose": "Reproducible dependency identity",
+      "schema": "npm package and lockfile schemas",
+      "producer": "npm dependency setup",
+      "consumer_or_final_deliverable": "Local launcher dependency installation",
+      "rebuild_or_restore": "Run npm ci in the declared companion tool directory",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep the manifest and lockfile while the launcher is enabled."
+      }
+    },
+    {
+      "artifact_id": "etherscan-dependencies",
+      "path_pattern": "tools/etherscan-mcp/node_modules/**",
+      "purpose": "Installed dependencies used by the configured launcher",
+      "schema": "Locked npm dependency tree",
+      "producer": "npm ci",
+      "consumer_or_final_deliverable": "Local launcher imports",
+      "rebuild_or_restore": "Rebuild with npm ci from the retained lockfile before the next invocation",
+      "retention_rule": {
+        "class": "rebuildable",
+        "rule": "Keep installed dependencies while the launcher is enabled. Remove only after stopping its consumers or proving a replacement installation."
+      }
+    },
+    {
+      "artifact_id": "operational-python",
+      "path_pattern": "scripts/*.py",
+      "purpose": "Current deterministic setup, read and recovery helpers",
+      "schema": "Python source; companion runbooks",
+      "producer": "Companion maintainer",
+      "consumer_or_final_deliverable": "Current runbooks and configured entrypoints",
+      "rebuild_or_restore": "Restore from private Git",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep used entrypoints and their tests; retire development-only helpers after their fixes are integrated."
+      }
+    },
+    {
+      "artifact_id": "operational-powershell",
+      "path_pattern": "scripts/*.ps1",
+      "purpose": "Current PowerShell setup helpers",
+      "schema": "PowerShell source; companion runbooks",
+      "producer": "Companion maintainer",
+      "consumer_or_final_deliverable": "Explicit setup and recovery commands",
+      "rebuild_or_restore": "Restore from private Git",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep current helpers; a retained installer does not authorize recreating a retired schedule."
+      }
+    },
+    {
+      "artifact_id": "operational-shell",
+      "path_pattern": "scripts/*.sh",
+      "purpose": "Current shell setup helpers",
+      "schema": "Shell source; companion runbooks",
+      "producer": "Companion maintainer",
+      "consumer_or_final_deliverable": "Explicit source installation",
+      "rebuild_or_restore": "Restore from private Git",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep current setup helpers while their source routes are supported."
+      }
+    },
+    {
+      "artifact_id": "operational-node",
+      "path_pattern": "scripts/*.cjs",
+      "purpose": "Browser storage bridge and its tests",
+      "schema": "CommonJS source; companion runbooks",
+      "producer": "Companion maintainer",
+      "consumer_or_final_deliverable": "Current browser storage adapter",
+      "rebuild_or_restore": "Restore from private Git",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep the current bridge and its tests while browser reads use it."
+      }
+    },
+    {
+      "artifact_id": "legacy-helpers",
+      "path_pattern": "scripts/legacy/**",
+      "purpose": "Superseded helper implementations",
+      "schema": "Historical source files",
+      "producer": "Earlier maintenance",
+      "consumer_or_final_deliverable": "No current runtime consumer",
+      "rebuild_or_restore": "Use integrated current helpers",
+      "retention_rule": {
+        "class": "retired",
+        "rule": "Remove after confirming no current entrypoint imports them and recording any still-needed fix."
+      }
+    },
+    {
+      "artifact_id": "python-cache",
+      "path_pattern": "scripts/__pycache__/**",
+      "purpose": "Interpreter cache",
+      "schema": "Python bytecode",
+      "producer": "Python interpreter",
+      "consumer_or_final_deliverable": "Interpreter import acceleration",
+      "rebuild_or_restore": "Recreated by Python",
+      "retention_rule": {
+        "class": "rebuildable",
+        "rule": "Remove after active helper processes finish."
+      }
+    },
+    {
+      "artifact_id": "test-cache",
+      "path_pattern": ".pytest_cache/**",
+      "purpose": "Local test cache",
+      "schema": "pytest cache",
+      "producer": "pytest",
+      "consumer_or_final_deliverable": "Optional local test acceleration",
+      "rebuild_or_restore": "Recreated by pytest",
+      "retention_rule": {
+        "class": "rebuildable",
+        "rule": "Remove after tests finish; it is not test-result evidence."
+      }
+    },
+    {
+      "artifact_id": "runbooks",
+      "path_pattern": "runbooks/*.md",
+      "purpose": "Current operational instructions",
+      "schema": "Markdown",
+      "producer": "Companion maintainer",
+      "consumer_or_final_deliverable": "Setup and recovery",
+      "rebuild_or_restore": "Restore from private Git",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep current instructions and necessary evidence links; update links when final deliverables move."
+      }
+    },
+    {
+      "artifact_id": "archived-runbooks",
+      "path_pattern": "runbooks/archive/**",
+      "purpose": "Superseded operational descriptions",
+      "schema": "Historical Markdown",
+      "producer": "Earlier maintenance",
+      "consumer_or_final_deliverable": "No current runtime requirement",
+      "rebuild_or_restore": "Use current runbooks",
+      "retention_rule": {
+        "class": "retired",
+        "rule": "Remove after extracting instructions still needed by active recovery paths."
+      }
+    },
+    {
+      "artifact_id": "live-ledger",
+      "path_pattern": "data/metrics/live-runs.jsonl",
+      "purpose": "Source observations and corrections",
+      "schema": "skills/market-intel/reference/live-run-contract.json and live-run-schema.json",
+      "producer": "tools/incident_helper.py",
+      "consumer_or_final_deliverable": "tools/feedback-bump.py",
+      "rebuild_or_restore": "Restore retained event records; do not relabel legacy outcomes",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep observations needed by active feedback and unresolved corrections. Exact duplicate legacy copies may be removed after a lossless locked merge."
+      }
+    },
+    {
+      "artifact_id": "legacy-ledgers",
+      "path_pattern": "data/metrics/live-runs.legacy*.jsonl",
+      "purpose": "Superseded ledger copies",
+      "schema": "Legacy live-run JSONL",
+      "producer": "Earlier migration",
+      "consumer_or_final_deliverable": "Current ledger supersedes these copies",
+      "rebuild_or_restore": "Use the verified consolidated live ledger",
+      "retention_rule": {
+        "class": "retired",
+        "rule": "Remove only after every distinct record exists in the current ledger."
+      }
+    },
+    {
+      "artifact_id": "root-legacy-ledgers",
+      "path_pattern": "metrics/**",
+      "purpose": "Old root-relative ledger location",
+      "schema": "Legacy live-run JSONL",
+      "producer": "Earlier writers",
+      "consumer_or_final_deliverable": "Current data/metrics ledger",
+      "rebuild_or_restore": "Use the verified consolidated live ledger",
+      "retention_rule": {
+        "class": "retired",
+        "rule": "Remove only after lossless consolidation into the current private DATA destination."
+      }
+    },
+    {
+      "artifact_id": "discovery",
+      "path_pattern": "data/discovery-state.md",
+      "purpose": "Pending source candidates and reject decisions",
+      "schema": "Private Markdown inbox; tools/discover.py",
+      "producer": "tools/discover.py and source reviewers",
+      "consumer_or_final_deliverable": "Future source review and repeated-candidate suppression",
+      "rebuild_or_restore": "Restore pending and rejected decisions from private Git",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep unresolved candidates and rejection reasons while they affect future discovery; historical dates do not establish current availability."
+      }
+    },
+    {
+      "artifact_id": "surface-inbox",
+      "path_pattern": "data/surface-inbox.jsonl",
+      "purpose": "Unprocessed discovery observations",
+      "schema": "JSONL; tools/poll_surfaces.py",
+      "producer": "tools/poll_surfaces.py",
+      "consumer_or_final_deliverable": "Source review",
+      "rebuild_or_restore": "Restore pending observations from private Git",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Retain pending observations until their decisions and necessary evidence are captured in the discovery state or source catalog."
+      }
+    },
+    {
+      "artifact_id": "inventory",
+      "path_pattern": "data/inventory/**",
+      "purpose": "Latest machine and session evidence",
+      "schema": "CONFIG.md and reference/host-capabilities.md",
+      "producer": "tools/console.py and the current-session adapter",
+      "consumer_or_final_deliverable": "Selected-operation readiness",
+      "rebuild_or_restore": "Recollect scoped inventory and current-session observations",
+      "retention_rule": {
+        "class": "rebuildable",
+        "rule": "Keep the latest useful snapshot. Session proof expires after 900 seconds; expiration requires reobservation, not an assertion that old proof is current."
+      }
+    },
+    {
+      "artifact_id": "account-evidence",
+      "path_pattern": "data/accounts/**",
+      "purpose": "Current account inventory and retained route evidence",
+      "schema": "Companion scripts/account_inventory.py and registry check records",
+      "producer": "Account inventory and explicit source probes",
+      "consumer_or_final_deliverable": "Current registry checks and operational runbooks",
+      "rebuild_or_restore": "Rebuild inventory from current configuration; retain referenced historical proof bytes",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep inventory and final proof referenced by current configuration or runbooks. Remove unreferenced repeated probes and temporary source copies after current conclusions are imported."
+      }
+    },
+    {
+      "artifact_id": "credential-latest",
+      "path_pattern": "data/credential-backups/latest.json",
+      "purpose": "Reference and integrity receipt for the retained recovery snapshot",
+      "schema": "Companion scripts/auth_backup.py",
+      "producer": "Explicit credential snapshot operation",
+      "consumer_or_final_deliverable": "Companion scripts/account_inventory.py",
+      "rebuild_or_restore": "Restore together with the referenced encrypted snapshot",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep while its referenced snapshot is the selected recovery source; replace only after checking the new reference and digest."
+      }
+    },
+    {
+      "artifact_id": "credential-snapshot",
+      "path_pattern": "data/credential-backups/*.dpapi",
+      "purpose": "Selected encrypted same-machine recovery snapshot",
+      "schema": "Windows DPAPI CurrentUser; auth_backup.py receipt",
+      "producer": "Explicit credential snapshot operation",
+      "consumer_or_final_deliverable": "Selected recovery procedure",
+      "rebuild_or_restore": "Requires the original Windows user and machine; not a portable backup",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep the snapshot referenced by latest.json and any separately justified recovery dependency. Delete superseded snapshots only after the selected reference and SHA-256 match."
+      }
+    },
+    {
+      "artifact_id": "final-deliverables",
+      "path_pattern": "data/deliverables/**",
+      "purpose": "Selected final research and maintenance reports with cited evidence",
+      "schema": "Producer-defined Markdown, JSON and source evidence; references remain local to each delivery",
+      "producer": "Completed research or maintenance work",
+      "consumer_or_final_deliverable": "Final user deliverables and interpretation of current source limitations",
+      "rebuild_or_restore": "Restore exact retained deliverables and their cited evidence from private Git",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Retain selected final deliverables and their evidence closure. Development scripts, repeated searches and uncited raw captures do not belong here."
+      }
+    },
+    {
+      "artifact_id": "old-research",
+      "path_pattern": "data/research/**",
+      "purpose": "Completed research working material",
+      "schema": "Historical research outputs",
+      "producer": "Earlier research runs",
+      "consumer_or_final_deliverable": "Selected data/deliverables output supersedes it",
+      "rebuild_or_restore": "Use the selected final deliverable and its retained evidence",
+      "retention_rule": {
+        "class": "retired",
+        "rule": "Remove after the final report and every necessary local reference are copied and hash-verified in data/deliverables."
+      }
+    },
+    {
+      "artifact_id": "old-maintenance",
+      "path_pattern": "data/maintenance/*/**/*",
+      "purpose": "Completed maintenance working material",
+      "schema": "Historical maintenance outputs",
+      "producer": "Earlier maintenance runs",
+      "consumer_or_final_deliverable": "Selected final maintenance deliverable",
+      "rebuild_or_restore": "Use current code, final receipts and retained cited evidence",
+      "retention_rule": {
+        "class": "retired",
+        "rule": "Remove after required fixes are integrated and the final report with necessary evidence is retained."
+      }
+    },
+    {
+      "artifact_id": "convergence-receipt",
+      "path_pattern": "data/maintenance/storage-convergence.json",
+      "purpose": "Latest structural convergence decision and verification receipt",
+      "schema": "schema_version 1; source heads, hashes, retained dependencies and executed retirement results",
+      "producer": "Explicit storage maintenance",
+      "consumer_or_final_deliverable": "Audit of the current source and companion layout",
+      "rebuild_or_restore": "Restore from private Git",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep the latest completed layout decision; it records minimal conclusions, not a second source archive."
+      }
+    },
+    {
+      "artifact_id": "migration-material",
+      "path_pattern": "data/migrations/**",
+      "purpose": "Old history preservation and migration material",
+      "schema": "Git bundles and migration receipts",
+      "producer": "Earlier migrations",
+      "consumer_or_final_deliverable": "No normal runtime consumer",
+      "rebuild_or_restore": "Use current published code and retained final convergence decisions",
+      "retention_rule": {
+        "class": "retired",
+        "rule": "Remove after necessary unique code and decisions are integrated or extracted; historical existence alone does not extend retention."
+      }
+    },
+    {
+      "artifact_id": "browser-reads",
+      "path_pattern": "data/browser-reads/**",
+      "purpose": "Temporary browser read outputs",
+      "schema": "Companion browser_public_reads.py output",
+      "producer": "Explicit browser read",
+      "consumer_or_final_deliverable": "Imported source observation or selected final report",
+      "rebuild_or_restore": "Rerun a new read when needed; do not claim historical content is reproducible",
+      "retention_rule": {
+        "class": "retired",
+        "rule": "Remove completed unreferenced reads after importing their current conclusion and required evidence."
+      }
+    },
+    {
+      "artifact_id": "library-runs",
+      "path_pattern": "data/library-runs/**",
+      "purpose": "Temporary library probe outputs",
+      "schema": "Companion library_reads.py output",
+      "producer": "Explicit library probe",
+      "consumer_or_final_deliverable": "Imported source observation",
+      "rebuild_or_restore": "Rerun a current probe when needed",
+      "retention_rule": {
+        "class": "retired",
+        "rule": "Remove completed probe copies once current conclusions and necessary evidence are retained."
+      }
+    },
+    {
+      "artifact_id": "browser-runtime",
+      "path_pattern": "data/browser-runtime/**",
+      "purpose": "Disposable isolated browser runtime",
+      "schema": "Browser profile files",
+      "producer": "Isolated browser helper",
+      "consumer_or_final_deliverable": "Active browser helper only",
+      "rebuild_or_restore": "Recreate the isolated runtime using current authentication setup",
+      "retention_rule": {
+        "class": "rebuildable",
+        "rule": "Remove only after the helper is inactive and required authentication state is retained in its authoritative store."
+      }
+    },
+    {
+      "artifact_id": "retired-source-residue",
+      "path_pattern": "data/retired-source-residue/**",
+      "purpose": "Temporary private holding of obsolete files removed from the public source worktree",
+      "schema": "Original file bytes; hashes and move receipt in data/maintenance/storage-convergence.json",
+      "producer": "Explicit source data-boundary repair",
+      "consumer_or_final_deliverable": "No current runtime consumer; pending physical retirement",
+      "rebuild_or_restore": "Not required by current operation; original hashes remain in the convergence receipt",
+      "retention_rule": {
+        "class": "retired",
+        "rule": "This holding path repairs the public data boundary only. Remove after the reviewed retirement operation can execute; placement in private Git does not make these files core data."
+      }
+    },
+    {
+      "artifact_id": "legacy-empty-worktree-directory",
+      "path_pattern": ".claude/worktrees/**",
+      "purpose": "Unused checkout directory left by earlier maintenance",
+      "schema": "Filesystem directory",
+      "producer": "Earlier local maintenance",
+      "consumer_or_final_deliverable": "No current consumer",
+      "rebuild_or_restore": "Not needed by current operation",
+      "retention_rule": {
+        "class": "retired",
+        "rule": "Remove after confirming the directory is empty and no live worktree uses it."
+      }
+    },
+    {
+      "artifact_id": "refresh-worktrees",
+      "path_pattern": "data/refresh-worktrees/**",
+      "purpose": "Temporary refresh checkouts",
+      "schema": "Git worktree or temporary checkout",
+      "producer": "Explicit refresh maintenance",
+      "consumer_or_final_deliverable": "Active refresh execution only",
+      "rebuild_or_restore": "Recreate from the selected source revision",
+      "retention_rule": {
+        "class": "rebuildable",
+        "rule": "Remove after no refresh process uses the checkout and all useful changes are integrated."
+      }
+    }
+  ]
+}
