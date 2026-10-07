@@ -351,7 +351,7 @@
       "rebuild_or_restore": "Rebuild inventory from current configuration; retain referenced historical proof bytes",
       "retention_rule": {
         "class": "core",
-        "rule": "Keep inventory and final proof referenced by current configuration or runbooks. Remove unreferenced repeated probes and temporary source copies after current conclusions are imported."
+        "rule": "Retain the exact final evidence paths referenced by current registry checks, runbooks or unresolved account recovery. Record that selected reference closure in the current private receipt. Completed repeated probes, temporary source copies and unused captures need individual dependency review and narrow non-core declarations; this broad core glob supplies neither permanent historical retention nor deletion permission. Future reclassification must split the broad declaration into disjoint reviewed ownership; never overlay a non-core exact pattern on a core glob. Every path must have one owner."
       }
     },
     {
@@ -377,7 +377,7 @@
       "rebuild_or_restore": "Requires the original Windows user and machine; not a portable backup",
       "retention_rule": {
         "class": "core",
-        "rule": "Keep the snapshot referenced by latest.json and any separately justified recovery dependency. Delete superseded snapshots only after the selected reference and SHA-256 match."
+        "rule": "Keep the exact snapshot selected by latest.json and each separately justified recovery dependency. Bind the retained reference, digest and same-machine recovery obligation in the current private receipt. Superseded snapshots require an exact owner-reviewed non-core classification after selected-reference verification and closure of other recovery obligations; the broad glob remains protected until then. Do not create further historical copies to satisfy retention. Future reclassification must split the broad declaration into disjoint reviewed ownership; never overlay a non-core exact pattern on a core glob. Every path must have one owner."
       }
     },
     {
@@ -390,7 +390,7 @@
       "rebuild_or_restore": "Restore exact retained deliverables and their cited evidence from private Git",
       "retention_rule": {
         "class": "core",
-        "rule": "Retain selected final deliverables and their evidence closure. Development scripts, repeated searches and uncited raw captures do not belong here."
+        "rule": "Retain selected final deliverables and every unique cited local dependency, identified by exact references in the current private receipt. Keep active or unresolved delivery dependencies. Uncited raw captures, repeated searches and development files require separate exact non-core declarations after reference review; do not create a second whole working-tree archive. Future reclassification must split the broad declaration into disjoint reviewed ownership; never overlay a non-core exact pattern on a core glob. Every path must have one owner."
       }
     },
     {
@@ -442,7 +442,7 @@
       "rebuild_or_restore": "Use current published code and retained final convergence decisions",
       "retention_rule": {
         "class": "retired",
-        "rule": "Remove after necessary unique code and decisions are integrated or extracted; historical existence alone does not extend retention."
+        "rule": "Hold until each unique code revision and still-needed migration or restoration conclusion is integrated or preserved by exact PRIVATE revision and receipt references. Then review obsolete material for retirement. Current source publication and integration proof must be checked; an old bundle or private location alone neither extends retention nor permits removal."
       }
     },
     {

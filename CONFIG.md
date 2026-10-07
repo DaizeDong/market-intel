@@ -193,3 +193,28 @@ verify READY.
 The 64 MiB worktree budget is a review threshold, excluding Git metadata. Exceeding it requires examining dependencies, not discarding core data. Use the shared `skill-smith` storage-contract checker with this source checkout and its PRIVATE companion; no copy of the checker is vendored here. It inventories structure and retention declarations, not live provider readiness or recovery.
 
 Keep current configuration, pending discovery decisions, feedback records, selected final deliverables and referenced recovery evidence. Consolidate exact duplicate ledger copies without changing outcomes. Retain active launcher dependencies even when reproducible. Superseded credential snapshots require a verified retained reference and digest before retirement. Completed probe and research working trees may be retired after their final conclusions and required evidence are retained.
+
+### Exact retention closure before retirement
+
+Record exact selected deliverable, cited-evidence and current account-recovery
+references in the existing PRIVATE maintenance receipt. A broad core path is
+protective while that review is incomplete; it is not permission to retain
+every old probe or capture forever. Releasing files under a broad core pattern
+requires owner-reviewed splitting of the broad declaration into disjoint
+ownership after dependency review. Every path must match exactly one artifact;
+an exact non-core pattern overlaid on an existing core glob does not override
+it. The generic storage planner continues to refuse such overlaps and core paths.
+
+Credential recovery retains the snapshot selected by `latest.json` and each
+separately justified obligation. Verify the selected reference and digest,
+then review superseded snapshot paths and their other recovery duties before
+reclassification. The DPAPI snapshot requires its original Windows user and
+machine; it is not a portable recovery proof. Existing timestamped snapshots
+must not trigger more historical copies or a larger budget. Active launcher
+dependencies remain protected even when a lockfile can reproduce them.
+
+Completed migration or research work needs exact integrated revision, selected
+conclusion and cited-reference closure before retirement. Do not replace that
+closure with a whole-tree archive. This contract change performs no rotation,
+cleanup, restore or provider check. If working storage exceeds the 64 MiB
+budget, the check remains failed until storage meets its reviewed bound.
