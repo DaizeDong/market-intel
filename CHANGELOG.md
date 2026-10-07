@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Refresh the two StaffSpy star annotations to 341 using the GitHub API on 2026-10-06;
+  installation and scraping remain unverified by this metadata check.
+- Hummingbot (+ MCP): D-STALE. The client is archived upstream, confirmed by the GitHub API
+  on 2026-10-06. Withdraw its Ready MCP and installation recommendation; retain the active
+  Hummingbot core as setup pending. Preserve the retired client URL and evidence in
+  [the retirement note](docs/retired-catalog.md), with no replacement claimed.
+
 - Align plugin metadata, README badges and ROADMAP with the existing 0.30.0 release record.
   The later catalog repair had reverted the manifest to 0.29.2 without a corresponding release
   record; this corrects metadata consistency and does not declare a new capability release.

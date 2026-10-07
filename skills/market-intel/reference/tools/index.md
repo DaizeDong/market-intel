@@ -74,7 +74,7 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 - [Nansen](nansen.md), ① · smart-money labels, token god mode
 - [GeckoTerminal API](geckoterminal.md), ① · DEX OHLCV history to 1s
 - ★ [ccxt](ccxt.md),, · unified 100+ exchange lib, spread monitor
-- [Hummingbot (+ MCP)](hummingbot.md), ① · CEX/DEX arbitrage execution
+- [Hummingbot core](hummingbot.md), ① · CEX/DEX arbitrage execution; setup pending, MCP client retired
 - [funding-rates-mcp](funding-rates-mcp.md), ① · cross-exchange funding divergence
 - [DefiLlama API](defillama.md), ① · free no-key TVL/yields/stablecoins/fees REST
 - [Barker](barker.md), ① L2 · stablecoin yields across 515 DeFi + 20 CEX, REST + `llms.txt`
