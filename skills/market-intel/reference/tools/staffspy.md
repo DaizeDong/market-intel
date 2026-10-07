@@ -3,7 +3,7 @@
 - **Domain(s):** leadgen-crm (also: none)
 - **Barrier route:** ④ · **Source tier:** L4 · **Ready MCP:** no (Python library; self-host)
 - **Cost:** free (open source). Hidden costs: a LinkedIn account (burned at risk) + optional CAPTCHA solver (CapSolver / 2Captcha, paid per solve). [github.com/cullenwatson/StaffSpy, fetched 2026-06]
-- **Repo / Provider:** github.com/cullenwatson/StaffSpy, `cullenwatson/StaffSpy (255★, gh-api 2026-06)`, WTFPL, not archived but ⚠ last push 2025-06 (~12mo stale, LinkedIn DOM/anti-bot changes may have broken it; smoke-test before relying)
+- **Repo / Provider:** github.com/cullenwatson/StaffSpy, `cullenwatson/StaffSpy (341★, gh-api 2026-10-06)`, WTFPL, not archived but ⚠ last push 2025-06-17 (~15mo stale, LinkedIn DOM/anti-bot changes may have broken it; smoke-test before relying). This metadata recheck does not verify installation or scraping.
 - **Top pick for its domain:** no (route-④ default is **gosom/google-maps-scraper**, LinkedIn scraping is the high-ban-rate path the shard tells you to avoid)
 
 ## What it does / when to pick it

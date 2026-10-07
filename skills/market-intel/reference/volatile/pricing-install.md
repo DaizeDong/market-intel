@@ -86,7 +86,8 @@
   ⚠ July-2026 change drops max records returned 10k→1k (info.etherscan.com).
 - Blockscout MCP (free, 3000+ chains, no key for dev; read-only on-chain): repo blockscout/mcp-server
   (45★, official), install/endpoint per docs.blockscout.com/devs/mcp-server. Pro key (free) for prod throughput.
-- Hummingbot: follow the [Hummingbot setup prerequisites](../tools/hummingbot.md). Before
+- Hummingbot core: the MCP client is retired after an upstream archive was confirmed on
+  2026-10-06. Follow the [core setup prerequisites](../tools/hummingbot.md). Before
   launch, verify absolute PRIVATE versioned bind locations and every supported persistent
   writer. A Docker named volume alone does not establish versioning or backup. Keep setup
   pending until the selected version's runtime adapter and private paths are verified.

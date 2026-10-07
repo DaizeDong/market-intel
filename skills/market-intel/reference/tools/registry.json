@@ -383,7 +383,7 @@
     },
     {
       "slug": "hummingbot",
-      "name": "Hummingbot (+ MCP)",
+      "name": "Hummingbot core",
       "kind": "repo",
       "repo": "hummingbot/hummingbot",
       "domain": "crypto-defi",
