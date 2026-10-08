@@ -47,6 +47,8 @@ REPO = os.path.dirname(HERE)
 # checker whose red is known to be pre-existing and owned elsewhere, and say so in the description,
 # because a permanently-not-required checker is an orphan wearing a badge.
 MANIFEST = {
+    "test_artifact_write.py": ([], False, True, "source-owned artifact admission before atomic writes"),
+    "test_config_selection.py": ([], False, True, "single companion selection and configured readiness"),
     "pii_guard.py":       (["--tree"], False, True,  "no real private data in tracked files"),
     "dash_guard.py":      (["--tree"], False, True,  "no en/em dashes in prose"),
     "data_boundary.py":   ([],         False, True,  "no real-run output can land inside the repo"),

@@ -81,8 +81,8 @@ def test_changelog_uses_verified_atomic_output(companion, monkeypatch, write_fai
     repository, _, _, _ = companion
     sample = fixture()["maintenance"]
     text = sample["discovery"]["one_line_pitch"]
-    target = repository / "reports" / "draft.md"
-    target.parent.mkdir()
+    target = repository / "data/deliverables/reports" / "draft.md"
+    target.parent.mkdir(parents=True)
     target.write_text(text, encoding="utf-8")
     monkeypatch.setattr(changelog_draft, "require_call", lambda: None)
     monkeypatch.setattr(changelog_draft, "parse_latest_changelog_version",
@@ -100,11 +100,11 @@ def test_changelog_uses_verified_atomic_output(companion, monkeypatch, write_fai
     assert changelog_draft.main(["--since", "HEAD~1", "--out", str(target)]) == (2 if write_fails else 0)
     expected = text if write_fails else text + "\n" + changelog_draft.FOOTER
     assert target.read_text(encoding="utf-8") == expected
-    pending = list(target.parent.glob(".inventory-*"))
+    pending = list((repository / ".staging").glob("inventory-*.tmp"))
     assert len(pending) == (1 if write_fails else 0)
     if pending:
         assert pending[0].read_text(encoding="utf-8") == text + "\n" + changelog_draft.FOOTER
-    assert set(target.parent.iterdir()) == {target, *pending}
+    assert set(target.parent.iterdir()) == {target}
 
 
 def test_incident_requires_private_destination_before_any_write(tmp_path, monkeypatch):
@@ -115,21 +115,20 @@ def test_incident_requires_private_destination_before_any_write(tmp_path, monkey
     assert not (tmp_path / "metrics").exists()
 
 
-def test_incident_uses_canonical_destination_and_atomic_write(tmp_path, monkeypatch):
-    target = tmp_path / "metrics/live-runs.jsonl"
-    target.parent.mkdir()
+def test_incident_uses_canonical_destination_and_atomic_write(companion, monkeypatch):
+    repository = companion[0]
+    target = repository / "data/metrics/live-runs.jsonl"
+    target.parent.mkdir(parents=True)
     old = json.dumps(fixture()["inventory"]) + "\n"
     target.write_text(old, encoding="utf-8")
-    destination = private_inventory.Destination(target, tmp_path, "example/companion")
-    monkeypatch.setattr(private_inventory, "resolve_destination", lambda *args: destination)
     with patch.object(private_inventory.os, "replace", side_effect=PermissionError("synthetic credential must never appear")):
         with pytest.raises(private_inventory.InventoryError, match="persistence failed"):
             incident_helper.apply_live_runs_append(json.dumps(fixture()["evidence"]))
     assert target.read_text(encoding="utf-8") == old
-    pending = list(target.parent.glob(".inventory-*"))
+    pending = list((repository / ".staging").glob("inventory-*.tmp"))
     assert len(pending) == 1
     assert pending[0].read_text(encoding="utf-8") == old + json.dumps(fixture()["evidence"]) + "\n"
-    assert set(target.parent.iterdir()) == {target, *pending}
+    assert set(target.parent.iterdir()) == {target}
 
 
 def test_incident_model_bridge_inherits_defaults_and_hides_provider_errors(capsys):
@@ -231,6 +230,9 @@ def test_incident_draft_uses_selected_companion_checker(monkeypatch, tmp_path, c
     if choice == "priority":
         selection["MARKET_INTEL_CONFIG_DIR"] = tmp_path / "missing lower priority"
     text = incident_draft_output(monkeypatch, tmp_path, capsys, selection=selection)
+    if choice == "xdg":
+        assert str(checker.resolve()) not in text
+        return
     assert str(checker.resolve()) in text
     assert "python " in text and "<username>" not in text
     assert "Expect: slug" not in text

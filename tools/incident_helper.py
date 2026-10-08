@@ -84,17 +84,8 @@ D_CODE_EXPLANATIONS = {
 def config_check_advisory() -> str:
     """Locate the optional companion checker without reading config or running it."""
     try:
-        selected = None
-        for name in ("MARKET_INTEL_CONFIG", "MARKET_INTEL_CONFIG_DIR"):
-            if os.environ.get(name):
-                selected = Path(os.environ[name]).expanduser()
-                break
-        if selected is None:
-            for candidate in (Path.home() / ".market-intel-config",
-                              Path.home() / ".config" / "market-intel-config"):
-                if candidate.exists():
-                    selected = candidate
-                    break
+        from config_paths import companion_root
+        selected = companion_root()
         if selected is None:
             return "SKIP: no companion is configured under the documented discovery convention."
         if not selected.is_dir():

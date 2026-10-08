@@ -37,7 +37,10 @@ def native_companion(tmp_path, monkeypatch):
             monkeypatch.delenv(key)
     for key, value in generated["environment"].items():
         monkeypatch.setenv(key, value)
-    monkeypatch.setenv("MARKET_INTEL_DATA_DIR", str(generated["repository"]))
+    for key in ("MARKET_INTEL_CONFIG", "MARKET_INTEL_CONFIG_DIR"):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv("MARKET_INTEL_DATA_DIR", str(generated["repository"] / "data"))
+    (generated["repository"] / "data").mkdir(exist_ok=True)
     return generated
 
 
@@ -72,7 +75,7 @@ def test_native_private_proof_rejects_unsafe_transport(
         with pytest.raises(storage.InventoryError):
             storage.resolve_destination()
     assert forbidden == [], "fresh synthetic receipts require only local Git metadata reads"
-    assert not (repository / "inventory").exists()
+    assert not (repository / "data/inventory").exists()
 
 
 @pytest.mark.parametrize("identity,accepted", [
@@ -95,7 +98,7 @@ def test_native_nested_repository_is_authoritative(native_companion, identity, a
 @pytest.mark.parametrize("failure", ["ignored", "unversioned"])
 def test_native_storage_requirements_are_preserved(native_companion, failure):
     repository = native_companion["repository"]
-    target = repository / "ignored-output/record.json" if failure == "ignored" else repository / "report.json"
+    target = repository / "ignored-output/record.json" if failure == "ignored" else repository / "data/deliverables/report.json"
     if failure == "unversioned":
         subprocess.run(["git", "-C", str(repository), "update-ref", "-d", "HEAD"], check=True)
     with pytest.raises(storage.InventoryError):
@@ -106,11 +109,11 @@ def test_native_storage_requirements_are_preserved(native_companion, failure):
 @pytest.mark.parametrize("change", ["stable", "public", "other-private", "same-identity-url", "lexical-target"])
 def test_native_publication_rechecked_before_replace(native_companion, monkeypatch, change):
     repository = native_companion["repository"]
-    target = repository / "reports/synthetic.json"
-    target.parent.mkdir()
+    target = repository / "data/deliverables/reports/synthetic.json"
+    target.parent.mkdir(parents=True)
     before, after = "Synthetic retained bytes\n", "Synthetic replacement bytes\n"
     target.write_text(before, encoding="utf-8")
-    lexical = repository / "reports/selected.json"
+    lexical = repository / "data/deliverables/reports/selected.json"
     selected_path = [target]
     if change == "lexical-target":
         original_resolve = Path.resolve
@@ -127,7 +130,7 @@ def test_native_publication_rechecked_before_replace(native_companion, monkeypat
             subprocess.run(["git", "-C", str(repository), "remote", "set-url", "origin",
                             "https://github.com/" + identity + suffix], check=True)
         elif change == "lexical-target":
-            selected_path[0] = repository / "reports/other.json"
+            selected_path[0] = repository / "data/deliverables/reports/other.json"
     monkeypatch.setattr(os, "fsync", change_after_flush)
     if change == "stable":
         storage.write_text(after, "reports/synthetic.json", selected)
@@ -136,7 +139,7 @@ def test_native_publication_rechecked_before_replace(native_companion, monkeypat
         with pytest.raises(storage.InventoryError):
             storage.write_text(after, "reports/synthetic.json", selected)
         assert target.read_text(encoding="utf-8") == before
-    pending = list(target.parent.glob(".inventory-*"))
+    pending = list((repository / ".staging").glob("inventory-*.tmp"))
     assert len(pending) == (0 if change == "stable" else 1)
     if pending:
         assert pending[0].read_text(encoding="utf-8") == after
@@ -145,7 +148,7 @@ def test_native_publication_rechecked_before_replace(native_companion, monkeypat
 
 def test_native_same_identity_route_change_is_revalidated(native_companion):
     repository = native_companion["repository"]
-    target = repository / "reports/result.json"
+    target = repository / "data/deliverables/reports/result.json"
     selected = storage.resolve_destination(path=target)
     subprocess.run(["git", "-C", str(repository), "remote", "set-url", "origin",
                     "https://github.com/" + SAMPLE["companion_identity"]], check=True)
@@ -156,8 +159,8 @@ def test_native_same_identity_route_change_is_revalidated(native_companion):
 
 def test_native_explicit_target_retains_lexical_selection(native_companion, monkeypatch):
     repository = native_companion["repository"]
-    lexical = repository / "selected.json"
-    selected_target = [repository / "first.json"]
+    lexical = repository / "data/deliverables/selected.json"
+    selected_target = [repository / "data/deliverables/first.json"]
     original_resolve = Path.resolve
 
     def resolve(path, *args, **kwargs):
@@ -166,11 +169,11 @@ def test_native_explicit_target_retains_lexical_selection(native_companion, monk
     monkeypatch.setattr(Path, "resolve", resolve)
     selected = storage.resolve_destination(path=lexical)
     assert selected.requested_path == lexical and selected.path == selected_target[0]
-    selected_target[0] = repository / "second.json"
+    selected_target[0] = repository / "data/deliverables/second.json"
     with pytest.raises(storage.InventoryError, match="changed"):
         storage.write_text("{}\n", "reports/result.json", selected)
-    assert not (repository / "first.json").exists()
-    assert not (repository / "second.json").exists()
+    assert not (repository / "data/deliverables/first.json").exists()
+    assert not (repository / "data/deliverables/second.json").exists()
 
 
 def test_native_effective_git_rewrite_cannot_hide_physical_public_route(native_companion, monkeypatch):
@@ -183,7 +186,7 @@ def test_native_effective_git_rewrite_cannot_hide_physical_public_route(native_c
     monkeypatch.setenv("GIT_CONFIG_VALUE_0", public)
     with pytest.raises(storage.InventoryError):
         storage.resolve_destination()
-    assert not (repository / "inventory").exists()
+    assert not (repository / "data/inventory").exists()
 
 
 @pytest.mark.parametrize("label,payload", runtime_visibility_cases())
@@ -198,7 +201,10 @@ def test_native_invalid_visibility_receipt_refuses_before_writes(native_companio
 def companion(tmp_path, monkeypatch):
     repository = tmp_path / "companion"
     (repository / ".git").mkdir(parents=True)
-    monkeypatch.setenv("MARKET_INTEL_DATA_DIR", str(repository))
+    (repository / "data").mkdir()
+    for key in ("MARKET_INTEL_CONFIG", "MARKET_INTEL_CONFIG_DIR"):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv("MARKET_INTEL_DATA_DIR", str(repository / "data"))
     routes = {"origin": {"fetch": [SAMPLE["companion_identity"]],
                           "push": [SAMPLE["companion_identity"]]}}
     visibility = {SAMPLE["companion_identity"]: "PRIVATE", SAMPLE["other_identity"]: "PRIVATE",
@@ -228,6 +234,9 @@ def companion(tmp_path, monkeypatch):
 
     boundary = SimpleNamespace(prove_private_companion=prove, read_private_companion_git=read, GitError=ProofError)
     monkeypatch.setattr(storage, "_shared_boundary", lambda: boundary)
+    contract_boundary = SimpleNamespace(prove_private_companion=lambda directory, *_: prove(directory),
+                                        read_private_companion_git=read, GitError=ProofError)
+    monkeypatch.setattr(storage._storage_contract(), "load_boundary", lambda: contract_boundary)
     return repository, routes, visibility, configuration
 
 
@@ -238,7 +247,7 @@ def test_every_effective_push_destination_must_be_private(companion, visibility)
     states[SAMPLE["public_identity"]] = visibility
     with pytest.raises(storage.InventoryError, match="visibility"):
         storage.resolve_destination()
-    assert list(repository.iterdir()) == [repository / ".git"]
+    assert set(repository.iterdir()) == {repository / ".git", repository / "data"}
 
 
 def test_all_remotes_and_configured_push_remotes_are_verified(companion):
@@ -261,12 +270,12 @@ def test_publication_route_change_is_rechecked_before_write(companion):
     routes["origin"]["push"] = [SAMPLE["other_identity"]]
     with pytest.raises(storage.InventoryError, match="changed"):
         storage.write_snapshot(fixture()["inventory"], selected)
-    assert not (repository / "inventory").exists()
+    assert not (repository / "data/inventory").exists()
 
 
 def test_explicit_destinations_use_final_private_repository(companion, tmp_path):
     repository, _, _, _ = companion
-    selected = storage.resolve_destination("reports/feedback.json", path=repository / "reports/result.json")
+    selected = storage.resolve_destination("reports/feedback.json", path=repository / "data/deliverables/reports/result.json")
     storage.write_text("synthetic\n", "reports/feedback.json", selected)
     assert selected.path.read_text() == "synthetic\n"
     for target in (storage.ROOT / "inventory/research.json", tmp_path / "unmanaged/result.json"):
@@ -294,9 +303,9 @@ def test_serialized_updates_preserve_both_generated_rows(companion):
             storage.update_text(lambda body: body + json.dumps(SAMPLE["ledger"][2]) + "\n",
                                 "metrics/live-runs.jsonl", selected)
     assert selected.path.read_bytes() == before
-    pending, = selected.path.parent.glob(".inventory-*")
+    pending, = (repository / ".staging").glob("inventory-*.tmp")
     assert pending.read_text() == before.decode() + json.dumps(SAMPLE["ledger"][2]) + "\n"
-    assert set(selected.path.parent.iterdir()) == {selected.path, pending}
+    assert set(selected.path.parent.iterdir()) == {selected.path}
 
 
 def load_writer(name):
@@ -335,7 +344,7 @@ def test_writers_refuse_unproven_output_before_observation(name, tmp_path, monke
 def test_writers_persist_only_to_verified_private_override(name, companion, monkeypatch):
     repository, _, _, _ = companion
     writer = load_writer(name)
-    target = repository / "reports/result.json"
+    target = repository / "data/deliverables/reports/result.json"
     if name == "discover":
         monkeypatch.setattr(writer, "CHANNELS", {"e1": lambda *_: [deepcopy(SAMPLE["discovery"])]})
         args = ["--out", str(target)]
@@ -343,8 +352,8 @@ def test_writers_persist_only_to_verified_private_override(name, companion, monk
         monkeypatch.setattr(writer, "SURFACES", {"E1": lambda *_: [deepcopy(SAMPLE["surface"])]})
         args = ["--inbox", str(target)]
     else:
-        ledger = repository / "metrics/live-runs.jsonl"
-        ledger.parent.mkdir()
+        ledger = repository / "data/metrics/live-runs.jsonl"
+        ledger.parent.mkdir(parents=True)
         ledger.write_text(json.dumps(SAMPLE["ledger"][0]) + "\n", encoding="utf-8")
         monkeypatch.setattr(writer, "live_runs_path", lambda: ledger)
         args = ["--out", str(target), "--since", "2030-01-01"]
@@ -357,7 +366,7 @@ def test_writers_persist_only_to_verified_private_override(name, companion, monk
 def test_polling_dry_run_does_not_create_output_directories(name, companion, monkeypatch):
     repository, _, _, _ = companion
     writer = load_writer(name)
-    target = repository / "uncreated/result.json"
+    target = repository / "data/deliverables/uncreated/result.json"
     if name == "discover":
         monkeypatch.setattr(writer, "CHANNELS", {"e1": lambda *_: [deepcopy(SAMPLE["discovery"])]})
         args = ["--out", str(target), "--dry-run"]
@@ -392,9 +401,10 @@ def test_writer_reader_and_generated_schema_share_the_published_vocabulary():
 
 def test_temporary_cleanup_refuses_replaced_directory_junction(native_companion, monkeypatch, capsys):
     repository = native_companion["repository"]
-    reports = repository / "reports"
-    reports.mkdir()
-    target = reports / "result.json"
+    reports = repository / ".staging"
+    reports.mkdir(parents=True)
+    target = repository / "data/deliverables/result.json"
+    target.parent.mkdir(parents=True)
     before = json.dumps(fixture()["inventory"], sort_keys=True).encode()
     target.write_bytes(before)
     other = make_runtime_repository(repository.parent / "other", native_companion["environment"], SAMPLE["other_identity"])
@@ -404,7 +414,7 @@ def test_temporary_cleanup_refuses_replaced_directory_junction(native_companion,
     def changed(relative, destination):
         calls.append(relative)
         if len(calls) == 2:
-            pending, = reports.glob(".inventory-*")
+            pending, = (repository / ".staging").glob("inventory-*.tmp")
             held = repository / "held-reports"
             assert reports.resolve().is_relative_to(repository.parent.resolve())
             assert held.absolute().is_relative_to(repository.parent.resolve())
@@ -419,18 +429,18 @@ def test_temporary_cleanup_refuses_replaced_directory_junction(native_companion,
             observed.update(sentinel=sentinel, held=held, temporary=pending.name)
         return original(relative, destination)
     monkeypatch.setattr(storage, "_revalidate", changed)
-    with pytest.raises(storage.InventoryError, match="destination changed"):
+    with pytest.raises(storage.InventoryError):
         storage.write_text("Synthetic replacement\n", "reports/result.json", selected)
     assert observed["sentinel"].read_bytes() == before
-    assert (observed["held"] / "result.json").read_bytes() == before
+    assert target.read_bytes() == before
     assert (observed["held"] / observed["temporary"]).is_file()
     assert "cleanup refused" in capsys.readouterr().err
 
 
 def test_temporary_cleanup_refuses_replaced_file(native_companion, monkeypatch, capsys):
     repository = native_companion["repository"]
-    target = repository / "reports/result.json"
-    target.parent.mkdir()
+    target = repository / "data/deliverables/reports/result.json"
+    target.parent.mkdir(parents=True)
     target.write_bytes(b"Synthetic original target\n")
     selected = storage.resolve_destination(path=target)
     original = storage._revalidate
@@ -438,15 +448,15 @@ def test_temporary_cleanup_refuses_replaced_file(native_companion, monkeypatch, 
     def changed(relative, destination):
         calls.append(relative)
         if len(calls) == 2:
-            pending, = target.parent.glob(".inventory-*")
+            pending, = (repository / ".staging").glob("inventory-*.tmp")
             held = target.parent / "held-temporary"
             pending.rename(held)
             pending.write_bytes(b"Synthetic unrelated replacement\n")
             observed.update(pending=pending, held=held)
-            raise storage.InventoryError("Synthetic original publication refusal")
+            # Publication must detect the substituted ordinary file itself.
         return original(relative, destination)
     monkeypatch.setattr(storage, "_revalidate", changed)
-    with pytest.raises(storage.InventoryError, match="original publication refusal"):
+    with pytest.raises(storage.InventoryError, match="temporary file changed identity"):
         storage.write_text("Synthetic replacement\n", "reports/result.json", selected)
     assert observed["pending"].read_bytes() == b"Synthetic unrelated replacement\n"
     assert observed["held"].read_text() == "Synthetic replacement\n"
@@ -456,15 +466,16 @@ def test_temporary_cleanup_refuses_replaced_file(native_companion, monkeypatch, 
 
 
 @pytest.mark.parametrize("failed", [False, True])
-def test_native_lock_cleanup_preserves_substituted_parent(tmp_path, monkeypatch, failed):
-    parent, held, other = (tmp_path / name for name in ("reports", "held", "other"))
+def test_native_lock_cleanup_preserves_substituted_parent(tmp_path, monkeypatch, failed, companion):
+    tmp_path = companion[0]
+    parent, held, other = (tmp_path / name for name in (".staging", "held", "other"))
     parent.mkdir()
     other.mkdir()
     target = parent / "ledger.jsonl"
-    lock = parent / ".ledger.jsonl.lock"
+    selected = storage.Destination(target, tmp_path, "example/companion")
+    lock = storage._update_lock_path(selected)
     sentinel = other / lock.name
     sentinel.write_bytes(b"Synthetic unrelated lock\n")
-    selected = storage.Destination(target, tmp_path, "example/companion")
     real_open, real_close = storage.os.open, storage.os.close
     observed = {}
     def open_lock(path, flags, *args, **kwargs):
@@ -499,9 +510,10 @@ def test_native_lock_cleanup_preserves_substituted_parent(tmp_path, monkeypatch,
 
 
 @pytest.mark.parametrize("case", ["ordinary", "handled-outer", "failed-current"])
-def test_native_lock_close_failure_tracks_current_transaction(tmp_path, monkeypatch, capsys, case):
+def test_native_lock_close_failure_tracks_current_transaction(tmp_path, monkeypatch, capsys, case, companion):
+    tmp_path = companion[0]
     selected = storage.Destination(tmp_path / "ledger.jsonl", tmp_path, "example/companion")
-    lock = tmp_path / ".ledger.jsonl.lock"
+    lock = storage._update_lock_path(selected)
     real_open, real_close = storage.os.open, storage.os.close
     observed = {}
     def open_lock(path, flags, *args, **kwargs):
@@ -540,9 +552,10 @@ def test_native_lock_close_failure_tracks_current_transaction(tmp_path, monkeypa
     assert not lock.exists()
 
 
-def test_native_lock_repeated_acquisition_and_failure_recovery(tmp_path):
+def test_native_lock_repeated_acquisition_and_failure_recovery(tmp_path, companion):
+    tmp_path = companion[0]
     selected = storage.Destination(tmp_path / "ledger.jsonl", tmp_path, "example/companion")
-    lock = tmp_path / ".ledger.jsonl.lock"
+    lock = storage._update_lock_path(selected)
     for unused in range(2):
         with storage._exclusive_update(selected):
             with pytest.raises(storage.InventoryError, match="lock is busy"):
@@ -560,11 +573,12 @@ def test_native_lock_repeated_acquisition_and_failure_recovery(tmp_path):
 
 @pytest.mark.skipif(os.name == "nt", reason="POSIX directory descriptor contract")
 @pytest.mark.parametrize("failed", [False, True])
-def test_native_lock_cleanup_anchors_parent_during_transaction(tmp_path, failed):
-    parent, held = (tmp_path / name for name in ("reports", "held"))
+def test_native_lock_cleanup_anchors_parent_during_transaction(tmp_path, failed, companion):
+    tmp_path = companion[0]
+    parent, held = (tmp_path / name for name in (".staging", "held"))
     parent.mkdir()
     selected = storage.Destination(parent / "ledger.jsonl", tmp_path, "example/companion")
-    lock = parent / ".ledger.jsonl.lock"
+    lock = storage._update_lock_path(selected)
     def transaction():
         with storage._exclusive_update(selected):
             parent.rename(held)
@@ -583,9 +597,10 @@ def test_native_lock_cleanup_anchors_parent_during_transaction(tmp_path, failed)
 
 @pytest.mark.skipif(os.name == "nt", reason="POSIX directory descriptor contract")
 @pytest.mark.parametrize("failed", [False, True])
-def test_native_lock_cleanup_refuses_replaced_entry(tmp_path, capsys, failed):
+def test_native_lock_cleanup_refuses_replaced_entry(tmp_path, capsys, failed, companion):
+    tmp_path = companion[0]
     selected = storage.Destination(tmp_path / "ledger.jsonl", tmp_path, "example/companion")
-    lock, held = tmp_path / ".ledger.jsonl.lock", tmp_path / "held-lock"
+    lock, held = storage._update_lock_path(selected), tmp_path / "held-lock"
     message = "Synthetic transaction failure" if failed else "cleanup refused"
     with pytest.raises(storage.InventoryError, match=message):
         with storage._exclusive_update(selected):

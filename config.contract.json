@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "repository_kind": "skill",
+  "configuration": "settings",
+  "rationale": "The skill consumes selected private configuration and needs domain-specific readiness validation.",
+  "documentation": [
+    "CONFIG.md",
+    "DATA.md",
+    "README.md",
+    "README_CN.md"
+  ],
+  "settings": {
+    "schema_document": "CONFIG.md",
+    "discovery_document": "CONFIG.md",
+    "environment": "MARKET_INTEL_CONFIG",
+    "aliases": [
+      "MARKET_INTEL_CONFIG_DIR",
+      "MARKET_INTEL_DATA_DIR"
+    ],
+    "precedence": [
+      "explicit CLI companion",
+      "MARKET_INTEL_CONFIG",
+      "MARKET_INTEL_CONFIG_DIR",
+      "MARKET_INTEL_DATA_DIR (same companion only)",
+      "proven sibling companion",
+      "~/.market-intel-config",
+      "legacy ~/.market-intel-data"
+    ],
+    "required_fields": [
+      "registry.schema_version",
+      "registry.tools[].slug",
+      "registry.tools[].installed"
+    ],
+    "initializer": {
+      "path": "scripts/init_config.py",
+      "args": [
+        "--out",
+        "{output}"
+      ]
+    },
+    "doctor": {
+      "path": "scripts/verify_config.py",
+      "args": []
+    }
+  }
+}

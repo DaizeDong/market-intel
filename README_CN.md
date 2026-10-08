@@ -74,15 +74,14 @@ git clone --recurse-submodules https://github.com/DaizeDong/market-intel.git ~/.
 注册表)。仓根契约见 [CONFIG.md](CONFIG.md);权威深规范见
 [`companion-config-spec.md`](skills/market-intel/reference/companion-config-spec.md)(v1.3, STABLE)。
 
-- **挂载(发现顺序):** `$MARKET_INTEL_CONFIG` → `~/.market-intel-config/` →
-  `~/.config/market-intel-config/`。命中第一个即用；都没有则降级为纯矩阵模式照常运行。
-- **首次配置：**
+- **挂载：** `MARKET_INTEL_CONFIG` 优先，`MARKET_INTEL_CONFIG_DIR` 为别名，随后使用 Guards 的统一发现规则。`MARKET_INTEL_DATA_DIR` 必须属于同一个伴生仓。完整顺序与目录布局见 [CONFIG.md](CONFIG.md#discovery-convention-e2)。
+- **首次配置：** 空的 `tools: []` 会报 NOT READY。先填写启用工具的标识和两份模板，再跑 doctor；运行写入前还需建立伴生仓的 data/。
   ```bash
   python "<absolute-market-intel-checkout>/scripts/init_config.py"        # 生成符合规范的 config 骨架(确定性)
   export MARKET_INTEL_CONFIG=~/.market-intel-config  # 或给 init 传 --out <dir>
   python "<absolute-market-intel-checkout>/scripts/verify_config.py"       # doctor:逐项 PASS/FAIL,明确报缺什么
   ```
-- **切换 config(即插即用):** 把环境变量指向另一个 config 目录即可， config 自包含，无需别的改动：
+- **切换 config(即插即用):** 把环境变量指向另一个 config 目录即可， config 自包含，同时清除或更新 DATA 覆盖值：
   `export MARKET_INTEL_CONFIG=~/configs/work` ↔ `~/configs/personal`。
 - **密钥：** 按伴生仓声明的存储模式维护。Mode A 仅在已核验的 PRIVATE Git 仓中记录凭据；
   Mode B 忽略凭据文件，并要求另行备份。自带初始化工具只支持 Mode B。两种模式都禁止把密钥写进公开工具仓，

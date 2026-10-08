@@ -10,18 +10,9 @@ deep spec** is [`skills/market-intel/reference/companion-config-spec.md`](skills
 Overview + tutorial: [`companion-config-repo.md`](skills/market-intel/reference/companion-config-repo.md);
 GitHub-side lockdown to run **before** the first secret: [`companion-config-hardening.md`](skills/market-intel/reference/companion-config-hardening.md).
 
-## Discovery convention (how the skill finds your config), E2
+## Discovery convention (E2)
 
-The skill probes these paths in order; the first that exists is the active companion repo
-(spec §1):
-
-1. `$MARKET_INTEL_CONFIG`, environment variable (highest priority, location-independent).
-2. `~/.market-intel-config/`, dotfile-in-home, universal fallback.
-3. `~/.config/market-intel-config/`, XDG-style fallback (Linux/macOS).
-
-If none resolves, the skill **degrades to matrix-only mode and keeps working**, the companion
-repo is always optional, never a hard crash. (The bundled `scripts/` also accept
-`$MARKET_INTEL_CONFIG_DIR` as a convenience alias for path 1.)
+`MARKET_INTEL_CONFIG` selects the companion root; `MARKET_INTEL_CONFIG_DIR` is its lower-priority alias. `MARKET_INTEL_DATA_DIR` may select the supported DATA directory in that same companion. Conflicting CONFIG and DATA selections, empty selectors and explicit missing paths fail before any write. With no explicit selector, the pinned Guards resolver checks a proven sibling companion, `~/.market-intel-config`, then its legacy `~/.market-intel-data` convention. There is no separate XDG search. Settings and DATA share this selection. `--config-dir` on the doctor selects one companion in isolation from inherited selectors; restore normal environment selection before running the product. Runtime writers require an existing `<companion>/data`; DATA_DIR must name it. Root-level inventory or live-ledger writes are unsupported.
 
 ### Where real-run output goes: the private companion repo, versioned
 
@@ -34,10 +25,10 @@ not permission to create an unmanaged fallback.
 python guards/tools/datadir.py --path market-intel metrics/live-runs.jsonl
 ```
 
-For inventory, set `MARKET_INTEL_DATA_DIR` to an existing directory in a private
-companion, or set `MARKET_INTEL_CONFIG` (alias `MARKET_INTEL_CONFIG_DIR`) to that
-companion. The shared convention uses `data/` when present and otherwise the
-companion root. `console.py --refresh` validates the final canonical containing
+For inventory, set `MARKET_INTEL_CONFIG` (alias `MARKET_INTEL_CONFIG_DIR`) to the PRIVATE
+companion and create its `data/` child during setup. `MARKET_INTEL_DATA_DIR`, if set,
+must select that same child. Missing data/ is NOT initialized; writers never use the companion
+root as a fallback. `console.py --refresh` validates the final canonical containing
 repository, existing history, every physical and effective fetch/push destination,
 fresh local PRIVATE visibility receipts and Git ignore status before collecting
 inventory or creating directories. It refuses public, unknown, unmanaged, missing
@@ -159,7 +150,13 @@ recovery instructions in the selected companion; do not reinitialize it to chang
 See [the storage-mode specification](skills/market-intel/reference/companion-config-spec.md#53-storage-modes-mode-a-vs-mode-b)
 for declarations, checks and backup responsibilities.
 
-## First-time setup (E3), succeeds on the first try
+## First-time setup (E3)
+
+The generated empty registry is a valid template and remains NOT READY. Populate at least one
+selected `tools[]` entry with a unique kebab-case `slug` and boolean `installed: true`, plus
+`tools/<slug>/claude.json.template` containing an `mcpServers` object and `env.template`.
+The doctor validates these configured fields without testing provider connectivity. Prepare a
+versioned PRIVATE companion and its data/ directory before invoking runtime writers., succeeds on the first try
 
 ```bash
 # 1. Stamp a conformant, empty config skeleton (deterministic — E4):

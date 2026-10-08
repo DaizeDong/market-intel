@@ -34,6 +34,14 @@ def config_script(name):
     return module
 
 
+def populate_config(directory):
+    from make_fixtures import configured_doctor_files
+    for relative, content in configured_doctor_files().items():
+        target = directory / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
+
+
 @pytest.mark.parametrize("relative", ["registry.json", ".gitignore", "tools/.gitkeep",
                                        "secrets/README.md", "secrets/.gitkeep"])
 @pytest.mark.parametrize("force,linked", [(False, True), (True, True), (True, False)])
@@ -70,6 +78,7 @@ def test_config_doctor_honors_declared_storage_mode(tmp_path, monkeypatch, mode)
     import sys
     monkeypatch.setattr(sys, "argv", ["init_config.py", "--skill", "synthetic-skill", "--out", str(tmp_path)])
     assert config_script("init_config.py").main() == 0
+    populate_config(tmp_path)
     if mode == "A":
         (tmp_path / ".gitignore").write_text("# Mode A: private credential backup\n", encoding="utf-8")
         (tmp_path / "secrets/README.md").write_text("Active storage mode: A. Synthetic private fixture.\n", encoding="utf-8")
@@ -90,6 +99,7 @@ def test_config_doctor_applies_explicit_and_legacy_policy(
     import sys
     monkeypatch.setattr(sys, "argv", ["init_config.py", "--skill", "synthetic-skill", "--out", str(tmp_path)])
     assert config_script("init_config.py").main() == 0
+    populate_config(tmp_path)
     (tmp_path / "secrets/README.md").write_text(declaration + "\n", encoding="utf-8")
     if not ignored:
         (tmp_path / ".gitignore").write_text("# Synthetic unexcluded configuration\n", encoding="utf-8")
@@ -340,7 +350,9 @@ def test_refresh_reads_only_its_selected_companion(
             '{"tools":[{"slug":"synthetic-selected","installed":true}]}\n', encoding="utf-8")
     data = selected / "data" if nested_data else selected
     if nested_data:
-        data.mkdir()
+        data.mkdir(exist_ok=True)
+    else:
+        (selected / "data").rmdir()
     for key in ("MARKET_INTEL_CONFIG", "MARKET_INTEL_CONFIG_DIR", "MARKET_INTEL_DATA_DIR"):
         monkeypatch.delenv(key, raising=False)
     if selection == "MARKET_INTEL_DATA_DIR":
@@ -361,6 +373,13 @@ def test_refresh_reads_only_its_selected_companion(
         assert Path(path) == selected / "registry.json"
         return original_read(path, default=default)
     monkeypatch.setattr(console, "read_json", read)
+    if not nested_data or selection == "MARKET_INTEL_DATA_DIR":
+        # A missing canonical data/ or conflicting config override must fail before collection.
+        with pytest.raises(console.private_inventory.InventoryError):
+            console.load_snapshot(refresh=True)
+        assert reads == []
+        assert other_registry.read_bytes() == other_bytes
+        return
     snapshot, status = console.load_snapshot(refresh=True)
     collected = snapshot["companion"]
     assert collected["path"] == str(selected)

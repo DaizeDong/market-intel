@@ -42,18 +42,22 @@ that checklist **before** committing the first secret.
 
 ## 1. Discovery
 
-Configuration discovery checks these candidate paths in order, then validates the
-selected configuration. Existence alone does not establish PRIVATE storage or readiness:
+Settings, initialization, diagnostics and runtime DATA use the pinned Guards
+companion-root resolver through the source adapter. `MARKET_INTEL_CONFIG` wins over
+its alias `MARKET_INTEL_CONFIG_DIR`. An explicit empty or missing selector is an
+error. `MARKET_INTEL_DATA_DIR` must identify `<companion>/data`; when CONFIG is also
+selected, both must identify the same companion.
 
-1. **`$MARKET_INTEL_CONFIG`** env var (highest priority, location-independent).
-2. **`~/.market-intel-config/`** (dotfile-in-home, universal fallback).
-3. **`~/.config/market-intel-config/`** (XDG-style, Linux/macOS).
+Without explicit selectors, discovery checks a proven sibling companion, then
+`~/.market-intel-config`, then the shared legacy `~/.market-intel-data` convention.
+There is no independent XDG fallback. The doctor's `--config-dir` selects one
+companion in isolation from inherited selectors. Runtime writers require the
+`data/` directory to exist; an absent directory means uninitialized storage.
 
-If none exists, catalog browsing MUST remain usable. A companion is optional for
-reading the public matrix. Writing real configuration or runtime DATA requires a
-resolved verified PRIVATE repository; PUBLIC or unknown remote visibility MUST block
-the write. There is no public-checkout fallback. An explicitly selected invalid
-configuration MUST be reported rather than silently replaced.
+Catalog browsing remains usable without a companion. A selected path does not
+establish PRIVATE storage or readiness: writes require fresh PRIVATE admission and
+exact source-contract artifact ownership, and an empty registry is TEMPLATE_VALID
+but NOT READY. Public or unknown publication routes block writes.
 
 ---
 

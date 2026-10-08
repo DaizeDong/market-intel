@@ -414,6 +414,7 @@ def test_l0_private_miss_then_hit_preserves_consumer_sentinel(companion, tmp_pat
     old_cache = consumer / "metrics" / ("gh-api-cache.json" if kind == "github" else "l0-cache.json")
     sentinel = b'{"synthetic-sentinel": "must remain untouched"}\n'
     old_cache.write_bytes(sentinel)
+    (consumer / "storage.contract.json").write_bytes((storage.ROOT / "storage.contract.json").read_bytes())
     monkeypatch.setattr(storage, "ROOT", consumer)
     monkeypatch.setattr(l0, "ROOT", str(consumer))
     calls = []
@@ -424,7 +425,7 @@ def test_l0_private_miss_then_hit_preserves_consumer_sentinel(companion, tmp_pat
     assert l0.verify(target, kind)["verdict"] == "PASS"
     assert len(calls) == 1
     relative = caches.GH_CACHE_PATH if kind == "github" else caches.L0_CACHE_PATH
-    rows = json.loads((repository / relative).read_text(encoding="utf-8"))
+    rows = json.loads((repository / "data" / relative).read_text(encoding="utf-8"))
     assert rows[REPO if kind == "github" else "npm-v2:synthetic-package"]["verdict"] == "PASS"
     assert old_cache.read_bytes() == sentinel
     assert sorted(p.name for p in (consumer / "metrics").iterdir()) == [old_cache.name]
@@ -444,15 +445,15 @@ def test_unproven_private_cache_refuses_before_probe(companion, tmp_path, monkey
     with pytest.raises(storage.InventoryError):
         l0.verify(URL if kind == "github" else "synthetic-package", kind)
     assert calls == []
-    assert not (repository / "cache").exists()
+    assert not (repository / "data/cache").exists()
     assert not (tmp_path / "unmanaged").exists()
 
 
 @pytest.mark.parametrize("late", [False, True])
 def test_cache_write_failure_is_nonzero_and_preserves_snapshot(companion, monkeypatch, late, capsys):
     repository, _, _, _ = companion
-    path = repository / caches.GH_CACHE_PATH
-    path.parent.mkdir()
+    path = repository / "data" / caches.GH_CACHE_PATH
+    path.parent.mkdir(parents=True)
     before = b'{"unrelated": {"value": 17}}\n'
     path.write_bytes(before)
     calls = []
@@ -468,8 +469,8 @@ def test_cache_write_failure_is_nonzero_and_preserves_snapshot(companion, monkey
     assert invoke(l0, monkeypatch, "--url", URL, "--type", "github") == 2
     assert len(calls) == int(late)
     assert path.read_bytes() == before
-    pending, = path.parent.glob(".inventory-*")
-    assert set(path.parent.iterdir()) == {path, pending}
+    pending, = (repository / ".staging").glob("inventory-*.tmp")
+    assert set(path.parent.iterdir()) == {path}
     if late:
         candidate = json.loads(pending.read_text(encoding="utf-8"))
         assert set(candidate) == {"unrelated", REPO}
@@ -491,7 +492,7 @@ def test_cache_merge_keeps_other_observations(companion):
     caches.prepare_write(caches.GH_CACHE_PATH, destination)
     caches.save_entries(caches.GH_CACHE_PATH, {"example/first": {"verdict": "PASS"}}, destination)
     caches.save_entries(caches.GH_CACHE_PATH, {"example/second": {"verdict": "BLOCK"}}, destination)
-    assert set(json.loads((repository / caches.GH_CACHE_PATH).read_text(encoding="utf-8"))) == {
+    assert set(json.loads((repository / "data" / caches.GH_CACHE_PATH).read_text(encoding="utf-8"))) == {
         "example/first", "example/second"}
 
 
@@ -516,8 +517,8 @@ def test_l0_incomplete_github_observation_never_passes(companion, monkeypatch, p
 ])
 def test_cached_github_pass_is_reclassified_from_typed_evidence(companion, monkeypatch, archived, pushed, expected):
     repository, _, _, _ = companion
-    path = repository / caches.GH_CACHE_PATH
-    path.parent.mkdir()
+    path = repository / "data" / caches.GH_CACHE_PATH
+    path.parent.mkdir(parents=True)
     path.write_text(json.dumps({REPO: {"verdict": "PASS", "checked_at": l0._now_iso,
                                       "archived": archived, "pushed_at": pushed,
                                       "hostname": "github.com"}}))
@@ -554,12 +555,12 @@ def test_matrix_current_evidence_overrides_every_cached_verdict():
 
 def test_directory_and_file_interfaces_preserve_final_private_destination(companion, tmp_path):
     repository, _, _, _ = companion
-    runtime = repository / "runtime"
+    runtime = repository / "data/runtime"
     runtime.mkdir()
     assert storage.resolve_directory().path == runtime
     assert storage.resolve_directory(path=repository).repository == repository
-    file = storage.resolve_destination(path=runtime / "cookies.json")
-    storage.write_text("{}\n", "profiles/cookies.json", file)
+    file = storage.resolve_destination("profiles/twikit/cookies.json")
+    storage.write_text("{}\n", "profiles/twikit/cookies.json", file)
     assert file.path.read_text(encoding="utf-8") == "{}\n"
     for target in (runtime / "missing", file.path, storage.ROOT, tmp_path):
         with pytest.raises(storage.InventoryError):
@@ -760,13 +761,13 @@ def test_poll_main_persists_partial_real_rows_and_reports_degradation(companion,
     npm_surface_reply(monkeypatch)
     monkeypatch.setattr(poll, "_http_get", lambda *args, **kwargs: ATOM.format(VIDEO).encode())
     assert invoke(poll, monkeypatch, "--config", str(config), "--only", "E4,E6") == 0
-    rows = [json.loads(line) for line in (repository / "surface-inbox.jsonl").read_text(encoding="utf-8").splitlines()]
+    rows = [json.loads(line) for line in (repository / "data/surface-inbox.jsonl").read_text(encoding="utf-8").splitlines()]
     assert {row["key"] for row in rows} == {"E4:synthetic-package", "E6:https://example.com/video"}
     output = capsys.readouterr().out
     assert "SUMMARY new=2 surfaces_ok=0/2 degraded=E4,E6" in output
     assert invoke(poll, monkeypatch, "--config", str(config), "--only", "E4,E6") == 0
     assert "SUMMARY new=0 surfaces_ok=0/2 degraded=E4,E6" in capsys.readouterr().out
-    assert len((repository / "surface-inbox.jsonl").read_text(encoding="utf-8").splitlines()) == 2
+    assert len((repository / "data/surface-inbox.jsonl").read_text(encoding="utf-8").splitlines()) == 2
 
 
 def test_poll_total_failure_is_never_successful_empty(companion, tmp_path, monkeypatch, capsys):
@@ -776,7 +777,7 @@ def test_poll_total_failure_is_never_successful_empty(companion, tmp_path, monke
     npm_surface_reply(monkeypatch)
     assert invoke(poll, monkeypatch, "--config", str(config), "--only", "E4") == 0
     assert "SUMMARY new=0 surfaces_ok=0/1 degraded=E4" in capsys.readouterr().out
-    assert not (repository / "surface-inbox.jsonl").exists()
+    assert not (repository / "data/surface-inbox.jsonl").exists()
 
 
 @pytest.mark.parametrize("slug", ["yt-dlp", "instaloader", "crawlee", "twikit"])
@@ -798,7 +799,7 @@ def test_documented_literal_destination_has_working_private_contract(companion, 
     for call in calls:
         relative = call.args[0].value
         assert not Path(relative).is_absolute() and ".." not in Path(relative).parts
-        target = repository / relative
+        target = repository / "data" / relative
         if call.func.id == "resolve_directory":
             assert relative.startswith("runtime/")
             with pytest.raises(storage.InventoryError):
@@ -854,8 +855,8 @@ def test_disabled_cache_skips_private_io_and_keeps_current_activity(monkeypatch,
 
 def test_matrix_cache_defaults_to_private_preflight_and_merge(companion):
     repository, _, _, _ = companion
-    path = repository / caches.GH_CACHE_PATH
-    path.parent.mkdir()
+    path = repository / "data" / caches.GH_CACHE_PATH
+    path.parent.mkdir(parents=True)
     before = b'{"unrelated": {"value": 17}}\n'
     path.write_bytes(before)
     destination, cache = caches.load_cache(caches.GH_CACHE_PATH)
@@ -881,14 +882,14 @@ def test_matrix_cache_enabled_requires_private_authority(companion, tmp_path, mo
     with pytest.raises(storage.InventoryError):
         caches.load_cache(caches.GH_CACHE_PATH)
     assert not (selected / "cache").exists()
-    assert not (repository / "cache").exists()
+    assert not (repository / "data/cache").exists()
 
 
 @pytest.mark.parametrize("failure", ["preflight", "save"])
 def test_matrix_cache_enabled_never_falls_back_after_write_failure(companion, monkeypatch, failure, capsys):
     repository, _, _, _ = companion
-    path = repository / caches.GH_CACHE_PATH
-    path.parent.mkdir()
+    path = repository / "data" / caches.GH_CACHE_PATH
+    path.parent.mkdir(parents=True)
     before = b'{"unrelated": {"value": 17}}\n'
     path.write_bytes(before)
     destination, _ = caches.load_cache(caches.GH_CACHE_PATH)
@@ -903,8 +904,8 @@ def test_matrix_cache_enabled_never_falls_back_after_write_failure(companion, mo
         else:
             caches.save_entries(caches.GH_CACHE_PATH, {REPO: {"verdict": "BLOCK"}}, destination)
     assert path.read_bytes() == before
-    pending, = path.parent.glob(".inventory-*")
-    assert set(path.parent.iterdir()) == {path, pending}
+    pending, = (repository / ".staging").glob("inventory-*.tmp")
+    assert set(path.parent.iterdir()) == {path}
     if failure == "save":
         assert json.loads(pending.read_text(encoding="utf-8")) == {
             "unrelated": {"value": 17}, REPO: {"verdict": "BLOCK"}}
@@ -2196,7 +2197,7 @@ def test_e6_unconfigured_fails_without_observation_or_write(
     elif configuration == "invalid":
         monkeypatch.setattr(discovery, "YOUTUBE_CHANNELS",
                             [("Synthetic A", ""), ("Synthetic B", None)])
-    target = repository / "uncreated/discovery.md"
+    target = repository / "data/deliverables/uncreated/discovery.md"
     assert discovery.main(["--channel", "e6", "--out", str(target)]) == 1
     captured = capsys.readouterr()
     assert "E6: FAIL" in captured.out and "failures: 1/1" in captured.out
@@ -2229,7 +2230,7 @@ def test_e6_valid_empty_observation_allows_success_without_write(
     repository, _, _, _ = companion
     monkeypatch.setattr(discovery, "YOUTUBE_CHANNELS", [("Synthetic", "UCsynthetic")])
     monkeypatch.setattr(discovery.requests, "get", lambda *a, **k: response(text=payload))
-    target = repository / "uncreated/discovery.md"
+    target = repository / "data/deliverables/uncreated/discovery.md"
     assert discovery.main(["--channel", "e6", "--since", str(SINCE), "--out", str(target)]) == 0
     captured = capsys.readouterr()
     assert "E6: 0 candidates" in captured.out and "failures: 0/1" in captured.out
@@ -2289,7 +2290,7 @@ def test_e4_valid_empty_or_below_threshold_allows_success(
     repository, _, _, _ = companion
     monkeypatch.setattr(discovery, "NPM_PACKAGES", ["synthetic-package"])
     monkeypatch.setattr(discovery.requests, "get", lambda *a, **k: response(payload))
-    target = repository / "uncreated/discovery.md"
+    target = repository / "data/deliverables/uncreated/discovery.md"
     assert discovery.main(["--channel", "e4", "--out", str(target)]) == 0
     captured = capsys.readouterr()
     assert "E4: 0 candidates" in captured.out and "failures: 0/1" in captured.out
@@ -2333,7 +2334,7 @@ def test_e4_one_failed_period_never_completes_a_package(
                             status=503 if failure == "http" else 200)
         return response({"downloads": [{"downloads": 1000}]})
     monkeypatch.setattr(discovery.requests, "get", get)
-    target = repository / "uncreated/discovery.md"
+    target = repository / "data/deliverables/uncreated/discovery.md"
     assert discovery.main(["--channel", "e4", "--out", str(target)]) == (0 if mixed else 1)
     output = capsys.readouterr()
     assert f"configured={len(packages)} attempted={len(packages)} completed={int(mixed)}" in output.err
@@ -2360,7 +2361,7 @@ def test_default_sweep_requires_a_completed_channel(
             return SimpleNamespace(json=lambda: [], raise_for_status=lambda: None)
         raise discovery.requests.RequestException("synthetic unavailable source")
     monkeypatch.setattr(discovery.requests, "get", get)
-    target = repository / "uncreated/discovery.md"
+    target = repository / "data/deliverables/uncreated/discovery.md"
     assert discovery.main(["--out", str(target)]) == (0 if healthy_empty else 1)
     captured = capsys.readouterr()
     assert f"failures: {5 if healthy_empty else 6}/6" in captured.out
@@ -2377,7 +2378,7 @@ def test_main_persists_partial_discovery_from_real_channel(
     monkeypatch.setattr(discovery.requests, "get",
                         lambda url, **k: response(text=ATOM.format(VIDEO),
                                                  status=503 if url.endswith("UCfailed") else 200))
-    target = repository / "reports/discovery.md"
+    target = repository / "data/deliverables/reports/discovery.md"
     assert discovery.main(["--channel", "e6", "--since", str(SINCE), "--out", str(target)]) == 0
     content = target.read_text(encoding="utf-8")
     assert "https://example.com/synthetic-video" in content
@@ -2437,7 +2438,7 @@ def test_malformed_response_never_completes_an_observation(
         calls.append(url)
         return observation_response(payload, text=text)
     monkeypatch.setattr(discovery.requests, "get", get)
-    target = repository / "uncreated/malformed-observation.md"
+    target = repository / "data/deliverables/uncreated/malformed-observation.md"
     if through_main:
         assert discovery.main(["--channel", channel, "--since", str(SINCE),
                                "--out", str(target)]) == 1
@@ -2465,7 +2466,7 @@ def test_valid_empty_envelope_is_a_completed_observation(
     monkeypatch.setattr(discovery, "GITHUB_TOPICS", ["synthetic-topic"])
     monkeypatch.setattr(discovery.requests, "get",
                         lambda *a, **k: observation_response(payload, text=text))
-    target = repository / "uncreated/valid-empty.md"
+    target = repository / "data/deliverables/uncreated/valid-empty.md"
     assert discovery.main(["--channel", channel, "--since", str(SINCE),
                            "--out", str(target)]) == 0
     summary = capsys.readouterr()
@@ -2481,7 +2482,7 @@ def test_e2_unconfigured_fails_without_http_or_output(
     repository, _, _, _ = companion
     monkeypatch.setattr(discovery, "GITHUB_TOPICS", topics)
     # The discovery fixture already makes any HTTP attempt fail this test.
-    target = repository / "uncreated/unconfigured-topics.md"
+    target = repository / "data/deliverables/uncreated/unconfigured-topics.md"
     if through_main:
         assert discovery.main(["--channel", "e2", "--out", str(target)]) == 1
         assert "E2: FAIL" in capsys.readouterr().out
@@ -2515,7 +2516,7 @@ def test_e2_partial_topic_failure_keeps_valid_rows_in_private_output(
             ValueError("synthetic malformed JSON") if failure == "json" else {},
             status=503 if failure == "http" else 200)
     monkeypatch.setattr(discovery.requests, "get", get)
-    target = repository / "reports/partial-github.md"
+    target = repository / "data/deliverables/reports/partial-github.md"
     assert discovery.main(["--channel", "e2", "--since", str(SINCE),
                            "--out", str(target)]) == 0
     content = target.read_text(encoding="utf-8")
@@ -2552,7 +2553,7 @@ def test_default_sweep_distinguishes_invalid_bodies_from_valid_empty(
             return observation_response(status=503)
         pytest.fail("unexpected synthetic surface request")
     monkeypatch.setattr(discovery.requests, "get", get)
-    target = repository / "uncreated/whole-sweep.md"
+    target = repository / "data/deliverables/uncreated/whole-sweep.md"
     assert discovery.main(["--since", str(SINCE), "--out", str(target)]) == (
         1 if healthy is None else 0)
     summary = capsys.readouterr()
@@ -2583,7 +2584,7 @@ def test_schema_valid_partial_candidates_still_persist(
     repository, _, _, _ = companion
     monkeypatch.setattr(discovery.requests, "get",
                         lambda *a, **k: observation_response(payload, text=text))
-    target = repository / "reports/partial-candidates.md"
+    target = repository / "data/deliverables/reports/partial-candidates.md"
     assert discovery.main(["--channel", channel, "--since", str(SINCE),
                            "--out", str(target)]) == 0
     content = target.read_text(encoding="utf-8")
@@ -2606,7 +2607,7 @@ def test_e2_incomplete_topic_never_completes_or_writes(
         calls.append(url)
         return observation_response({"incomplete_results": True, "items": items})
     monkeypatch.setattr(discovery.requests, "get", get)
-    target = repository / "uncreated/incomplete-github.md"
+    target = repository / "data/deliverables/uncreated/incomplete-github.md"
     if through_main:
         assert discovery.main(["--channel", "e2", "--since", str(SINCE),
                                "--out", str(target)]) == 1
@@ -2640,7 +2641,7 @@ def test_e2_incomplete_topic_preserves_completed_topics_only(
         }]
         return observation_response({"incomplete_results": incomplete, "items": items})
     monkeypatch.setattr(discovery.requests, "get", get)
-    target = repository / "reports/complete-topics.md"
+    target = repository / "data/deliverables/reports/complete-topics.md"
     assert discovery.main(["--channel", "e2", "--since", str(SINCE),
                            "--out", str(target)]) == 0
     content = target.read_text(encoding="utf-8")
@@ -2662,7 +2663,7 @@ def test_e2_explicit_complete_empty_response_remains_success(
         calls.append(url)
         return observation_response({"total_count": 0, "incomplete_results": False, "items": []})
     monkeypatch.setattr(discovery.requests, "get", get)
-    target = repository / "uncreated/complete-empty-github.md"
+    target = repository / "data/deliverables/uncreated/complete-empty-github.md"
     assert discovery.main(["--channel", "e2", "--since", str(SINCE),
                            "--out", str(target)]) == 0
     captured = capsys.readouterr()
@@ -2678,7 +2679,7 @@ def test_e2_malformed_completeness_metadata_is_not_empty_success(
     monkeypatch.setattr(discovery, "GITHUB_TOPICS", ["synthetic-invalid"])
     monkeypatch.setattr(discovery.requests, "get", lambda *a, **k:
                         observation_response({"incomplete_results": invalid_flag, "items": []}))
-    target = repository / "uncreated/invalid-completeness.md"
+    target = repository / "data/deliverables/uncreated/invalid-completeness.md"
     assert discovery.main(["--channel", "e2", "--since", str(SINCE),
                            "--out", str(target)]) == 1
     captured = capsys.readouterr()
@@ -2738,7 +2739,7 @@ def test_poll_invalid_envelopes_never_count_as_success(
     output = capsys.readouterr().out
     assert "DEGRADED" in output and "surfaces_ok=0/1" in output
     assert "new=0" in output and f"degraded={surface}" in output
-    assert not (companion[0] / "surface-inbox.jsonl").exists()
+    assert not (companion[0] / "data/surface-inbox.jsonl").exists()
 
 
 @pytest.mark.parametrize("surface,payload", [
@@ -2750,7 +2751,7 @@ def test_poll_valid_empty_envelope_completes_without_writing(
     assert invoke_poll(poller, monkeypatch, tmp_path, surface) == 0
     output = capsys.readouterr().out
     assert "surfaces_ok=1/1" in output and "degraded=none" in output and "new=0" in output
-    assert not (companion[0] / "surface-inbox.jsonl").exists()
+    assert not (companion[0] / "data/surface-inbox.jsonl").exists()
 
 
 @pytest.mark.parametrize("surface,key", [("E1", "servers"), ("E2", "items"), ("E5", "hits")])
@@ -2759,7 +2760,7 @@ def test_poll_error_envelope_cannot_be_hidden_by_empty_result_field(
     set_poll_payload(poller, monkeypatch, surface, {key: [], "error": "synthetic provider error"})
     assert invoke_poll(poller, monkeypatch, tmp_path, surface) == 0
     assert "surfaces_ok=0/1" in capsys.readouterr().out
-    assert not (companion[0] / "surface-inbox.jsonl").exists()
+    assert not (companion[0] / "data/surface-inbox.jsonl").exists()
 
 
 @pytest.mark.parametrize("surface,payload,key", [
@@ -2777,7 +2778,7 @@ def test_poll_valid_nonempty_responses_keep_original_filters_and_fields(
         surface, payload, key, poller, companion, tmp_path, monkeypatch, capsys):
     set_poll_payload(poller, monkeypatch, surface, payload)
     assert invoke_poll(poller, monkeypatch, tmp_path, surface) == 0
-    row = json.loads((companion[0] / "surface-inbox.jsonl").read_text(encoding="utf-8"))
+    row = json.loads((companion[0] / "data/surface-inbox.jsonl").read_text(encoding="utf-8"))
     assert row["key"] == key and row["surface"] == surface and row["discovered_at"]
     assert "surfaces_ok=1/1" in capsys.readouterr().out
 
@@ -2829,7 +2830,7 @@ def test_poll_e2_incomplete_or_invalid_completion_cannot_be_all_green(
     assert invoke_poll(poller, monkeypatch, tmp_path, "E2") == 0
     output = capsys.readouterr().out
     assert "DEGRADED" in output and "surfaces_ok=0/1" in output and "0/1 requests complete" in output
-    target = companion[0] / "surface-inbox.jsonl"
+    target = companion[0] / "data/surface-inbox.jsonl"
     if flag is True:
         row = json.loads(target.read_text(encoding="utf-8"))
         assert row["title"] == "example-org/synthetic-partial"
@@ -2850,7 +2851,7 @@ def test_poll_main_retains_partial_topic_rows_without_duplicate_replay(
     cfg.write_text(json.dumps({"E2": {"topics": ["synthetic-ready", "synthetic-failed"]}}))
     monkeypatch.setattr(poller.sys, "argv", ["poll_surfaces.py", "--config", str(cfg), "--only", "E2"])
     assert poller.main() == 0
-    target = companion[0] / "surface-inbox.jsonl"
+    target = companion[0] / "data/surface-inbox.jsonl"
     first = target.read_bytes()
     assert json.loads(first)["title"] == "example-org/synthetic-retained"
     assert "surfaces_ok=0/1" in capsys.readouterr().out
@@ -2897,6 +2898,14 @@ def config_script(name):
     return module
 
 
+def populate_config(directory):
+    from make_fixtures import configured_doctor_files
+    for relative, content in configured_doctor_files().items():
+        target = directory / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
+
+
 @pytest.mark.parametrize("relative", ["registry.json", ".gitignore", "tools/.gitkeep",
                                        "secrets/README.md", "secrets/.gitkeep"])
 @pytest.mark.parametrize("force,linked", [(False, True), (True, True), (True, False)])
@@ -2933,6 +2942,7 @@ def test_config_doctor_honors_declared_storage_mode(tmp_path, monkeypatch, mode)
     import sys
     monkeypatch.setattr(sys, "argv", ["init_config.py", "--skill", "synthetic-skill", "--out", str(tmp_path)])
     assert config_script("init_config.py").main() == 0
+    populate_config(tmp_path)
     if mode == "A":
         (tmp_path / ".gitignore").write_text("# Mode A: private credential backup\n", encoding="utf-8")
         (tmp_path / "secrets/README.md").write_text("Active storage mode: A. Synthetic private fixture.\n", encoding="utf-8")
@@ -2953,6 +2963,7 @@ def test_config_doctor_applies_explicit_and_legacy_policy(
     import sys
     monkeypatch.setattr(sys, "argv", ["init_config.py", "--skill", "synthetic-skill", "--out", str(tmp_path)])
     assert config_script("init_config.py").main() == 0
+    populate_config(tmp_path)
     (tmp_path / "secrets/README.md").write_text(declaration + "\n", encoding="utf-8")
     if not ignored:
         (tmp_path / ".gitignore").write_text("# Synthetic unexcluded configuration\n", encoding="utf-8")
@@ -3203,7 +3214,9 @@ def test_refresh_reads_only_its_selected_companion(
             '{"tools":[{"slug":"synthetic-selected","installed":true}]}\n', encoding="utf-8")
     data = selected / "data" if nested_data else selected
     if nested_data:
-        data.mkdir()
+        data.mkdir(exist_ok=True)
+    else:
+        (selected / "data").rmdir()
     for key in ("MARKET_INTEL_CONFIG", "MARKET_INTEL_CONFIG_DIR", "MARKET_INTEL_DATA_DIR"):
         monkeypatch.delenv(key, raising=False)
     if selection == "MARKET_INTEL_DATA_DIR":
@@ -3224,6 +3237,13 @@ def test_refresh_reads_only_its_selected_companion(
         assert Path(path) == selected / "registry.json"
         return original_read(path, default=default)
     monkeypatch.setattr(console, "read_json", read)
+    if not nested_data or selection == "MARKET_INTEL_DATA_DIR":
+        # A missing canonical data/ or conflicting config override must fail before collection.
+        with pytest.raises(console.private_inventory.InventoryError):
+            console.load_snapshot(refresh=True)
+        assert reads == []
+        assert other_registry.read_bytes() == other_bytes
+        return
     snapshot, status = console.load_snapshot(refresh=True)
     collected = snapshot["companion"]
     assert collected["path"] == str(selected)
@@ -3511,7 +3531,10 @@ def native_companion(tmp_path, monkeypatch):
             monkeypatch.delenv(key)
     for key, value in generated["environment"].items():
         monkeypatch.setenv(key, value)
-    monkeypatch.setenv("MARKET_INTEL_DATA_DIR", str(generated["repository"]))
+    for key in ("MARKET_INTEL_CONFIG", "MARKET_INTEL_CONFIG_DIR"):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv("MARKET_INTEL_DATA_DIR", str(generated["repository"] / "data"))
+    (generated["repository"] / "data").mkdir(exist_ok=True)
     return generated
 
 
@@ -3546,7 +3569,7 @@ def test_native_private_proof_rejects_unsafe_transport(
         with pytest.raises(storage.InventoryError):
             storage.resolve_destination()
     assert forbidden == [], "fresh synthetic receipts require only local Git metadata reads"
-    assert not (repository / "inventory").exists()
+    assert not (repository / "data/inventory").exists()
 
 
 @pytest.mark.parametrize("identity,accepted", [
@@ -3569,7 +3592,7 @@ def test_native_nested_repository_is_authoritative(native_companion, identity, a
 @pytest.mark.parametrize("failure", ["ignored", "unversioned"])
 def test_native_storage_requirements_are_preserved(native_companion, failure):
     repository = native_companion["repository"]
-    target = repository / "ignored-output/record.json" if failure == "ignored" else repository / "report.json"
+    target = repository / "ignored-output/record.json" if failure == "ignored" else repository / "data/deliverables/report.json"
     if failure == "unversioned":
         subprocess.run(["git", "-C", str(repository), "update-ref", "-d", "HEAD"], check=True)
     with pytest.raises(storage.InventoryError):
@@ -3580,11 +3603,11 @@ def test_native_storage_requirements_are_preserved(native_companion, failure):
 @pytest.mark.parametrize("change", ["stable", "public", "other-private", "same-identity-url", "lexical-target"])
 def test_native_publication_rechecked_before_replace(native_companion, monkeypatch, change):
     repository = native_companion["repository"]
-    target = repository / "reports/synthetic.json"
-    target.parent.mkdir()
+    target = repository / "data/deliverables/reports/synthetic.json"
+    target.parent.mkdir(parents=True)
     before, after = "Synthetic retained bytes\n", "Synthetic replacement bytes\n"
     target.write_text(before, encoding="utf-8")
-    lexical = repository / "reports/selected.json"
+    lexical = repository / "data/deliverables/reports/selected.json"
     selected_path = [target]
     if change == "lexical-target":
         original_resolve = Path.resolve
@@ -3601,7 +3624,7 @@ def test_native_publication_rechecked_before_replace(native_companion, monkeypat
             subprocess.run(["git", "-C", str(repository), "remote", "set-url", "origin",
                             "https://github.com/" + identity + suffix], check=True)
         elif change == "lexical-target":
-            selected_path[0] = repository / "reports/other.json"
+            selected_path[0] = repository / "data/deliverables/reports/other.json"
     monkeypatch.setattr(os, "fsync", change_after_flush)
     if change == "stable":
         storage.write_text(after, "reports/synthetic.json", selected)
@@ -3610,7 +3633,7 @@ def test_native_publication_rechecked_before_replace(native_companion, monkeypat
         with pytest.raises(storage.InventoryError):
             storage.write_text(after, "reports/synthetic.json", selected)
         assert target.read_text(encoding="utf-8") == before
-    pending = list(target.parent.glob(".inventory-*"))
+    pending = list((repository / ".staging").glob("inventory-*.tmp"))
     assert len(pending) == (0 if change == "stable" else 1)
     if pending:
         assert pending[0].read_text(encoding="utf-8") == after
@@ -3619,7 +3642,7 @@ def test_native_publication_rechecked_before_replace(native_companion, monkeypat
 
 def test_native_same_identity_route_change_is_revalidated(native_companion):
     repository = native_companion["repository"]
-    target = repository / "reports/result.json"
+    target = repository / "data/deliverables/reports/result.json"
     selected = storage.resolve_destination(path=target)
     subprocess.run(["git", "-C", str(repository), "remote", "set-url", "origin",
                     "https://github.com/" + SAMPLE["companion_identity"]], check=True)
@@ -3630,8 +3653,8 @@ def test_native_same_identity_route_change_is_revalidated(native_companion):
 
 def test_native_explicit_target_retains_lexical_selection(native_companion, monkeypatch):
     repository = native_companion["repository"]
-    lexical = repository / "selected.json"
-    selected_target = [repository / "first.json"]
+    lexical = repository / "data/deliverables/selected.json"
+    selected_target = [repository / "data/deliverables/first.json"]
     original_resolve = Path.resolve
 
     def resolve(path, *args, **kwargs):
@@ -3640,11 +3663,11 @@ def test_native_explicit_target_retains_lexical_selection(native_companion, monk
     monkeypatch.setattr(Path, "resolve", resolve)
     selected = storage.resolve_destination(path=lexical)
     assert selected.requested_path == lexical and selected.path == selected_target[0]
-    selected_target[0] = repository / "second.json"
+    selected_target[0] = repository / "data/deliverables/second.json"
     with pytest.raises(storage.InventoryError, match="changed"):
         storage.write_text("{}\n", "reports/result.json", selected)
-    assert not (repository / "first.json").exists()
-    assert not (repository / "second.json").exists()
+    assert not (repository / "data/deliverables/first.json").exists()
+    assert not (repository / "data/deliverables/second.json").exists()
 
 
 def test_native_effective_git_rewrite_cannot_hide_physical_public_route(native_companion, monkeypatch):
@@ -3657,7 +3680,7 @@ def test_native_effective_git_rewrite_cannot_hide_physical_public_route(native_c
     monkeypatch.setenv("GIT_CONFIG_VALUE_0", public)
     with pytest.raises(storage.InventoryError):
         storage.resolve_destination()
-    assert not (repository / "inventory").exists()
+    assert not (repository / "data/inventory").exists()
 
 
 @pytest.mark.parametrize("label,payload", runtime_visibility_cases())
@@ -3672,7 +3695,10 @@ def test_native_invalid_visibility_receipt_refuses_before_writes(native_companio
 def companion(tmp_path, monkeypatch):
     repository = tmp_path / "companion"
     (repository / ".git").mkdir(parents=True)
-    monkeypatch.setenv("MARKET_INTEL_DATA_DIR", str(repository))
+    (repository / "data").mkdir()
+    for key in ("MARKET_INTEL_CONFIG", "MARKET_INTEL_CONFIG_DIR"):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv("MARKET_INTEL_DATA_DIR", str(repository / "data"))
     routes = {"origin": {"fetch": [SAMPLE["companion_identity"]],
                           "push": [SAMPLE["companion_identity"]]}}
     visibility = {SAMPLE["companion_identity"]: "PRIVATE", SAMPLE["other_identity"]: "PRIVATE",
@@ -3702,6 +3728,9 @@ def companion(tmp_path, monkeypatch):
 
     boundary = SimpleNamespace(prove_private_companion=prove, read_private_companion_git=read, GitError=ProofError)
     monkeypatch.setattr(storage, "_shared_boundary", lambda: boundary)
+    contract_boundary = SimpleNamespace(prove_private_companion=lambda directory, *_: prove(directory),
+                                        read_private_companion_git=read, GitError=ProofError)
+    monkeypatch.setattr(storage._storage_contract(), "load_boundary", lambda: contract_boundary)
     return repository, routes, visibility, configuration
 
 
@@ -3712,7 +3741,7 @@ def test_every_effective_push_destination_must_be_private(companion, visibility)
     states[SAMPLE["public_identity"]] = visibility
     with pytest.raises(storage.InventoryError, match="visibility"):
         storage.resolve_destination()
-    assert list(repository.iterdir()) == [repository / ".git"]
+    assert set(repository.iterdir()) == {repository / ".git", repository / "data"}
 
 
 def test_all_remotes_and_configured_push_remotes_are_verified(companion):
@@ -3735,12 +3764,12 @@ def test_publication_route_change_is_rechecked_before_write(companion):
     routes["origin"]["push"] = [SAMPLE["other_identity"]]
     with pytest.raises(storage.InventoryError, match="changed"):
         storage.write_snapshot(fixture()["inventory"], selected)
-    assert not (repository / "inventory").exists()
+    assert not (repository / "data/inventory").exists()
 
 
 def test_explicit_destinations_use_final_private_repository(companion, tmp_path):
     repository, _, _, _ = companion
-    selected = storage.resolve_destination("reports/feedback.json", path=repository / "reports/result.json")
+    selected = storage.resolve_destination("reports/feedback.json", path=repository / "data/deliverables/reports/result.json")
     storage.write_text("synthetic\n", "reports/feedback.json", selected)
     assert selected.path.read_text() == "synthetic\n"
     for target in (storage.ROOT / "inventory/research.json", tmp_path / "unmanaged/result.json"):
@@ -3768,9 +3797,9 @@ def test_serialized_updates_preserve_both_generated_rows(companion):
             storage.update_text(lambda body: body + json.dumps(SAMPLE["ledger"][2]) + "\n",
                                 "metrics/live-runs.jsonl", selected)
     assert selected.path.read_bytes() == before
-    pending, = selected.path.parent.glob(".inventory-*")
+    pending, = (repository / ".staging").glob("inventory-*.tmp")
     assert pending.read_text() == before.decode() + json.dumps(SAMPLE["ledger"][2]) + "\n"
-    assert set(selected.path.parent.iterdir()) == {selected.path, pending}
+    assert set(selected.path.parent.iterdir()) == {selected.path}
 
 
 def load_writer(name):
@@ -3809,7 +3838,7 @@ def test_writers_refuse_unproven_output_before_observation(name, tmp_path, monke
 def test_writers_persist_only_to_verified_private_override(name, companion, monkeypatch):
     repository, _, _, _ = companion
     writer = load_writer(name)
-    target = repository / "reports/result.json"
+    target = repository / "data/deliverables/reports/result.json"
     if name == "discover":
         monkeypatch.setattr(writer, "CHANNELS", {"e1": lambda *_: [deepcopy(SAMPLE["discovery"])]})
         args = ["--out", str(target)]
@@ -3817,8 +3846,8 @@ def test_writers_persist_only_to_verified_private_override(name, companion, monk
         monkeypatch.setattr(writer, "SURFACES", {"E1": lambda *_: [deepcopy(SAMPLE["surface"])]})
         args = ["--inbox", str(target)]
     else:
-        ledger = repository / "metrics/live-runs.jsonl"
-        ledger.parent.mkdir()
+        ledger = repository / "data/metrics/live-runs.jsonl"
+        ledger.parent.mkdir(parents=True)
         ledger.write_text(json.dumps(SAMPLE["ledger"][0]) + "\n", encoding="utf-8")
         monkeypatch.setattr(writer, "live_runs_path", lambda: ledger)
         args = ["--out", str(target), "--since", "2030-01-01"]
@@ -3831,7 +3860,7 @@ def test_writers_persist_only_to_verified_private_override(name, companion, monk
 def test_polling_dry_run_does_not_create_output_directories(name, companion, monkeypatch):
     repository, _, _, _ = companion
     writer = load_writer(name)
-    target = repository / "uncreated/result.json"
+    target = repository / "data/deliverables/uncreated/result.json"
     if name == "discover":
         monkeypatch.setattr(writer, "CHANNELS", {"e1": lambda *_: [deepcopy(SAMPLE["discovery"])]})
         args = ["--out", str(target), "--dry-run"]
@@ -3949,8 +3978,8 @@ def test_changelog_uses_verified_atomic_output(companion, monkeypatch, write_fai
     repository, _, _, _ = companion
     sample = fixture()["maintenance"]
     text = sample["discovery"]["one_line_pitch"]
-    target = repository / "reports" / "draft.md"
-    target.parent.mkdir()
+    target = repository / "data/deliverables/reports" / "draft.md"
+    target.parent.mkdir(parents=True)
     target.write_text(text, encoding="utf-8")
     monkeypatch.setattr(changelog_draft, "require_call", lambda: None)
     monkeypatch.setattr(changelog_draft, "parse_latest_changelog_version",
@@ -3968,11 +3997,11 @@ def test_changelog_uses_verified_atomic_output(companion, monkeypatch, write_fai
     assert changelog_draft.main(["--since", "HEAD~1", "--out", str(target)]) == (2 if write_fails else 0)
     expected = text if write_fails else text + "\n" + changelog_draft.FOOTER
     assert target.read_text(encoding="utf-8") == expected
-    pending = list(target.parent.glob(".inventory-*"))
+    pending = list((repository / ".staging").glob("inventory-*.tmp"))
     assert len(pending) == (1 if write_fails else 0)
     if pending:
         assert pending[0].read_text(encoding="utf-8") == text + "\n" + changelog_draft.FOOTER
-    assert set(target.parent.iterdir()) == {target, *pending}
+    assert set(target.parent.iterdir()) == {target}
 
 
 def test_incident_requires_private_destination_before_any_write(tmp_path, monkeypatch):
@@ -3983,21 +4012,20 @@ def test_incident_requires_private_destination_before_any_write(tmp_path, monkey
     assert not (tmp_path / "metrics").exists()
 
 
-def test_incident_uses_canonical_destination_and_atomic_write(tmp_path, monkeypatch):
-    target = tmp_path / "metrics/live-runs.jsonl"
-    target.parent.mkdir()
+def test_incident_uses_canonical_destination_and_atomic_write(companion, monkeypatch):
+    repository = companion[0]
+    target = repository / "data/metrics/live-runs.jsonl"
+    target.parent.mkdir(parents=True)
     old = json.dumps(fixture()["inventory"]) + "\n"
     target.write_text(old, encoding="utf-8")
-    destination = private_inventory.Destination(target, tmp_path, "example/companion")
-    monkeypatch.setattr(private_inventory, "resolve_destination", lambda *args: destination)
     with patch.object(private_inventory.os, "replace", side_effect=PermissionError("synthetic credential must never appear")):
         with pytest.raises(private_inventory.InventoryError, match="persistence failed"):
             incident_helper.apply_live_runs_append(json.dumps(fixture()["evidence"]))
     assert target.read_text(encoding="utf-8") == old
-    pending = list(target.parent.glob(".inventory-*"))
+    pending = list((repository / ".staging").glob("inventory-*.tmp"))
     assert len(pending) == 1
     assert pending[0].read_text(encoding="utf-8") == old + json.dumps(fixture()["evidence"]) + "\n"
-    assert set(target.parent.iterdir()) == {target, *pending}
+    assert set(target.parent.iterdir()) == {target}
 
 
 def test_incident_model_bridge_inherits_defaults_and_hides_provider_errors(capsys):
@@ -4616,6 +4644,9 @@ def test_incident_draft_uses_selected_companion_checker(monkeypatch, tmp_path, c
     if choice == "priority":
         selection["MARKET_INTEL_CONFIG_DIR"] = tmp_path / "missing lower priority"
     text = incident_draft_output(monkeypatch, tmp_path, capsys, selection=selection)
+    if choice == "xdg":
+        assert str(checker.resolve()) not in text
+        return
     assert str(checker.resolve()) in text
     assert "python " in text and "<username>" not in text
     assert "Expect: slug" not in text
@@ -4646,9 +4677,10 @@ def successor_private_test_source():
 
 def test_temporary_cleanup_refuses_replaced_directory_junction(native_companion, monkeypatch, capsys):
     repository = native_companion["repository"]
-    reports = repository / "reports"
-    reports.mkdir()
-    target = reports / "result.json"
+    reports = repository / ".staging"
+    reports.mkdir(parents=True)
+    target = repository / "data/deliverables/result.json"
+    target.parent.mkdir(parents=True)
     before = json.dumps(fixture()["inventory"], sort_keys=True).encode()
     target.write_bytes(before)
     other = make_runtime_repository(repository.parent / "other", native_companion["environment"], SAMPLE["other_identity"])
@@ -4658,7 +4690,7 @@ def test_temporary_cleanup_refuses_replaced_directory_junction(native_companion,
     def changed(relative, destination):
         calls.append(relative)
         if len(calls) == 2:
-            pending, = reports.glob(".inventory-*")
+            pending, = (repository / ".staging").glob("inventory-*.tmp")
             held = repository / "held-reports"
             assert reports.resolve().is_relative_to(repository.parent.resolve())
             assert held.absolute().is_relative_to(repository.parent.resolve())
@@ -4673,18 +4705,18 @@ def test_temporary_cleanup_refuses_replaced_directory_junction(native_companion,
             observed.update(sentinel=sentinel, held=held, temporary=pending.name)
         return original(relative, destination)
     monkeypatch.setattr(storage, "_revalidate", changed)
-    with pytest.raises(storage.InventoryError, match="destination changed"):
+    with pytest.raises(storage.InventoryError):
         storage.write_text("Synthetic replacement\n", "reports/result.json", selected)
     assert observed["sentinel"].read_bytes() == before
-    assert (observed["held"] / "result.json").read_bytes() == before
+    assert target.read_bytes() == before
     assert (observed["held"] / observed["temporary"]).is_file()
     assert "cleanup refused" in capsys.readouterr().err
 
 
 def test_temporary_cleanup_refuses_replaced_file(native_companion, monkeypatch, capsys):
     repository = native_companion["repository"]
-    target = repository / "reports/result.json"
-    target.parent.mkdir()
+    target = repository / "data/deliverables/reports/result.json"
+    target.parent.mkdir(parents=True)
     target.write_bytes(b"Synthetic original target\n")
     selected = storage.resolve_destination(path=target)
     original = storage._revalidate
@@ -4692,15 +4724,15 @@ def test_temporary_cleanup_refuses_replaced_file(native_companion, monkeypatch, 
     def changed(relative, destination):
         calls.append(relative)
         if len(calls) == 2:
-            pending, = target.parent.glob(".inventory-*")
+            pending, = (repository / ".staging").glob("inventory-*.tmp")
             held = target.parent / "held-temporary"
             pending.rename(held)
             pending.write_bytes(b"Synthetic unrelated replacement\n")
             observed.update(pending=pending, held=held)
-            raise storage.InventoryError("Synthetic original publication refusal")
+            # Publication must detect the substituted ordinary file itself.
         return original(relative, destination)
     monkeypatch.setattr(storage, "_revalidate", changed)
-    with pytest.raises(storage.InventoryError, match="original publication refusal"):
+    with pytest.raises(storage.InventoryError, match="temporary file changed identity"):
         storage.write_text("Synthetic replacement\n", "reports/result.json", selected)
     assert observed["pending"].read_bytes() == b"Synthetic unrelated replacement\n"
     assert observed["held"].read_text() == "Synthetic replacement\n"
@@ -4714,15 +4746,16 @@ def successor_lock_test_source():
 
 
 @pytest.mark.parametrize("failed", [False, True])
-def test_native_lock_cleanup_preserves_substituted_parent(tmp_path, monkeypatch, failed):
-    parent, held, other = (tmp_path / name for name in ("reports", "held", "other"))
+def test_native_lock_cleanup_preserves_substituted_parent(tmp_path, monkeypatch, failed, companion):
+    tmp_path = companion[0]
+    parent, held, other = (tmp_path / name for name in (".staging", "held", "other"))
     parent.mkdir()
     other.mkdir()
     target = parent / "ledger.jsonl"
-    lock = parent / ".ledger.jsonl.lock"
+    selected = storage.Destination(target, tmp_path, "example/companion")
+    lock = storage._update_lock_path(selected)
     sentinel = other / lock.name
     sentinel.write_bytes(b"Synthetic unrelated lock\n")
-    selected = storage.Destination(target, tmp_path, "example/companion")
     real_open, real_close = storage.os.open, storage.os.close
     observed = {}
     def open_lock(path, flags, *args, **kwargs):
@@ -4757,9 +4790,10 @@ def test_native_lock_cleanup_preserves_substituted_parent(tmp_path, monkeypatch,
 
 
 @pytest.mark.parametrize("case", ["ordinary", "handled-outer", "failed-current"])
-def test_native_lock_close_failure_tracks_current_transaction(tmp_path, monkeypatch, capsys, case):
+def test_native_lock_close_failure_tracks_current_transaction(tmp_path, monkeypatch, capsys, case, companion):
+    tmp_path = companion[0]
     selected = storage.Destination(tmp_path / "ledger.jsonl", tmp_path, "example/companion")
-    lock = tmp_path / ".ledger.jsonl.lock"
+    lock = storage._update_lock_path(selected)
     real_open, real_close = storage.os.open, storage.os.close
     observed = {}
     def open_lock(path, flags, *args, **kwargs):
@@ -4798,9 +4832,10 @@ def test_native_lock_close_failure_tracks_current_transaction(tmp_path, monkeypa
     assert not lock.exists()
 
 
-def test_native_lock_repeated_acquisition_and_failure_recovery(tmp_path):
+def test_native_lock_repeated_acquisition_and_failure_recovery(tmp_path, companion):
+    tmp_path = companion[0]
     selected = storage.Destination(tmp_path / "ledger.jsonl", tmp_path, "example/companion")
-    lock = tmp_path / ".ledger.jsonl.lock"
+    lock = storage._update_lock_path(selected)
     for unused in range(2):
         with storage._exclusive_update(selected):
             with pytest.raises(storage.InventoryError, match="lock is busy"):
@@ -4818,11 +4853,12 @@ def test_native_lock_repeated_acquisition_and_failure_recovery(tmp_path):
 
 @pytest.mark.skipif(os.name == "nt", reason="POSIX directory descriptor contract")
 @pytest.mark.parametrize("failed", [False, True])
-def test_native_lock_cleanup_anchors_parent_during_transaction(tmp_path, failed):
-    parent, held = (tmp_path / name for name in ("reports", "held"))
+def test_native_lock_cleanup_anchors_parent_during_transaction(tmp_path, failed, companion):
+    tmp_path = companion[0]
+    parent, held = (tmp_path / name for name in (".staging", "held"))
     parent.mkdir()
     selected = storage.Destination(parent / "ledger.jsonl", tmp_path, "example/companion")
-    lock = parent / ".ledger.jsonl.lock"
+    lock = storage._update_lock_path(selected)
     def transaction():
         with storage._exclusive_update(selected):
             parent.rename(held)
@@ -4841,9 +4877,10 @@ def test_native_lock_cleanup_anchors_parent_during_transaction(tmp_path, failed)
 
 @pytest.mark.skipif(os.name == "nt", reason="POSIX directory descriptor contract")
 @pytest.mark.parametrize("failed", [False, True])
-def test_native_lock_cleanup_refuses_replaced_entry(tmp_path, capsys, failed):
+def test_native_lock_cleanup_refuses_replaced_entry(tmp_path, capsys, failed, companion):
+    tmp_path = companion[0]
     selected = storage.Destination(tmp_path / "ledger.jsonl", tmp_path, "example/companion")
-    lock, held = tmp_path / ".ledger.jsonl.lock", tmp_path / "held-lock"
+    lock, held = storage._update_lock_path(selected), tmp_path / "held-lock"
     message = "Synthetic transaction failure" if failed else "cleanup refused"
     with pytest.raises(storage.InventoryError, match=message):
         with storage._exclusive_update(selected):
@@ -5101,3 +5138,18 @@ if __name__ == "__main__":
     parser.add_argument("--check", action="store_true", help="verify fixture bytes without writing")
     args = parser.parse_args()
     raise SystemExit(generate(args.out, check=args.check))
+
+
+def artifact_write_scenario():
+    """Generate fictional artifact-admission paths and content without reading runtime state."""
+    return {'allowed': 'data/metrics/live-runs.jsonl', 'undeclared': 'unowned/result.json', 'content': {'schema_version': 1, 'label': 'Synthetic transaction'}}
+
+
+def configured_doctor_files():
+    """Create a fictional selected capability without inspecting an installed account."""
+    return {
+        "registry.json": json.dumps({"schema_version": 1, "tools": [
+            {"slug": "synthetic-tool", "installed": True}]}),
+        "tools/synthetic-tool/claude.json.template": '{"mcpServers": {}}\n',
+        "tools/synthetic-tool/env.template": "# Synthetic credential-free tool\n",
+    }

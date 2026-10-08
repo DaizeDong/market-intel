@@ -1,5 +1,15 @@
 # Tool: patchright (Undetected-Playwright patch)
 
+**Runtime storage status: setup only.** This recipe has no shipped adapter that
+admits every file the external tool may create. Directory PRIVATE proof is only a
+placement check. Do not launch collection, login or persistence from this recipe
+until an adapter declares its exact output namespaces in `storage.contract.json`
+and calls `resolve_destination` for each file immediately before writing. Include
+implicit databases, sessions, caches, logs and exports in that review. The setup
+examples below describe adapter configuration; they do not establish runtime
+readiness or authorize child-file writes after `resolve_directory`.
+
+
 - **Domain(s):** web-scraping (also: browser-automation)
 - **Barrier route:** ④ · **Source tier:** L2 · **Ready MCP:** no, it's a Playwright-API drop-in library (Python `patchright` / Node `patchright`), drive it from your own script or wire it under a playwright-style runner. No prebuilt MCP server.
 - **Cost:** free, Apache-2.0 (no key, no quota) [github.com/Kaliiiiiiiiii-Vinyzu/patchright, fetched 2026-06]

@@ -1,5 +1,15 @@
 # Tool: twscrape
 
+**Runtime storage status: setup only.** This recipe has no shipped adapter that
+admits every file the external tool may create. Directory PRIVATE proof is only a
+placement check. Do not launch collection, login or persistence from this recipe
+until an adapter declares its exact output namespaces in `storage.contract.json`
+and calls `resolve_destination` for each file immediately before writing. Include
+implicit databases, sessions, caches, logs and exports in that review. The setup
+examples below describe adapter configuration; they do not establish runtime
+readiness or authorize child-file writes after `resolve_directory`.
+
+
 - **Domain(s):** x-twitter (also: none)
 - **Barrier route:** ③ self-host scrape · **Source tier:** L4 · **Ready MCP:** no (Python library, wrap it yourself or call from a script)
 - **Cost:** free (OSS, self-host), you supply X account cookies + proxies; proxies are the hidden cost at scale
@@ -16,9 +26,9 @@ Free Python lib for X search / user / followers / tweets via the GraphQL + Searc
 Authentication uses an account pool containing login details and session cookies. Keep the account import file and pool database in the designated PRIVATE versioned companion under its approved backup policy, with credential values excluded from transcripts. See `reference/install-guide.md` for account and proxy mechanics.
 
 ## Usage, call examples
-Before constructing `API()` or invoking any twscrape command, use `tools/private_inventory.py`'s `resolve_directory(path=runtime_directory)` on the final absolute, existing PRIVATE runtime directory. It verifies the containing repository, including a nested repository at that directory, and every effective publication destination. Stop on missing, PUBLIC or unknown proof. Start the caller or CLI with its working directory set to the verified directory so implicit database, cookie, log and export paths remain there. Revalidate on each run.
+Before constructing `API()` or invoking any twscrape command, use `tools/private_inventory.py`'s `resolve_directory(path=runtime_directory)` on the final absolute, existing PRIVATE runtime directory. It verifies the containing repository, including a nested repository at that directory, and every effective publication destination. Stop on missing, PUBLIC or unknown proof. The completed adapter must start the caller or CLI with its working directory set to the verified directory so implicit database, cookie, log and export paths remain there. Revalidate on each run.
 
-Verify the absolute account import file with `resolve_destination(path=account_file)` before passing it to the CLI. Keep the default pool database and all returned observations versioned in the same PRIVATE companion. Use the installed version's documented CLI import/login/search commands or `API()` methods only after the runtime check. Never run these default-path commands from the public consumer checkout.
+Verify the absolute account import file with `resolve_destination(path=account_file)` before passing it to the CLI. Keep the default pool database and all returned observations versioned in the same PRIVATE companion. Use the installed version's documented CLI import/login/search commands or `API()` methods only through that completed adapter after its file-admission checks. Never run these default-path commands from the public consumer checkout.
 
 ## General experience & gotchas (踩坑)
 - **You must supply real X accounts + proxies**, the software is free, the accounts/proxies are the actual cost and the actual risk. Login-walled scraping at volume needs several accounts and residential proxies, or the whole pool gets flagged together.

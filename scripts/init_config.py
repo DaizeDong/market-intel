@@ -1,23 +1,9 @@
 #!/usr/bin/env python3
-"""Initialize a spec-conformant companion config repo for market-intel (config-spec E3/E4).
+"""Initialize synthetic configuration templates for market-intel.
 
-Deterministic + template-driven. Derives the discovery env var from the skill name and stamps an
-empty, conformant config skeleton (Mode B: secrets gitignored). Re-running with the same skill +
-out dir produces byte-identical output — no interactive divergence (E4).
-
-Authoritative deep spec: skills/market-intel/reference/companion-config-spec.md (v1.3, STABLE).
-Discovery order this skill uses (also in CONFIG.md, E2), the config dir resolves from, in order:
-  1. $MARKET_INTEL_CONFIG          (UPPER_SNAKE of skill name + _CONFIG)
-  2. ~/.market-intel-config/       (dotfile fallback)
-  3. ~/.config/market-intel-config/ (XDG fallback)
-  ($MARKET_INTEL_CONFIG_DIR is accepted by the tooling as a convenience alias for #1.)
-
-Usage:
-  python init_config.py [--skill <name>] [--out <dir>] [--mode B] [--force]
-
---skill   skill name; if omitted, auto-detected from the nearest .claude-plugin/plugin.json.
---out     target dir; if omitted, the default discovery path ~/.<skill>-config/.
-Stdlib only. Cross-platform. Never writes secrets; never echoes anything secret.
+Selection and required fields are defined in CONFIG.md and config.contract.json.
+Explicit CLI paths isolate environment selection. Runtime uses the same pinned Guards
+companion discovery; invalid selectors never fall through to another companion.
 """
 import argparse
 import json
@@ -27,7 +13,7 @@ import sys
 import tempfile
 
 GITIGNORE = """\
-# Secrets gate (config-spec E6 / Mode B) — real values never enter git.
+# Secrets gate (config-spec E6 / Mode B) — Mode B excludes credential values from this backup.
 secrets/*
 !secrets/README.md
 !secrets/.gitkeep
@@ -46,7 +32,7 @@ claude.json
 SECRETS_README = """\
 # secrets/ — Mode B (gitignored)
 
-Real secret values live here and are **gitignored** (see ../.gitignore). They never enter git.
+Real secret values live here and are **gitignored** (see ../.gitignore). Mode B ignores these values; a separately selected Mode A may use verified PRIVATE versioning.
 Back them up out-of-band (cloud sync / encrypted drive). Restore on a new machine by copying the
 `*.env` files back into this directory, then re-running the skill's verify script.
 
@@ -158,7 +144,9 @@ def main():
     if not skill:
         print("ERROR: could not detect skill name; pass --skill <name>.")
         return 2
-    out = a.out or default_dir(skill)
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools"))
+    from config_paths import companion_root
+    out = a.out or companion_root() or default_dir(skill)
     out = os.path.abspath(os.path.expanduser(out))
 
     print("Init config for skill '%s' (mode %s) at %s" % (skill, a.mode, out))

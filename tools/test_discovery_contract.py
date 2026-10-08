@@ -41,7 +41,7 @@ def test_e6_unconfigured_fails_without_observation_or_write(
     elif configuration == "invalid":
         monkeypatch.setattr(discovery, "YOUTUBE_CHANNELS",
                             [("Synthetic A", ""), ("Synthetic B", None)])
-    target = repository / "uncreated/discovery.md"
+    target = repository / "data/deliverables/uncreated/discovery.md"
     assert discovery.main(["--channel", "e6", "--out", str(target)]) == 1
     captured = capsys.readouterr()
     assert "E6: FAIL" in captured.out and "failures: 1/1" in captured.out
@@ -74,7 +74,7 @@ def test_e6_valid_empty_observation_allows_success_without_write(
     repository, _, _, _ = companion
     monkeypatch.setattr(discovery, "YOUTUBE_CHANNELS", [("Synthetic", "UCsynthetic")])
     monkeypatch.setattr(discovery.requests, "get", lambda *a, **k: response(text=payload))
-    target = repository / "uncreated/discovery.md"
+    target = repository / "data/deliverables/uncreated/discovery.md"
     assert discovery.main(["--channel", "e6", "--since", str(SINCE), "--out", str(target)]) == 0
     captured = capsys.readouterr()
     assert "E6: 0 candidates" in captured.out and "failures: 0/1" in captured.out
@@ -134,7 +134,7 @@ def test_e4_valid_empty_or_below_threshold_allows_success(
     repository, _, _, _ = companion
     monkeypatch.setattr(discovery, "NPM_PACKAGES", ["synthetic-package"])
     monkeypatch.setattr(discovery.requests, "get", lambda *a, **k: response(payload))
-    target = repository / "uncreated/discovery.md"
+    target = repository / "data/deliverables/uncreated/discovery.md"
     assert discovery.main(["--channel", "e4", "--out", str(target)]) == 0
     captured = capsys.readouterr()
     assert "E4: 0 candidates" in captured.out and "failures: 0/1" in captured.out
@@ -178,7 +178,7 @@ def test_e4_one_failed_period_never_completes_a_package(
                             status=503 if failure == "http" else 200)
         return response({"downloads": [{"downloads": 1000}]})
     monkeypatch.setattr(discovery.requests, "get", get)
-    target = repository / "uncreated/discovery.md"
+    target = repository / "data/deliverables/uncreated/discovery.md"
     assert discovery.main(["--channel", "e4", "--out", str(target)]) == (0 if mixed else 1)
     output = capsys.readouterr()
     assert f"configured={len(packages)} attempted={len(packages)} completed={int(mixed)}" in output.err
@@ -205,7 +205,7 @@ def test_default_sweep_requires_a_completed_channel(
             return SimpleNamespace(json=lambda: [], raise_for_status=lambda: None)
         raise discovery.requests.RequestException("synthetic unavailable source")
     monkeypatch.setattr(discovery.requests, "get", get)
-    target = repository / "uncreated/discovery.md"
+    target = repository / "data/deliverables/uncreated/discovery.md"
     assert discovery.main(["--out", str(target)]) == (0 if healthy_empty else 1)
     captured = capsys.readouterr()
     assert f"failures: {5 if healthy_empty else 6}/6" in captured.out
@@ -222,7 +222,7 @@ def test_main_persists_partial_discovery_from_real_channel(
     monkeypatch.setattr(discovery.requests, "get",
                         lambda url, **k: response(text=ATOM.format(VIDEO),
                                                  status=503 if url.endswith("UCfailed") else 200))
-    target = repository / "reports/discovery.md"
+    target = repository / "data/deliverables/reports/discovery.md"
     assert discovery.main(["--channel", "e6", "--since", str(SINCE), "--out", str(target)]) == 0
     content = target.read_text(encoding="utf-8")
     assert "https://example.com/synthetic-video" in content
@@ -282,7 +282,7 @@ def test_malformed_response_never_completes_an_observation(
         calls.append(url)
         return observation_response(payload, text=text)
     monkeypatch.setattr(discovery.requests, "get", get)
-    target = repository / "uncreated/malformed-observation.md"
+    target = repository / "data/deliverables/uncreated/malformed-observation.md"
     if through_main:
         assert discovery.main(["--channel", channel, "--since", str(SINCE),
                                "--out", str(target)]) == 1
@@ -310,7 +310,7 @@ def test_valid_empty_envelope_is_a_completed_observation(
     monkeypatch.setattr(discovery, "GITHUB_TOPICS", ["synthetic-topic"])
     monkeypatch.setattr(discovery.requests, "get",
                         lambda *a, **k: observation_response(payload, text=text))
-    target = repository / "uncreated/valid-empty.md"
+    target = repository / "data/deliverables/uncreated/valid-empty.md"
     assert discovery.main(["--channel", channel, "--since", str(SINCE),
                            "--out", str(target)]) == 0
     summary = capsys.readouterr()
@@ -326,7 +326,7 @@ def test_e2_unconfigured_fails_without_http_or_output(
     repository, _, _, _ = companion
     monkeypatch.setattr(discovery, "GITHUB_TOPICS", topics)
     # The discovery fixture already makes any HTTP attempt fail this test.
-    target = repository / "uncreated/unconfigured-topics.md"
+    target = repository / "data/deliverables/uncreated/unconfigured-topics.md"
     if through_main:
         assert discovery.main(["--channel", "e2", "--out", str(target)]) == 1
         assert "E2: FAIL" in capsys.readouterr().out
@@ -360,7 +360,7 @@ def test_e2_partial_topic_failure_keeps_valid_rows_in_private_output(
             ValueError("synthetic malformed JSON") if failure == "json" else {},
             status=503 if failure == "http" else 200)
     monkeypatch.setattr(discovery.requests, "get", get)
-    target = repository / "reports/partial-github.md"
+    target = repository / "data/deliverables/reports/partial-github.md"
     assert discovery.main(["--channel", "e2", "--since", str(SINCE),
                            "--out", str(target)]) == 0
     content = target.read_text(encoding="utf-8")
@@ -397,7 +397,7 @@ def test_default_sweep_distinguishes_invalid_bodies_from_valid_empty(
             return observation_response(status=503)
         pytest.fail("unexpected synthetic surface request")
     monkeypatch.setattr(discovery.requests, "get", get)
-    target = repository / "uncreated/whole-sweep.md"
+    target = repository / "data/deliverables/uncreated/whole-sweep.md"
     assert discovery.main(["--since", str(SINCE), "--out", str(target)]) == (
         1 if healthy is None else 0)
     summary = capsys.readouterr()
@@ -428,7 +428,7 @@ def test_schema_valid_partial_candidates_still_persist(
     repository, _, _, _ = companion
     monkeypatch.setattr(discovery.requests, "get",
                         lambda *a, **k: observation_response(payload, text=text))
-    target = repository / "reports/partial-candidates.md"
+    target = repository / "data/deliverables/reports/partial-candidates.md"
     assert discovery.main(["--channel", channel, "--since", str(SINCE),
                            "--out", str(target)]) == 0
     content = target.read_text(encoding="utf-8")
@@ -451,7 +451,7 @@ def test_e2_incomplete_topic_never_completes_or_writes(
         calls.append(url)
         return observation_response({"incomplete_results": True, "items": items})
     monkeypatch.setattr(discovery.requests, "get", get)
-    target = repository / "uncreated/incomplete-github.md"
+    target = repository / "data/deliverables/uncreated/incomplete-github.md"
     if through_main:
         assert discovery.main(["--channel", "e2", "--since", str(SINCE),
                                "--out", str(target)]) == 1
@@ -485,7 +485,7 @@ def test_e2_incomplete_topic_preserves_completed_topics_only(
         }]
         return observation_response({"incomplete_results": incomplete, "items": items})
     monkeypatch.setattr(discovery.requests, "get", get)
-    target = repository / "reports/complete-topics.md"
+    target = repository / "data/deliverables/reports/complete-topics.md"
     assert discovery.main(["--channel", "e2", "--since", str(SINCE),
                            "--out", str(target)]) == 0
     content = target.read_text(encoding="utf-8")
@@ -507,7 +507,7 @@ def test_e2_explicit_complete_empty_response_remains_success(
         calls.append(url)
         return observation_response({"total_count": 0, "incomplete_results": False, "items": []})
     monkeypatch.setattr(discovery.requests, "get", get)
-    target = repository / "uncreated/complete-empty-github.md"
+    target = repository / "data/deliverables/uncreated/complete-empty-github.md"
     assert discovery.main(["--channel", "e2", "--since", str(SINCE),
                            "--out", str(target)]) == 0
     captured = capsys.readouterr()
@@ -523,7 +523,7 @@ def test_e2_malformed_completeness_metadata_is_not_empty_success(
     monkeypatch.setattr(discovery, "GITHUB_TOPICS", ["synthetic-invalid"])
     monkeypatch.setattr(discovery.requests, "get", lambda *a, **k:
                         observation_response({"incomplete_results": invalid_flag, "items": []}))
-    target = repository / "uncreated/invalid-completeness.md"
+    target = repository / "data/deliverables/uncreated/invalid-completeness.md"
     assert discovery.main(["--channel", "e2", "--since", str(SINCE),
                            "--out", str(target)]) == 1
     captured = capsys.readouterr()
@@ -583,7 +583,7 @@ def test_poll_invalid_envelopes_never_count_as_success(
     output = capsys.readouterr().out
     assert "DEGRADED" in output and "surfaces_ok=0/1" in output
     assert "new=0" in output and f"degraded={surface}" in output
-    assert not (companion[0] / "surface-inbox.jsonl").exists()
+    assert not (companion[0] / "data/surface-inbox.jsonl").exists()
 
 
 @pytest.mark.parametrize("surface,payload", [
@@ -595,7 +595,7 @@ def test_poll_valid_empty_envelope_completes_without_writing(
     assert invoke_poll(poller, monkeypatch, tmp_path, surface) == 0
     output = capsys.readouterr().out
     assert "surfaces_ok=1/1" in output and "degraded=none" in output and "new=0" in output
-    assert not (companion[0] / "surface-inbox.jsonl").exists()
+    assert not (companion[0] / "data/surface-inbox.jsonl").exists()
 
 
 @pytest.mark.parametrize("surface,key", [("E1", "servers"), ("E2", "items"), ("E5", "hits")])
@@ -604,7 +604,7 @@ def test_poll_error_envelope_cannot_be_hidden_by_empty_result_field(
     set_poll_payload(poller, monkeypatch, surface, {key: [], "error": "synthetic provider error"})
     assert invoke_poll(poller, monkeypatch, tmp_path, surface) == 0
     assert "surfaces_ok=0/1" in capsys.readouterr().out
-    assert not (companion[0] / "surface-inbox.jsonl").exists()
+    assert not (companion[0] / "data/surface-inbox.jsonl").exists()
 
 
 @pytest.mark.parametrize("surface,payload,key", [
@@ -622,7 +622,7 @@ def test_poll_valid_nonempty_responses_keep_original_filters_and_fields(
         surface, payload, key, poller, companion, tmp_path, monkeypatch, capsys):
     set_poll_payload(poller, monkeypatch, surface, payload)
     assert invoke_poll(poller, monkeypatch, tmp_path, surface) == 0
-    row = json.loads((companion[0] / "surface-inbox.jsonl").read_text(encoding="utf-8"))
+    row = json.loads((companion[0] / "data/surface-inbox.jsonl").read_text(encoding="utf-8"))
     assert row["key"] == key and row["surface"] == surface and row["discovered_at"]
     assert "surfaces_ok=1/1" in capsys.readouterr().out
 
@@ -674,7 +674,7 @@ def test_poll_e2_incomplete_or_invalid_completion_cannot_be_all_green(
     assert invoke_poll(poller, monkeypatch, tmp_path, "E2") == 0
     output = capsys.readouterr().out
     assert "DEGRADED" in output and "surfaces_ok=0/1" in output and "0/1 requests complete" in output
-    target = companion[0] / "surface-inbox.jsonl"
+    target = companion[0] / "data/surface-inbox.jsonl"
     if flag is True:
         row = json.loads(target.read_text(encoding="utf-8"))
         assert row["title"] == "example-org/synthetic-partial"
@@ -695,7 +695,7 @@ def test_poll_main_retains_partial_topic_rows_without_duplicate_replay(
     cfg.write_text(json.dumps({"E2": {"topics": ["synthetic-ready", "synthetic-failed"]}}))
     monkeypatch.setattr(poller.sys, "argv", ["poll_surfaces.py", "--config", str(cfg), "--only", "E2"])
     assert poller.main() == 0
-    target = companion[0] / "surface-inbox.jsonl"
+    target = companion[0] / "data/surface-inbox.jsonl"
     first = target.read_bytes()
     assert json.loads(first)["title"] == "example-org/synthetic-retained"
     assert "surfaces_ok=0/1" in capsys.readouterr().out

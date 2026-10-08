@@ -36,7 +36,8 @@
     "reports/",
     "runtime/",
     "profiles/",
-    "cache/"
+    "cache/",
+    ".staging/"
   ],
   "data_sealed": [
     "skills/market-intel/reference/discovery-state.md",
