@@ -4376,11 +4376,12 @@ class ConsoleTest(unittest.TestCase):
     def fake_repository(self, name="private companion", visibility="PRIVATE"):
         root = self.tmp / name
         (root / ".git").mkdir(parents=True)
+        (root / "data").mkdir()
         self.repo_visibility = getattr(self, "repo_visibility", {})
         self.repo_visibility[root.resolve()] = visibility
         return root
 
-    def fake_proof(self, directory):
+    def fake_proof(self, directory, visibility_map=None):
         """Only synthetic proof results; native guard behavior is covered separately."""
         directory = Path(directory)
         repository = next((path for path in (directory, *directory.parents)
@@ -4402,13 +4403,15 @@ class ConsoleTest(unittest.TestCase):
                                    read_private_companion_git=self.fake_query, GitError=RuntimeError)
         self.stack.enter_context(patch.object(self.console.private_inventory, "_shared_boundary",
                                              return_value=boundary))
+        self.stack.enter_context(patch.object(self.console.private_inventory._storage_contract(),
+                                             "load_boundary", return_value=boundary))
         return boundary
 
     def test_refresh_writes_private_inventory_and_reports_verified_repository(self):
         companion = self.fake_repository()
         self.install_fake_boundary()
         os.environ["MARKET_INTEL_CONFIG"] = str(companion)
-        target = companion / "inventory/availability-cache.json"
+        target = companion / "data/inventory/availability-cache.json"
         # Generator-backed slugs cover both the MCP guide and its earlier non-MCP return.
         for slug in (FIXTURE["tool"]["slug"], FIXTURE["tool"]["source_id"]):
             tool = dict(FIXTURE["tool"], slug=slug)
@@ -4427,14 +4430,14 @@ class ConsoleTest(unittest.TestCase):
         for visibility in ("PUBLIC", "UNKNOWN", None):
             with self.subTest(visibility=visibility):
                 companion = self.fake_repository(str(visibility), visibility)
-                os.environ["MARKET_INTEL_DATA_DIR"] = str(companion)
+                os.environ["MARKET_INTEL_DATA_DIR"] = str(companion / "data")
                 self.install_fake_boundary()
                 code, _, err = self.invoke(["--refresh"])
                 self.assertEqual(code, 2)
                 self.assertIn("inventory", err)
-                self.assertFalse((companion / "inventory").exists())
-        loose = self.tmp / "unmanaged"
-        loose.mkdir()
+                self.assertFalse((companion / "data/inventory").exists())
+        loose = self.tmp / "unmanaged/data"
+        loose.mkdir(parents=True)
         os.environ["MARKET_INTEL_DATA_DIR"] = str(loose)
         code, _, _ = self.invoke(["--refresh"])
         self.assertEqual(code, 2)
@@ -4442,8 +4445,8 @@ class ConsoleTest(unittest.TestCase):
 
     def test_final_nested_repository_visibility_wins_over_parent(self):
         companion = self.fake_repository()
-        nested = self.fake_repository("private companion/inventory", "PUBLIC")
-        os.environ["MARKET_INTEL_DATA_DIR"] = str(companion)
+        nested = self.fake_repository("private companion/data/inventory", "PUBLIC")
+        os.environ["MARKET_INTEL_DATA_DIR"] = str(companion / "data")
         self.install_fake_boundary()
         code, _, err = self.invoke(["--refresh"])
         self.assertEqual(code, 2)
@@ -4454,7 +4457,7 @@ class ConsoleTest(unittest.TestCase):
         os.environ["MARKET_INTEL_DATA_DIR"] = str(ROOT)
         code, _, err = self.invoke(["--refresh"])
         self.assertEqual(code, 2)
-        self.assertIn("consumer source tree", err)
+        self.assertIn("INSIDE its own repo", err)
 
     def test_canonical_alias_to_public_destination_is_rejected(self):
         companion = self.fake_repository()
@@ -4462,7 +4465,7 @@ class ConsoleTest(unittest.TestCase):
         self.install_fake_boundary()
         os.environ["MARKET_INTEL_CONFIG"] = str(companion)
         original_resolve = Path.resolve
-        lexical = companion / "inventory/availability-cache.json"
+        lexical = companion / "data/inventory/availability-cache.json"
         def resolve(path, *args, **kwargs):
             # Pure canonicalization double: real link behavior is an integration check.
             return public / "availability-cache.json" if path == lexical else original_resolve(path, *args, **kwargs)
@@ -4475,7 +4478,7 @@ class ConsoleTest(unittest.TestCase):
     def test_failed_replace_preserves_previous_snapshot_and_returns_failure(self):
         companion = self.fake_repository()
         self.install_fake_boundary()
-        target = companion / "inventory/availability-cache.json"
+        target = companion / "data/inventory/availability-cache.json"
         target.parent.mkdir()
         previous = json.dumps(FIXTURE["inventory"]).encode("utf-8")
         target.write_bytes(previous)
@@ -4484,7 +4487,7 @@ class ConsoleTest(unittest.TestCase):
                 patch.object(os, "replace", side_effect=PermissionError("synthetic denial")):
             for args in self.refresh_commands():
                 with self.subTest(args=args):
-                    retained = set(target.parent.glob(".inventory-*"))
+                    retained = set((companion / ".staging").glob("inventory-*.tmp"))
                     code, out, err = self.invoke(args)
                     self.assertEqual(code, 2)
                     self.assertIn("persistence failed", err)
@@ -4492,12 +4495,13 @@ class ConsoleTest(unittest.TestCase):
                     self.assertIn("unpublished candidate retained", err)
                     self.assertEqual(out, "")
                     self.assertEqual(target.read_bytes(), previous)
-                    pending = set(target.parent.glob(".inventory-*"))
+                    pending = set((companion / ".staging").glob("inventory-*.tmp"))
                     self.assertTrue(retained <= pending)
                     self.assertEqual(len(pending - retained), 1)
                     candidate, = pending - retained
                     self.assertEqual(json.loads(candidate.read_text(encoding="utf-8")), FIXTURE["inventory"])
-                    self.assertEqual(set(target.parent.iterdir()), {target, *pending})
+                    self.assertEqual(set(target.parent.iterdir()), {target})
+                    self.assertEqual(set((companion / ".staging").iterdir()), pending)
 
     def test_directory_permission_failure_is_explicit(self):
         companion = self.fake_repository()
@@ -4508,11 +4512,11 @@ class ConsoleTest(unittest.TestCase):
             code, _, err = self.invoke(["--refresh"])
         self.assertEqual(code, 2)
         self.assertIn("persistence failed", err)
-        self.assertFalse((companion / "inventory").exists())
+        self.assertFalse((companion / "data/inventory").exists())
 
     def test_visibility_proof_and_git_ignore_denials_are_explicit(self):
         companion = self.fake_repository()
-        os.environ["MARKET_INTEL_DATA_DIR"] = str(companion)
+        os.environ["MARKET_INTEL_DATA_DIR"] = str(companion / "data")
         boundary = self.install_fake_boundary()
         for failure in ("malformed receipt", "missing identity", "PUBLIC", "UNKNOWN"):
             with self.subTest(failure=failure), patch.object(
@@ -4520,7 +4524,7 @@ class ConsoleTest(unittest.TestCase):
                 code, _, err = self.invoke(["--refresh"])
                 self.assertEqual(code, 2)
                 self.assertIn("visibility", err)
-                self.assertFalse((companion / "inventory").exists())
+                self.assertFalse((companion / "data/inventory").exists())
         def ignored(proof, *arguments):
             if arguments[0] == "check-ignore":
                 return subprocess.CompletedProcess(arguments, 0, "", "")
@@ -4529,7 +4533,7 @@ class ConsoleTest(unittest.TestCase):
             code, _, err = self.invoke(["--refresh"])
         self.assertEqual(code, 2)
         self.assertIn("version control", err)
-        self.assertFalse((companion / "inventory").exists())
+        self.assertFalse((companion / "data/inventory").exists())
 
     def test_visibility_process_failure_is_not_available(self):
         companion = self.fake_repository()
@@ -4548,7 +4552,7 @@ class ConsoleTest(unittest.TestCase):
         with patch.object(self.console, "build_snapshot", side_effect=TypeError("synthetic source defect")):
             with self.assertRaisesRegex(TypeError, "source defect"):
                 self.invoke(["--refresh"])
-        self.assertFalse((companion / "inventory").exists())
+        self.assertFalse((companion / "data/inventory").exists())
 
     def test_changed_destination_refuses_before_write(self):
         companion = self.fake_repository()
@@ -4562,16 +4566,16 @@ class ConsoleTest(unittest.TestCase):
             code, _, err = self.invoke(["--refresh"])
         self.assertEqual(code, 2)
         self.assertIn("changed during refresh", err)
-        self.assertFalse((companion / "inventory").exists())
-        self.assertFalse((alternate / "inventory").exists())
+        self.assertFalse((companion / "data/inventory").exists())
+        self.assertFalse((alternate / "data/inventory").exists())
 
     def test_explicit_missing_override_cannot_fall_back_to_existing_private_config(self):
         companion = self.fake_repository()
         os.environ.update(MARKET_INTEL_CONFIG=str(companion), MARKET_INTEL_DATA_DIR=str(self.tmp / "missing"))
         code, _, err = self.invoke(["--refresh"])
         self.assertEqual(code, 2)
-        self.assertIn("missing", err)
-        self.assertFalse((companion / "inventory").exists())
+        self.assertIn("MARKET_INTEL_DATA_DIR is not an existing config directory", err)
+        self.assertFalse((companion / "data/inventory").exists())
 
     def test_connect_guidance_uses_selected_host(self):
         os.environ["MARKET_INTEL_HOST"] = "codex"

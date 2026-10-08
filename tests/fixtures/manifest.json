@@ -1,6 +1,6 @@
 {
   "generator": "tools/make_fixtures.py",
-  "generator_sha256": "114c39ff5a6d68742ec6edb88397df05acf31557e06b41f749356df213354a03",
+  "generator_sha256": "77198432ce528a94658aa06b7213f6a2d460e90a1ffd75958e97b62133085e96",
   "seed_or_recipe_id": "market-intel-maintenance-v3-synthetic",
   "synthetic_origin": true,
   "files": {
@@ -17,7 +17,7 @@
     "tools/test_discovery_contract.py": "7cccd3aa2ea933c60ea08dd00e5ce2e061c7d81891106af06925657e42db6c9f",
     "tools/test_first_use_contract.py": "e347741707d1e921975a71a0d9c08e3c68e0cb43d511037c7ce11e031e3fbea6",
     "tools/test_check_all.py": "a0500c77f51af2a0e2bfc8db70e2d60889266259c7fc66807153f37e1e0825b4",
-    "tools/test_console.py": "766ed78f6724970eceb23dc18cd683d73ab372f91fb873229b3c924e62cce823",
+    "tools/test_console.py": "9b8d2e4584a1a9d89b9a46e2921544b3896a6ac7c18f13c20cef90e5b454481f",
     "tools/test_private_writers.py": "71f0e80ace4900d60a5d2056253c2bcba9469e91bb3f72458c55a394c7a3385a",
     "tools/test_incident_boundary.py": "47809fbc4825a814fe438b82de1f093540186c4abf92f0390462b59db867caa5",
     "tools/test_human_review.py": "95fa54d0ca86d009f8ac92d6c40302dbe09b1603787a093217abe02019714d09"
