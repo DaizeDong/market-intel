@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Refresh both open-seo star annotations to 22.7k using the GitHub API snapshot
+  of 22,708 stars on 2026-10-08.
 - Keep directory-only external runtime recipes setup-only until child-file admission is implemented; align feedback ledger reads with selected companion layout.
 - Unify companion selection across settings, initialization, diagnostics and runtime DATA; reject conflicting selectors.
 - Enforce declared artifact ownership and persistence through the pinned Guards write-admission API.
