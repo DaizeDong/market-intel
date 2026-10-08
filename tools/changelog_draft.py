@@ -18,7 +18,7 @@ This is a DRAFT helper, NOT a gate.
 CLI:
     python tools/changelog_draft.py --since v0.24.0
     python tools/changelog_draft.py --since HEAD~5
-    python tools/changelog_draft.py --since v0.24.0 --out <private-companion>/reports/changelog-draft.md
+    python tools/changelog_draft.py --since v0.24.0 --out <private-companion>/data/reports/changelog-draft.md
 
 Default --since:
     Parses the most recent `## [<version>]` header from CHANGELOG.md and

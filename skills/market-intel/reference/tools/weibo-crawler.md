@@ -1,5 +1,15 @@
 # Tool: dataabc/weibo-crawler
 
+**Runtime storage status: setup only.** This recipe has no shipped adapter that
+admits every file the external tool may create. Directory PRIVATE proof is only a
+placement check. Do not launch collection, login or persistence from this recipe
+until an adapter declares its exact output namespaces in `storage.contract.json`
+and calls `resolve_destination` for each file immediately before writing. Include
+implicit databases, sessions, caches, logs and exports in that review. The setup
+examples below describe adapter configuration; they do not establish runtime
+readiness or authorize child-file writes after `resolve_directory`.
+
+
 - **Domain(s):** browser-automation (also: social-publishing)
 - **Barrier route:** ④ · **Source tier:** L4 · **Ready MCP:** no (Python script / config-driven; the agent runs it directly)
 - **Cost:** free (open source). ⚠ **No LICENSE file** in the repo (gh-api 2026-06), no explicit grant; treat as research-only and don't assume reuse rights. Proxies/cookies are the hidden cost.

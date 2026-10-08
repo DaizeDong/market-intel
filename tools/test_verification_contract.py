@@ -237,6 +237,7 @@ def test_l0_private_miss_then_hit_preserves_consumer_sentinel(companion, tmp_pat
     old_cache = consumer / "metrics" / ("gh-api-cache.json" if kind == "github" else "l0-cache.json")
     sentinel = b'{"synthetic-sentinel": "must remain untouched"}\n'
     old_cache.write_bytes(sentinel)
+    (consumer / "storage.contract.json").write_bytes((storage.ROOT / "storage.contract.json").read_bytes())
     monkeypatch.setattr(storage, "ROOT", consumer)
     monkeypatch.setattr(l0, "ROOT", str(consumer))
     calls = []
@@ -247,7 +248,7 @@ def test_l0_private_miss_then_hit_preserves_consumer_sentinel(companion, tmp_pat
     assert l0.verify(target, kind)["verdict"] == "PASS"
     assert len(calls) == 1
     relative = caches.GH_CACHE_PATH if kind == "github" else caches.L0_CACHE_PATH
-    rows = json.loads((repository / relative).read_text(encoding="utf-8"))
+    rows = json.loads((repository / "data" / relative).read_text(encoding="utf-8"))
     assert rows[REPO if kind == "github" else "npm-v2:synthetic-package"]["verdict"] == "PASS"
     assert old_cache.read_bytes() == sentinel
     assert sorted(p.name for p in (consumer / "metrics").iterdir()) == [old_cache.name]
@@ -267,15 +268,15 @@ def test_unproven_private_cache_refuses_before_probe(companion, tmp_path, monkey
     with pytest.raises(storage.InventoryError):
         l0.verify(URL if kind == "github" else "synthetic-package", kind)
     assert calls == []
-    assert not (repository / "cache").exists()
+    assert not (repository / "data/cache").exists()
     assert not (tmp_path / "unmanaged").exists()
 
 
 @pytest.mark.parametrize("late", [False, True])
 def test_cache_write_failure_is_nonzero_and_preserves_snapshot(companion, monkeypatch, late, capsys):
     repository, _, _, _ = companion
-    path = repository / caches.GH_CACHE_PATH
-    path.parent.mkdir()
+    path = repository / "data" / caches.GH_CACHE_PATH
+    path.parent.mkdir(parents=True)
     before = b'{"unrelated": {"value": 17}}\n'
     path.write_bytes(before)
     calls = []
@@ -291,8 +292,8 @@ def test_cache_write_failure_is_nonzero_and_preserves_snapshot(companion, monkey
     assert invoke(l0, monkeypatch, "--url", URL, "--type", "github") == 2
     assert len(calls) == int(late)
     assert path.read_bytes() == before
-    pending, = path.parent.glob(".inventory-*")
-    assert set(path.parent.iterdir()) == {path, pending}
+    pending, = (repository / ".staging").glob("inventory-*.tmp")
+    assert set(path.parent.iterdir()) == {path}
     if late:
         candidate = json.loads(pending.read_text(encoding="utf-8"))
         assert set(candidate) == {"unrelated", REPO}
@@ -314,7 +315,7 @@ def test_cache_merge_keeps_other_observations(companion):
     caches.prepare_write(caches.GH_CACHE_PATH, destination)
     caches.save_entries(caches.GH_CACHE_PATH, {"example/first": {"verdict": "PASS"}}, destination)
     caches.save_entries(caches.GH_CACHE_PATH, {"example/second": {"verdict": "BLOCK"}}, destination)
-    assert set(json.loads((repository / caches.GH_CACHE_PATH).read_text(encoding="utf-8"))) == {
+    assert set(json.loads((repository / "data" / caches.GH_CACHE_PATH).read_text(encoding="utf-8"))) == {
         "example/first", "example/second"}
 
 
@@ -339,8 +340,8 @@ def test_l0_incomplete_github_observation_never_passes(companion, monkeypatch, p
 ])
 def test_cached_github_pass_is_reclassified_from_typed_evidence(companion, monkeypatch, archived, pushed, expected):
     repository, _, _, _ = companion
-    path = repository / caches.GH_CACHE_PATH
-    path.parent.mkdir()
+    path = repository / "data" / caches.GH_CACHE_PATH
+    path.parent.mkdir(parents=True)
     path.write_text(json.dumps({REPO: {"verdict": "PASS", "checked_at": l0._now_iso,
                                       "archived": archived, "pushed_at": pushed,
                                       "hostname": "github.com"}}))
@@ -377,12 +378,12 @@ def test_matrix_current_evidence_overrides_every_cached_verdict():
 
 def test_directory_and_file_interfaces_preserve_final_private_destination(companion, tmp_path):
     repository, _, _, _ = companion
-    runtime = repository / "runtime"
+    runtime = repository / "data/runtime"
     runtime.mkdir()
     assert storage.resolve_directory().path == runtime
     assert storage.resolve_directory(path=repository).repository == repository
-    file = storage.resolve_destination(path=runtime / "cookies.json")
-    storage.write_text("{}\n", "profiles/cookies.json", file)
+    file = storage.resolve_destination("profiles/twikit/cookies.json")
+    storage.write_text("{}\n", "profiles/twikit/cookies.json", file)
     assert file.path.read_text(encoding="utf-8") == "{}\n"
     for target in (runtime / "missing", file.path, storage.ROOT, tmp_path):
         with pytest.raises(storage.InventoryError):
@@ -583,13 +584,13 @@ def test_poll_main_persists_partial_real_rows_and_reports_degradation(companion,
     npm_surface_reply(monkeypatch)
     monkeypatch.setattr(poll, "_http_get", lambda *args, **kwargs: ATOM.format(VIDEO).encode())
     assert invoke(poll, monkeypatch, "--config", str(config), "--only", "E4,E6") == 0
-    rows = [json.loads(line) for line in (repository / "surface-inbox.jsonl").read_text(encoding="utf-8").splitlines()]
+    rows = [json.loads(line) for line in (repository / "data/surface-inbox.jsonl").read_text(encoding="utf-8").splitlines()]
     assert {row["key"] for row in rows} == {"E4:synthetic-package", "E6:https://example.com/video"}
     output = capsys.readouterr().out
     assert "SUMMARY new=2 surfaces_ok=0/2 degraded=E4,E6" in output
     assert invoke(poll, monkeypatch, "--config", str(config), "--only", "E4,E6") == 0
     assert "SUMMARY new=0 surfaces_ok=0/2 degraded=E4,E6" in capsys.readouterr().out
-    assert len((repository / "surface-inbox.jsonl").read_text(encoding="utf-8").splitlines()) == 2
+    assert len((repository / "data/surface-inbox.jsonl").read_text(encoding="utf-8").splitlines()) == 2
 
 
 def test_poll_total_failure_is_never_successful_empty(companion, tmp_path, monkeypatch, capsys):
@@ -599,7 +600,7 @@ def test_poll_total_failure_is_never_successful_empty(companion, tmp_path, monke
     npm_surface_reply(monkeypatch)
     assert invoke(poll, monkeypatch, "--config", str(config), "--only", "E4") == 0
     assert "SUMMARY new=0 surfaces_ok=0/1 degraded=E4" in capsys.readouterr().out
-    assert not (repository / "surface-inbox.jsonl").exists()
+    assert not (repository / "data/surface-inbox.jsonl").exists()
 
 
 @pytest.mark.parametrize("slug", ["yt-dlp", "instaloader", "crawlee", "twikit"])
@@ -621,7 +622,7 @@ def test_documented_literal_destination_has_working_private_contract(companion, 
     for call in calls:
         relative = call.args[0].value
         assert not Path(relative).is_absolute() and ".." not in Path(relative).parts
-        target = repository / relative
+        target = repository / "data" / relative
         if call.func.id == "resolve_directory":
             assert relative.startswith("runtime/")
             with pytest.raises(storage.InventoryError):
@@ -677,8 +678,8 @@ def test_disabled_cache_skips_private_io_and_keeps_current_activity(monkeypatch,
 
 def test_matrix_cache_defaults_to_private_preflight_and_merge(companion):
     repository, _, _, _ = companion
-    path = repository / caches.GH_CACHE_PATH
-    path.parent.mkdir()
+    path = repository / "data" / caches.GH_CACHE_PATH
+    path.parent.mkdir(parents=True)
     before = b'{"unrelated": {"value": 17}}\n'
     path.write_bytes(before)
     destination, cache = caches.load_cache(caches.GH_CACHE_PATH)
@@ -704,14 +705,14 @@ def test_matrix_cache_enabled_requires_private_authority(companion, tmp_path, mo
     with pytest.raises(storage.InventoryError):
         caches.load_cache(caches.GH_CACHE_PATH)
     assert not (selected / "cache").exists()
-    assert not (repository / "cache").exists()
+    assert not (repository / "data/cache").exists()
 
 
 @pytest.mark.parametrize("failure", ["preflight", "save"])
 def test_matrix_cache_enabled_never_falls_back_after_write_failure(companion, monkeypatch, failure, capsys):
     repository, _, _, _ = companion
-    path = repository / caches.GH_CACHE_PATH
-    path.parent.mkdir()
+    path = repository / "data" / caches.GH_CACHE_PATH
+    path.parent.mkdir(parents=True)
     before = b'{"unrelated": {"value": 17}}\n'
     path.write_bytes(before)
     destination, _ = caches.load_cache(caches.GH_CACHE_PATH)
@@ -726,8 +727,8 @@ def test_matrix_cache_enabled_never_falls_back_after_write_failure(companion, mo
         else:
             caches.save_entries(caches.GH_CACHE_PATH, {REPO: {"verdict": "BLOCK"}}, destination)
     assert path.read_bytes() == before
-    pending, = path.parent.glob(".inventory-*")
-    assert set(path.parent.iterdir()) == {path, pending}
+    pending, = (repository / ".staging").glob("inventory-*.tmp")
+    assert set(path.parent.iterdir()) == {path}
     if failure == "save":
         assert json.loads(pending.read_text(encoding="utf-8")) == {
             "unrelated": {"value": 17}, REPO: {"verdict": "BLOCK"}}

@@ -175,8 +175,8 @@ and versioning policy.
 **Discovery convention (try in order):**
 
 1. **`$MARKET_INTEL_CONFIG`** env var, explicit path, highest priority and the recommended way.
-2. **`~/.market-intel-config/`**, dotfile-in-home fallback (works on all OSes).
-3. **`~/.config/market-intel-config/`**, XDG-style fallback (Linux/macOS).
+2. **`$MARKET_INTEL_CONFIG_DIR`**, lower-priority alias. `MARKET_INTEL_DATA_DIR` must select the same companion's data/ child.
+3. A proven sibling companion, then `~/.market-intel-config/`, through pinned Guards. There is no separate XDG search.
 
 Each user picks where to place their companion repo and either sets the env var or uses one of
 the fallbacks. There is no required filesystem location.

@@ -84,16 +84,15 @@ not make these scripts relative to the current project.
 **separate, private** companion config repo. Repo-root contract: [CONFIG.md](CONFIG.md); authoritative
 deep spec: [`companion-config-spec.md`](skills/market-intel/reference/companion-config-spec.md) (v1.3, STABLE).
 
-- **Mount (discovery order):** `$MARKET_INTEL_CONFIG` → `~/.market-intel-config/` →
-  `~/.config/market-intel-config/`. First that exists wins; absent = runs in matrix-only mode.
-- **First time:**
+- **Mount:** `MARKET_INTEL_CONFIG` → `MARKET_INTEL_CONFIG_DIR` → shared Guards discovery. `MARKET_INTEL_DATA_DIR` must belong to the same companion. See [CONFIG.md](CONFIG.md#discovery-convention-e2) for the exact layout and fallback order.
+- **First time:** Empty `tools: []` remains NOT READY. Fill installed tool identities and both templates before the doctor; initialize companion data/ before runtime writes.
   ```bash
   python "<absolute-market-intel-checkout>/scripts/init_config.py"        # stamp a conformant skeleton (deterministic)
   export MARKET_INTEL_CONFIG=~/.market-intel-config  # or pass --out <dir> to init
   python "<absolute-market-intel-checkout>/scripts/verify_config.py"       # doctor: PASS/FAIL, names what is missing
   ```
 - **Switch configs (hot-swap):** point the env var at another config dir, configs are self-contained,
-  no other change needed: `export MARKET_INTEL_CONFIG=~/configs/work` ↔ `~/configs/personal`.
+  clear or update the DATA override with it: `export MARKET_INTEL_CONFIG=~/configs/work` ↔ `~/configs/personal`.
 - **Secrets:** follow the companion's declared storage mode. Mode A versions credentials only in
   verified PRIVATE Git; Mode B ignores them and requires a separate backup. The bundled initializer
   supports Mode B only. Both modes keep secrets out of this public source; see [CONFIG.md](CONFIG.md#secrets-and-storage-modes-e6).

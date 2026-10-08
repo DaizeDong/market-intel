@@ -1,6 +1,13 @@
 # Changelog
 
-## Unreleased
+## [Unreleased]
+
+- Keep directory-only external runtime recipes setup-only until child-file admission is implemented; align feedback ledger reads with selected companion layout.
+- Unify companion selection across settings, initialization, diagnostics and runtime DATA; reject conflicting selectors.
+- Enforce declared artifact ownership and persistence through the pinned Guards write-admission API.
+- Align setup, required fields and recovery documentation with supported capabilities.
+- Report an empty tool registry as NOT READY and require installed capability templates; runtime writers require the data/ layout.
+
 
 - Refresh the two StaffSpy star annotations to 341 using the GitHub API on 2026-10-06;
   installation and scraping remain unverified by this metadata check.

@@ -10,7 +10,6 @@ import os
 from pathlib import Path
 import stat
 import sys
-import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,30 +46,14 @@ def _shared_boundary():
 
 
 def _data_directory():
-    """Use shared discovery for defaults; an explicit missing path never falls back."""
-    explicit = os.environ.get("MARKET_INTEL_DATA_DIR")
-    if explicit:
-        directory = Path(explicit).expanduser()
-    else:
-        config = os.environ.get("MARKET_INTEL_CONFIG") or os.environ.get("MARKET_INTEL_CONFIG_DIR")
-        if config:
-            companion = Path(config).expanduser()
-            if not companion.is_dir():
-                raise InventoryError("inventory companion is missing; initialize a PRIVATE versioned companion")
-            directory = companion / "data" if (companion / "data").is_dir() else companion
-        else:
-            resolver = ROOT / "guards/tools/datadir.py"
-            if not resolver.is_file():
-                raise InventoryError("inventory resolver is missing; initialize the guards submodule")
-            spec = importlib.util.spec_from_file_location("market_intel_datadir", resolver)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            try:
-                directory = module.resolve_data_dir("market-intel", create=False)
-            except (module.DataDirInsideOwnRepo, module.CompanionUnproven) as exc:
-                raise InventoryError("inventory companion cannot be resolved safely") from exc
+    """Runtime producers use the declared data/ layout; absence is uninitialized."""
+    from config_paths import data_directory
+    try:
+        directory = data_directory()
+    except (OSError, ValueError, RuntimeError) as exc:
+        raise InventoryError(str(exc)) from exc
     if directory is None or not directory.is_dir():
-        raise InventoryError("inventory DATA is missing; set MARKET_INTEL_CONFIG to a PRIVATE versioned companion")
+        raise InventoryError("companion data/ is missing; initialize the PRIVATE runtime data directory")
     return directory
 
 
@@ -112,6 +95,8 @@ def _resolve_destination(relative_path, path, directory):
                 "use a versioned PRIVATE companion with a fresh visibility receipt") from exc
         if ignored.returncode != 1:
             raise InventoryError("inventory must be eligible for version control; destination is ignored or cannot be checked")
+        if not directory:
+            authorize_write(target, repository)
         identity = ", ".join(proof.repositories)
         publication = (tuple(proof.repositories), proof.signature)
         return Destination(target, repository, identity, lexical if path is not None else None, publication)
@@ -145,13 +130,19 @@ def write_text(payload, relative_path, destination=None):
     temporary = None
     try:
         current.path.parent.mkdir(parents=True, exist_ok=True)
-        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", newline="\n",
-                                         dir=current.path.parent, prefix=".inventory-", delete=False) as stream:
-            temporary = Path(stream.name)
+        import uuid
+        temporary = authorize_write(current.repository / ".staging" / ("inventory-" + uuid.uuid4().hex + ".tmp"), current.repository)
+        temporary.parent.mkdir(parents=True, exist_ok=True)
+        with temporary.open("x", encoding="utf-8", newline="\n") as stream:
+            temporary_identity = os.fstat(stream.fileno())
             stream.write(payload)
             stream.flush()
             os.fsync(stream.fileno())
         current = _revalidate(relative_path, current)
+        authorize_write(temporary, current.repository)
+        candidate = temporary.lstat()
+        if not stat.S_ISREG(candidate.st_mode) or candidate.st_nlink != 1 or not os.path.samestat(temporary_identity, candidate):
+            raise InventoryError("inventory temporary file changed identity before publication")
         os.replace(temporary, current.path)
         temporary = None
     except (OSError, UnicodeError) as exc:
@@ -173,10 +164,18 @@ def _revalidate(relative_path, destination):
     return current
 
 
+def _update_lock_path(destination):
+    """Use one companion-local coordination path for each destination."""
+    import hashlib
+    relative = os.path.normcase(destination.path.relative_to(destination.repository).as_posix())
+    return destination.repository / ".staging" / ("lock-" + hashlib.sha256(relative.encode()).hexdigest() + ".lock")
+
+
 @contextmanager
 def _exclusive_update(destination, timeout=10):
     """An exclusive lock file serializes cooperating processes; stale locks fail closed."""
-    lock = destination.path.with_name("." + destination.path.name + ".lock")
+    lock = authorize_write(_update_lock_path(destination), destination.repository)
+    lock.parent.mkdir(parents=True, exist_ok=True)
     descriptor = None
     directory = None
     transaction_failed = False
@@ -251,3 +250,24 @@ def update_text(transform, relative_path, destination=None):
         except (OSError, UnicodeError) as exc:
             raise InventoryError("private ledger is unreadable; previous ledger was preserved") from exc
         return write_text(transform(previous), relative_path, current)
+
+
+@lru_cache(maxsize=1)
+def _storage_contract():
+    source = ROOT / "guards/tools/storage_contract.py"
+    spec = importlib.util.spec_from_file_location("market_intel_storage_contract", source)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    try:
+        spec.loader.exec_module(module)
+    except (OSError, ImportError) as exc:
+        raise RuntimeError("update the pinned guards submodule for artifact write admission") from exc
+    return module
+
+
+def authorize_write(path, repository):
+    try:
+        return _storage_contract().authorize_artifact_write(
+            ROOT, repository, Path(path).relative_to(repository).as_posix()).path
+    except (ValueError, RuntimeError) as exc:
+        raise InventoryError("artifact write refused: " + str(exc)) from exc

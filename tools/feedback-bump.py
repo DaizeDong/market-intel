@@ -58,12 +58,7 @@ from pathlib import Path
 # --- paths -----------------------------------------------------------------
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-# datadir moved into the guards submodule: one copy for the fleet instead of one per repo,
-# which had already begun to drift. The insert above stays, because sibling modules in this
-# same tools/ directory are still imported by bare name.
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                                "guards", "tools"))
-from datadir import resolve_data_dir  # noqa: E402
+from config_paths import data_directory
 from live_run_contract import VALID_OUTCOMES, REVIEW_OUTCOMES, documentation_verified
 from document_io import DocumentError, read_document, replace_document
 import private_inventory
@@ -87,8 +82,8 @@ def live_runs_path() -> Path | None:
     (incident_helper.py) must NOT degrade -- silently dropping a real observation, or worse,
     falling back to a path inside the repo, is the whole bug this boundary exists to close.
     """
-    d = resolve_data_dir(SKILL)
-    return None if d is None else d / "metrics" / "live-runs.jsonl"
+    d = data_directory()
+    return None if d is None or not d.is_dir() else d / "metrics" / "live-runs.jsonl"
 
 LAST_VERIFIED_RE = re.compile(r"^(## Last verified:\s*)(\d{4}-\d{2})\s*$", re.MULTILINE)
 
@@ -581,15 +576,19 @@ def main(argv: list[str] | None = None) -> int:
         except private_inventory.InventoryError as exc:
             print(f"ERROR: report destination refused: {exc}", file=sys.stderr)
             return 2
-    lr = live_runs_path()
+    try:
+        lr = live_runs_path()
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f"ERROR: feedback configuration refused: {exc}", file=sys.stderr)
+        return 2
     if lr is None:
         print("market-intel is uninitialized: no private data dir, so there is no live-run ledger")
         print("to consume. That is the correct state for a freshly cloned public skill -- it ships")
         print("as a tool, not as somebody's research history. Point it at your own store:")
-        print("    mkdir -p ~/.market-intel-config/data/metrics")
-        print("    (or set MARKET_INTEL_DATA_DIR)")
+        print("    Initialize a versioned PRIVATE companion using CONFIG.md, then")
+        print("    select it with MARKET_INTEL_CONFIG.")
         print("The shape is in skills/market-intel/metrics/live-runs.jsonl.example.")
-        print("\nStep -1 has no feedback to act on; treating this as a clean sweep.")
+        print("\nStep -1 skipped: no feedback ledger is initialized.")
         return 0
 
     entries = load_live_runs(lr, args.since)

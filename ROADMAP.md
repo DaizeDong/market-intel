@@ -1,5 +1,10 @@
 # Roadmap
 
+External tool recipes that have only a PRIVATE directory preflight remain setup
+only until an adapter declares and admits their child-file writes. The source's
+atomic inventory, cache, ledger and report writers already use artifact admission;
+directory placement alone does not establish that coverage for a third-party SDK.
+
 Current: **v0.30.0**
 
 ## v0.1.0 (alpha), foundation
@@ -131,3 +136,7 @@ them, so they don't get forgotten until the right moment to populate.
 See `skills/market-intel/reference/refresh-protocol.md`, cadence overhauled in v0.17.0.
 Default monthly · weekly for the fast-moving set (crypto-defi / browser-automation /
 frontier-research / mcp-ecosystem) · quarterly reserved for Horizon scan.
+
+## Configuration and storage acceptance
+
+Companion selection and write admission use the source contracts. Synthetic regressions cover conflicting roots, absent setup and undeclared or ignored writes. Current provider connectivity, delivery and restore success require separate operational evidence. The declared 64 MiB working-data budget remains enforced; any over-budget companion remains out of conformance until reviewed dependency and retention closure is completed. No empty template, static document check or path classification establishes readiness or authorizes deletion.

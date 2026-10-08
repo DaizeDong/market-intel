@@ -1,16 +1,9 @@
 #!/usr/bin/env python3
-"""Doctor for market-intel's companion config (config-spec E3). Resolves the config dir via the
-documented discovery order, validates it against the spec, and prints PASS/FAIL per check naming
-exactly what is missing. Exit 0 = ready, 1 = not ready, 2 = usage error.
+"""Validate the selected companion configuration for market-intel.
 
-Authoritative deep spec: skills/market-intel/reference/companion-config-spec.md (v1.3, STABLE).
-Discovery order (config-spec E2 / spec §1):
-  1. $MARKET_INTEL_CONFIG   2. ~/.market-intel-config/   3. ~/.config/market-intel-config/
-  ($MARKET_INTEL_CONFIG_DIR is accepted as a convenience alias for #1.)
-
-Usage:
-  python verify_config.py [--skill <name>] [--config-dir <dir>]
-Stdlib only. Never echoes secret values (only presence / length).
+Selection and required fields are defined in CONFIG.md and config.contract.json.
+Explicit CLI paths isolate environment selection. Runtime uses the same pinned Guards
+companion discovery; invalid selectors never fall through to another companion.
 """
 import argparse
 import json
@@ -45,17 +38,10 @@ def detect_skill():
 
 
 def discover(skill, override):
-    if override:
-        return os.path.abspath(os.path.expanduser(override)), "explicit (--config-dir)"
-    for v in (env_var(skill), env_var(skill) + "_DIR"):
-        val = os.environ.get(v)
-        if val:
-            return os.path.abspath(os.path.expanduser(val)), "env:%s" % v
-    for d in (os.path.expanduser("~/.%s-config" % skill),
-              os.path.expanduser("~/.config/%s-config" % skill)):
-        if os.path.isdir(d):
-            return d, "default:%s" % d
-    return None, None
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools"))
+    from config_paths import companion_root
+    selected = companion_root(override)
+    return (str(selected), "shared companion selection") if selected is not None else (None, None)
 
 
 def storage_mode(config):
@@ -82,6 +68,47 @@ def storage_mode(config):
     return modes.pop()
 
 
+def validate_tools(entries, config):
+    """Validate selected capabilities without invoking a provider or revealing credentials."""
+    if not isinstance(entries, list):
+        return ["tools must be an array"]
+    errors, selected, seen = [], 0, set()
+    for index, entry in enumerate(entries):
+        label = "tools[%d]" % index
+        if not isinstance(entry, dict):
+            errors.append(label + " must be an object")
+            continue
+        slug = entry.get("slug")
+        if not isinstance(slug, str) or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug):
+            errors.append(label + ".slug must be a kebab-case identifier")
+            continue
+        if slug in seen:
+            errors.append(label + ".slug must be unique")
+        seen.add(slug)
+        if not isinstance(entry.get("installed"), bool):
+            errors.append(label + ".installed must be boolean")
+            continue
+        if not entry["installed"]:
+            continue
+        selected += 1
+        directory = os.path.join(config, "tools", slug)
+        for filename in ("claude.json.template", "env.template"):
+            if not os.path.isfile(os.path.join(directory, filename)):
+                errors.append(label + " needs tools/<slug>/" + filename)
+        template = os.path.join(directory, "claude.json.template")
+        if os.path.isfile(template):
+            try:
+                with open(template, encoding="utf-8-sig") as stream:
+                    payload = json.load(stream)
+                if not isinstance(payload, dict) or not isinstance(payload.get("mcpServers"), dict):
+                    errors.append(label + " claude.json.template needs an mcpServers object")
+            except (OSError, ValueError):
+                errors.append(label + " claude.json.template must be readable JSON")
+    if not selected:
+        errors.append("TEMPLATE_VALID is not READY: configure at least one tool with installed=true")
+    return errors
+
+
 def main():
     ap = argparse.ArgumentParser(description="Validate market-intel's companion config.")
     ap.add_argument("--skill", default=None)
@@ -93,7 +120,11 @@ def main():
         print("ERROR: could not detect skill name; pass --skill <name>.")
         return 2
 
-    cfg, how = discover(skill, a.config_dir)
+    try:
+        cfg, how = discover(skill, a.config_dir)
+    except (OSError, ValueError, RuntimeError) as exc:
+        print("NOT READY: " + str(exc))
+        return 1
     print("Config doctor for skill '%s'" % skill)
     print("Discovery env var: %s (and %s_DIR)" % (env_var(skill), env_var(skill)))
     if not cfg:
@@ -101,6 +132,7 @@ def main():
         print("       Set %s=<dir> or run: python scripts/init_config.py" % env_var(skill))
         return 1
     print("  resolved via %s -> %s" % (how, cfg))
+    print("RESOLVED: " + cfg)
     print("-" * 60)
 
     results = []
@@ -123,6 +155,8 @@ def main():
             tools = data.get("tools", data.get("entries"))
             check("tools[]/entries[] is a list", isinstance(tools, list),
                   "type %s" % type(tools).__name__)
+            errors = validate_tools(tools, cfg)
+            check("selected capability fields and templates", not errors, "; ".join(errors))
         except Exception as e:
             check("registry.json valid JSON", False, str(e))
 
@@ -170,7 +204,7 @@ def main():
     if n_fail:
         print("NOT READY: %d check(s) failed. Fix the above for the selected storage mode." % n_fail)
         return 1
-    print("READY: config at %s conforms. Add tools/<slug>/ + secrets/<slug>.env to populate it." % cfg)
+    print("READY: config at %s has configured capability templates; provider connectivity is not probed." % cfg)
     if mode == "A":
         print("Mode A uses PRIVATE Git for credential backup; verify remote visibility and backup durability separately.")
     else:

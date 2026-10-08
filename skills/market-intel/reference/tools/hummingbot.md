@@ -1,5 +1,15 @@
 # Tool: Hummingbot core
 
+**Runtime storage status: setup only.** This recipe has no shipped adapter that
+admits every file the external tool may create. Directory PRIVATE proof is only a
+placement check. Do not launch collection, login or persistence from this recipe
+until an adapter declares its exact output namespaces in `storage.contract.json`
+and calls `resolve_destination` for each file immediately before writing. Include
+implicit databases, sessions, caches, logs and exports in that review. The setup
+examples below describe adapter configuration; they do not establish runtime
+readiness or authorize child-file writes after `resolve_directory`.
+
+
 - **Domain(s):** crypto-defi (also: none)
 - **Barrier route:** ① (execution layer) · **Source tier:** L1 · **Ready MCP:** no; the archived client is retired from the usable catalog
 - **Cost:** free, open-source (Apache-2.0). You pay only for a VPS + exchange trading fees.

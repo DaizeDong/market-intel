@@ -522,6 +522,114 @@
         "class": "rebuildable",
         "rule": "Remove after no refresh process uses the checkout and all useful changes are integrated."
       }
+    },
+    {
+      "artifact_id": "atomic-staging",
+      "path_pattern": ".staging/inventory-*.tmp",
+      "purpose": "Prepared atomic inventory, ledger and report publication",
+      "schema": "Producer-owned ordinary file; never executable configuration.",
+      "producer": "private_inventory.write_text",
+      "consumer_or_final_deliverable": "Declared final artifact after validation",
+      "rebuild_or_restore": "Recreate through the producer after resolving an interrupted operation.",
+      "retention_rule": {
+        "class": "rebuildable",
+        "rule": "Keep while the owning operation is active; inspect interrupted operations before removing residual files."
+      },
+      "persistence": "transient",
+      "transient_reason": "Local transaction coordination or atomic staging; the committed destination is the recoverable record."
+    },
+    {
+      "artifact_id": "writer-locks",
+      "path_pattern": ".staging/lock-*.lock",
+      "purpose": "Serialized local ledger update locks",
+      "schema": "Producer-owned ordinary file; never executable configuration.",
+      "producer": "private_inventory._exclusive_update",
+      "consumer_or_final_deliverable": "Cooperating ledger writers",
+      "rebuild_or_restore": "Recreate through the producer after resolving an interrupted operation.",
+      "retention_rule": {
+        "class": "rebuildable",
+        "rule": "Keep while the owning operation is active; inspect interrupted operations before removing residual files."
+      },
+      "persistence": "transient",
+      "transient_reason": "Local transaction coordination or atomic staging; the committed destination is the recoverable record."
+    },
+    {
+      "artifact_id": "github-verification-cache",
+      "path_pattern": "data/cache/gh-api-cache.json",
+      "purpose": "Cached GitHub metadata observations",
+      "schema": "JSON object",
+      "producer": "tools/private_cache.py through enabled verification cache writers",
+      "consumer_or_final_deliverable": "Offline reuse of source-verification metadata",
+      "rebuild_or_restore": "Restore retained observations or drafts from the PRIVATE companion Git history; a new run does not reproduce an earlier observation.",
+      "retention_rule": {
+        "class": "rebuildable",
+        "rule": "Keep current cache entries while their observations are reused. Preserve any entries cited by a retained verification result before replacing the cache."
+      }
+    },
+    {
+      "artifact_id": "l0-verification-cache",
+      "path_pattern": "data/cache/l0-cache.json",
+      "purpose": "Cached deterministic source-check observations",
+      "schema": "JSON object",
+      "producer": "tools/private_cache.py through enabled verification cache writers",
+      "consumer_or_final_deliverable": "L0 source validation and cache reuse",
+      "rebuild_or_restore": "Restore retained observations or drafts from the PRIVATE companion Git history; a new run does not reproduce an earlier observation.",
+      "retention_rule": {
+        "class": "rebuildable",
+        "rule": "Keep current entries while consumers reuse them. Preserve observations referenced by retained reports before invalidation or retirement."
+      }
+    },
+    {
+      "artifact_id": "changelog-draft",
+      "path_pattern": "data/reports/changelog-draft.md",
+      "purpose": "Private draft of a requested release note",
+      "schema": "UTF-8 Markdown",
+      "producer": "tools/changelog_draft.py with an explicit output request",
+      "consumer_or_final_deliverable": "Human review and selected release note",
+      "rebuild_or_restore": "Restore retained observations or drafts from the PRIVATE companion Git history; a new run does not reproduce an earlier observation.",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep the current requested draft until its result is accepted or explicitly abandoned; preserve accepted text in the final deliverable before retirement."
+      }
+    },
+    {
+      "artifact_id": "feedback-report",
+      "path_pattern": "data/reports/feedback.json",
+      "purpose": "Private feedback analysis and proposed source changes",
+      "schema": "JSON object",
+      "producer": "tools/feedback-bump.py with an explicit output request",
+      "consumer_or_final_deliverable": "Human review of feedback changes",
+      "rebuild_or_restore": "Restore retained observations or drafts from the PRIVATE companion Git history; a new run does not reproduce an earlier observation.",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep the current requested report and supporting evidence until the proposed changes are accepted or explicitly abandoned."
+      }
+    },
+    {
+      "artifact_id": "twikit-cookie-session",
+      "path_pattern": "data/profiles/twikit/cookies.json",
+      "purpose": "Selected private client authentication state",
+      "schema": "Client-owned JSON session format; values are credentials",
+      "producer": "Explicit Twikit client.save_cookies in the documented recipe",
+      "consumer_or_final_deliverable": "The selected client session and credential recovery",
+      "rebuild_or_restore": "Restore through the selected PRIVATE credential backup policy; reauthenticate only when the session cannot be recovered.",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep the selected active session and any recovery copy still required after rotation. Retire superseded credentials only after replacement and recovery verification."
+      }
+    },
+    {
+      "artifact_id": "instagrapi-session",
+      "path_pattern": "data/runtime/instagrapi/session.json",
+      "purpose": "Selected private client authentication state",
+      "schema": "Client-owned JSON session format; values are credentials",
+      "producer": "Explicit Instagrapi dump_settings in the documented recipe",
+      "consumer_or_final_deliverable": "The selected client session and credential recovery",
+      "rebuild_or_restore": "Restore through the selected PRIVATE credential backup policy; reauthenticate only when the session cannot be recovered.",
+      "retention_rule": {
+        "class": "core",
+        "rule": "Keep the selected active session and any recovery copy still required after rotation. Retire superseded credentials only after replacement and recovery verification."
+      }
     }
   ]
 }
