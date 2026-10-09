@@ -1,14 +1,9 @@
 # Tool: towfiqi/serpbear
 
-**Runtime storage status: setup only.** This recipe has no shipped adapter that
-admits every file the external tool may create. Directory PRIVATE proof is only a
-placement check. Do not launch collection, login or persistence from this recipe
-until an adapter declares its exact output namespaces in `storage.contract.json`
-and calls `resolve_destination` for each file immediately before writing. Include
-implicit databases, sessions, caches, logs and exports in that review. The setup
-examples below describe adapter configuration; they do not establish runtime
-readiness or authorize child-file writes after `resolve_directory`.
-
+**Runtime storage status: setup only.** No shipped adapter admits this tool's
+complete file output. Do not launch collection, login or persistence until every
+child-file write meets the [external-tool storage requirements](../../../../DATA.md#external-tool-storage).
+`resolve_directory` alone does not authorize writes; examples below are setup guidance.
 
 - **Domain(s):** seo-keywords (also: none)
 - **Barrier route:** ④ self-host · **Source tier:** L4 · **Ready MCP:** no, self-hosted web app + REST API; drive via its API or UI
@@ -39,7 +34,7 @@ the upstream image's current environment and persistence contract before launch.
 Then open the local UI, configure a scraper and inspect operation results.
 
 ## Auth / keys
-App login is `USER`/`PASSWORD`; the REST API uses the self-generated `APIKEY` header (you set it at deploy time). The **SERP scraping backend** is separate: SerpBear needs a source to read Google positions, either a paid scraper (ScrapingRobot/SerpApi/SpaceSerp key) or **point it at your self-hosted SearXNG** to stay fully free. Since all keys here are *your own* self-generated secrets in your container env, the only hygiene rule is the standard one, keys live plaintext in env/`~/.claude.json`; never commit or screenshot. One-line pointer: `reference/install-guide.md` § secret hygiene.
+App login is `USER`/`PASSWORD`; the REST API uses the self-generated `APIKEY` header (you set it at deploy time). The **SERP scraping backend** is separate: SerpBear needs a source to read Google positions, either a paid scraper (ScrapingRobot/SerpApi/SpaceSerp key) or **point it at your self-hosted SearXNG** to stay fully free. Treat the app credentials, self-generated API key and backend keys as secrets. Use the selected companion credential mode: Mode A permits verified PRIVATE versioning; Mode B keeps credential values outside Git. Never copy them into the public source, screenshots or transcripts. See [secret-handling guidance](../install-guide.md) and the [credential-mode contract](../../../../CONFIG.md).
 
 ## Usage
 Read tracked keywords with the documented `/api/keywords` endpoint using a

@@ -6,30 +6,22 @@ allowed-tools: Read, Glob, Grep, Bash, Agent, Skill, WebSearch, WebFetch
 
 # market-intel
 
-A thin orchestration layer for commercial/market research. It does **only three things that
-nothing else does**: (1) triage a commercial topic to the right data domains, (2) detect which
-specialized MCP sources are actually connected and guide installing missing ones, (3) enforce
-research quality guardrails. The heavy lifting, fan-out search, fetching, adversarial
-verification, citation synthesis, is **delegated** to the existing `deep-research` harness or
-`research-lit` skill. Do not re-implement those.
-
-> **Design philosophy (governs all changes): root-cause design, not incremental patching**, change
-> the assumption underneath a problem, not the symptom on top. This thin-delegation shape, the
-> first-class browser route, and the monotonic anti-regression refresh all follow from it. Full
-> statement in the repo's `PHILOSOPHY.md`; every change must pass "does it fix the framing, or just
-> patch a symptom?"
+Select commercial data sources, verify their current operations, guide missing setup,
+and apply research evidence requirements. Delegate retrieval, fan-out, verification
+and synthesis to the available `deep-research` or `research-lit` workflow.
+Do not re-implement those engines. [PHILOSOPHY.md](../../PHILOSOPHY.md) governs changes
+to this scope, source selection and maintenance.
 
 ## When to stop and delegate immediately
 
-Before doing anything, decide if this skill even applies:
+Select the applicable route before starting:
 
 - **Single-fact lookup / quick query** → just use plain web search. Do not invoke this workflow.
 - **General web-only deep report** (no specialized commercial source needed) → delegate to
   `deep-research` and exit.
 - **Academic / scientific literature** → delegate to `research-lit` and exit.
 - **Needs a specialized commercial source** (X data, real e-commerce prices, market/finance
-  feeds, on-chain data, SEO metrics, social sentiment, lead data) → continue below. This is the
-  only case where this skill earns its keep.
+  feeds, on-chain data, SEO metrics, social sentiment, lead data) → continue below. Continue with this workflow only for this case.
 
 > **Recurring / digest use:** this skill is one-shot by design. To watch a topic over time, wrap it
 > in a user-owned `/schedule` routine (or `/loop`), the routine owns cadence, watchlist, and
@@ -133,11 +125,11 @@ If the topic clearly depends on a source that is missing or not connected:
 Never block on install. Prefer HTTP-transport sources on Windows (no local Node/uv needed; stdio
 `npx`/`uvx` MCPs are flaky there).
 
-#### Secret-handling hygiene, HARD rules (learned the hard way; real runs leaked keys 3×)
-Configuring the tool yourself is fine and often expected, but a key must **never leak into the
-transcript** (it may sync to the user's cloud backup). Follow exactly:
-Four prohibitions, absolute. **The procedure that satisfies them lives in
-[`reference/install-guide.md`](./reference/install-guide.md); read it before touching a key.**
+#### Secret handling
+
+Keep keys out of transcripts, including transcripts synced to cloud backups. Read the
+procedure in [the installation guide](reference/install-guide.md) before handling a key.
+These four prohibitions apply:
 - **NEVER `browser_snapshot` a page that displays a key**, provider dashboards render it plaintext
   in the DOM and the snapshot captures it.
 - **NEVER `claude mcp add` for a secret-bearing MCP**, it echoes the header/URL to stdout.
@@ -149,72 +141,38 @@ Secrets belong in the selected host's supported secret configuration. Claude's
 configuration format does not configure Codex. Never expose secret-bearing settings
 in transcripts or public source; follow the private companion's credential policy.
 
-#### Where the user's keys + install state live: the COMPANION CONFIG REPO
+#### Companion configuration
 
-The user's per-machine ops state, which MCPs they installed, their per-tool tier, their API
-keys, their rotation history, does **not** live in this matrix repo. It belongs in a **separate,
-private companion config repo**. This is a hard architectural rule; see
-`reference/companion-config-repo.md` for the rationale.
+Per-machine installation state, tool tiers, keys and rotation history belong in a
+separate PRIVATE companion. Use [CONFIG.md](../../CONFIG.md#discovery-convention-e2)
+for current selection: `MARKET_INTEL_CONFIG`, then the lower-priority
+`MARKET_INTEL_CONFIG_DIR`, then pinned Guards discovery. `MARKET_INTEL_DATA_DIR`
+must select the same companion's `data/` child. There is no required filesystem
+location or separate XDG search.
 
-The exchange between this skill and any companion config repo follows a **formal spec**
-([`reference/companion-config-spec.md`](reference/companion-config-spec.md), spec version 1).
-As an agent, **assume one may exist on the user's machine**, and treat it as the authoritative
-source of "what the user has installed." The spec defines: discovery convention, required
-directory layout, `registry.json` schema, per-tool template formats, conformance checklist,
-and versioning policy.
+The [version-1 companion spec](reference/companion-config-spec.md) owns layout,
+registry and template formats, conformance and versioning. It includes root
+`registry.json`, per-tool `claude.json.template` and `env.template`, and credential
+Mode A (PRIVATE Git) or Mode B (ignored with a separate backup).
+Use the [companion tutorial](reference/companion-config-repo.md) for setup and
+surface [the hardening runbook](reference/companion-config-hardening.md) before
+the first push. Review third-party app access and the selected credential policy
+before storing real state.
 
-> 🔒 **When guiding the user to bootstrap a new companion repo, ALWAYS surface the
-> hardening runbook ([`reference/companion-config-hardening.md`](reference/companion-config-hardening.md))
-> BEFORE the first push.** A freshly-created GitHub repo defaults to "All repositories"
-> access for installed GitHub Apps (ChatGPT Codex, Devin.ai, etc.) and account-level
-> Copilot training is opt-out, not opt-in. The runbook is a 12-step lockdown that closes
-> these by hand; ~15 min the first time. Skipping it means the user's API keys may be
-> visible to third-party AI agents and used as future training data the moment the repo
-> exists.
+1. Inspect the active host first. Consult the companion's registry only for setup;
+   it records configured tools, not current operation readiness.
+2. Read a selected `tools/<slug>/README.md` only when tier or rate-limit context is needed.
+3. Never read `secrets/<slug>.env` into the transcript, including in Mode A. The
+   companion's `apply.py` handles substitution into `~/.claude.json` without requiring
+   the agent to see raw values; Claude settings do not configure Codex.
+4. Recommend missing tools through the companion's `runbooks/add-new-tool.md`, when
+   present, or through the public companion tutorial.
 
-**Discovery convention (try in order):**
-
-1. **`$MARKET_INTEL_CONFIG`** env var, explicit path, highest priority and the recommended way.
-2. **`$MARKET_INTEL_CONFIG_DIR`**, lower-priority alias. `MARKET_INTEL_DATA_DIR` must select the same companion's data/ child.
-3. A proven sibling companion, then `~/.market-intel-config/`, through pinned Guards. There is no separate XDG search.
-
-Each user picks where to place their companion repo and either sets the env var or uses one of
-the fallbacks. There is no required filesystem location.
-
-If found, the repo follows the layout defined in
-[`reference/companion-config-spec.md`](reference/companion-config-spec.md) §2, `registry.json`
-at root, `tools/<slug>/` per-tool dirs with `claude.json.template` + `env.template`, and
-`secrets/<slug>.env` (committed under Mode A, gitignored under Mode B per spec §5.3).
-**The spec is the canonical structure reference, don't paraphrase it here.**
-
-**How to use it from this skill (Step 2 detection enhancement):**
-
-1. After inspecting the active host session, consult companion configuration only
-   when it helps with setup. It describes installation, not current operation readiness.
-2. If yes, read its `registry.json` to learn which tools the user has *configured*, and read
-   the specific `tools/<slug>/README.md` only when you need tier/rate-limit context for that
-   tool.
-3. **Never** read `secrets/<slug>.env` files even when they're committed in the repo (Mode
-   A), reading them spills key values into the transcript regardless of where they're
-   stored. apply.py handles substitution into `~/.claude.json`; you never need to look at
-   the raw value.
-4. When a tool the user would benefit from is NOT in their companion repo, recommend
-   adding it using the standard procedure: if the user's companion repo includes
-   `runbooks/add-new-tool.md`, follow that (each user authors their own runbooks);
-   otherwise summarize the procedure from `reference/companion-config-repo.md` here.
-
-**Rotation triggers:** if a key turns out to have leaked (the user pasted it into chat by
-mistake, or you find evidence of unauthorized usage in a dashboard), tell them to:
-- Rotate the key at the provider's dashboard.
-- Use the companion repo's `scripts/capture-key.ps1 -Slug <slug> -Var <VARNAME>` to refresh
-  `secrets/<slug>.env` via clipboard with no echo.
-- Re-run `python3 scripts/apply.py --tool <slug>`.
-- Restart the Claude session.
-
-**What this skill does NOT need to do:** none of the above is required for the matrix to be
-useful. Users without a companion repo just install MCPs ad-hoc via `claude mcp add` and lose
-the durable ops state. The companion pattern is the recommended, audit-friendly way; the
-skill's flow degrades gracefully when it's absent.
+For leaked keys, tell the user to rotate at the provider, use the companion's
+`scripts/capture-key.ps1 -Slug <slug> -Var <VARNAME>` for a no-echo clipboard update,
+rerun `python3 scripts/apply.py --tool <slug>`, and restart Claude. Do not rotate
+on the user's behalf. Without a companion, host tools can still support research;
+missing inventory remains a setup limitation, and real outputs still require PRIVATE storage.
 
 ### Step 4, Delegate execution (to available-now tools only) + JIT-surface the rest
 
@@ -296,32 +254,21 @@ setup vs hard-gap), full source list.
 
 ## Close the feedback loop (Step 5, write what you observed)
 
-The refresh mechanism is open-loop unless real usage feeds back. So at the end of a real research
-run, append one line per source you actually touched to the live-run ledger (this reuses verdicts
-the guardrails above already produced, near-zero extra cost). This is the highest-value error
-signal: it tells the next refresh which matrix entries the real world just proved right or wrong.
+At the end of a research run, append one observation per source used to
+`metrics/live-runs.jsonl` below the PRIVATE DATA directory. The resolver is
+`guards/tools/datadir.py`; the incident helper uses `tools/private_inventory.py`
+to verify the final canonical PRIVATE versioned destination before writing.
+If storage is missing or unverified, stop persistence, explain the required setup,
+and retain the observations in the reply until storage is ready. Never write this
+ledger in the public source.
 
-**The ledger is NOT in this repo.** It is `metrics/live-runs.jsonl` below the private
-DATA directory discovered by `guards/tools/datadir.py`. The incident helper uses
-`tools/private_inventory.py` to verify the final canonical PRIVATE versioned
-repository before creating or writing that path. A live-run entry records what YOU were actually
-researching, that is data, not tool knowledge, and this repo is public. It used to be git-tracked
-here, and a public repo accumulated the operator's research history one real run at a time. If the
-DATA destination is missing or its PRIVATE versioned repository cannot be verified,
-stop persistence and explain what needs initialization. Keep observations in the reply
-until storage is ready. **Never write the ledger back into the repo.** The shape is in
-`metrics/live-runs.jsonl.example`.
-
-What DOES get published is the knowledge distilled from the ledger, "this source is dead", "that
-route falls back", which lands in `reference/tools/*.md` on the next sweep. The lesson is public;
-the research history is not.
+The next refresh uses observations to prioritize re-verification and automatically
+nominate sources flagged `dead` for the C4 deletion process. Publish only reusable source
+findings in `reference/tools/*.md`; research history stays private.
 
 The canonical outcome vocabulary is defined in [live-run-schema.json](reference/live-run-schema.json).
 The [generated synthetic ledger](metrics/live-runs.jsonl.example) covers every supported outcome.
 Do not hand-write real-run records into public examples.
-
-The refresh then reads these to prioritise which domains/sources to re-verify first (a source
-flagged `dead` in real use gets auto-nominated for the C4 deletion path next sweep).
 
 ## Progressive loading rules
 
@@ -353,7 +300,7 @@ flagged `dead` in real use gets auto-nominated for the C4 deletion path next swe
 
 ## Maintenance
 
-The source matrix decays. When asked to "refresh the market-intel source matrix / 刷新工具库", or on
-a scheduled sweep, follow `reference/refresh-protocol.md`: fan out one subagent per domain to find
+When asked to "refresh the market-intel source matrix / 刷新工具库", follow
+`reference/refresh-protocol.md`: fan out one subagent per domain to find
 new/changed/dead tools since each shard's `last_verified`, apply the same quality guardrails, edit
 shards incrementally, record the diff in `CHANGELOG.md`, and bump the plugin version.

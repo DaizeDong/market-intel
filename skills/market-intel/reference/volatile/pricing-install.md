@@ -5,7 +5,9 @@
 > A newly added MCP only takes effect after session restart / `/mcp` reconnect.
 >
 > Security: never fill in or echo the user's API key. Have the USER run the `-e KEY=$VAR` form
-> themselves. Keys land in plaintext in `~/.claude.json`, warn them not to commit/screenshot it.
+> themselves. Keys may be plaintext in `~/.claude.json`; keep them out of screenshots,
+> transcripts and public repositories. Follow the selected companion credential mode:
+> verified PRIVATE Git in Mode A, credentials outside Git in Mode B. See [CONFIG](../../../../CONFIG.md).
 > Prefer `-s user` scope for reusable sources. Prefer HTTP-transport sources on Windows.
 
 ## x-twitter `last_verified: 2026-09`
@@ -77,6 +79,8 @@
 - Alpaca: alpacahq/alpaca-mcp-server (paper trading free, use FIRST).
 - Alex2Yang97/yahoo-finance-mcp (306★): `uvx`/clone self-host, free no-key (⚠ yfinance scrapes
   Yahoo, not for prod).
+
+<a id="crypto-defi"></a>
 
 ## crypto-defi `last_verified: 2026-09`
 - CoinGecko: `npx mcp-remote https://mcp.api.coingecko.com/mcp` (public, no key).

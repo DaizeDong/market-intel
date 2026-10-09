@@ -1,6 +1,6 @@
 # market-intel
 
-Triage a commercial topic across 15 data domains, auto-detect the right specialized source, then delegate the heavy research to the harness you already have.
+Select specialized sources for commercial research across 15 data domains, verify their availability, and delegate retrieval and synthesis to an existing research workflow.
 
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-orange?style=flat)](https://docs.anthropic.com/en/docs/claude-code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -13,7 +13,7 @@ Triage a commercial topic across 15 data domains, auto-detect the right speciali
 
 ---
 
-## ⭐ Read this first, the design philosophy
+## Design philosophy
 
 Commercial research often fails at source selection: a general search result cannot replace
 the required transaction history, platform data or authenticated operation. The tool owns source
@@ -32,22 +32,27 @@ Those checks can reject known forms of regression; they do not prove every recom
 better or every provider is currently usable. Refreshes now require manual initiation, so their
 dates and coverage must remain visible to the reader.
 
-📜 **[Read the full design philosophy → PHILOSOPHY.md](PHILOSOPHY.md)** (seven principles explaining
-source selection, delegation, evidence, update controls and progressive loading).
+See [PHILOSOPHY.md](PHILOSOPHY.md) for the seven principles behind source selection,
+delegation, evidence, update controls and progressive loading.
 
 ---
 
-## What it is (and isn't)
+## Scope
 
-Claude Code already has a `deep-research` harness (fan-out → fetch → verify → synthesize) and a `research-lit` skill. Those are great for **general web** and **academic** research. They fall short the moment your question needs a **specialized commercial source** behind an information barrier, real X/Twitter data, Amazon price history, on-chain feeds, SEO metrics, social sentiment, B2B lead data.
+Use market-intel when a commercial question needs specialized data such as X/Twitter
+content, Amazon price history, on-chain feeds, SEO metrics, social sentiment or B2B leads.
+The skill handles three parts of that workflow:
 
-`market-intel` is the **thin layer** that fills exactly that gap. It does **only three things nothing else does**, and delegates everything else:
+1. **Triage:** map the topic to 1 to N of the 15 data domains.
+2. **Source selection and setup:** verify the selected operation in the active Claude or
+   Codex session, including exposure, execution, authentication and usable content. Use
+   the [per-tool docs](skills/market-intel/reference/tools/index.md) for missing setup.
+3. **Evidence requirements:** verify citations, classify sources, seek independent
+   corroboration and counter-evidence, and report conflicts and coverage gaps.
 
-1. **Triage**, map a commercial topic to 1 to N of 15 data domains.
-2. **Detect + guide install**, verify the selected operation in the active Claude or Codex session, including exposure, execution, authentication and usable content. Missing evidence produces a setup reason; the [per-tool docs](skills/market-intel/reference/tools/index.md) provide install and authentication guidance.
-3. **Quality guardrails**, citation verification, source tiers, multi-source corroboration, mandatory disconfirmation, explicit gaps.
-
-The actual fan-out, fetching, adversarial verification, and citation synthesis are **delegated** to `deep-research` / `research-lit`. No reinvented engine, no trigger fights.
+Retrieval, fan-out and synthesis use the available `deep-research` or `research-lit`
+workflow. Routing for general web and academic questions is listed under
+[How to invoke](#how-to-invoke).
 
 ---
 
@@ -68,8 +73,6 @@ from the checkout. Use `requirements-dev.txt` for the offline test suite. Catalo
 source collection and deterministic checks need no model package. The optional
 incident and changelog draft helpers use the operator's configured `llmcall`
 interface; follow [model adapter setup](CONFIG.md#model-adapter) before using them.
-
-It auto-activates on phrases like `市场调研`, `competitor analysis`, `research this market`, `find arbitrage opportunities`, `X/Twitter sentiment`, `SEO intel`, `product trends`. For single-fact lookups or general web reports it deliberately steps aside (use plain search / `deep-research`); for academic literature it defers to `research-lit`.
 
 ---
 
@@ -115,8 +118,8 @@ installed-host acceptance or provider readiness.
 
 ## Quick start, install the free no-key bootstrap pack (3 minutes)
 
-Want to try it without configuring API keys? Install these 3 free, no-key MCPs first, they cover
-HN/Reddit-style community + market trends + AI papers at zero cost:
+These three free, no-key MCPs provide routes for Hacker News discussions, global
+news and trends, and research papers:
 
 ```bash
 # 1. Hacker News (community)
@@ -134,25 +137,19 @@ For **Codex**, configure the source through Codex MCP settings or its installed 
 reconnect Codex, and inspect the tools exposed there. Claude settings do not prove
 Codex availability. See the [host evidence guide](skills/market-intel/reference/host-capabilities.md).
 
-Now ask: `调研一下 AI agent 工具生态的趋势`. The skill will fan out research subagents that
-use these three sources together, community signal + trends + papers, and produce a sourced
-report after the selected sources pass current operation and content checks.
+After setup, ask `调研一下 AI agent 工具生态的趋势`. The workflow can combine community
+signals, trends and papers from sources that pass current operation and content checks.
 
-After this, the [60-second tour](#60-second-tour) below explains the **specialized MCPs**
-(paid X data, Bright Data, Keepa, etc.), these unlock the high-quality routes the skill is
-really designed for.
+The [60-second tour](#60-second-tour) shows how specialized sources such as paid X
+data, Bright Data and Keepa fit into a research run.
 
-### Now what?, installed it, what do I read first?
-
-Three different "next steps" depending on intent. Pick one:
+### Documentation by task
 
 | If you want to… | Open this |
 |---|---|
-| **Use the skill** (just have it trigger automatically and run research for you) | Nothing else, the skill is loaded; type a research query. |
+| **Use the skill** (just have it trigger automatically and run research for you) | Enter a research query after the host has loaded the skill. |
 | **Install your first specialized MCP** (e.g. a real X data source, a finance API) | `skills/market-intel/reference/install-guide.md`, L0 install mechanics; then `skills/market-intel/reference/tools/<slug>.md` for the specific tool you picked from the source matrix below. |
 | **Set up a private companion config repo** to persist your install state + secrets across machines (recommended for >1 tool) | `skills/market-intel/reference/companion-config-repo.md`, overview + tutorial. Then `companion-config-spec.md` (formal contract) and `companion-config-hardening.md` (GitHub-side lockdown BEFORE first push). |
-
-Most users want path 2 first, then path 3 once they accumulate >1 tool / >1 machine.
 
 ---
 
@@ -182,7 +179,8 @@ After the Quick Start install, try invoking the skill on something concrete:
 - `find me 3 underrated open-source web-scraping tools released in 2026 with > 200 stars`, exercises web-scraping + GitHub velocity discovery
 - `who's been launching credible LLM eval skills in the last 3 months`, exercises ready-skills + frontier-research
 
-Each will fan out subagents, surface evidence with citations, and end with a "gaps if you connect <X> source" list. If a query produces only web-fallback output, that's the skill being honest about its coverage, see the install-guide to add a specialized MCP for deeper data.
+The report identifies the sources used and any missing specialized access. Use the
+installation guide when a listed setup step would improve the requested coverage.
 
 ---
 
@@ -190,7 +188,9 @@ Each will fan out subagents, surface evidence with citations, and end with a "ga
 
 ### The source matrix (15 domains)
 
-The knowledge asset. Each domain shard names the best tool, its **barrier route**, how to detect it, and what to install. Thin index → load only the domain(s) you need. Each tool also has a **per-tool how-to doc** under [`reference/tools/`](skills/market-intel/reference/tools/index.md) (install + auth + usage + 踩坑), reached on-demand via the thin tool index.
+Each domain shard records recommended sources, barrier routes, detection and installation.
+Load the relevant domains, then the selected [tool documentation](skills/market-intel/reference/tools/index.md)
+for installation, authentication, usage and troubleshooting.
 
 | Domain | Top pick (barrier route) |
 |---|---|
@@ -213,7 +213,7 @@ The knowledge asset. Each domain shard names the best tool, its **barrier route*
 For X, twikit remains a conditional fallback after a fresh operation check; see the
 [domain notes](skills/market-intel/reference/domains/x-twitter.md) for its staleness limits.
 
-**Barrier routes:** ① official API (compliant, often paid) · ② resale API (provider absorbs the barrier, cheap, gray-area) · ③ self-host scrape (reverse-engineered API, free, accounts+proxies, ban risk) · ④ **browser automation / act-like-human**, real logged-in browser (playwright MCP + free OSS repos). **First-class, not a footnote:** often returns richer data (rendered/logged-in view, fields APIs hide) at zero API cost. The skill prefers route ④ over paid APIs when it fits, reaching for ①/② only for history it can't backfill (e.g. Keepa), scale reliability, or compliance.
+**Barrier routes:** ① official API (compliant, often paid) · ② resale API (provider absorbs the barrier, cheap, gray-area) · ③ self-host scrape (reverse-engineered API, free, accounts+proxies, ban risk) · ④ **browser automation / act-like-human**, real logged-in browser (playwright MCP + free OSS repos). Browser access can expose rendered or logged-in fields that an API omits, without an API fee. The skill prefers route ④ over paid APIs when it fits, reaching for ①/② only for history it can't backfill (e.g. Keepa), scale reliability, or compliance.
 
 Three install levels: [`install-guide.md`](skills/market-intel/reference/install-guide.md) (L0 mechanics) → [`pricing-install.md`](skills/market-intel/reference/volatile/pricing-install.md) (L1 per-domain commands + prices, `last_verified`-stamped) → [`tools/<slug>.md`](skills/market-intel/reference/tools/index.md) (L2 per-tool). Verify volatile prices against the official site before quoting.
 
@@ -247,15 +247,11 @@ It deliberately steps aside for single-fact lookups or general web reports (use 
 
 ## Example output
 
-A finished run is snapshot-dated, tier-tagged, and built from **structured evidence units**
-(`claim · source · quote · tier · date · confidence`) rather than raw page dumps:
-
-- Decision-grade claims carry ≥2 independent sources, each tagged confidence high/medium/low.
-- A disagreement matrix surfaces conflicts instead of averaging them.
-- A mandatory **Risks & counter-evidence** section (a reverse-search subagent hunts scam/failure/risk).
-- An explicit **"configure source X for deeper data"** gap list where coverage fell back to web.
-
-See the [60-second tour](#60-second-tour) for the step-by-step of what produces this.
+The [report template](skills/market-intel/reference/report-template.md) organizes the
+snapshot date, per-domain findings, confidence levels, disagreement matrix, **Risks &
+counter-evidence**, source list and **configure source X for deeper data** gaps.
+Workers return structured evidence units (`claim · source · quote · tier · date · confidence`)
+for synthesis. The checks below govern which claims enter the report.
 
 ---
 
@@ -275,11 +271,14 @@ Hard rules applied during synthesis (see [SKILL.md](skills/market-intel/SKILL.md
 
 ## Limitations
 
-- **The matrix decays:** APIs go paid, tools get acquired and prices move. The [refresh protocol](skills/market-intel/reference/refresh-protocol.md) rechecks domains, reviews evidence and records accepted changes. The scheduled monthly refresh and weekly surface poll were retired on 2026-10-01. Refreshes are manual: say `刷新工具库` / `refresh the market-intel source matrix`. Monthly domain review, weekly review of volatile sources and a quarterly Horizon scan are planning guidance, not running schedules. See [ROADMAP](ROADMAP.md).
-- **Web fallback is honest, not magic**, if no specialized MCP is connected, the skill says so and flags the gap rather than pretending the web answer is as deep.
-- **No reinvented engine**, the fan-out/verify/synthesize depth is delegated to `deep-research` / `research-lit`; market-intel is the routing + detection + guardrail seam, not a research engine of its own.
-
-This skill is the product of a 12-subagent tool survey followed by a 5-subagent adversarial design review. The review killed the original "build another full deep-research" plan (it would have been a clone with a trigger conflict), proved that `claude mcp add` doesn't take effect until a session reconnect, and forced in the citation-verification gate, source tiers, and disconfirmation mandate.
+- Coverage depends on the connected sources and their verified operations. Web fallback
+  remains explicitly labelled when specialized access is unavailable.
+- Catalog entries, prices and policies can become stale. The monthly refresh and weekly
+  surface poll were retired on 2026-10-01; refreshes now run manually through the
+  [refresh protocol](skills/market-intel/reference/refresh-protocol.md). The review
+  frequencies in [ROADMAP.md](ROADMAP.md#maintenance-cadence) are planning guidance.
+- Deterministic checks cover declared invariants. Live research, source readiness and
+  recovery require evidence from the operation concerned.
 
 ---
 

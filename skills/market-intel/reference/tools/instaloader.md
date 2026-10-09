@@ -1,14 +1,9 @@
 # Tool: instaloader/instaloader
 
-**Runtime storage status: setup only.** This recipe has no shipped adapter that
-admits every file the external tool may create. Directory PRIVATE proof is only a
-placement check. Do not launch collection, login or persistence from this recipe
-until an adapter declares its exact output namespaces in `storage.contract.json`
-and calls `resolve_destination` for each file immediately before writing. Include
-implicit databases, sessions, caches, logs and exports in that review. The setup
-examples below describe adapter configuration; they do not establish runtime
-readiness or authorize child-file writes after `resolve_directory`.
-
+**Runtime storage status: setup only.** No shipped adapter admits this tool's
+complete file output. Do not launch collection, login or persistence until every
+child-file write meets the [external-tool storage requirements](../../../../DATA.md#external-tool-storage).
+`resolve_directory` alone does not authorize writes; examples below are setup guidance.
 
 - **Domain(s):** social-publishing (also: browser-automation)
 - **Barrier route:** ③ · **Source tier:** L4 · **Ready MCP:** no (Python lib + CLI; wrap it yourself)
@@ -30,7 +25,9 @@ browser-automation.
 ## Private runtime and outputs
 Before any collection or login below, use `tools/private_inventory.py` from the full consumer checkout. Select an existing absolute runtime directory with `runtime = resolve_directory("runtime/instaloader")`. This proves the final directory's repository, including a nested repository at that directory, and every effective publication destination is PRIVATE and versioned. Stop if it is missing, PUBLIC or unknown. Revalidate `resolve_directory(path=runtime.path)` immediately before launching the caller with that directory as its working directory.
 
-Check the installed version's supported output and storage settings before use. Route every download, transcript, dataset, request queue, cache, session, cookie file and export through that verified PRIVATE runtime or an absolute file destination checked with `resolve_destination`. Settings that default elsewhere must be explicitly redirected with supported installed-version options. If any output cannot be located and redirected, keep the tool in setup status. Capture metadata stdout only into a verified PRIVATE file; do not redirect it into the consumer checkout. Credential values belong in the designated PRIVATE versioned companion and its approved backup.
+Follow the [external-tool output checklist](../../../../DATA.md#external-tool-storage)
+for installed-version output settings, implicit storage, stdout and credentials.
+Keep this tool in setup status if any output cannot be located and admitted.
 
 ## Auth / keys
 Anonymous works for public profiles (very rate-limited). For private/followed content or higher

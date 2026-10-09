@@ -156,7 +156,7 @@ The generated empty registry is a valid template and remains NOT READY. Populate
 selected `tools[]` entry with a unique kebab-case `slug` and boolean `installed: true`, plus
 `tools/<slug>/claude.json.template` containing an `mcpServers` object and `env.template`.
 The doctor validates these configured fields without testing provider connectivity. Prepare a
-versioned PRIVATE companion and its data/ directory before invoking runtime writers., succeeds on the first try
+versioned PRIVATE companion and its data/ directory before invoking runtime writers.
 
 ```bash
 # 1. Stamp a conformant, empty config skeleton (deterministic — E4):
@@ -171,8 +171,8 @@ python scripts/verify_config.py          # doctor: PASS/FAIL per check, names wh
 
 ## Switching between two configs (hot-swap), E5
 
-A config dir is self-contained (no hardcoded paths). Keep as many as you like and switch by
-repointing the env var, no other change:
+Select a self-contained config directory with the environment variable. Clear or
+update `MARKET_INTEL_DATA_DIR` so it selects the same companion’s `data/` child:
 
 ```bash
 export MARKET_INTEL_CONFIG=~/configs/work       # config A

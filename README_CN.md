@@ -1,6 +1,6 @@
 # market-intel
 
-把商业课题在 15 个数据方向上分诊、自动检测对的专业数据源，再把繁重的检索·验证·合成委托给你已有的调研引擎。
+从 15 个数据方向中为商业调研选择专业来源，核验当前可用性，并把检索与综合交给已有调研流程。
 
 [![Claude Code Skill](https://img.shields.io/badge/Claude%20Code-Skill-orange?style=flat)](https://docs.anthropic.com/en/docs/claude-code)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -13,7 +13,7 @@
 
 ---
 
-## ⭐ 先读这个， 设计理念
+## 设计理念
 
 商业调研常在选源时就出了问题：普通搜索结果无法替代所需的交易历史、平台数据或鉴权操作。
 工具负责分诊、安装指引和证据要求，检索与综合交给已有调研引擎。浏览器访问与官方 API 等来源并列，
@@ -26,21 +26,22 @@
 矩阵修改需要通过已声明规则的确定性检查，并保留来源证据。这些检查能拦住已定义的退化，
 不能证明每条推荐都更好，也不能证明服务商此刻可用。刷新现已改为手动启动，日期和覆盖范围必须留给读者判断。
 
-📜 **[阅读完整设计理念 → PHILOSOPHY.md](PHILOSOPHY.md)**（七条原则说明选源、委托、证据、更新检查和按需加载）。
+选源、委托、证据、更新检查和按需加载的七条原则见 [PHILOSOPHY.md](PHILOSOPHY.md)。
 
 ---
 
-## 它是什么（不是什么）
+## 适用范围
 
-Claude Code 已经内置了 `deep-research`（fan-out → 抓取 → 验证 → 合成）和 `research-lit`。这两个擅长**通用网页**和**学术**调研。但一旦课题需要**有信息壁垒的专业商业数据源**,真实的 X/推特数据、亚马逊历史价、链上数据、SEO 指标、社媒舆情、B2B 潜客，它们就够不着了。
+商业问题需要 X/推特内容、亚马逊历史价、链上数据、SEO 指标、社媒舆情或 B2B 潜客等
+专业数据时，使用 market-intel。它负责三部分工作：
 
-`market-intel` 就是补这个缺口的**瘦层**。它**只做三件别人不做的事**，其余全部委托出去：
+1. **分诊：** 把课题映射到 15 个数据方向中的 1 到 N 个。
+2. **选源与配置：** 在当前 Claude 或 Codex 会话中核验选定操作的开放状态、执行、鉴权和内容。
+   缺少配置时，查阅[逐工具文档](skills/market-intel/reference/tools/index.md)。
+3. **证据要求：** 回验引用、标注源等级、寻找独立印证和反方证据，列明冲突与覆盖缺口。
 
-1. **分诊**, 把商业课题映射到 15 个数据方向中的 1~N 个。
-2. **检测 + 引导安装**, 在当前 Claude 或 Codex 会话中核验选定操作，分别检查工具是否开放、执行是否成功、鉴权是否通过，以及返回内容是否可用。证据不足时说明要补什么；安装和鉴权步骤见[逐工具文档](skills/market-intel/reference/tools/index.md)。
-3. **质量护栏**, 引用回验、源等级、多源印证、强制反方检索、显式缺口。
-
-真正的 fan-out、抓取、对抗式验证、带引用合成，**委托**给 `deep-research` / `research-lit`。不重造引擎，不抢触发。
+检索、并行子任务和综合使用当前可用的 `deep-research` 或 `research-lit` 流程。
+通用网页和学术问题的路由见[如何触发](#如何触发)。
 
 ---
 
@@ -59,8 +60,6 @@ git clone --recurse-submodules https://github.com/DaizeDong/market-intel.git ~/.
 在检出的工具仓中运行 `python -m pip install -r requirements.txt`，安装 Python 维护命令的依赖；
 离线测试依赖见 `requirements-dev.txt`。目录浏览、数据采集和确定性检查无需模型适配包。
 可选的事故说明和变更记录起草工具使用当前安装的 `llmcall`，配置步骤见[模型适配器说明](CONFIG.md#model-adapter)。
-
-遇到 `市场调研`、`竞品分析`、`调研这个市场`、`找套利机会`、`X/推特舆情`、`SEO 情报`、`产品趋势` 等会自动触发。单点查询或纯网页报告它会主动让位（用普通搜索 / `deep-research`）；学术文献则交给 `research-lit`。
 
 ---
 
@@ -103,7 +102,7 @@ DATA，不探测机器清单，也不写文件。`--capability` 为目录中的 
 
 ## 快速开始， 装免费无密钥三件套（3 分钟）
 
-不想配 API key 也想试用?先装这 3 个免费无密钥的 MCP, 覆盖 HN / Reddit 风格社区 + 全球趋势 + AI 论文，零成本：
+以下三个免费、无需密钥的 MCP 分别提供 Hacker News 讨论、全球新闻与趋势、研究论文的访问路线：
 
 ```bash
 # 1. Hacker News (社区)
@@ -122,19 +121,15 @@ claude mcp add -s user arxiv -- uvx arxiv-mcp-server
 
 接着说： `调研一下 AI agent 工具生态的趋势`。skill 会用通过核验的来源检索社区信号、趋势和论文，再生成带引用的报告。只有选定来源通过当前操作和内容核验后，才把它计为可用。
 
-之后，看下面 [60 秒演示](#60-秒演示)了解**专用 MCP**(付费 X 数据、Bright Data、Keepa 等), 那些才是 skill 真正设计的高质量路线。
+[60 秒演示](#60-秒演示)说明付费 X 数据、Bright Data、Keepa 等专业来源如何参与调研。
 
-### 装完之后， 该读哪个?
-
-按目的选一条：
+### 按任务查阅文档
 
 | 你想做的… | 打开这个 |
 |---|---|
-| **直接用 skill**(让它自动触发跑研究) | 啥也不用读， skill 已加载，直接打研究问题。 |
+| **直接用 skill**(让它自动触发跑研究) | 宿主加载 skill 后，直接输入研究问题。 |
 | **装第一个专用 MCP**(比如真 X 数据源 / 金融 API) | `skills/market-intel/reference/install-guide.md`, L0 装机机制；然后 `skills/market-intel/reference/tools/<slug>.md` 看你从下面源矩阵挑的那个工具。 |
 | **建私有 companion config repo** 跨机持久化你的安装状态 + 密钥(>1 工具时推荐) | `skills/market-intel/reference/companion-config-repo.md`, 概述 + 教程。然后 `companion-config-spec.md`(正式契约)和 `companion-config-hardening.md`(首次推送**前**做 GitHub 端锁定)。 |
-
-大多数人先走路径 2,工具/机器累积到 >1 后再走路径 3。
 
 ---
 
@@ -164,7 +159,7 @@ claude mcp add -s user arxiv -- uvx arxiv-mcp-server
 - `find me 3 underrated open-source web-scraping tools released in 2026 with > 200 stars`, 跑 web-scraping + GitHub 星速发现
 - `who's been launching credible LLM eval skills in the last 3 months`, 跑 ready-skills + 前沿研究
 
-每个都会 fan-out 子任务、亮出带引用的证据，最后给一份"配了 <X> 源可更深"缺口清单。如果某个查询只出网页兜底，那是 skill 在诚实地说明它的覆盖范围，见 install-guide 加一个专用 MCP 拿更深的数据。
+报告列明已用来源和缺少的专业访问能力。缺口中的配置步骤能补足所需覆盖时，再查安装指南。
 
 ---
 
@@ -172,7 +167,8 @@ claude mcp add -s user arxiv -- uvx arxiv-mcp-server
 
 ### 源矩阵（15 个方向）
 
-核心知识资产。每个方向分片标明首选工具、**信息壁垒路线**、如何检测、装什么。薄索引 → 只加载你需要的方向。每个工具还配有一份 [`reference/tools/`](skills/market-intel/reference/tools/index.md) 下的**逐工具操作文档**（安装 + 鉴权 + 用法 + 踩坑），通过薄工具索引按需加载。
+每个方向分片记录推荐来源、访问路线、检测与安装方法。先加载相关方向，再查所选的
+[工具文档](skills/market-intel/reference/tools/index.md)，获取安装、鉴权、用法和排障步骤。
 
 | 方向 | 首选（壁垒路线） |
 |---|---|
@@ -192,7 +188,10 @@ claude mcp add -s user arxiv -- uvx arxiv-mcp-server
 | [browser-automation](skills/market-intel/reference/domains/browser-automation.md) | playwright MCP + browser-use / crawl4ai ④ |
 | [consumer-price-compare](skills/market-intel/reference/domains/consumer-price-compare.md) | **委托给姊妹 skill** shopping-aggregator |
 
-**壁垒路线：** ① 官方 API（合规、多为付费）· ② 转售 API（服务商承担壁垒、便宜、灰区）· ③ 自托管抓取（逆向 API、免费、自备账号+代理、有封号风险）· ④ **浏览器自动化 / 模拟人**,真实登录态浏览器（playwright MCP + 免费开源仓库）。**一等路线，不是脚注：** 常能拿到比付费 API 更丰富的数据（渲染后/登录后视图、API 不返回的字段），且零 API 成本。skill 在适用时**优先走路线 ④**，只在需要它无法回溯的历史数据（如 Keepa 历史价）、规模化可靠性、或合规（无封号风险）时才用 ①/②。
+twikit 仅在重新核验操作后作为有条件的备选；时效限制见
+[X 方向说明](skills/market-intel/reference/domains/x-twitter.md)。
+
+**壁垒路线：** ① 官方 API（合规、多为付费）· ② 转售 API（服务商承担壁垒、便宜、灰区）· ③ 自托管抓取（逆向 API、免费、自备账号+代理、有封号风险）· ④ **浏览器自动化 / 模拟人**,真实登录态浏览器（playwright MCP + 免费开源仓库）。浏览器可以读取 API 未提供的渲染后或登录后字段，无需 API 费用。skill 在适用时**优先走路线 ④**，只在需要它无法回溯的历史数据（如 Keepa 历史价）、规模化可靠性、或合规（无封号风险）时才用 ①/②。
 
 三层安装指南：[`install-guide.md`](skills/market-intel/reference/install-guide.md)（L0 安装机制）→ [`pricing-install.md`](skills/market-intel/reference/volatile/pricing-install.md)（L1 逐方向命令 + 价格，带 `last_verified` 时间戳）→ [`tools/<slug>.md`](skills/market-intel/reference/tools/index.md)（L2 逐工具）。时效价格引用前请到官网二次核实。
 
@@ -225,15 +224,10 @@ shard](skills/market-intel/reference/domains/consumer-price-compare.md) 路由�
 
 ## 示例输出
 
-一份完成的报告带数据快照日期、源等级标注，由**结构化证据单元**（`论断·来源·原文引用·等级·日期·置信度`）
-而非原始网页堆构成：
-
-- 决策级结论带 ≥2 个独立源，每条标置信度高/中/低。
-- 分歧矩阵亮出冲突，而不是抹平它们。
-- 强制的**风险与反方证据**章节（反向检索子任务挖骗局/失败/风险）。
-- 凡回落到网页之处，给一份显式的**"配了 X 源可更深"**缺口清单。
-
-具体怎么产出这份报告，见上面的 [60 秒演示](#60-秒演示)。
+[报告模板](skills/market-intel/reference/report-template.md)包含快照日期、分方向发现、置信度、
+分歧矩阵、**风险与反方证据**、来源清单，以及**配了 X 源可更深**的缺口说明。
+子任务返回结构化证据单元（`论断·来源·原文引用·等级·日期·置信度`），供主任务综合。
+结论进入报告前，须满足下面的检查要求。
 
 ---
 
@@ -253,11 +247,11 @@ shard](skills/market-intel/reference/domains/consumer-price-compare.md) 路由�
 
 ## 局限
 
-- **矩阵会过时：** API 转付费、工具被收购、价格变动，都需要按[刷新协议](skills/market-intel/reference/refresh-protocol.md)重新核验来源、审查证据并记录已接受的修改。原每月刷新任务和每周动态采集已于 2026-10-01 退役，现在通过 `刷新工具库` / `refresh the market-intel source matrix` 手动启动。每月复核方向、每周关注快变来源、每季度做 Horizon scan，只是安排复核时的参考频率，不表示有任务正在运行。见 [ROADMAP](ROADMAP.md)。
-- **网页兜底是诚实，不是魔法**, 没连专用 MCP 时，skill 会如实说明并标注缺口，而不是假装网页答案一样深。
-- **不重造引擎**, fan-out/验证/合成的深度委托给 `deep-research` / `research-lit`；market-intel 是路由 + 检测 + 护栏的接缝，不是它自己的调研引擎。
-
-本 skill 是一次 12-子任务工具调研 + 5-子任务对抗式设计评审的产物。评审推翻了最初"再造一个全栈 deep-research"的方案（那会是带触发冲突的克隆），证实了 `claude mcp add` 需重连会话才生效，并强制加入了引用回验闸门、源等级、强制反方检索。
+- 覆盖范围取决于已连接来源及其通过核验的操作。缺少专业访问能力时，网页备选需要明确标注。
+- 目录条目、价格和政策会过时。每月刷新和每周动态采集已于 2026-10-01 退役，现在按
+  [刷新协议](skills/market-intel/reference/refresh-protocol.md)手动启动。
+  [ROADMAP.md](ROADMAP.md#maintenance-cadence) 中的复核频率是安排工作的参考。
+- 确定性检查覆盖已声明的不变量；真实调研、来源可用性和恢复成功需要相应操作的证据。
 
 ---
 

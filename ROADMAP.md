@@ -1,13 +1,28 @@
 # Roadmap
 
+Current: **v0.30.0**
+
+## Current maintenance and readiness contracts
+
+- [x] **Bounded GitHub retries.** `verify_matrix.py` attempts a repository lookup up to three
+      times, backs off after transient errors, stops immediately on 404 and classifies malformed
+      responses separately. Required repository and star verification still blocks if unverified.
+- [x] **Current-session capability evidence.** Configuration, exposure, execution, authentication
+      and content are distinct. Catalog browsing does not probe or write; explicit refresh writes
+      only to a verified PRIVATE companion. Offline checks do not prove live provider readiness.
+- [x] **Version alignment.** Package metadata, both badges and this current release declaration
+      use the already documented 0.30.0 release; subsequent contract repairs remain Unreleased.
+
 External tool recipes that have only a PRIVATE directory preflight remain setup
 only until an adapter declares and admits their child-file writes. The source's
 atomic inventory, cache, ledger and report writers already use artifact admission;
 directory placement alone does not establish that coverage for a third-party SDK.
 
-Current: **v0.30.0**
+Companion selection and write admission use the source contracts. Synthetic regressions cover conflicting roots, absent setup and undeclared or ignored writes. Current provider connectivity, delivery and restore success require separate operational evidence. The declared 64 MiB working-data budget remains enforced; any over-budget companion remains out of conformance until reviewed dependency and retention closure is completed. No empty template, static document check or path classification establishes readiness or authorizes deletion.
 
-## v0.1.0 (alpha), foundation
+## Implemented foundations
+
+### v0.1.0 (alpha)
 
 - Thin orchestration layer: triage → detect (`claude mcp list`) → guide install → delegate.
 - 14-domain source matrix (thin index + per-domain shards + isolated volatile pricing/install).
@@ -15,9 +30,9 @@ Current: **v0.30.0**
   degradation, dated volatile data, disconfirmation mandate, conflict surfacing, explicit gaps).
 - Refresh protocol for keeping the matrix current.
 
-## Done (v0.3.0), self-evolution / anti-regression core
+### v0.3.0 and later maintenance controls
 
-- [x] **Scheduled auto-refresh**, Windows Task `RefreshMarketIntel`, monthly, branch + gate + PR. Retired on 2026-10-01; refreshes are manual now.
+- [x] **Scheduled auto-refresh**, Windows Task `RefreshMarketIntel`, monthly, branch + gate + PR. Retired on 2026-10-01; see the maintenance cadence below.
 - [x] **Constitution** (`CONSTITUTION.md`, C1 to C10) injected as hard constraints each run.
 - [x] **Deterministic gate** (`tools/verify_matrix.py`), API-verified repo existence + star
       tolerance + structure + freshness + methodology + anti-mass-deletion + constitution lock.
@@ -32,17 +47,6 @@ Current: **v0.30.0**
       overview sits atop the L1 per-domain `pricing-install.md` and L2 per-tool docs. The gate gained a
       **TOOLS** coverage check (index↔doc) and now also gh-api-verifies repos/stars cited inside tool
       docs. The refresh protocol keeps the docs in sync each sweep (step 3b).
-
-## Current maintenance and readiness contracts
-
-- [x] **Bounded GitHub retries.** `verify_matrix.py` attempts a repository lookup up to three
-      times, backs off after transient errors, stops immediately on 404 and classifies malformed
-      responses separately. Required repository and star verification still blocks if unverified.
-- [x] **Current-session capability evidence.** Configuration, exposure, execution, authentication
-      and content are distinct. Catalog browsing does not probe or write; explicit refresh writes
-      only to a verified PRIVATE companion. Offline checks do not prove live provider readiness.
-- [x] **Version alignment.** Package metadata, both badges and this current release declaration
-      use the already documented 0.30.0 release; subsequent contract repairs remain Unreleased.
 
 ## Next, deferred pieces of the 5-subagent design
 
@@ -76,8 +80,8 @@ Current: **v0.30.0**
 
 ## Triggered work (v0.18.1), gated by external conditions
 
-The items below are designed but deferred. Each has a **trigger condition**: when the
-condition fires, the item moves to "Next" and gets a sweep. Don't pre-build.
+These proposals remain deferred until their trigger conditions are verified. Move a
+proposal to the active backlog when its condition is met.
 
 - [ ] **MCP-registry federation, sync-check bucket H.** Trigger: `registry.modelcontextprotocol.io`
       exposes a stable `/v0/servers?since=` API (verified working in 2026-06, but auth +
@@ -112,10 +116,9 @@ condition fires, the item moves to "Next" and gets a sweep. Don't pre-build.
 
 ## Future domain placeholders (v0.18.1)
 
-The audit identified six new domains that will likely materialize in 2026-2027. Each gets
-an empty placeholder in `sources-index.md`, owning the namespace before someone duplicates
-it. Per future-proofing doctrine: occupied placeholders force refresh-protocol to point at
-them, so they don't get forgotten until the right moment to populate.
+The v0.18.1 audit reserved six candidate namespaces for 2026-2027 in
+`sources-index.md`. Refresh reviews can revisit these placeholders when the sources
+mature; a reserved namespace is not an implemented domain.
 
 - [ ] `agent-marketplace`, Anthropic Skills Hub / OpenAI GPT Store / Smithery as research
       surfaces themselves (not just MCP distribution channels, research on what's selling
@@ -133,10 +136,8 @@ them, so they don't get forgotten until the right moment to populate.
 
 ## Maintenance cadence
 
-See `skills/market-intel/reference/refresh-protocol.md`, cadence overhauled in v0.17.0.
-Default monthly · weekly for the fast-moving set (crypto-defi / browser-automation /
-frontier-research / mcp-ecosystem) · quarterly reserved for Horizon scan.
-
-## Configuration and storage acceptance
-
-Companion selection and write admission use the source contracts. Synthetic regressions cover conflicting roots, absent setup and undeclared or ignored writes. Current provider connectivity, delivery and restore success require separate operational evidence. The declared 64 MiB working-data budget remains enforced; any over-budget companion remains out of conformance until reviewed dependency and retention closure is completed. No empty template, static document check or path classification establishes readiness or authorizes deletion.
+The scheduled monthly refresh and weekly surface poll were retired on 2026-10-01.
+Start a refresh manually through [the refresh protocol](skills/market-intel/reference/refresh-protocol.md).
+The v0.17.0 review frequencies remain planning guidance: monthly overall, weekly for
+crypto-defi / browser-automation / frontier-research / mcp-ecosystem, and quarterly
+for the Horizon scan. They do not indicate running schedules.

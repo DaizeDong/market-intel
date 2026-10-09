@@ -12,10 +12,12 @@ inventory do not establish current execution, authorization or useful response c
 
 ## Locate and validate the companion
 
-Configuration discovery checks `MARKET_INTEL_CONFIG`, then
-`~/.market-intel-config/`, then `~/.config/market-intel-config/`. These are candidate
-locations, not proof of a valid configuration or PRIVATE storage. An explicit invalid
-configuration must be diagnosed rather than silently replaced with another directory.
+Follow [CONFIG.md’s discovery order](../../../CONFIG.md#discovery-convention-e2):
+`MARKET_INTEL_CONFIG`, its lower-priority alias `MARKET_INTEL_CONFIG_DIR`, then the
+pinned Guards sibling/home conventions. There is no separate XDG search.
+`MARKET_INTEL_DATA_DIR`, when set, must select the same companion’s existing `data/`
+child. Explicit invalid or conflicting selectors fail without choosing another root.
+A resolved path does not by itself prove configuration readiness or PRIVATE storage.
 
 Before storing real configuration or DATA, verify the repository's configured remote
 visibility and the resolved destination. PUBLIC or unknown visibility blocks writes.
@@ -33,8 +35,9 @@ a verified PRIVATE destination.
 Locate the full market-intel checkout before invoking its maintenance scripts.
 `scripts/init_config.py --out <absolute-companion-path> --mode B` creates an empty
 configuration skeleton. It currently supports Mode B only; Mode A fails before
-creating output. Initialization and `scripts/verify_config.py` check configuration
-shape, not provider authentication or operation readiness.
+creating output. The empty registry remains NOT READY until the selected installed tools and their
+required templates are configured. Initialization and `scripts/verify_config.py`
+check configuration shape, not provider authentication or operation readiness.
 
 The skeleton includes:
 
