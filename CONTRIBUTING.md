@@ -1,7 +1,6 @@
 # Contributing to market-intel
 
-Thanks for considering a contribution. Most contributions fall into one of three patterns;
-each has a slightly different path.
+Use the workflow below for a new tool, an existing entry, or a domain/framework change.
 
 ## Pattern 1, Add a new tool to the source matrix
 
@@ -53,7 +52,7 @@ the replaced commit separately; CI uses that mapping only when the candidate has
 parent and it is the configured sanitized baseline. Missing history without this exact mapping
 remains `NOT_EXAMINED`.
 
-Of particular note: **GHACTIVE** is the deterministic activity gate. Full spec lives in
+**GHACTIVE** is the deterministic activity gate. Full spec lives in
 `tools/verify_matrix.py` module docstring (canonical). Short version: every github.com URL
 in any shard gets a real `gh api` check; 404 / archived / >12mo stale all gate the PR. If
 an activity check reports staleness, review the evidence against `CONSTITUTION.md` C4.
@@ -105,7 +104,7 @@ already-identified next-domain candidates with their maturity triggers.
 If you're new to the codebase, recommended order:
 
 1. `README.md`, what the skill is, who it's for, install
-2. `PHILOSOPHY.md`, the 6 principles that govern every change
+2. `PHILOSOPHY.md`, the seven principles that govern every change
 3. `skills/market-intel/SKILL.md`, the user-facing workflow
 4. `skills/market-intel/reference/sources-index.md`, domain map (one-line index)
 5. `skills/market-intel/reference/refresh-protocol.md`, how the matrix gets updated

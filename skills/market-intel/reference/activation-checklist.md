@@ -9,7 +9,8 @@ catalog. It contains no saved account inventory or host readiness claims.
   have separate configuration and session exposure.
 - Reconnect if required, then inspect this session's callable tool and operation.
 - Run a bounded read-only request. Check execution, authentication and usable
-  response content separately; a valid empty response is different from failure.
+  response content separately. Distinguish transport, authentication, quota and
+  content failures from a valid empty response.
 - Attribute evidence to the host, session, source, capability, timestamp and
   observation method in [host-capabilities.md](host-capabilities.md).
 - Report `available-now`, `setup` with its missing prerequisite, or an evidenced

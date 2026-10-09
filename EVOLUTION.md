@@ -2,13 +2,18 @@
 
 > **自动进化闭环设计, 评估结论与分阶段路线**
 
-This document captures the closed-loop design for market-intel's self-update: an honest diagnosis of
-where it is today, why it is **not yet** safe to go fully autonomous, and the staged path that gets
-there without violating [PHILOSOPHY.md](PHILOSOPHY.md) (P3: monotonic, only improve, never decay).
-It is the product of a 5-subagent evaluation (control-theory, feedback, meta-loop, red-team, CI).
+This document preserves a historical five-subagent evaluation (control theory,
+feedback, meta-loop, red-team and CI) and its staged proposal for automated updates.
+The diagnosis below describes the evaluated baseline, including the v0.5.1 interim
+check; it is not a current capability audit. [ROADMAP.md](ROADMAP.md) owns current
+implementation and backlog status. Scheduled refreshes were retired on 2026-10-01.
 
-> 本文记录 market-intel 自更新的闭环设计：现状诚实诊断、为何**尚不能**安全全自动、以及在不违背
-> PHILOSOPHY（P3 单调进化）前提下达成全自动的分阶段路线。源自一次 5-subagent 评估。
+The proposed stages require the controls in [PHILOSOPHY.md](PHILOSOPHY.md) and explicit
+approval before any change to merge authority. None of the proposals grants that authority.
+
+> 本文保留一次五子任务评估的诊断与分阶段提案，涵盖控制理论、反馈、元循环、对抗审查和 CI。
+> 下文的现状判断属于当时的评估基线，包括 v0.5.1 的临时检查，并非当前能力审计。
+> 当前实现和待办以 ROADMAP.md 为准；定时刷新已于 2026-10-01 退役。
 
 ---
 

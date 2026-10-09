@@ -1,14 +1,9 @@
 # Tool: twscrape
 
-**Runtime storage status: setup only.** This recipe has no shipped adapter that
-admits every file the external tool may create. Directory PRIVATE proof is only a
-placement check. Do not launch collection, login or persistence from this recipe
-until an adapter declares its exact output namespaces in `storage.contract.json`
-and calls `resolve_destination` for each file immediately before writing. Include
-implicit databases, sessions, caches, logs and exports in that review. The setup
-examples below describe adapter configuration; they do not establish runtime
-readiness or authorize child-file writes after `resolve_directory`.
-
+**Runtime storage status: setup only.** No shipped adapter admits this tool's
+complete file output. Do not launch collection, login or persistence until every
+child-file write meets the [external-tool storage requirements](../../../../DATA.md#external-tool-storage).
+`resolve_directory` alone does not authorize writes; examples below are setup guidance.
 
 - **Domain(s):** x-twitter (also: none)
 - **Barrier route:** ③ self-host scrape · **Source tier:** L4 · **Ready MCP:** no (Python library, wrap it yourself or call from a script)
@@ -36,7 +31,7 @@ Verify the absolute account import file with `resolve_destination(path=account_f
 - **Rides X's internal GraphQL/Search endpoints** → breaks when X changes them. The repo is **very active (pushed 2026-06-08)**, which is exactly why it's still viable, pin to a recent version and update when search silently returns empty.
 - **Read-only-ish**, it's a scraper, not a poster; consider twikit for write/DM only after a fresh check of that operation, or use an authorized official write route.
 - **Violates X ToS**, research/throwaway use at your own risk.
-- **Shard truth:** X "Top"/search was nearly empty for consumer/non-tech demand (patio-heater real-run), rotating 10 accounts won't conjure demand signal that isn't on X; route consumer-demand questions to 抖音/小红书/B站 or Reddit/forums.
+- **Source coverage:** Prior consumer/non-tech demand queries found little useful evidence in X "Top"/search. Rotating more accounts does not establish that the relevant audience is present; include 抖音/小红书/B站 or Reddit/forums when selecting consumer-demand sources.
 - Don't confuse with the **dead** snscrape (停更), twscrape is its living successor; flag snscrape L5 if a plan relies on it.
 
 ## Failure signals & fallback

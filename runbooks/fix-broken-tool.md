@@ -101,11 +101,10 @@ ahead of the shard. Touch it only when the shard's default actually moved.
 
 ## 5. (If companion-config installed) update config side
 
-Resolve the active companion using [the discovery convention](../CONFIG.md#discovery-convention-how-the-skill-finds-your-config-e2):
-`MARKET_INTEL_CONFIG` first (with `MARKET_INTEL_CONFIG_DIR` as its supported alias), then
-`~/.market-intel-config/`, then `~/.config/market-intel-config/`. Report an explicitly selected
-missing or invalid path instead of falling back or skipping. Skip to Step 6 only when discovery
-establishes that no companion is configured.
+Resolve the active companion through [the CONFIG discovery contract](../CONFIG.md#discovery-convention-e2),
+including its supported aliases and same-companion DATA selection. Invalid, missing or conflicting
+explicit selectors are errors; do not fall back or skip them. Skip to Step 6 only when normal
+discovery establishes that no companion is configured.
 
 For a resolved companion, run its checker without reading or printing secret values:
 

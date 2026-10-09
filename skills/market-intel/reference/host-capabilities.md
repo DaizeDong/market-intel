@@ -129,9 +129,10 @@ or invalid. A failed refresh leaves storage unverified. See the
 for initialization requirements.
 
 The destination is `inventory/availability-cache.json` below the resolved DATA
-directory. Set `MARKET_INTEL_CONFIG` to an existing private companion or
-`MARKET_INTEL_DATA_DIR` to an existing directory in that companion. The shared
-resolver selects `data/` when present. A failed explicit override never falls back.
+directory. Set `MARKET_INTEL_CONFIG` to the selected private companion. Its `data/` child
+must already exist; `MARKET_INTEL_DATA_DIR`, when set, must name that same child.
+Follow [CONFIG.md](../../../CONFIG.md#discovery-convention-e2) for selection and
+initialization. A failed explicit override never falls back.
 An atomic write preserves a previous snapshot if replacement fails; the CLI returns
 nonzero on a storage failure and names the verified companion on success. The
 console does not commit; include the snapshot in the companion's normal backup

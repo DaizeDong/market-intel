@@ -2,21 +2,24 @@
 
 ## [Unreleased]
 
+### Catalog corrections
+
 - Refresh both open-seo star annotations to 22.7k using the GitHub API snapshot
   of 22,708 stars on 2026-10-08.
-- Keep directory-only external runtime recipes setup-only until child-file admission is implemented; align feedback ledger reads with selected companion layout.
-- Unify companion selection across settings, initialization, diagnostics and runtime DATA; reject conflicting selectors.
-- Enforce declared artifact ownership and persistence through the pinned Guards write-admission API.
-- Align setup, required fields and recovery documentation with supported capabilities.
-- Report an empty tool registry as NOT READY and require installed capability templates; runtime writers require the data/ layout.
-
-
 - Refresh the two StaffSpy star annotations to 341 using the GitHub API on 2026-10-06;
   installation and scraping remain unverified by this metadata check.
 - Hummingbot (+ MCP): D-STALE. The client is archived upstream, confirmed by the GitHub API
   on 2026-10-06. Withdraw its Ready MCP and installation recommendation; retain the active
   Hummingbot core as setup pending. Preserve the retired client URL and evidence in
   [the retirement note](docs/retired-catalog.md), with no replacement claimed.
+
+### Configuration and operation evidence
+
+- Keep directory-only external runtime recipes setup-only until child-file admission is implemented; align feedback ledger reads with selected companion layout.
+- Unify companion selection across settings, initialization, diagnostics and runtime DATA; reject conflicting selectors.
+- Enforce declared artifact ownership and persistence through the pinned Guards write-admission API.
+- Align setup, required fields and recovery documentation with supported capabilities.
+- Report an empty tool registry as NOT READY and require installed capability templates; runtime writers require the data/ layout.
 
 - Align plugin metadata, README badges and ROADMAP with the existing 0.30.0 release record.
   The later catalog repair had reverted the manifest to 0.29.2 without a corresponding release
@@ -27,7 +30,6 @@
   to 15 and surface the scheduled-refresh retirement in both entry documents.
 - Explain source-selection tradeoffs and evidence limits before installation in both languages;
   distinguish the Mode B initializer default from a companion's declared Mode A or Mode B policy.
-
 
 - Retire the scheduled monthly refresh. The Windows task `RefreshMarketIntel`, its local runner and the weekly surface poll that fed it were removed on 2026-10-01, so refreshes now run manually through the refresh protocol. The `heartbeat` workflow, which opened an issue whenever a month passed without a scheduled refresh, is removed with them; it would now fire every month.
 
