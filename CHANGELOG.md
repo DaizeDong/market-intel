@@ -4,6 +4,9 @@
 
 ### Catalog corrections
 
+- Refresh all three omkarcloud/google-maps-scraper star annotations to 3.6k and its
+  last-push date using the GitHub API snapshot of 3,601 stars on 2026-10-10;
+  installation and scraping remain unverified by this metadata check.
 - Refresh both open-seo star annotations to 22.7k using the GitHub API snapshot
   of 22,708 stars on 2026-10-08.
 - Refresh the two StaffSpy star annotations to 341 using the GitHub API on 2026-10-06;

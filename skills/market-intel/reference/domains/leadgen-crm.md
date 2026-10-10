@@ -25,7 +25,7 @@ ZeroBounce. Outreach → Smartlead. CRM → your CRM's official MCP. Min combo: 
 | repo | route | note |
 |---|---|---|
 | **gosom/google-maps-scraper** (5.8k★) | ④ self-host | local B2B leads: name/phone/site/**email**, **far lower risk than LinkedIn** |
-| omkarcloud/google-maps-scraper (2.7k★) | ④ | 50+ fields incl email/socials + enrichment |
+| omkarcloud/google-maps-scraper (3.6k★) | ④ | 50+ fields incl email/socials + enrichment; star count checked via GitHub API 2026-10-10 |
 | joeyism/linkedin_scraper (4.2k★) | ④ | Selenium + your login session; ⚠ highest ban risk, small batch only |
 | cullenwatson/StaffSpy (341★) | ④ | scrape company staff lists; ⚠ ToS/ban risk; star count checked via GitHub API 2026-10-06 |
 

@@ -213,7 +213,7 @@ Platform-specific OSS repos (free; most violate platform ToS, throwaway accounts
 - Bluesky: `pip install atproto` (MarshalX/atproto, official) · Mastodon: `pip install Mastodon.py` (official)
 - Ecom: Cybrarist/Discount-Bandit (697★, self-host tracker) · omkarcloud/amazon-scraper (220★)
 - SERP/SEO: searxng/searxng (31k★, self-host meta-search) · towfiqi/serpbear (2k★, rank tracker) · deedy5/ddgs (2.7k★)
-- B2B leads: gosom/google-maps-scraper (5.8k★, low-risk) · omkarcloud/google-maps-scraper (2.7k★)
+- B2B leads: gosom/google-maps-scraper (5.8k★, low-risk) · omkarcloud/google-maps-scraper (3.6k★, gh-api 2026-10-10)
 - Trends: flack0x/trendspyg · sdil87/trendspy. App stores: facundoolano/google-play-scraper (2.9k★) + app-store-scraper
 - Dead/avoid: tomquirk/linkedin-api (404), pytrends (archived), snscrape (停更), elizaOS/agent-twitter-client (下架)
 

@@ -3,7 +3,7 @@
 - **Domain(s):** leadgen-crm (also: browser-automation)
 - **Barrier route:** ④ · **Source tier:** L4 · **Ready MCP:** no (desktop GUI app + optional REST API; no MCP)
 - **Cost:** free (200 searches/month, lifetime; each search returns 1000s of rows). REST-API tier also 200/mo free. [github.com/omkarcloud/google-maps-scraper, fetched 2026-06]
-- **Repo / Provider:** github.com/omkarcloud/google-maps-scraper, `omkarcloud/google-maps-scraper (2.7k★, gh-api 2026-06)`, MIT, active (pushed 2026-06)
+- **Repo / Provider:** github.com/omkarcloud/google-maps-scraper, `omkarcloud/google-maps-scraper (3.6k★, gh-api 2026-10-10)`, MIT, active (pushed 2026-09-21)
 - **Top pick for its domain:** no (the ④ default is **gosom/google-maps-scraper**, lower-friction headless; pick omkarcloud when you need its 50+ fields / built-in email+social enrichment)
 
 ## What it does / when to pick it
