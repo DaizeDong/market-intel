@@ -524,6 +524,21 @@
       }
     },
     {
+      "artifact_id": "atomic-staging-container",
+      "path_pattern": ".staging",
+      "purpose": "Runtime container for separately admitted atomic staging files and writer locks",
+      "schema": "Ordinary directory; this exact path grants no ownership to child files.",
+      "producer": "private_inventory.write_text and private_inventory._exclusive_update",
+      "consumer_or_final_deliverable": "Parent of separately declared atomic-staging and writer-locks artifacts",
+      "rebuild_or_restore": "Recreate only when admitting a declared staging file or writer lock.",
+      "retention_rule": {
+        "class": "rebuildable",
+        "rule": "Keep while writers use it; remove only when empty and no owning operation is active."
+      },
+      "persistence": "transient",
+      "transient_reason": "Structural container with no independent runtime record; child artifacts have separate ownership and retention."
+    },
+    {
       "artifact_id": "atomic-staging",
       "path_pattern": ".staging/inventory-*.tmp",
       "purpose": "Prepared atomic inventory, ledger and report publication",
