@@ -48,9 +48,8 @@ its alias `MARKET_INTEL_CONFIG_DIR`. An explicit empty or missing selector is an
 error. `MARKET_INTEL_DATA_DIR` must identify `<companion>/data`; when CONFIG is also
 selected, both must identify the same companion.
 
-Without explicit selectors, discovery checks a proven sibling companion, then
-`~/.market-intel-config`, then the shared legacy `~/.market-intel-data` convention.
-There is no independent XDG fallback. The doctor's `--config-dir` selects one
+Without explicit selectors, discovery checks a proven sibling companion only.
+There is no home-directory location and no independent XDG fallback. The doctor's `--config-dir` selects one
 companion in isolation from inherited selectors. Runtime writers require the
 `data/` directory to exist; an absent directory means uninitialized storage.
 

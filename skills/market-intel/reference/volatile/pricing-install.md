@@ -207,7 +207,7 @@ Platform-specific OSS repos (free; most violate platform ToS, throwaway accounts
 - Instagram: subzeroid/instagrapi (`pip install instagrapi`, 6.3k★) · instaloader (`pip install instaloader`, 12.5k★, read-only)
 - LinkedIn: stickerdaniel/linkedin-mcp-server (3.0k★, ready MCP, ⚠ high ban risk) · joeyism/linkedin_scraper (4.2k★)
 - TikTok: davidteather/TikTok-Api (`pip install TikTokApi`, 6.4k★)
-- 小红书: xpzouying/xiaohongshu-mcp (14k★, Go, ready MCP, can post) · NanmiCoder/MediaCrawler (50k★, 7 中文平台)
+- 小红书: xpzouying/xiaohongshu-mcp (14k★, Go, ready MCP, can post) · NanmiCoder/MediaCrawler (66.7k★, 7 中文平台)
 - YouTube/media: yt-dlp (`pip install yt-dlp`, 167k★)
 - 微博: dataabc/weibo-crawler (4.5k★)
 - Bluesky: `pip install atproto` (MarshalX/atproto, official) · Mastodon: `pip install Mastodon.py` (official)

@@ -31,6 +31,6 @@ After the private runtime and active server operation are verified, MCP tools ar
 - Like all route-④ tools this **violates platform ToS**; it is for research/automation at your own risk.
 
 ## Failure signals & fallback
-Failure looks like: login-status false mid-run, publish returns success but the note gets ~0 views (限流), or 验证码/滑块 stalls the browser. **Fallbacks:** for read-only 小红书 (and other 中文 platforms) drop to **NanmiCoder/MediaCrawler** (50k★, Playwright, 7 platforms); for generic act-like-human control use **playwright MCP** after current-session verification with your own RED session.
+Failure looks like: login-status false mid-run, publish returns success but the note gets ~0 views (限流), or 验证码/滑块 stalls the browser. **Fallbacks:** for read-only 小红书 (and other 中文 platforms) drop to **NanmiCoder/MediaCrawler** (66.7k★, Playwright, 7 platforms); for generic act-like-human control use **playwright MCP** after current-session verification with your own RED session.
 
 ## Last verified: 2026-06

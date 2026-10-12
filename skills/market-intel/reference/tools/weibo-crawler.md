@@ -12,7 +12,7 @@ child-file write meets the [external-tool storage requirements](../../../../DATA
 - **Top pick for its domain:** no
 
 ## What it does / when to pick it
-A focused crawler for **微博 (Weibo)**: pull a given user's posts (text, images, video links, reposts), post metadata (likes/comments/reposts counts, timestamps), and basic profile info, exporting to CSV/JSON/MySQL/MongoDB/SQLite. **Pick it when the target is specific Weibo users/accounts** and you want a ready config-driven pull. For multi-platform Chinese coverage (also 抖音/小红书/B站/快手/知乎/贴吧) prefer **NanmiCoder/MediaCrawler** (50k★); use weibo-crawler when Weibo is the whole job and you want the lighter single-purpose tool.
+A focused crawler for **微博 (Weibo)**: pull a given user's posts (text, images, video links, reposts), post metadata (likes/comments/reposts counts, timestamps), and basic profile info, exporting to CSV/JSON/MySQL/MongoDB/SQLite. **Pick it when the target is specific Weibo users/accounts** and you want a ready config-driven pull. For multi-platform Chinese coverage (also 抖音/小红书/B站/快手/知乎/贴吧) prefer **NanmiCoder/MediaCrawler** (66.7k★); use weibo-crawler when Weibo is the whole job and you want the lighter single-purpose tool.
 
 ## Install in a PRIVATE runtime checkout
 Before any real run, resolve the full consumer checkout and use

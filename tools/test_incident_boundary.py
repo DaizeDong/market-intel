@@ -230,7 +230,8 @@ def test_incident_draft_uses_selected_companion_checker(monkeypatch, tmp_path, c
     if choice == "priority":
         selection["MARKET_INTEL_CONFIG_DIR"] = tmp_path / "missing lower priority"
     text = incident_draft_output(monkeypatch, tmp_path, capsys, selection=selection)
-    if choice == "xdg":
+    if choice in {"home", "xdg"}:
+        # Neither a home dotfile nor an XDG directory is a companion location.
         assert str(checker.resolve()) not in text
         return
     assert str(checker.resolve()) in text
