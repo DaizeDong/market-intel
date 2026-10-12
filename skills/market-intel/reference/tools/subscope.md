@@ -8,7 +8,7 @@ child-file write meets the [external-tool storage requirements](../../../../DATA
 - **Domain(s):** reddit-community (also: none)
 - **Barrier route:** ④ self-host (keyless public RSS) · **Source tier:** L4 · **Ready MCP:** no, ships as a **Claude Code plugin** (self-host), not a hosted MCP; runs locally
 - **Cost:** free, no API key, no Reddit account; reads public RSS feeds, stores to local SQLite [https://github.com/dancolta/subscope, fetched 2026-06]
-- **Repo / Provider:** github.com/dancolta/subscope, `dancolta/subscope (21★, gh-api 2026-08-01, thin adoption)`; not archived, MIT, pushed 2026-07-22 (active but very early)
+- **Repo / Provider:** github.com/dancolta/subscope, `dancolta/subscope (29★, gh-api 2026-10-12, thin adoption)`; not archived, MIT, pushed 2026-07-22 (active but very early)
 - **Top pick for its domain:** no, a niche, post-GummySearch buyer-intent tool, thin adoption (21★)
 
 ## What it does / when to pick it

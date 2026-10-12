@@ -32,7 +32,7 @@
 - Reddit (D-SUPERSEDED fallback): GridfireAI/reddit-mcp, `uvx reddit-mcp`; create app at
   reddit.com/prefs/apps for REDDIT_CLIENT_ID/SECRET (free). Superseded by reddit-mcp-buddy; minimal fallback only.
 - Stack Exchange: midodimori-stack-overflow-mcp (free; SE key raises 300→10k/day).
-- dancolta/subscope (21★): self-host, keyless public-RSS buyer-intent.
+- dancolta/subscope (29★): self-host, keyless public-RSS buyer-intent.
 
 ## web-scraping `last_verified: 2026-09`
 - Firecrawl: `npx -y firecrawl-mcp` (key from firecrawl.dev; free 1,000 credits/mo, cheapest paid
