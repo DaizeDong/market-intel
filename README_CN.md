@@ -83,7 +83,8 @@ git clone --recurse-submodules https://github.com/DaizeDong/market-intel.git ~/.
 - **切换 config(即插即用):** 把环境变量指向另一个 config 目录即可， config 自包含，同时清除或更新 DATA 覆盖值：
   `export MARKET_INTEL_CONFIG=~/configs/work` ↔ `~/configs/personal`。
 - **密钥：** 按伴生仓声明的存储模式维护。Mode A 仅在已核验的 PRIVATE Git 仓中记录凭据；
-  Mode B 忽略凭据文件，并要求另行备份。自带初始化工具只支持 Mode B。两种模式都禁止把密钥写进公开工具仓，
+  Mode B 忽略凭据文件，并要求另行备份。参考部署用的是带金库投影的 Mode B：`secrets/<slug>.env`
+  是从加密凭据金库生成、被 gitignore 的明文文件，新密钥先存进金库再重新生成。自带初始化工具只支持 Mode B。两种模式都禁止把密钥写进公开工具仓，
   详见 [CONFIG.md](CONFIG.md#secrets-and-storage-modes-e6)。
 
 ---

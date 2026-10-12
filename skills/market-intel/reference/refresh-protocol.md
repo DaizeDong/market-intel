@@ -422,10 +422,12 @@ get buried.
    task list (e.g. `phase3-handoff.md`, `bucket-B-checklist.md`). If all items are
    completed → delete; if any pending → migrate the pending parts into a generic runbook
    and delete the stub.
-2. **Stale Mode-B / out-of-band-backup references**, under Mode A the OneDrive backup
-   scripts are no-ops. They live in `scripts/legacy/` per v0.9.0 convention. If a runbook
-   still references them as live, fix to "Mode B fallback only".
-3. **CHANGELOG bloat**, once a major doctrinal pivot lands (e.g. Mode B → Mode A,
+2. **Stale storage-mode references**, runbooks must match the companion's declared
+   mode (spec §5.3). Under Mode B with a vault projection, no runbook may tell operators
+   to edit, commit or restore `secrets/*.env`; they change the vault and regenerate the
+   projection. The OneDrive backup scripts in `scripts/legacy/` (v0.9.0 convention) apply
+   only to plain Mode B; if a runbook references them as live elsewhere, fix it.
+3. **CHANGELOG bloat**, once a major doctrinal pivot lands (e.g. a storage-mode switch,
    spec v1 → v2), compress all pre-pivot entries to a single summary paragraph. Keep
    only entries from the current doctrinal era as full text. **Half-year archive
    convention (added 2026-06-17 ops audit):** at each Cleanup pass, if `CHANGELOG.md` is
@@ -434,8 +436,9 @@ get buried.
    the main file from passing ~5000 lines where GitHub's renderer gets slow + Discovery
    agents have to load too much history. Hard cap on main file: 24 months of entries.
 4. **PII drift in committed READMEs**, grep `tools/*/README.md` for email patterns,
-   phone numbers, real usernames. Per spec §4.3 these belong in
-   `secrets/_credentials.env` + `secrets/_account-info.env`, not in committed docs.
+   phone numbers, real usernames. Per spec §4.3 these belong in the companion's private
+   credential storage (vault records under a vault projection, otherwise
+   `secrets/_credentials.env` + `secrets/_account-info.env`), not in committed docs.
 5. **Duplicate or near-duplicate docs**, when a runbook covers one Windows gotcha or one
    provider quirk, ask "should this be a standalone file or a section in a larger
    runbook?" Single-purpose files <80 lines that share an audience with a sibling are

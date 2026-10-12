@@ -79,6 +79,11 @@ The configuration spec describes two operator-selected modes:
   from Git history.
 - **Mode B:** credentials are excluded from Git and backed up through a separate
   private mechanism. Recovery requires both the repository and that backup.
+  A vault projection is the variant the reference deployment uses: an encrypted
+  credential vault outside the companion holds the values, `secrets/<slug>.env` is a
+  generated gitignored projection per tool, and capture or registration writes to
+  the vault and regenerates the projection. Do not edit, commit or hand-restore the
+  projected files; recovery restores the vault and its key, then regenerates them.
 
 Document the selected policy in `secrets/README.md` and use tooling that supports it.
 The initializer's current Mode B limitation does not prohibit a separately implemented

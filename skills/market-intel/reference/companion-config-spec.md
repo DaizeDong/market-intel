@@ -362,8 +362,9 @@ absence):
 - `## Reinstall on a new machine`, typically just `python3 scripts/apply.py --tool <slug>`.
 
 Per-account identifying info (email, username, phone, account IDs) MUST NOT appear in this
-README; that information belongs in `secrets/_account-info.env` under the selected
-Mode A or Mode B storage policy (see §5.1).
+README; that information belongs in the companion's private credential storage under
+the selected Mode A or Mode B policy: `secrets/_account-info.env`, or vault records when
+Mode B uses a vault projection (see §5.1 and §5.3).
 
 ---
 
@@ -374,7 +375,7 @@ Mode A or Mode B storage policy (see §5.1).
 | File | Status | Purpose |
 |---|---|---|
 | `secrets/<slug>.env` | OPTIONAL per slug | Real env values for `tools/<slug>/`; versioned in Mode A, gitignored in Mode B. |
-| `secrets/_account-info.env` | OPTIONAL | Cross-service metadata (default email/username/auth-method preference, per-service registration log). Leading underscore = "not-a-tool". |
+| `secrets/_account-info.env` | OPTIONAL | Cross-service metadata (default email/username/auth-method preference, per-service registration log). Leading underscore = "not-a-tool". Under a vault projection this metadata stays in vault records and no `_`-prefixed file is projected. |
 | `secrets/README.md` | RECOMMENDED | Human-readable note explaining the directory. |
 | `secrets/.gitkeep` | RECOMMENDED | Ensures the dir exists after fresh clone. |
 
@@ -412,6 +413,15 @@ threat model.
   USB, or a dedicated secret-management tool.
 - **Pros**: keys never enter git; no GitHub exposure surface; safe to add collaborators.
 - **Cons**: bootstrap is two-step (`git clone` + restore).
+- **Vault projection (a Mode B variant)**: the values live in an encrypted credential
+  vault kept outside the companion, and each `secrets/<slug>.env` is a generated,
+  gitignored plaintext projection of one vault target (a `materialize` step per tool).
+  The projection is disposable: regenerate it, never edit, commit or hand-copy it.
+  Writers (the companion's key-capture script and `config-bridge.py --register`) store
+  the value in the vault and then regenerate the projection; without the vault, its
+  key or its tool they fail and write nothing anywhere else. Readers that find a
+  projection missing report the regeneration command and must not restore plaintext
+  from Git history or another machine. The same Mode B ignore patterns apply.
 - **Required `.gitignore` patterns under Mode B**:
   ```
   secrets/*
@@ -432,6 +442,11 @@ it checks the first nonempty line for a legacy `Mode A` or `Mode B` declaration;
 that line has no mode declaration, it defaults to Mode B. Missing `secrets/README.md`
 also defaults to Mode B. Invalid or conflicting declarations are errors.
 
+The reference companion deployment declares Mode B with a vault projection (since
+2026-10-12; it used Mode A from its v0.5.0 until then). Plaintext committed under
+Mode A remains in that repository's history; switching modes does not remove it, so a
+key exposed there stays exposed until it is rotated at the provider.
+
 The bundled initializer supports Mode B only and refuses Mode A. Its doctor checks
 configuration shape and the declared mode's ignore policy; a successful result does not
 prove PRIVATE visibility, credential backup durability, template validity or host readiness.
@@ -442,6 +457,9 @@ Verify those requirements separately before writing credentials or applying conf
 - **Mode A**: git is the backup (pushing to a private remote covers durability).
 - **Mode B**: backup mechanism is the user's choice. `scripts/backup-secrets.sh` +
   `scripts/restore-from-onedrive.sh` are conventional helpers but not required.
+- **Mode B with a vault projection**: the vault and its key are the backup; projections
+  are regenerated after restore and are never backed up as plaintext. Recovery needs
+  the companion, the vault and the vault key.
 
 ---
 
@@ -501,7 +519,8 @@ spec itself.
 A repo conforms to this spec when:
 
 - [ ] The storage mode is declared as in §5.3. Mode B uses the §2.2 ignore patterns and
-      a separately verified backup. Mode A versions credentials in a verified PRIVATE
+      a separately verified backup (for a vault projection, the vault and its key).
+      Mode A versions credentials in a verified PRIVATE
       repository; confirm that its history and private backup preserve those files.
 - [ ] `registry.json` exists at the repo root and has `schema_version: 1` (or higher that's
       backward-compat with v1).

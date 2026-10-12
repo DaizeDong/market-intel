@@ -97,7 +97,9 @@ deep spec: [`companion-config-spec.md`](skills/market-intel/reference/companion-
 - **Switch configs (hot-swap):** point the env var at another config dir, configs are self-contained,
   clear or update the DATA override with it: `export MARKET_INTEL_CONFIG=~/configs/work` ↔ `~/configs/personal`.
 - **Secrets:** follow the companion's declared storage mode. Mode A versions credentials only in
-  verified PRIVATE Git; Mode B ignores them and requires a separate backup. The bundled initializer
+  verified PRIVATE Git; Mode B ignores them and requires a separate backup. The reference deployment
+  uses Mode B with a vault projection: `secrets/<slug>.env` are gitignored files generated from an
+  encrypted credential vault, and new keys are captured into the vault. The bundled initializer
   supports Mode B only. Both modes keep secrets out of this public source; see [CONFIG.md](CONFIG.md#secrets-and-storage-modes-e6).
 
 ---

@@ -122,8 +122,9 @@ Machine-readable index at the companion-repo root. Full field reference: spec §
 Consumers MUST tolerate unknown top-level/entry fields (forward-compat) and degrade when optional
 fields are absent. Per tool that needs credentials, add
 `tools/<slug>/{claude.json.template, env.template}` (`<UPPER_SNAKE>` placeholders, **UTF-8 without
-BOM**, fail-loud on a missing value) and put real values in `secrets/<slug>.env` under the
-companion's declared storage mode (versioned in PRIVATE Git for Mode A, gitignored for Mode B).
+BOM**, fail-loud on a missing value) and provide real values in `secrets/<slug>.env` under the
+companion's declared storage mode (versioned in PRIVATE Git for Mode A, gitignored for Mode B;
+under a Mode B vault projection the file is generated from the vault, never written by hand).
 Apply/verify contracts: spec §6 / §7.
 
 ## Companion-repo layout (spec §2)
@@ -144,6 +145,11 @@ Apply/verify contracts: spec §6 / §7.
 The companion is separate and PRIVATE. Its declared storage mode governs credentials:
 Mode A versions them in verified PRIVATE Git; Mode B ignores them and requires a
 separate backup. Both keep secrets out of the public tool and command output.
+The reference deployment uses Mode B with a vault projection: each `secrets/<slug>.env`
+is a gitignored plaintext file generated per tool from an encrypted credential vault,
+and new keys are captured into the vault (the companion's key-capture script or
+`config-bridge.py --register`), then the projection is regenerated. Writers fail when
+the vault is unavailable; nothing falls back to writing the file directly.
 The bundled initializer supports Mode B only and refuses Mode A. That initializer
 default does not describe every existing deployment. Follow the declaration and
 recovery instructions in the selected companion; do not reinitialize it to change modes.

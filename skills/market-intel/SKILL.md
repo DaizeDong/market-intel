@@ -169,7 +169,8 @@ before storing real state.
    present, or through the public companion tutorial.
 
 For leaked keys, tell the user to rotate at the provider, use the companion's
-`scripts/capture-key.ps1 -Slug <slug> -Var <VARNAME>` for a no-echo clipboard update,
+`scripts/capture-key.ps1 -Slug <slug> -Var <VARNAME>` for a no-echo clipboard update
+(under a vault projection it stores into the vault and regenerates the file),
 rerun `python3 scripts/apply.py --tool <slug>`, and restart Claude. Do not rotate
 on the user's behalf. Without a companion, host tools can still support research;
 missing inventory remains a setup limitation, and real outputs still require PRIVATE storage.

@@ -19,7 +19,10 @@ an interrupted operation before removing residual staging.
 
 The companion's selected credential policy remains authoritative. Mode A versions
 credentials in verified PRIVATE Git; Mode B ignores them and requires a separate
-protected backup. Restore the chosen dependency before treating recovery as ready.
+protected backup. When Mode B uses a vault projection (the reference deployment),
+restore the vault and its key, then regenerate `secrets/<slug>.env`; never restore
+those files as plaintext from Git history or another machine. Restore the chosen
+dependency before treating recovery as ready.
 
 The 64 MiB working-data budget remains enforced. Over-budget snapshots need exact
 selected recovery references and digest checks before retirement. A schema check,

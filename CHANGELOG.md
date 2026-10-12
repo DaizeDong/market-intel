@@ -18,6 +18,12 @@
 
 ### Configuration and operation evidence
 
+- Document the Mode B vault-projection variant (spec §5.3/§5.4) and record that the reference
+  companion moved from Mode A to it on 2026-10-12: `secrets/<slug>.env` are gitignored files
+  generated from an encrypted credential vault, key capture and `config-bridge.py --register`
+  write to the vault and regenerate the projection, and recovery restores the vault and its key
+  instead of plaintext files. CONFIG, DATA, both READMEs, SKILL.md, the companion tutorial and the
+  refresh cleanup pass no longer assume Mode A; Mode A plaintext stays in that private history.
 - Keep directory-only external runtime recipes setup-only until child-file admission is implemented; align feedback ledger reads with selected companion layout.
 - Unify companion selection across settings, initialization, diagnostics and runtime DATA; reject conflicting selectors.
 - Enforce declared artifact ownership and persistence through the pinned Guards write-admission API.
