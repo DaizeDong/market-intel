@@ -52,7 +52,7 @@ claude.json
 # per-directory. history.jsonl / sweep-*.json / doc-drift-cache.json are TOOL: they describe the
 # SKILL (coverage counts, source-catalog diffs, a README hash) and stay public. live-runs.jsonl is
 # DATA: it records what happened during REAL research runs, which means it records what the
-# operator was researching. It lives in ~/.market-intel-config/data/, resolved by tools/datadir.py.
+# operator was researching. It lives in the private companion's data/, resolved by tools/datadir.py.
 metrics/live-runs.jsonl
 metrics/live-runs.*.jsonl
 skills/market-intel/metrics/live-runs.jsonl

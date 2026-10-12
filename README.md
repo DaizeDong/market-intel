@@ -91,7 +91,7 @@ deep spec: [`companion-config-spec.md`](skills/market-intel/reference/companion-
 - **First time:** Empty `tools: []` remains NOT READY. Fill installed tool identities and both templates before the doctor; initialize companion data/ before runtime writes.
   ```bash
   python "<absolute-market-intel-checkout>/scripts/init_config.py"        # stamp a conformant skeleton (deterministic)
-  export MARKET_INTEL_CONFIG=~/.market-intel-config  # or pass --out <dir> to init
+  export MARKET_INTEL_CONFIG=<companion dir>  # not needed when it sits beside this repository
   python "<absolute-market-intel-checkout>/scripts/verify_config.py"       # doctor: PASS/FAIL, names what is missing
   ```
 - **Switch configs (hot-swap):** point the env var at another config dir, configs are self-contained,

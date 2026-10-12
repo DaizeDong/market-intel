@@ -77,7 +77,7 @@ git clone --recurse-submodules https://github.com/DaizeDong/market-intel.git ~/.
 - **首次配置：** 空的 `tools: []` 会报 NOT READY。先填写启用工具的标识和两份模板，再跑 doctor；运行写入前还需建立伴生仓的 data/。
   ```bash
   python "<absolute-market-intel-checkout>/scripts/init_config.py"        # 生成符合规范的 config 骨架(确定性)
-  export MARKET_INTEL_CONFIG=~/.market-intel-config  # 或给 init 传 --out <dir>
+  export MARKET_INTEL_CONFIG=<伴生仓目录>  # 伴生仓就在本仓旁边时不需要
   python "<absolute-market-intel-checkout>/scripts/verify_config.py"       # doctor:逐项 PASS/FAIL,明确报缺什么
   ```
 - **切换 config(即插即用):** 把环境变量指向另一个 config 目录即可， config 自包含，同时清除或更新 DATA 覆盖值：

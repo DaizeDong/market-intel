@@ -46,8 +46,9 @@ def env_var(skill):
     return skill.upper().replace("-", "_") + "_CONFIG"
 
 
-def default_dir(skill):
-    return os.path.expanduser("~/.%s-config" % skill)
+def no_companion(skill):
+    return ("no companion found: create a PRIVATE repository with an origin and clone it beside this "
+            "repository as %s-config, set %s to it, or pass --out <dir>" % (skill, env_var(skill)))
 
 
 def detect_skill():
@@ -146,11 +147,14 @@ def main():
         return 2
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tools"))
     from config_paths import companion_root
-    out = a.out or companion_root() or default_dir(skill)
+    out = a.out or companion_root()
+    if not out:
+        print("ERROR: " + no_companion(skill))
+        return 2
     out = os.path.abspath(os.path.expanduser(out))
 
     print("Init config for skill '%s' (mode %s) at %s" % (skill, a.mode, out))
-    print("Discovery env var: %s  (fallback %s)" % (env_var(skill), default_dir(skill)))
+    print("Discovery env var: %s  (then the proven sibling companion)" % env_var(skill))
 
     # registry.json, deterministic; no machine-specific content (E4/E5).
     # Top-level shape per companion-config-spec.md §3 (schema_version + tools[]).

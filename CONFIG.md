@@ -160,10 +160,12 @@ versioned PRIVATE companion and its data/ directory before invoking runtime writ
 
 ```bash
 # 1. Stamp a conformant, empty config skeleton (deterministic — E4):
-python scripts/init_config.py            # -> ~/.market-intel-config/  (or pass --out <dir>)
+#    It stamps the companion that discovery above selects; when there is none, pass
+#    --out <dir> naming your PRIVATE companion clone.
+python scripts/init_config.py --out <companion dir>
 
-# 2. Point the skill at it (skip if you used the default path):
-export MARKET_INTEL_CONFIG=~/.market-intel-config
+# 2. Point the skill at it (skip when the companion sits beside this repository):
+export MARKET_INTEL_CONFIG=<companion dir>
 
 # 3. Add your tools + secrets, then confirm it is ready:
 python scripts/verify_config.py          # doctor: PASS/FAIL per check, names what is missing

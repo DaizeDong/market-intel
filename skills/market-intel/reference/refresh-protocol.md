@@ -36,7 +36,7 @@ of its cadence tier.
 > 发现阶段的完整规则见下方 **「Discovery phase（前沿发现 + 质量筛选）」** 一节。它产出一个
 > 「候选池（candidate pool）」，核实/差分阶段只处理通过准入门槛的候选 + 旧条目复检。
 
--1. **Step -1, 消费 live-run 账本（必跑，v0.17.0 起）。** 账本在**私有 store**（`~/.market-intel-config/
+-1. **Step -1, 消费 live-run 账本（必跑，v0.17.0 起）。** 账本在**私有 store**（`<伴生仓>/
     data/metrics/live-runs.jsonl`，由 `guards/tools/datadir.py` 解析），**不在本仓**：它记录你真实在调研什么，是
     data 而非工具知识。在 Horizon scan 之前,先读账本自上次 refresh 以来的所有条目（按 `ts` 过滤;首次跑取最近 90 天）,按
     `outcome` 分桶:
