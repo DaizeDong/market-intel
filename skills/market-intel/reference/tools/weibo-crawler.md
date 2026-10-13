@@ -18,17 +18,16 @@ A focused crawler for **微博 (Weibo)**: pull a given user's posts (text, image
 Before any real run, resolve the full consumer checkout and use
 `tools/private_inventory.py`'s `resolve_destination(path=...)` for individual
 config/output files and `resolve_directory(path=...)` for existing runtime or
-browser-profile directories. Pass the final absolute path. Each check proves the
-containing repository, including a repository rooted at the directory itself,
-and PRIVATE visibility for every effective
-publication destination. Stop on missing, PUBLIC or unknown proof.
+browser-profile directories. Pass the final absolute path. Each check resolves the
+containing Git worktree, including a repository rooted at the directory itself,
+and refuses destinations outside it or inside this checkout. Stop when it fails.
 Keep runtime files versioned in that PRIVATE companion. An ignored directory in
 this public checkout is not a valid destination. A later real run must repeat the
 check; this recipe is not a live destination attestation.
 
 This upstream project uses repository-relative runtime paths. Do not clone or
 launch its real workload under the public market-intel checkout. Prepare a
-runtime source copy inside the verified PRIVATE companion, with no nested
+runtime source copy inside the PRIVATE companion, with no nested
 PUBLIC upstream Git repository; verify the final containing repository after
 preparation. Keep upstream version/license metadata with the private copy.
 Install dependencies there using the upstream instructions. Only then launch
@@ -42,7 +41,7 @@ No service key. It reads Weibo's m.weibo.cn endpoints; for anything beyond publi
 Keep target identifiers, queries and authentication inputs in the PRIVATE runtime
 configuration. Use the installed upstream `weibo.py` CLI help for supported
 options; this guide does not assume an output-redirection flag exists. Run only
-from the verified PRIVATE runtime copy so `weibo/`, target lists, `config.json` and cookie state stay private and versioned.
+from the PRIVATE runtime copy so `weibo/`, target lists, `config.json` and cookie state stay private and versioned.
 Validate actual content and record gaps before accepting a run.
 
 ## General experience & gotchas (踩坑)

@@ -34,7 +34,7 @@ GUI: enter a keyword + location (e.g. "dentists in Austin"), Run, export CSV (na
 email, socials, …). REST API path (if used): POST a search task to the omkar.cloud endpoint with your
 key, poll for the CSV/JSON result. There is no MCP tool surface, drive it as an external app/REST call
 and read the exported CSV into the research. Verify that browser state, logs and exports
-can be directed to verified PRIVATE versioned DATA before a real collection run.
+can be directed to PRIVATE versioned DATA before a real collection run.
 
 ## General experience & gotchas (踩坑)
 - **Far lower legal/ban risk than LinkedIn scraping** (shard compliance red line), Google Maps public

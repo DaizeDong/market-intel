@@ -26,10 +26,9 @@ from tools.private_inventory import resolve_directory
 runtime = resolve_directory("runtime/hummingbot")
 ```
 
-Initialize that directory in the configured PRIVATE versioned companion and provide a fresh
-visibility receipt first. The shared proof checks all configured fetch/push destinations from
-local Git configuration and receipts; it does not query GitHub live or require a remote named
-`origin`. Missing, stale or unknown visibility fails setup.
+Initialize that directory in the configured PRIVATE versioned companion first. The resolver
+checks only that it is inside the companion's Git worktree and outside this checkout; a missing
+or unmanaged directory fails setup.
 
 Use supported absolute bind mounts beneath `runtime.path` for the core databases, encrypted
 keystore, API state, logs, strategy configuration and exports. A Docker named volume alone

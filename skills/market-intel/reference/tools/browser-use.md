@@ -22,7 +22,7 @@ All model or external-agent work must use installed `llmcall`, inheriting its
 current routing, model, timeout and fallback policy. Verify an actual supported
 adapter and its tool-I/O contract before using this library. Until then, use a
 current-session verified deterministic browser/extractor route. Keep resulting
-content, cookies, profiles and traces in verified PRIVATE versioned DATA.
+content, cookies, profiles and traces in PRIVATE versioned DATA.
 
 ## General experience & gotchas (踩坑)
 - **Token cost is the real cost, not a license.** Each step is an LLM call reading the DOM; long pages × many steps = expensive fast. Cap `max_steps`, narrow the goal, inherit llmcall's selected planner policy.

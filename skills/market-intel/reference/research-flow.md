@@ -144,7 +144,7 @@ Append one line per source actually touched to the live-run ledger (reuses guard
 near-zero extra cost). This is the highest-value error signal for the next refresh sweep, a source
 flagged `dead` in real use auto-nominates for the deletion path.
 
-The incident helper appends to `metrics/live-runs.jsonl` below verified PRIVATE
+The incident helper appends to `metrics/live-runs.jsonl` below PRIVATE
 DATA. It holds a lock across the read/modify/replace transaction and returns a
 storage error if persistence cannot be verified. Keep observations in the reply
 until the companion is initialized; never fall back to a public source path.

@@ -60,7 +60,7 @@ one new account → demote to `WATCH`, do not promote across to a real domain sh
 6. Diff `punkpeye/awesome-mcp-servers` README HEAD vs last sweep.
 7. Manual: scroll Discord `#mcp-showcase` since last poll (no API).
 8. Output: one consolidated candidate list, dedup by repo URL, each with `discovery_surface` tag.
-9. Drop candidates into `discovery-state.md` in the verified PRIVATE companion DATA directory inbox; defer Verify & Diff to the monthly sweep per refresh-protocol §Cadence.
+9. Drop candidates into `discovery-state.md` in the PRIVATE companion DATA directory inbox; defer Verify & Diff to the monthly sweep per refresh-protocol §Cadence.
 
 ## Decision rule, when does an entry from here get promoted to a real domain shard
 

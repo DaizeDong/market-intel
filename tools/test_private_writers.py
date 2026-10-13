@@ -1,6 +1,5 @@
 """Generated synthetic destination and concurrent-writer regressions; no live calls."""
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
 from copy import deepcopy
 import importlib.util
 import json
@@ -9,24 +8,13 @@ from pathlib import Path
 import subprocess
 import sys
 import threading
-from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
 import private_inventory as storage
-from make_fixtures import (
-    fixture, make_runtime_fixture, make_runtime_repository,
-    runtime_transport_cases, runtime_visibility_cases,
-)
+from make_fixtures import fixture, make_runtime_fixture, make_runtime_repository
 
 SAMPLE = fixture()["maintenance"]
-
-
-@dataclass(frozen=True)
-class SyntheticProof:
-    root: str
-    repositories: tuple
-    signature: str
 
 
 @pytest.fixture
@@ -44,69 +32,26 @@ def native_companion(tmp_path, monkeypatch):
     return generated
 
 
-@pytest.mark.parametrize("label,remote,configuration,environment,accepted", runtime_transport_cases())
-def test_native_private_proof_rejects_unsafe_transport(
-        native_companion, monkeypatch, label, remote, configuration, environment, accepted):
-    repository = native_companion["repository"]
-    subprocess.run(["git", "-C", str(repository), "remote", "set-url", "origin", remote], check=True)
-    for key, value in configuration.items():
-        subprocess.run(["git", "-C", str(repository), "config", key, value], check=True)
-    for key, value in environment.items():
-        monkeypatch.setenv(key, value)
-    original_run = subprocess.run
-    forbidden = []
-
-    def local_only(command, *args, **kwargs):
-        if command[0] == "git":
-            return original_run(command, *args, **kwargs)
-        forbidden.append(command[0])
-        if command[0] == "gh":
-            return subprocess.CompletedProcess(command, 0, json.dumps(
-                {"nameWithOwner": SAMPLE["companion_identity"], "visibility": "PRIVATE"}), "")
-        if command[0] == "ssh":
-            return subprocess.CompletedProcess(command, 0, "hostname github.com\n", "")
-        pytest.fail("a transport command was executed")
-
-    monkeypatch.setattr(subprocess, "run", local_only)
-    if accepted:
-        destination = storage.resolve_destination()
-        assert destination.repository == repository
-    else:
-        with pytest.raises(storage.InventoryError):
-            storage.resolve_destination()
-    assert forbidden == [], "fresh synthetic receipts require only local Git metadata reads"
-    assert not (repository / "data/inventory").exists()
-
-
-@pytest.mark.parametrize("identity,accepted", [
-    (SAMPLE["other_identity"], True), (SAMPLE["public_identity"], False),
-    ("example/unknown", False),
-])
-def test_native_nested_repository_is_authoritative(native_companion, identity, accepted):
+def test_native_nested_repository_is_authoritative(native_companion):
     repository = native_companion["repository"]
     assert storage.resolve_directory(path=repository).repository == repository
-    nested = make_runtime_repository(repository / "runtime", native_companion["environment"], identity)
-    if accepted:
-        selected = storage.resolve_directory(path=nested)
-        assert selected.repository == nested and selected.identity == identity
-    else:
-        with pytest.raises(storage.InventoryError):
-            storage.resolve_directory(path=nested)
+    nested = make_runtime_repository(repository / "runtime", native_companion["environment"], SAMPLE["other_identity"])
+    selected = storage.resolve_directory(path=nested)
+    assert selected.repository == nested and selected.identity == nested.name
     assert not (nested / "inventory").exists()
 
 
-@pytest.mark.parametrize("failure", ["ignored", "unversioned"])
-def test_native_storage_requirements_are_preserved(native_companion, failure):
+def test_native_path_checks_start_no_process(native_companion, monkeypatch):
     repository = native_companion["repository"]
-    target = repository / "ignored-output/record.json" if failure == "ignored" else repository / "data/deliverables/report.json"
-    if failure == "unversioned":
-        subprocess.run(["git", "-C", str(repository), "update-ref", "-d", "HEAD"], check=True)
-    with pytest.raises(storage.InventoryError):
-        storage.resolve_destination(path=target)
-    assert not target.exists()
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: pytest.fail("runtime path check started a process"))
+    monkeypatch.setattr(subprocess, "Popen", lambda *a, **k: pytest.fail("runtime path check started a process"))
+    target = repository / "data/deliverables/report.json"
+    selected = storage.resolve_destination(path=target)
+    storage.write_text("{}\n", "reports/report.json", selected)
+    assert target.read_text(encoding="utf-8") == "{}\n"
 
 
-@pytest.mark.parametrize("change", ["stable", "public", "other-private", "same-identity-url", "lexical-target"])
+@pytest.mark.parametrize("change", ["stable", "lexical-target"])
 def test_native_publication_rechecked_before_replace(native_companion, monkeypatch, change):
     repository = native_companion["repository"]
     target = repository / "data/deliverables/reports/synthetic.json"
@@ -123,13 +68,7 @@ def test_native_publication_rechecked_before_replace(native_companion, monkeypat
     real_fsync = os.fsync
     def change_after_flush(descriptor):
         real_fsync(descriptor)
-        identity = {"public": SAMPLE["public_identity"], "other-private": SAMPLE["other_identity"],
-                    "same-identity-url": SAMPLE["companion_identity"]}.get(change)
-        if identity:
-            suffix = "" if change == "same-identity-url" else ".git"
-            subprocess.run(["git", "-C", str(repository), "remote", "set-url", "origin",
-                            "https://github.com/" + identity + suffix], check=True)
-        elif change == "lexical-target":
+        if change == "lexical-target":
             selected_path[0] = repository / "data/deliverables/reports/other.json"
     monkeypatch.setattr(os, "fsync", change_after_flush)
     if change == "stable":
@@ -144,17 +83,6 @@ def test_native_publication_rechecked_before_replace(native_companion, monkeypat
     if pending:
         assert pending[0].read_text(encoding="utf-8") == after
     assert not (target.parent / "other.json").exists()
-
-
-def test_native_same_identity_route_change_is_revalidated(native_companion):
-    repository = native_companion["repository"]
-    target = repository / "data/deliverables/reports/result.json"
-    selected = storage.resolve_destination(path=target)
-    subprocess.run(["git", "-C", str(repository), "remote", "set-url", "origin",
-                    "https://github.com/" + SAMPLE["companion_identity"]], check=True)
-    with pytest.raises(storage.InventoryError, match="changed"):
-        storage.write_text("{}\n", "reports/result.json", selected)
-    assert not target.parent.exists()
 
 
 def test_native_explicit_target_retains_lexical_selection(native_companion, monkeypatch):
@@ -176,105 +104,20 @@ def test_native_explicit_target_retains_lexical_selection(native_companion, monk
     assert not (repository / "data/deliverables/second.json").exists()
 
 
-def test_native_effective_git_rewrite_cannot_hide_physical_public_route(native_companion, monkeypatch):
-    repository = native_companion["repository"]
-    public = "https://github.com/" + SAMPLE["public_identity"] + ".git"
-    private = "https://github.com/" + SAMPLE["companion_identity"] + ".git"
-    subprocess.run(["git", "-C", str(repository), "remote", "set-url", "origin", public], check=True)
-    monkeypatch.setenv("GIT_CONFIG_COUNT", "1")
-    monkeypatch.setenv("GIT_CONFIG_KEY_0", "url." + private + ".insteadOf")
-    monkeypatch.setenv("GIT_CONFIG_VALUE_0", public)
-    with pytest.raises(storage.InventoryError):
-        storage.resolve_destination()
-    assert not (repository / "data/inventory").exists()
-
-
-@pytest.mark.parametrize("label,payload", runtime_visibility_cases())
-def test_native_invalid_visibility_receipt_refuses_before_writes(native_companion, label, payload):
-    native_companion["receipt"].write_text(payload, encoding="utf-8")
-    with pytest.raises(storage.InventoryError, match="visibility"):
-        storage.resolve_destination()
-    assert not (native_companion["repository"] / "inventory").exists()
-
-
 @pytest.fixture
 def companion(tmp_path, monkeypatch):
+    """A synthetic companion worktree: path checks only need the Git marker."""
     repository = tmp_path / "companion"
     (repository / ".git").mkdir(parents=True)
     (repository / "data").mkdir()
     for key in ("MARKET_INTEL_CONFIG", "MARKET_INTEL_CONFIG_DIR"):
         monkeypatch.delenv(key, raising=False)
     monkeypatch.setenv("MARKET_INTEL_DATA_DIR", str(repository / "data"))
-    routes = {"origin": {"fetch": [SAMPLE["companion_identity"]],
-                          "push": [SAMPLE["companion_identity"]]}}
-    visibility = {SAMPLE["companion_identity"]: "PRIVATE", SAMPLE["other_identity"]: "PRIVATE",
-                  SAMPLE["public_identity"]: "PUBLIC"}
-    configuration = []
-
-    class ProofError(RuntimeError):
-        pass
-
-    def prove(directory):
-        if not Path(directory).is_relative_to(repository):
-            raise ProofError("synthetic unmanaged directory")
-        if any(line.split(None, 1)[1] not in routes for line in configuration):
-            raise ProofError("synthetic missing publication remote")
-        identities = sorted({identity for route in routes.values()
-                             for values in route.values() for identity in values})
-        if any(visibility.get(identity) != "PRIVATE" for identity in identities):
-            raise ProofError("synthetic PUBLIC or UNKNOWN visibility")
-        return SyntheticProof(str(repository), tuple(identities), json.dumps([routes, configuration], sort_keys=True))
-
-    def read(proof, *arguments):
-        if arguments == ("rev-parse", "--verify", "HEAD"):
-            return subprocess.CompletedProcess(arguments, 0, "1" * 40, "")
-        if arguments[:4] == ("check-ignore", "--no-index", "-q", "--"):
-            return subprocess.CompletedProcess(arguments, 1, "", "")
-        raise AssertionError(arguments)
-
-    boundary = SimpleNamespace(prove_private_companion=prove, read_private_companion_git=read, GitError=ProofError)
-    monkeypatch.setattr(storage, "_shared_boundary", lambda: boundary)
-    contract_boundary = SimpleNamespace(prove_private_companion=lambda directory, *_: prove(directory),
-                                        read_private_companion_git=read, GitError=ProofError)
-    monkeypatch.setattr(storage._storage_contract(), "load_boundary", lambda: contract_boundary)
-    return repository, routes, visibility, configuration
-
-
-@pytest.mark.parametrize("visibility", ["PUBLIC", "UNKNOWN"])
-def test_every_effective_push_destination_must_be_private(companion, visibility):
-    repository, routes, states, _ = companion
-    routes["origin"]["push"].append(SAMPLE["public_identity"])
-    states[SAMPLE["public_identity"]] = visibility
-    with pytest.raises(storage.InventoryError, match="visibility"):
-        storage.resolve_destination()
-    assert set(repository.iterdir()) == {repository / ".git", repository / "data"}
-
-
-def test_all_remotes_and_configured_push_remotes_are_verified(companion):
-    _, routes, _, configuration = companion
-    routes["publish"] = {"fetch": [SAMPLE["other_identity"]], "push": [SAMPLE["public_identity"]]}
-    configuration.append("remote.pushdefault publish")
-    with pytest.raises(storage.InventoryError):
-        storage.resolve_destination()
-    routes["publish"]["push"] = [SAMPLE["other_identity"]]
-    destination = storage.resolve_destination()
-    assert set(destination.identity.split(", ")) == {SAMPLE["companion_identity"], SAMPLE["other_identity"]}
-    configuration[:] = ["branch.main.pushremote absent-remote"]
-    with pytest.raises(storage.InventoryError):
-        storage.resolve_destination()
-
-
-def test_publication_route_change_is_rechecked_before_write(companion):
-    repository, routes, _, _ = companion
-    selected = storage.resolve_destination()
-    routes["origin"]["push"] = [SAMPLE["other_identity"]]
-    with pytest.raises(storage.InventoryError, match="changed"):
-        storage.write_snapshot(fixture()["inventory"], selected)
-    assert not (repository / "data/inventory").exists()
+    return repository
 
 
 def test_explicit_destinations_use_final_private_repository(companion, tmp_path):
-    repository, _, _, _ = companion
+    repository = companion
     selected = storage.resolve_destination("reports/feedback.json", path=repository / "data/deliverables/reports/result.json")
     storage.write_text("synthetic\n", "reports/feedback.json", selected)
     assert selected.path.read_text() == "synthetic\n"
@@ -284,7 +127,7 @@ def test_explicit_destinations_use_final_private_repository(companion, tmp_path)
 
 
 def test_serialized_updates_preserve_both_generated_rows(companion):
-    repository, _, _, _ = companion
+    repository = companion
     selected = storage.resolve_destination("metrics/live-runs.jsonl")
     start = threading.Barrier(2)
     rows = SAMPLE["ledger"][:2]
@@ -342,7 +185,7 @@ def test_writers_refuse_unproven_output_before_observation(name, tmp_path, monke
 
 @pytest.mark.parametrize("name", ["discover", "poll_surfaces", "feedback-bump"])
 def test_writers_persist_only_to_verified_private_override(name, companion, monkeypatch):
-    repository, _, _, _ = companion
+    repository = companion
     writer = load_writer(name)
     target = repository / "data/deliverables/reports/result.json"
     if name == "discover":
@@ -364,7 +207,7 @@ def test_writers_persist_only_to_verified_private_override(name, companion, monk
 
 @pytest.mark.parametrize("name", ["discover", "poll_surfaces"])
 def test_polling_dry_run_does_not_create_output_directories(name, companion, monkeypatch):
-    repository, _, _, _ = companion
+    repository = companion
     writer = load_writer(name)
     target = repository / "data/deliverables/uncreated/result.json"
     if name == "discover":
@@ -467,7 +310,7 @@ def test_temporary_cleanup_refuses_replaced_file(native_companion, monkeypatch, 
 
 @pytest.mark.parametrize("failed", [False, True])
 def test_native_lock_cleanup_preserves_substituted_parent(tmp_path, monkeypatch, failed, companion):
-    tmp_path = companion[0]
+    tmp_path = companion
     parent, held, other = (tmp_path / name for name in (".staging", "held", "other"))
     parent.mkdir()
     other.mkdir()
@@ -511,7 +354,7 @@ def test_native_lock_cleanup_preserves_substituted_parent(tmp_path, monkeypatch,
 
 @pytest.mark.parametrize("case", ["ordinary", "handled-outer", "failed-current"])
 def test_native_lock_close_failure_tracks_current_transaction(tmp_path, monkeypatch, capsys, case, companion):
-    tmp_path = companion[0]
+    tmp_path = companion
     selected = storage.Destination(tmp_path / "ledger.jsonl", tmp_path, "example/companion")
     lock = storage._update_lock_path(selected)
     real_open, real_close = storage.os.open, storage.os.close
@@ -553,7 +396,7 @@ def test_native_lock_close_failure_tracks_current_transaction(tmp_path, monkeypa
 
 
 def test_native_lock_repeated_acquisition_and_failure_recovery(tmp_path, companion):
-    tmp_path = companion[0]
+    tmp_path = companion
     selected = storage.Destination(tmp_path / "ledger.jsonl", tmp_path, "example/companion")
     lock = storage._update_lock_path(selected)
     for unused in range(2):
@@ -574,7 +417,7 @@ def test_native_lock_repeated_acquisition_and_failure_recovery(tmp_path, compani
 @pytest.mark.skipif(os.name == "nt", reason="POSIX directory descriptor contract")
 @pytest.mark.parametrize("failed", [False, True])
 def test_native_lock_cleanup_anchors_parent_during_transaction(tmp_path, failed, companion):
-    tmp_path = companion[0]
+    tmp_path = companion
     parent, held = (tmp_path / name for name in (".staging", "held"))
     parent.mkdir()
     selected = storage.Destination(parent / "ledger.jsonl", tmp_path, "example/companion")
@@ -598,7 +441,7 @@ def test_native_lock_cleanup_anchors_parent_during_transaction(tmp_path, failed,
 @pytest.mark.skipif(os.name == "nt", reason="POSIX directory descriptor contract")
 @pytest.mark.parametrize("failed", [False, True])
 def test_native_lock_cleanup_refuses_replaced_entry(tmp_path, capsys, failed, companion):
-    tmp_path = companion[0]
+    tmp_path = companion
     selected = storage.Destination(tmp_path / "ledger.jsonl", tmp_path, "example/companion")
     lock, held = storage._update_lock_path(selected), tmp_path / "held-lock"
     message = "Synthetic transaction failure" if failed else "cleanup refused"

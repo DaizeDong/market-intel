@@ -231,7 +231,7 @@ def test_registry_retry_reports_later_rate_limit(monkeypatch, kind):
 
 @pytest.mark.parametrize("kind", ["github", "npm"])
 def test_l0_private_miss_then_hit_preserves_consumer_sentinel(companion, tmp_path, monkeypatch, kind):
-    repository, _, _, _ = companion
+    repository = companion
     consumer = tmp_path / "consumer"
     (consumer / "metrics").mkdir(parents=True)
     old_cache = consumer / "metrics" / ("gh-api-cache.json" if kind == "github" else "l0-cache.json")
@@ -254,14 +254,10 @@ def test_l0_private_miss_then_hit_preserves_consumer_sentinel(companion, tmp_pat
     assert sorted(p.name for p in (consumer / "metrics").iterdir()) == [old_cache.name]
 
 
-@pytest.mark.parametrize("state", ["PUBLIC", "UNKNOWN", "unmanaged"])
 @pytest.mark.parametrize("kind", ["github", "npm"])
-def test_unproven_private_cache_refuses_before_probe(companion, tmp_path, monkeypatch, state, kind):
-    repository, routes, states, _ = companion
-    if state == "unmanaged":
-        monkeypatch.setenv("MARKET_INTEL_DATA_DIR", str(tmp_path / "unmanaged"))
-    else:
-        states[routes["origin"]["fetch"][0]] = state
+def test_unmanaged_private_cache_refuses_before_probe(companion, tmp_path, monkeypatch, kind):
+    repository = companion
+    monkeypatch.setenv("MARKET_INTEL_DATA_DIR", str(tmp_path / "unmanaged"))
     calls = []
     github_reply(monkeypatch, {"archived": False, "pushed_at": RECENT}, calls)
     npm_reply(monkeypatch, calls)
@@ -274,7 +270,7 @@ def test_unproven_private_cache_refuses_before_probe(companion, tmp_path, monkey
 
 @pytest.mark.parametrize("late", [False, True])
 def test_cache_write_failure_is_nonzero_and_preserves_snapshot(companion, monkeypatch, late, capsys):
-    repository, _, _, _ = companion
+    repository = companion
     path = repository / "data" / caches.GH_CACHE_PATH
     path.parent.mkdir(parents=True)
     before = b'{"unrelated": {"value": 17}}\n'
@@ -309,7 +305,7 @@ def test_cache_write_failure_is_nonzero_and_preserves_snapshot(companion, monkey
 
 
 def test_cache_merge_keeps_other_observations(companion):
-    repository, _, _, _ = companion
+    repository = companion
     destination, cache = caches.load_cache(caches.GH_CACHE_PATH)
     assert cache == {}
     caches.prepare_write(caches.GH_CACHE_PATH, destination)
@@ -339,7 +335,7 @@ def test_l0_incomplete_github_observation_never_passes(companion, monkeypatch, p
     (False, "2032-01-01T00:00:00Z", "UNCERTAIN"), ("false", RECENT, "UNCERTAIN"),
 ])
 def test_cached_github_pass_is_reclassified_from_typed_evidence(companion, monkeypatch, archived, pushed, expected):
-    repository, _, _, _ = companion
+    repository = companion
     path = repository / "data" / caches.GH_CACHE_PATH
     path.parent.mkdir(parents=True)
     path.write_text(json.dumps({REPO: {"verdict": "PASS", "checked_at": l0._now_iso,
@@ -377,7 +373,7 @@ def test_matrix_current_evidence_overrides_every_cached_verdict():
 
 
 def test_directory_and_file_interfaces_preserve_final_private_destination(companion, tmp_path):
-    repository, _, _, _ = companion
+    repository = companion
     runtime = repository / "data/runtime"
     runtime.mkdir()
     assert storage.resolve_directory().path == runtime
@@ -392,29 +388,12 @@ def test_directory_and_file_interfaces_preserve_final_private_destination(compan
         storage.resolve_destination(path=runtime)
 
 
-@pytest.mark.parametrize("state", ["PRIVATE", "PUBLIC", "UNKNOWN"])
-def test_runtime_leaf_nested_repository_is_the_visibility_authority(companion, monkeypatch, state):
-    repository, _, states, _ = companion
-    nested = repository / "runtime"
+def test_runtime_leaf_nested_repository_is_the_storage_authority(companion):
+    nested = companion / "runtime"
     (nested / ".git").mkdir(parents=True)
-    boundary = storage._shared_boundary()
-    original_prove = boundary.prove_private_companion
-    seen = []
-    def prove(directory):
-        seen.append(Path(directory))
-        if Path(directory).is_relative_to(nested):
-            if state != "PRIVATE":
-                raise boundary.GitError("synthetic nested visibility")
-            return SimpleNamespace(root=str(nested), repositories=("example/nested",), signature="synthetic-nested")
-        return original_prove(directory)
-    monkeypatch.setattr(boundary, "prove_private_companion", prove)
-    if state == "PRIVATE":
-        result = storage.resolve_directory(path=nested)
-        assert result.repository == nested and result.identity == "example/nested"
-    else:
-        with pytest.raises(storage.InventoryError, match="visibility"):
-            storage.resolve_directory(path=nested)
-    assert seen == [nested]
+    result = storage.resolve_directory(path=nested)
+    assert result.repository == nested.resolve() and result.identity == nested.name
+    assert storage.resolve_directory(path=companion).repository == companion.resolve()
 
 
 def baseline_reply(monkeypatch, bodies, listing_error=False):
@@ -575,7 +554,7 @@ def test_youtube_empty_and_failed_channels_have_no_warning_candidates(monkeypatc
 
 
 def test_poll_main_persists_partial_real_rows_and_reports_degradation(companion, tmp_path, monkeypatch, capsys):
-    repository, _, _, _ = companion
+    repository = companion
     config = tmp_path / "synthetic-config.json"
     config.write_text(json.dumps({
         "E4": {"watchlist": ["synthetic-package", "broken"]},
@@ -594,7 +573,7 @@ def test_poll_main_persists_partial_real_rows_and_reports_degradation(companion,
 
 
 def test_poll_total_failure_is_never_successful_empty(companion, tmp_path, monkeypatch, capsys):
-    repository, _, _, _ = companion
+    repository = companion
     config = tmp_path / "synthetic-config.json"
     config.write_text(json.dumps({"E4": {"watchlist": ["broken"]}}))
     npm_surface_reply(monkeypatch)
@@ -605,7 +584,7 @@ def test_poll_total_failure_is_never_successful_empty(companion, tmp_path, monke
 
 @pytest.mark.parametrize("slug", ["yt-dlp", "instaloader", "crawlee", "twikit"])
 def test_documented_literal_destination_has_working_private_contract(companion, slug):
-    repository, _, _, _ = companion
+    repository = companion
     path = Path(__file__).resolve().parents[1] / "skills/market-intel/reference/tools" / (slug + ".md")
     calls = []
     for fragment in re.findall(r"\x60([^\x60\n]+)\x60", path.read_text(encoding="utf-8")):
@@ -677,7 +656,7 @@ def test_disabled_cache_skips_private_io_and_keeps_current_activity(monkeypatch,
 
 
 def test_matrix_cache_defaults_to_private_preflight_and_merge(companion):
-    repository, _, _, _ = companion
+    repository = companion
     path = repository / "data" / caches.GH_CACHE_PATH
     path.parent.mkdir(parents=True)
     before = b'{"unrelated": {"value": 17}}\n'
@@ -691,17 +670,13 @@ def test_matrix_cache_defaults_to_private_preflight_and_merge(companion):
         "unrelated": {"value": 17}, REPO: {"verdict": "BLOCK"}}
 
 
-@pytest.mark.parametrize("authority", ["missing", "unmanaged", "PUBLIC", "UNKNOWN"])
+@pytest.mark.parametrize("authority", ["missing", "unmanaged"])
 def test_matrix_cache_enabled_requires_private_authority(companion, tmp_path, monkeypatch, authority):
-    repository, routes, states, _ = companion
-    if authority in {"missing", "unmanaged"}:
-        selected = tmp_path / "unproven-companion"
-        if authority == "unmanaged":
-            selected.mkdir()
-        monkeypatch.setenv("MARKET_INTEL_DATA_DIR", str(selected))
-    else:
-        selected = repository
-        states[routes["origin"]["fetch"][0]] = authority
+    repository = companion
+    selected = tmp_path / "unproven-companion"
+    if authority == "unmanaged":
+        selected.mkdir()
+    monkeypatch.setenv("MARKET_INTEL_DATA_DIR", str(selected))
     with pytest.raises(storage.InventoryError):
         caches.load_cache(caches.GH_CACHE_PATH)
     assert not (selected / "cache").exists()
@@ -710,7 +685,7 @@ def test_matrix_cache_enabled_requires_private_authority(companion, tmp_path, mo
 
 @pytest.mark.parametrize("failure", ["preflight", "save"])
 def test_matrix_cache_enabled_never_falls_back_after_write_failure(companion, monkeypatch, failure, capsys):
-    repository, _, _, _ = companion
+    repository = companion
     path = repository / "data" / caches.GH_CACHE_PATH
     path.parent.mkdir(parents=True)
     before = b'{"unrelated": {"value": 17}}\n'

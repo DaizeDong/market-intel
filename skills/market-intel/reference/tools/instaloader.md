@@ -23,7 +23,7 @@ API. No ready MCP. Volatile line: `reference/volatile/pricing-install.md` → so
 browser-automation.
 
 ## Private runtime and outputs
-Before any collection or login below, use `tools/private_inventory.py` from the full consumer checkout. Select an existing absolute runtime directory with `runtime = resolve_directory("runtime/instaloader")`. This proves the final directory's repository, including a nested repository at that directory, and every effective publication destination is PRIVATE and versioned. Stop if it is missing, PUBLIC or unknown. Revalidate `resolve_directory(path=runtime.path)` immediately before launching the caller with that directory as its working directory.
+Before any collection or login below, use `tools/private_inventory.py` from the full consumer checkout. Select an existing absolute runtime directory with `runtime = resolve_directory("runtime/instaloader")`. This resolves the final directory's containing Git worktree, including a nested repository at that directory, and refuses directories outside it or inside this checkout. Stop if the check fails. Revalidate `resolve_directory(path=runtime.path)` immediately before launching the caller with that directory as its working directory.
 
 Follow the [external-tool output checklist](../../../../DATA.md#external-tool-storage)
 for installed-version output settings, implicit storage, stdout and credentials.

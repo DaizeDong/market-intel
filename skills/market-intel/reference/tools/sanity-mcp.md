@@ -20,7 +20,7 @@ Tools cover document create/patch/publish, schema introspection, GROQ query, and
 
 ## General experience & gotchas (踩坑)
 - **GA, schema-aware = the domain's strongest fit** for structured content; this is why it's a top pick alongside WordPress MCP.
-- Historical free-tier notes describe **public datasets only**; confirm current plan terms and dataset visibility. Public test datasets may contain only synthetic generator-owned fixtures. Keep real research and operational outputs in verified PRIVATE versioned DATA; a draft flag does not establish privacy.
+- Historical free-tier notes describe **public datasets only**; confirm current plan terms and dataset visibility. Public test datasets may contain only synthetic generator-owned fixtures. Keep real research and operational outputs in PRIVATE versioned DATA; a draft flag does not establish privacy.
 - OAuth scope is per-project/per-org; if you're in the wrong org the tools connect but return empty/permission errors, confirm the active project.
 - Drafts vs. published is a real distinction in Sanity (`drafts.` prefix); "I created it but it's not live" usually means you created a draft and never published.
 - **SEO命门:** if Sanity feeds a site that also syndicates, set canonical on the rendered front-end.

@@ -13,7 +13,7 @@ The mature Python client for the official Reddit API supports submissions, searc
 `pip install praw`. No MCP to add, write a short Python script. The L1 line: `reference/volatile/pricing-install.md → reddit-community` (notes PRAW as the still-free official-API route under `④ Browser/OSS`). Windows: pure-Python, so no stdio/path flakiness, runs fine in any Python ≥3.10 env. (If you'd rather have it in the MCP list, use `reddit-mcp-buddy` first; the superseded `reddit-mcp` also wraps PRAW, see `reddit-mcp-buddy.md` / `reddit-mcp.md`.)
 
 ## Auth / keys
-Follow Reddit's current application and authorization process. Load credentials and the real contact User-Agent through approved PRIVATE configuration without printing them. Keep collected comments, caches and exports in verified PRIVATE versioned DATA. Public code and generated tests use only synthetic values; see `reference/install-guide.md`.
+Follow Reddit's current application and authorization process. Load credentials and the real contact User-Agent through approved PRIVATE configuration without printing them. Keep collected comments, caches and exports in PRIVATE versioned DATA. Public code and generated tests use only synthetic values; see `reference/install-guide.md`.
 
 ## Usage, call examples
 Use `reddit.subreddit(...).top()/hot()/new()` or `.search(...)` for a bounded submission

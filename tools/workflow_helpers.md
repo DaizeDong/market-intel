@@ -59,6 +59,6 @@ observations when another domain fails, and report attempted, completed and fail
 domains separately.
 
 Raw responses, rejected candidates, watchlists and research notes are DATA. Keep
-those in the verified PRIVATE versioned companion through the existing DATA
+those in the PRIVATE versioned companion through the existing DATA
 resolver and writer. The public repository contains only the reusable instructions
 and generator-owned synthetic examples.

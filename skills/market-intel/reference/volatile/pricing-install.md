@@ -7,7 +7,7 @@
 > Security: never fill in or echo the user's API key. Have the USER run the `-e KEY=$VAR` form
 > themselves. Keys may be plaintext in `~/.claude.json`; keep them out of screenshots,
 > transcripts and public repositories. Follow the selected companion credential mode:
-> verified PRIVATE Git in Mode A, credentials outside Git in Mode B. See [CONFIG](../../../../CONFIG.md).
+> PRIVATE Git in Mode A, credentials outside Git in Mode B. See [CONFIG](../../../../CONFIG.md).
 > Prefer `-s user` scope for reusable sources. Prefer HTTP-transport sources on Windows.
 
 ## x-twitter `last_verified: 2026-09`

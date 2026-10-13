@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Weekly discovery sweep — poll the 6 high-signal "E-class" surfaces from
 `skills/market-intel/reference/refresh-protocol.md` §D1.E, dedupe, and append
-candidates to the verified PRIVATE companion's discovery inbox.
+candidates to the PRIVATE companion's discovery inbox.
 
 The 6 surfaces (per refresh-protocol D1.E):
   E1  PulseMCP newsletter RSS               (https://www.pulsemcp.com/feed.xml)
@@ -550,7 +550,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--since", default=None,
                     help="YYYY-MM-DD; only emit candidates dated >= this (default: 30 days ago)")
     ap.add_argument("--out", default=None,
-                    help="optional final output path inside a verified PRIVATE versioned companion")
+                    help="optional final output path inside the PRIVATE versioned companion")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the block that would be appended, don't write")
     ap.add_argument("--channel", default=None,

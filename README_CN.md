@@ -21,7 +21,7 @@
 
 这样可以减少重复维护，代价是覆盖范围取决于宿主、权限和数据源的实际行为。
 配置存在、发现工具、调用成功、内容可用是四种不同证据，缺哪一层就明确记录设置需求或覆盖缺口。
-只浏览目录无需在线探测；采集当前机器清单需要显式执行，结果只写入已核验的 PRIVATE 伴生仓。
+只浏览目录无需在线探测；采集当前机器清单需要显式执行，结果只写入 PRIVATE 伴生仓。
 
 矩阵修改需要通过已声明规则的确定性检查，并保留来源证据。这些检查能拦住已定义的退化，
 不能证明每条推荐都更好，也不能证明服务商此刻可用。刷新现已改为手动启动，日期和覆盖范围必须留给读者判断。
@@ -82,7 +82,7 @@ git clone --recurse-submodules https://github.com/DaizeDong/market-intel.git ~/.
   ```
 - **切换 config(即插即用):** 把环境变量指向另一个 config 目录即可， config 自包含，同时清除或更新 DATA 覆盖值：
   `export MARKET_INTEL_CONFIG=~/configs/work` ↔ `~/configs/personal`。
-- **密钥：** 按伴生仓声明的存储模式维护。Mode A 仅在已核验的 PRIVATE Git 仓中记录凭据；
+- **密钥：** 按伴生仓声明的存储模式维护。Mode A 仅在 PRIVATE Git 仓中记录凭据；
   Mode B 忽略凭据文件，并要求另行备份。参考部署用的是带金库投影的 Mode B：`secrets/<slug>.env`
   是从加密凭据金库生成、被 gitignore 的明文文件，新密钥先存进金库再重新生成。自带初始化工具只支持 Mode B。两种模式都禁止把密钥写进公开工具仓，
   详见 [CONFIG.md](CONFIG.md#secrets-and-storage-modes-e6)。
@@ -97,8 +97,8 @@ DATA，不探测机器清单，也不写文件。`--capability` 为目录中的 
 `MARKET_INTEL_CAPABILITIES` 提供。[schema v1 说明](skills/market-intel/reference/host-capabilities.md)
 列出了 `available-now`、带原因的 `setup` 和有证据支持的 `hard-gap` 的判定条件。
 
-只有显式 `--refresh` 才采集机器清单，并写入已核验为 PRIVATE、已有版本历史的
-伴生仓。写入失败会返回非零状态，保留先前快照。离线回归测试不能证明真实调研、
+只有显式 `--refresh` 才采集机器清单，并写入 PRIVATE 伴生仓的 Git 工作树
+（运行时只检查路径，PRIVATE 由提交期钩子和 CI 把关）。写入失败会返回非零状态，保留先前快照。离线回归测试不能证明真实调研、
 已安装宿主或服务商当前可用。
 
 ## 快速开始， 装免费无密钥三件套（3 分钟）

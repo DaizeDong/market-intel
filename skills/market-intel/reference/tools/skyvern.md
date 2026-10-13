@@ -15,7 +15,7 @@ Self-host: `git clone` the repo and run via Docker / `docker compose` (server + 
 ## Model integration and private setup
 The vision planner requires model integration. All model or external-agent work must use installed `llmcall`, inheriting its current routing, model, timeout and fallback policy. No supported Skyvern adapter is supplied or verified here. Before starting planner tasks, verify an actual installed-version adapter and its tool-I/O contract; otherwise stop at setup. Direct provider keys or a second routing ladder are not a substitute.
 
-Resolve profiles, cookies, workflow state, traces and outputs to verified PRIVATE versioned DATA before starting the server. Target-site credentials and any hosted-service key belong in approved PRIVATE configuration and must not appear in transcripts. Confirm upstream persistence settings support these destinations; otherwise keep this route at setup.
+Resolve profiles, cookies, workflow state, traces and outputs to PRIVATE versioned DATA before starting the server. Target-site credentials and any hosted-service key belong in approved PRIVATE configuration and must not appear in transcripts. Confirm upstream persistence settings support these destinations; otherwise keep this route at setup.
 
 ## Usage, call examples
 After the adapter and private persistence checks pass, inspect the installed server's OpenAPI or active-session MCP tool schema, then verify a bounded read-only workflow and its returned fields. API paths and workflow schemas vary by version; this card does not establish an executable task contract. Writing to target sites requires authorization for the specific action.

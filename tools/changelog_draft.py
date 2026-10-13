@@ -26,7 +26,7 @@ Default --since:
     instead.)
 
 Default --out:
-    stdout. With --out PATH, also write inside a verified PRIVATE companion.
+    stdout. With --out PATH, also write inside the PRIVATE companion.
 
 Exit codes:
     0 — success
@@ -295,7 +295,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument(
         "--out",
         default=None,
-        help="Also write draft inside a verified PRIVATE companion (default: stdout only).",
+        help="Also write draft inside the PRIVATE companion (default: stdout only).",
     )
     args = parser.parse_args(argv)
 

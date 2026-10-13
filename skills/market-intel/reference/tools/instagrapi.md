@@ -27,9 +27,9 @@ PRIVATE versioned companion; private credential backups are allowed. See
 
 ## Usage, call examples
 Make the full Market checkout importable. Initialize an existing `runtime/instagrapi` directory
-under the configured PRIVATE companion data root and provide a fresh visibility receipt before
-running this example. The shared resolver checks local Git configuration and the receipt; it does
-not query GitHub live. Missing or unproven storage stops setup, with no source-tree fallback.
+under the configured PRIVATE companion data root before running this example. The resolver
+checks that the directory is inside the companion's Git worktree. Missing or unmanaged storage
+stops setup, with no source-tree fallback.
 
 ```python
 import os

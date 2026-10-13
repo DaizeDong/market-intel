@@ -62,7 +62,7 @@
     "browser_data/",
     "weibo/"
   ],
-  "_sealed_note": "Legacy public output paths are forbidden even when ignored. Real ledgers, discovery inboxes, reports, browser profiles and scraper caches belong only in a verified PRIVATE versioned companion.",
+  "_sealed_note": "Legacy public output paths are forbidden even when ignored. Real ledgers, discovery inboxes, reports, browser profiles and scraper caches belong only in the PRIVATE versioned companion.",
   "fixture": [
     "tools/test_human_review.py",
     "tools/test_discovery_contract.py",
@@ -82,5 +82,5 @@
     "tools/test_incident_boundary.py",
     "tools/test_console.py"
   ],
-  "_data_home": "PRIVATE versioned companion. All consumer writers verify the final containing repository and every effective fetch/push destination, including explicit output overrides. Discovery, surface and incident appends use a lock over read-modify-replace. No public fallback."
+  "_data_home": "PRIVATE versioned companion. All consumer writers resolve the final containing Git worktree and refuse destinations outside it or inside this source tree, including explicit output overrides; they start no process and check no visibility at runtime (commit-time hooks and CI enforce PRIVATE publication). Discovery, surface and incident appends use a lock over read-modify-replace. No public fallback."
 }

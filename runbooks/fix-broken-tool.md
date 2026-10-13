@@ -11,7 +11,7 @@ into a permanent matrix improvement plus a feedback-loop record, without silent 
 
 ## 1. Log to the live-run ledger (`<data>/metrics/live-runs.jsonl`, PRIVATE store, not this repo)
 
-Use the incident helper to append one record through the verified PRIVATE
+Use the incident helper to append one record through the PRIVATE
 destination and its locked update transaction. Never append by shell redirection.
 The canonical schema is
 [`live-run-schema.json`](../skills/market-intel/reference/live-run-schema.json),

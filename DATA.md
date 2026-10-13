@@ -10,15 +10,16 @@ Runtime producers require an existing companion `data/` directory. Inventory is
 surface polling writes `data/surface-inbox.jsonl`. The root `metrics/**` namespace
 contains retired history and refuses new runtime writes.
 
-The pinned Guards `authorize_artifact_write` API checks each file's unique owner,
-current PRIVATE destination and Git ignore policy. Undeclared, retired and ignored
-versioned destinations fail before writing. Structural directories do not authorize
+Runtime writers check paths only: the destination must resolve inside the
+companion's Git worktree, outside this source tree and Git metadata. They start no
+process and do not check visibility or ignore status at runtime; keep writers to the
+paths declared in `storage.contract.json`. Structural directories do not authorize
 arbitrary children. Atomic staging and update locks use the exact transient
 `.staging/` patterns in the contract; successful publication removes them. Inspect
 an interrupted operation before removing residual staging.
 
 The companion's selected credential policy remains authoritative. Mode A versions
-credentials in verified PRIVATE Git; Mode B ignores them and requires a separate
+credentials in PRIVATE Git; Mode B ignores them and requires a separate
 protected backup. When Mode B uses a vault projection (the reference deployment),
 restore the vault and its key, then regenerate `secrets/<slug>.env`; never restore
 those files as plaintext from Git history or another machine. Restore the chosen
@@ -31,7 +32,7 @@ restore success or permission to delete retained data.
 
 ## External-tool storage
 
-`resolve_directory` proves an existing directory's PRIVATE boundary only. It does
+`resolve_directory` checks an existing directory's companion boundary only. It does
 not authorize arbitrary child files. External-library recipes must select declared
 file destinations and revalidate them before persistence. A new dynamic output
 namespace needs its own producer, consumer and retention declaration before use;
@@ -47,6 +48,6 @@ Review the installed version's supported storage settings, including implicit
 databases, sessions, cookie files, caches, logs, downloads, transcripts, datasets,
 request queues and exports. Redirect every output through supported options to an
 admitted PRIVATE file destination. If an output cannot be located and redirected,
-retain setup status. Capture metadata stdout only in a verified PRIVATE file,
+retain setup status. Capture metadata stdout only in the PRIVATE file,
 never in the consumer checkout. Keep credentials in the companion's designated
 store and backup under its selected policy.

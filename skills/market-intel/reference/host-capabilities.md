@@ -112,19 +112,14 @@ Legacy filters (`cold`, `cold-mcp`, `needs-key`, `needs-install`, `needs-deploy`
 `unknown`) remain accepted as aliases for `setup`; the reason explains the gap.
 
 Only an explicit `--refresh` collects inventory. Before collecting it, the console
-verifies the final canonical containing Git repository, its existing history, all
-physical and effective fetch and push destinations (including Git URL rewrites and
-configured push remotes), fresh local PRIVATE visibility receipts for each, and
-that the destination is eligible for version control. Missing, public, unknown,
-unmanaged and consumer-tree destinations are rejected before directory creation.
-Nested repositories and filesystem links are resolved before the visibility decision.
+resolves the final canonical path and the nearest containing Git worktree.
+Missing, unmanaged (no Git worktree), Git-metadata and consumer-tree destinations
+are rejected before directory creation. Filesystem links are resolved first, and
+a nested repository is the worktree that owns its paths.
 
-This storage proof reads `~/.pii-guard/visibility.json`; it does not make a live
-GitHub visibility request or refresh the receipt. The shared guard accepts only
-valid, dated receipts within its freshness window (currently 30 days). Run the
-installed guard's authenticated visibility refresh workflow before first use,
-after destination or visibility changes, and whenever a receipt is missing, stale
-or invalid. A failed refresh leaves storage unverified. See the
+These are path checks only: no Git or `gh` process runs and repository visibility
+is not checked at runtime. The commit and push hooks and CI enforce that the
+companion stays PRIVATE. See the
 [config contract](../../../CONFIG.md#where-real-run-output-goes-the-private-companion-repo-versioned)
 for initialization requirements.
 
@@ -134,17 +129,17 @@ must already exist; `MARKET_INTEL_DATA_DIR`, when set, must name that same child
 Follow [CONFIG.md](../../../CONFIG.md#discovery-convention-e2) for selection and
 initialization. A failed explicit override never falls back.
 An atomic write preserves a previous snapshot if replacement fails; the CLI returns
-nonzero on a storage failure and names the verified companion on success. The
+nonzero on a storage failure and names the companion on success. The
 console does not commit; include the snapshot in the companion's normal backup
 and versioning workflow. It never edits `.gitignore`.
 
 The console is maintenance code. The research workflow uses the host's tools and
 the evidence rules above without importing or invoking refresh scripts.
 
-The incident helper uses the same canonical PRIVATE destination proof for
+The incident helper uses the same canonical destination checks for
 `metrics/live-runs.jsonl` below DATA, before reading or replacing the ledger.
-Missing, PUBLIC, unknown, ignored, unmanaged and consumer-tree destinations fail
-without directory creation. Successful writes name the verified repository;
+Missing, unmanaged and consumer-tree destinations fail without directory
+creation. Successful writes name the companion;
 failed replacement preserves the previous ledger and returns a nonzero status.
 
 ## Catalog defaults and documentation aliases
@@ -163,7 +158,7 @@ tools, activations or coverage. The registry's `documentation` metadata keeps th
 ## PRIVATE writer transactions
 
 Discovery inboxes, surface rows, incident ledgers and feedback reports use the same
-final PRIVATE destination verifier, including explicit output overrides. Validation
+final destination path checks, including explicit output overrides. Validation
 precedes observation or private-ledger reads. Dry-run writers create no storage.
 Append writers hold an exclusive lock for the complete revalidate/read/modify/replace
 transaction and recheck destinations before replacement. Concurrent appends are

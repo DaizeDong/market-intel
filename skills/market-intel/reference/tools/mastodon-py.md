@@ -39,7 +39,7 @@ timeline = m.timeline_home()
 ```
 
 Validate the selected read operation before declaring the integration ready. Keep returned
-account data and any enabled caches, logs or exports in verified PRIVATE versioned storage.
+account data and any enabled caches, logs or exports in PRIVATE versioned storage.
 Publishing requires separate explicit authorization, for example
 `m.status_post(approved_text)` or `m.media_post(approved_private_image_path)` followed by the
 authorized post. Do not publish as an installation check.

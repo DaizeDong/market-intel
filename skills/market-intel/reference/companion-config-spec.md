@@ -54,8 +54,8 @@ companion in isolation from inherited selectors. Runtime writers require the
 `data/` directory to exist; an absent directory means uninitialized storage.
 
 Catalog browsing remains usable without a companion. A selected path does not
-establish PRIVATE storage or readiness: writes require fresh PRIVATE admission and
-exact source-contract artifact ownership, and an empty registry is TEMPLATE_VALID
+establish PRIVATE storage or readiness: writes require a destination inside the
+companion worktree at a declared artifact path, and an empty registry is TEMPLATE_VALID
 but NOT READY. Public or unknown publication routes block writes.
 
 ---
@@ -100,7 +100,7 @@ claude.json
 ```
 
 Under Mode B, real `.env` files and live host configuration MUST stay out of git.
-Mode A instead versions credentials only in a verified PRIVATE repository (§5.3).
+Mode A instead versions credentials only in the PRIVATE repository (§5.3).
 Additional Mode B ignore patterns (`*.key`, `*_token`, etc.) are RECOMMENDED.
 
 ---
@@ -493,7 +493,7 @@ no-echo inspection mechanism; masking after disclosure is insufficient.
 Current readiness MUST come from the active host/session with exact source and
 capability attribution, successful execution, valid authentication and usable
 response content, as defined by `host-capabilities.md`. Record this evidence in
-verified PRIVATE DATA. Unknown tools in the active host need not be added to the
+PRIVATE DATA. Unknown tools in the active host need not be added to the
 companion before they can be examined; missing inventory is a configuration gap,
 not proof of unsupported capability.
 
@@ -520,7 +520,7 @@ A repo conforms to this spec when:
 
 - [ ] The storage mode is declared as in §5.3. Mode B uses the §2.2 ignore patterns and
       a separately verified backup (for a vault projection, the vault and its key).
-      Mode A versions credentials in a verified PRIVATE
+      Mode A versions credentials in the PRIVATE
       repository; confirm that its history and private backup preserve those files.
 - [ ] `registry.json` exists at the repo root and has `schema_version: 1` (or higher that's
       backward-compat with v1).

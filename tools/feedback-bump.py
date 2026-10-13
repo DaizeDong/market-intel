@@ -552,7 +552,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument(
         "--out",
         default=None,
-        help="Optional report path inside a verified PRIVATE versioned companion.",
+        help="Optional report path inside the PRIVATE versioned companion.",
     )
     return p.parse_args(argv)
 

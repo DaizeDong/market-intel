@@ -1,10 +1,15 @@
-"""Validate the final PRIVATE Git destination before inventory or incident writes."""
+"""Resolve the companion destination before inventory or incident writes.
+
+The checks are path-only and start no process: the destination must resolve outside
+this consumer source tree and Git metadata, inside an existing Git worktree (the
+PRIVATE companion). Repository visibility is not checked at runtime; commit-time
+hooks and CI enforce PRIVATE publication. An unresolved companion is an error; there
+is no in-repo fallback.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
 from contextlib import contextmanager
-from functools import lru_cache
-import importlib.util
 import json
 import os
 from pathlib import Path
@@ -26,23 +31,6 @@ class Destination:
     repository: Path
     identity: str
     requested_path: Path | None = None
-    publication: tuple = ()
-
-
-@lru_cache(maxsize=1)
-def _shared_boundary():
-    """Load the supported proof API; an old or absent kit cannot authorize writes."""
-    source = ROOT / "guards/tools/data_boundary.py"
-    try:
-        spec = importlib.util.spec_from_file_location("market_intel_data_boundary", source)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-    except (OSError, ImportError, ValueError) as exc:
-        raise InventoryError("PRIVATE proof is unavailable; initialize the guards submodule") from exc
-    if not all(callable(getattr(module, name, None)) for name in (
-            "prove_private_companion", "read_private_companion_git", "GitError")):
-        raise InventoryError("PRIVATE proof is unavailable; update the guards submodule")
-    return module
 
 
 def _data_directory():
@@ -79,27 +67,16 @@ def _resolve_destination(relative_path, path, directory):
             ancestor = ancestor.parent
         if not ancestor.is_dir() or (target.exists() and not (target.is_dir() if directory else target.is_file())):
             raise InventoryError("inventory destination is not a file in a directory")
-        boundary = _shared_boundary()
-        try:
-            proof = boundary.prove_private_companion(ancestor)
-            repository = Path(proof.root).resolve()
-            if not target.is_relative_to(repository) or repository.is_relative_to(ROOT.resolve()):
-                raise InventoryError("inventory destination is not outside the consumer source tree")
-            boundary.read_private_companion_git(proof, "rev-parse", "--verify", "HEAD")
-            ignored = boundary.read_private_companion_git(
-                proof, "check-ignore", "--no-index", "-q", "--",
-                target.relative_to(repository).as_posix())
-        except boundary.GitError as exc:
+        repository = next((candidate for candidate in (ancestor, *ancestor.parents)
+                           if os.path.lexists(candidate / ".git")), None)
+        if repository is None:
             raise InventoryError(
-                "inventory destination visibility or Git storage could not be verified; "
-                "use a versioned PRIVATE companion with a fresh visibility receipt") from exc
-        if ignored.returncode != 1:
-            raise InventoryError("inventory must be eligible for version control; destination is ignored or cannot be checked")
-        if not directory:
-            authorize_write(target, repository)
-        identity = ", ".join(proof.repositories)
-        publication = (tuple(proof.repositories), proof.signature)
-        return Destination(target, repository, identity, lexical if path is not None else None, publication)
+                "inventory destination is not inside a Git worktree; "
+                "use the versioned PRIVATE companion")
+        repository = repository.resolve()
+        if repository.is_relative_to(ROOT.resolve()) or ROOT.resolve().is_relative_to(repository):
+            raise InventoryError("inventory destination is not outside the consumer source tree")
+        return Destination(target, repository, repository.name, lexical if path is not None else None)
     except (OSError, ValueError) as exc:
         raise InventoryError("inventory destination is inaccessible or invalid") from exc
 
@@ -131,7 +108,7 @@ def write_text(payload, relative_path, destination=None):
     try:
         current.path.parent.mkdir(parents=True, exist_ok=True)
         import uuid
-        temporary = authorize_write(current.repository / ".staging" / ("inventory-" + uuid.uuid4().hex + ".tmp"), current.repository)
+        temporary = current.repository / ".staging" / ("inventory-" + uuid.uuid4().hex + ".tmp")
         temporary.parent.mkdir(parents=True, exist_ok=True)
         with temporary.open("x", encoding="utf-8", newline="\n") as stream:
             temporary_identity = os.fstat(stream.fileno())
@@ -139,7 +116,6 @@ def write_text(payload, relative_path, destination=None):
             stream.flush()
             os.fsync(stream.fileno())
         current = _revalidate(relative_path, current)
-        authorize_write(temporary, current.repository)
         candidate = temporary.lstat()
         if not stat.S_ISREG(candidate.st_mode) or candidate.st_nlink != 1 or not os.path.samestat(temporary_identity, candidate):
             raise InventoryError("inventory temporary file changed identity before publication")
@@ -149,7 +125,7 @@ def write_text(payload, relative_path, destination=None):
         raise InventoryError("inventory persistence failed; previous snapshot was preserved") from exc
     finally:
         if temporary is not None:
-            # A failed proof may mean this pathname now traverses another directory.
+            # A failed revalidation may mean this pathname now traverses another directory.
             # Retaining the file avoids a check-then-unlink race and keeps the original error.
             print(f"inventory temporary cleanup refused after publication failure; "
                   f"unpublished candidate retained (created at {temporary})", file=sys.stderr)
@@ -174,7 +150,7 @@ def _update_lock_path(destination):
 @contextmanager
 def _exclusive_update(destination, timeout=10):
     """An exclusive lock file serializes cooperating processes; stale locks fail closed."""
-    lock = authorize_write(_update_lock_path(destination), destination.repository)
+    lock = _update_lock_path(destination)
     lock.parent.mkdir(parents=True, exist_ok=True)
     descriptor = None
     directory = None
@@ -250,24 +226,3 @@ def update_text(transform, relative_path, destination=None):
         except (OSError, UnicodeError) as exc:
             raise InventoryError("private ledger is unreadable; previous ledger was preserved") from exc
         return write_text(transform(previous), relative_path, current)
-
-
-@lru_cache(maxsize=1)
-def _storage_contract():
-    source = ROOT / "guards/tools/storage_contract.py"
-    spec = importlib.util.spec_from_file_location("market_intel_storage_contract", source)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    try:
-        spec.loader.exec_module(module)
-    except (OSError, ImportError) as exc:
-        raise RuntimeError("update the pinned guards submodule for artifact write admission") from exc
-    return module
-
-
-def authorize_write(path, repository):
-    try:
-        return _storage_contract().authorize_artifact_write(
-            ROOT, repository, Path(path).relative_to(repository).as_posix()).path
-    except (ValueError, RuntimeError) as exc:
-        raise InventoryError("artifact write refused: " + str(exc)) from exc

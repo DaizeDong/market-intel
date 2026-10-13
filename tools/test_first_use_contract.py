@@ -339,7 +339,7 @@ def test_requests_is_a_direct_runtime_dependency():
 @pytest.mark.parametrize("nested_data", [False, True])
 def test_refresh_reads_only_its_selected_companion(
         selection, with_registry, nested_data, companion, tmp_path, monkeypatch):
-    selected, _, _, _ = companion
+    selected = companion
     other = tmp_path / ".market-intel-config"
     other.mkdir()
     other_registry = other / "registry.json"

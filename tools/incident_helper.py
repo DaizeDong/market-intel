@@ -319,7 +319,7 @@ def _prompt_yn(question: str) -> bool:
 
 
 def apply_live_runs_append(entry_line: str) -> None:
-    """Append through a reverified PRIVATE target and preserve it on write failure."""
+    """Append through a rePRIVATE target and preserve it on write failure."""
     def append(existing):
         separator = "\n" if existing and not existing.endswith("\n") else ""
         return existing + separator + entry_line + "\n"

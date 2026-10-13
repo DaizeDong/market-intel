@@ -15,7 +15,7 @@ Prepare the LangGraph app (Node/TS, plus a LangGraph runtime) using the installe
 ## Model integration and private setup
 All model or external-agent work must use installed `llmcall`, inheriting its current routing, model, timeout and fallback policy. No supported adapter for this LangGraph app is supplied or verified here. Verify an actual installed-version adapter and its tool-I/O contract before running the graph; otherwise stop at setup. Do not add direct provider clients or a separate model ladder.
 
-Keep ingest and posting credentials in approved PRIVATE configuration with no transcript echo. Resolve feed history, drafts, checkpoints, logs and scheduling state to verified PRIVATE versioned DATA. Confirm that the installed app supports those destinations before starting it; no checkout or loose home-directory fallback is permitted.
+Keep ingest and posting credentials in approved PRIVATE configuration with no transcript echo. Resolve feed history, drafts, checkpoints, logs and scheduling state to PRIVATE versioned DATA. Confirm that the installed app supports those destinations before starting it; no checkout or loose home-directory fallback is permitted.
 
 ## Usage, call examples
 Once the adapter, private storage and selected-operation checks pass, submit a source URL to prepare a private draft. Review and edit that concrete draft before requesting scheduling or publication authorization. A configured backend or an app approval node does not itself authorize sending. The posting integration must expose a verified operation for the authorized destination.

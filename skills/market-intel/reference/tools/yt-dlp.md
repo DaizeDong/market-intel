@@ -18,7 +18,7 @@ The standard **media downloader + metadata extractor** for YouTube and 1000+ sit
 `pip install yt-dlp` (or `pip install -U yt-dlp` to update, it updates constantly) or a standalone binary. Not an MCP, shell out to the CLI or `import yt_dlp`. L1 line: `reference/volatile/pricing-install.md#browser-automation`. Works fine on native Windows (single binary / pip), no Playwright path quirks. Pair with `ffmpeg` only if you actually need to merge/convert media (metadata pulls don't).
 
 ## Private runtime and outputs
-Before any collection or login below, use `tools/private_inventory.py` from the full consumer checkout. Select an existing absolute runtime directory with `runtime = resolve_directory("runtime/yt-dlp")`. This proves the final directory's repository, including a nested repository at that directory, and every effective publication destination is PRIVATE and versioned. Stop if it is missing, PUBLIC or unknown. Revalidate `resolve_directory(path=runtime.path)` immediately before launching the caller with that directory as its working directory.
+Before any collection or login below, use `tools/private_inventory.py` from the full consumer checkout. Select an existing absolute runtime directory with `runtime = resolve_directory("runtime/yt-dlp")`. This resolves the final directory's containing Git worktree, including a nested repository at that directory, and refuses directories outside it or inside this checkout. Stop if the check fails. Revalidate `resolve_directory(path=runtime.path)` immediately before launching the caller with that directory as its working directory.
 
 Follow the [external-tool output checklist](../../../../DATA.md#external-tool-storage)
 for installed-version output settings, implicit storage, stdout and credentials.

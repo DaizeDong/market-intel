@@ -18,27 +18,26 @@ SerpBear is a self-hosted **keyword rank tracker**: add domains + keywords, and 
 Before any real run, resolve the full consumer checkout and use
 `tools/private_inventory.py`'s `resolve_destination(path=...)` for individual
 config/output files and `resolve_directory(path=...)` for existing runtime or
-browser-profile directories. Pass the final absolute path. Each check proves the
-containing repository, including a repository rooted at the directory itself,
-and PRIVATE visibility for every effective
-publication destination. Stop on missing, PUBLIC or unknown proof.
+browser-profile directories. Pass the final absolute path. Each check resolves the
+containing Git worktree, including a repository rooted at the directory itself,
+and refuses destinations outside it or inside this checkout. Stop when it fails.
 Keep runtime files versioned in that PRIVATE companion. An ignored directory in
 this public checkout is not a valid destination. A later real run must repeat the
 check; this recipe is not a live destination attestation.
 
-Use the upstream Docker image from a verified PRIVATE runtime directory. Bind an
-absolute verified PRIVATE host data directory to `/app/data`; do not derive the
+Use the upstream Docker image from the PRIVATE runtime directory. Bind an
+absolute PRIVATE host data directory to `/app/data`; do not derive the
 mount from the caller's current working directory. Store credentials in the
 approved PRIVATE configuration and supply them without echoing values. Confirm
 the upstream image's current environment and persistence contract before launch.
 Then open the local UI, configure a scraper and inspect operation results.
 
 ## Auth / keys
-App login is `USER`/`PASSWORD`; the REST API uses the self-generated `APIKEY` header (you set it at deploy time). The **SERP scraping backend** is separate: SerpBear needs a source to read Google positions, either a paid scraper (ScrapingRobot/SerpApi/SpaceSerp key) or **point it at your self-hosted SearXNG** to stay fully free. Treat the app credentials, self-generated API key and backend keys as secrets. Use the selected companion credential mode: Mode A permits verified PRIVATE versioning; Mode B keeps credential values outside Git. Never copy them into the public source, screenshots or transcripts. See [secret-handling guidance](../install-guide.md) and the [credential-mode contract](../../../../CONFIG.md).
+App login is `USER`/`PASSWORD`; the REST API uses the self-generated `APIKEY` header (you set it at deploy time). The **SERP scraping backend** is separate: SerpBear needs a source to read Google positions, either a paid scraper (ScrapingRobot/SerpApi/SpaceSerp key) or **point it at your self-hosted SearXNG** to stay fully free. Treat the app credentials, self-generated API key and backend keys as secrets. Use the selected companion credential mode: Mode A permits PRIVATE versioning; Mode B keeps credential values outside Git. Never copy them into the public source, screenshots or transcripts. See [secret-handling guidance](../install-guide.md) and the [credential-mode contract](../../../../CONFIG.md).
 
 ## Usage
 Read tracked keywords with the documented `/api/keywords` endpoint using a
-no-echo authenticated client. Save the response only to a verified PRIVATE
+no-echo authenticated client. Save the response only to the PRIVATE
 report path. It contains keyword positions, dated history, URLs and timestamps.
 Adding keywords through POST is a separate state-changing operation.
 

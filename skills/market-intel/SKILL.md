@@ -258,8 +258,8 @@ setup vs hard-gap), full source list.
 At the end of a research run, append one observation per source used to
 `metrics/live-runs.jsonl` below the PRIVATE DATA directory. The resolver is
 `guards/tools/datadir.py`; the incident helper uses `tools/private_inventory.py`
-to verify the final canonical PRIVATE versioned destination before writing.
-If storage is missing or unverified, stop persistence, explain the required setup,
+to resolve the final canonical destination inside the companion worktree before writing.
+If storage is missing or unresolved, stop persistence, explain the required setup,
 and retain the observations in the reply until storage is ready. Never write this
 ledger in the public source.
 

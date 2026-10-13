@@ -1,4 +1,4 @@
-"""Optional observation caches; persisted entries require the verified PRIVATE companion."""
+"""Optional observation caches; persisted entries require the PRIVATE companion."""
 import json
 from pathlib import Path
 

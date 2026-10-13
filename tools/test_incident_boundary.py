@@ -78,7 +78,7 @@ def test_changelog_refuses_unproven_output_before_reading_input(monkeypatch, tmp
 @pytest.mark.parametrize("write_fails", [False, True])
 def test_changelog_uses_verified_atomic_output(companion, monkeypatch, write_fails):
     import changelog_draft
-    repository, _, _, _ = companion
+    repository = companion
     sample = fixture()["maintenance"]
     text = sample["discovery"]["one_line_pitch"]
     target = repository / "data/deliverables/reports" / "draft.md"
@@ -108,15 +108,17 @@ def test_changelog_uses_verified_atomic_output(companion, monkeypatch, write_fai
 
 
 def test_incident_requires_private_destination_before_any_write(tmp_path, monkeypatch):
-    monkeypatch.setenv("MARKET_INTEL_DATA_DIR", str(tmp_path))
-    with patch.object(private_inventory, "_shared_boundary", side_effect=private_inventory.InventoryError("synthetic unversioned directory")):
-        with pytest.raises(private_inventory.InventoryError):
-            incident_helper.apply_live_runs_append(json.dumps(fixture()["inventory"]))
-    assert not (tmp_path / "metrics").exists()
+    (tmp_path / "data").mkdir()
+    for key in ("MARKET_INTEL_CONFIG", "MARKET_INTEL_CONFIG_DIR"):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv("MARKET_INTEL_DATA_DIR", str(tmp_path / "data"))
+    with pytest.raises(private_inventory.InventoryError, match="Git worktree"):
+        incident_helper.apply_live_runs_append(json.dumps(fixture()["inventory"]))
+    assert not (tmp_path / "data/metrics").exists()
 
 
 def test_incident_uses_canonical_destination_and_atomic_write(companion, monkeypatch):
-    repository = companion[0]
+    repository = companion
     target = repository / "data/metrics/live-runs.jsonl"
     target.parent.mkdir(parents=True)
     old = json.dumps(fixture()["inventory"]) + "\n"
@@ -172,18 +174,6 @@ def test_draft_model_call_has_no_provider_preflight_or_default_overrides():
         code, text, error = changelog_draft.run_claude("synthetic prompt")
     assert code != 0 and text == ""
     assert "synthetic credential" not in error
-
-
-def test_private_proof_module_must_exist_before_any_metadata_commands(tmp_path, monkeypatch):
-    import subprocess
-    monkeypatch.setattr(private_inventory, "ROOT", tmp_path / "consumer")
-    private_inventory._shared_boundary.cache_clear()
-    try:
-        with patch.object(subprocess, "run", side_effect=AssertionError("no metadata command before module validation")):
-            with pytest.raises(private_inventory.InventoryError, match="initialize the guards"):
-                private_inventory._shared_boundary()
-    finally:
-        private_inventory._shared_boundary.cache_clear()
 
 
 def incident_draft_output(monkeypatch, tmp_path, capsys, d_code="D-STALE", selection=None):

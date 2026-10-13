@@ -32,14 +32,13 @@ Python + Playwright. Two entry points: the `sau` CLI (`--headless` supported) an
 skills, which `init`-style tooling installs for Claude Code / Codex / OpenClaw. Before any login
 or launch, use the full Market checkout's `tools.private_inventory.resolve_directory` to resolve
 an existing `runtime/social-auto-upload` directory in the configured PRIVATE versioned companion.
-Provide a fresh visibility receipt; the shared proof checks local Git configuration and receipts.
 Verify the installed version's supported options for every session, browser profile, log and
 output destination, and configure an adapter to use those absolute private paths. Keep setup-only
 if any writer cannot be redirected. A public clone must never receive account sessions or outputs.
 
 ## Auth / keys
 Browser access uses a **logged-in account session per platform**. Treat session files as
-credentials: store and version them in the verified PRIVATE companion and its approved backup,
+credentials: store and version them in the PRIVATE companion and its approved backup,
 never in the public clone or transcript. Each platform may require interactive login and later
 re-authentication; a saved session does not establish current access.
 
@@ -53,7 +52,7 @@ Per-platform flags and scheduling support differ (the historical matrix above li
 on 6 of 11 platforms); verify the installed version before promising coverage.
 
 ## General experience & gotchas (踩坑)
-> Not yet exercised in a live market-intel run; notes below are from the repo README + gh api, fetched 2026-09-06. Record first-use observations in the verified PRIVATE versioned ledger (R4).
+> Not yet exercised in a live market-intel run; notes below are from the repo README + gh api, fetched 2026-09-06. Record first-use observations in the PRIVATE versioned ledger (R4).
 - **CN 风控 is the harshest surface in this matrix, and a banned 抖音 account is not recoverable with a credit card.** Past a handful of accounts you need one browser context and one residential proxy per account, which is how the dollar cost walks back in. "Free" here means *differently priced*, not costless.
 - **No SLA, no delivery receipt.** There is no per-post status webhook and no unified analytics; when a platform changes its upload UI the uploader breaks until someone lands a PR. That absence is a real part of what Ayrshare's $149/mo buys.
 - **It is mid-refactor, and the README says so.** The stated plan is converging the per-platform uploaders, unifying the CLI, skill-ifying for Claude Code/Codex/OpenClaw, **switching the driver to `patchright`**, and pushing headless as the mainline. As of this check patchright is a *plan*, not the shipped driver. The Web UI code is explicitly no longer the mainline and is "not guaranteed to run."

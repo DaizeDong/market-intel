@@ -19,7 +19,7 @@ The anonymous tier is designed to need no credentials, but the recorded outage p
 Via MCP, tools cover: browse a subreddit's hot/new/top posts, search posts by keyword, fetch a post's details + comments, and analyze a user. Minimal: "browse top posts in r/<niche> this month" → open the highest-comment threads → read the post details for recurring complaints. List the exact tool names with your client after connecting, don't assume signatures from memory.
 
 ## General experience & gotchas (踩坑)
-- **Anonymous 403 and quota exhaustion are different failures.** Adding delays cannot establish recovery from the recorded anonymous endpoint outage. Verify app-id/login access or use the no-credential hosted route; pace requests and keep caches in verified PRIVATE DATA.
+- **Anonymous 403 and quota exhaustion are different failures.** Adding delays cannot establish recovery from the recorded anonymous endpoint outage. Verify app-id/login access or use the no-credential hosted route; pace requests and keep caches in PRIVATE DATA.
 - **Subreddit search is keyword, not semantic**, and Reddit's own search is weak, run query variants and browse top/hot directly rather than trusting one search. To find the *right* subreddits at all, hand off to **reddit-research-mcp** (semantic discovery).
 - **Reddit API is tightening** (shard "Watch": GummySearch shuts down 2026-11). Official-API access stays the safe route, prefer it over scrapers, but expect quota/policy drift; re-verify before relying at scale.
 - **Post details include comments**, but for deep nested comment-tree walking / multi-sub aggregation with full pagination control, drop to **praw** (same free API, full control).

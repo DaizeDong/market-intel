@@ -538,7 +538,7 @@ mechanical sequence. Skip any step and the matrix drifts:
    buckets; missing checker or failed execution is an unresolved sync gap, never a clean check.
 7. **Prepare and review the release commit**, including the public changelog entry,
    plugin version and derived documentation, through the normal hooks. Then run
-   `tools/release.ps1` with `-Version`, the verified PRIVATE `-ConfigRepo` path and
+   `tools/release.ps1` with `-Version`, the PRIVATE `-ConfigRepo` path and
    `-DryRun`. It validates the prepared clean commit without editing or committing
    files. Remove `-DryRun` only after publication authorization; see
    `../../../runbooks/release.md` for exact tag/push and remote-readback requirements.

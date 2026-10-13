@@ -19,16 +19,17 @@ pinned Guards sibling convention. There is no home-directory location and no sep
 child. Explicit invalid or conflicting selectors fail without choosing another root.
 A resolved path does not by itself prove configuration readiness or PRIVATE storage.
 
-Before storing real configuration or DATA, verify the repository's configured remote
-visibility and the resolved destination. PUBLIC or unknown visibility blocks writes.
-A loose directory or an unverified Git repository is not a private companion. The
+Before storing real configuration or DATA, confirm once during setup that the
+repository is PRIVATE (see the hardening runbook). The runtime only checks that the
+resolved destination is inside a Git worktree outside this source tree; the commit
+and push hooks and CI enforce PRIVATE publication. A loose directory is not a companion. The
 consumer DATA resolver and `CONFIG.md` define the current DATA location contract;
 never fall back to a path inside the public source checkout.
 
 Without a configured companion, catalog browsing still works. Research can inspect
 tools exposed by the active host and verify a selected read-only operation directly.
 Missing inventory does not prove missing host capability. Real outputs still require
-a verified PRIVATE destination.
+the PRIVATE destination.
 
 ## Initialize a configuration
 
@@ -66,7 +67,7 @@ diagnostics and cannot attest another host or the current session. Avoid configu
 inspection commands that may echo credentials.
 
 Keep real observations, account records, research history, caches and exports in
-verified PRIVATE versioned DATA. No live data or private fallback copy belongs in the
+PRIVATE versioned DATA. No live data or private fallback copy belongs in the
 public matrix. Read-only consumers may report uninitialized state; writers must fail
 with setup guidance when a private destination cannot be established.
 
@@ -74,7 +75,7 @@ with setup guidance when a private destination cannot be established.
 
 The configuration spec describes two operator-selected modes:
 
-- **Mode A:** credentials are versioned in the verified PRIVATE repository. Rotation
+- **Mode A:** credentials are versioned in the PRIVATE repository. Rotation
   means rotating the credential itself; replacing a file does not remove old values
   from Git history.
 - **Mode B:** credentials are excluded from Git and backed up through a separate

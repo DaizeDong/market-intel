@@ -15,7 +15,7 @@ A grounded retrieval-augmented QA agent over **full-text PDFs**: it chunks/embed
 ## Model integration status
 PaperQA's question answering, agent and embedding modes require setup. All model or external-agent work must use installed `llmcall`, inheriting its current routing, model, timeout and fallback policy. No supported adapter for this library is supplied or verified here. Before using these modes, verify an actual installed-version adapter and its tool-I/O contract; otherwise stop at setup. Do not instantiate a direct provider client or add a separate model/provider ladder.
 
-Plain deterministic browser scraping or local PDF text extraction remains usable through a current-session verified non-model route. Keep resulting content, indexes, cookies, profiles, traces and exports in verified PRIVATE versioned DATA. Any hosted browser or target-site credentials belong in the approved PRIVATE credential store and must stay out of transcripts.
+Plain deterministic browser scraping or local PDF text extraction remains usable through a current-session verified non-model route. Keep resulting content, indexes, cookies, profiles, traces and exports in PRIVATE versioned DATA. Any hosted browser or target-site credentials belong in the approved PRIVATE credential store and must stay out of transcripts.
 
 ## General experience & gotchas (踩坑)
 - **It costs LLM tokens, not an API quota (shard).** "Free & open-source" means the code is free, a deep query over a large corpus can run many embedding + completion calls; watch spend on big PDF sets and inherit the installed llmcall policy.

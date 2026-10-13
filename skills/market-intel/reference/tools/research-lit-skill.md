@@ -13,7 +13,7 @@
 Check the active host's skill catalog for `research-lit` and read its installed instructions before invoking it. If absent, report the missing workflow and use only a verified alternative or prepare installation. It is not an MCP server. See `reference/install-guide.md` (L0) for how skills differ from MCP sources. Any model or external-agent invocation must use installed `llmcall` with its current routing, model, timeout and fallback policy; agent work uses `mode="agent"`.
 
 ## Auth / keys
-No source credential is implied by installing a skill. Verify each selected underlying operation separately, keep credentials in approved PRIVATE configuration, and keep raw research outputs in verified PRIVATE versioned DATA. Never print credentials or private configuration during setup.
+No source credential is implied by installing a skill. Verify each selected underlying operation separately, keep credentials in approved PRIVATE configuration, and keep raw research outputs in PRIVATE versioned DATA. Never print credentials or private configuration during setup.
 
 ## Usage, call examples
 - Hand off when the deliverable is synthesis: invoke the `research-lit` skill with the research question / seed papers / topic.

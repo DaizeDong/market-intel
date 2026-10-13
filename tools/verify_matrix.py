@@ -28,7 +28,7 @@ Checks (the real failure modes of an unattended LLM refresh):
   CONST    CONSTITUTION.md exists and was not modified by this run (scope guard)
 
 Usage: python tools/verify_matrix.py [--no-net] [--no-cache] [--base main]
-Default cache persistence requires a verified PRIVATE companion. Use --no-cache to skip
+Default cache persistence requires the PRIVATE companion. Use --no-cache to skip
 cache reads and writes intentionally while retaining current network checks.
 Run from the repo root (~/market-intel).
 """

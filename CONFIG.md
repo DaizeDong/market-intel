@@ -17,9 +17,9 @@ GitHub-side lockdown to run **before** the first secret: [`companion-config-hard
 ### Where real-run output goes: the private companion repo, versioned
 
 `guards/tools/datadir.py` provides the shared DATA path discovery. It is a path
-resolver; writers must still establish that the final destination is a PRIVATE
-versioned companion before writing. An explicit missing destination is an error,
-not permission to create an unmanaged fallback.
+resolver; writers then check that the final destination sits inside the companion's
+Git worktree and outside this source tree. An explicit missing destination is an
+error, not permission to create an unmanaged fallback.
 
 ```bash
 python guards/tools/datadir.py --path market-intel metrics/live-runs.jsonl
@@ -28,30 +28,23 @@ python guards/tools/datadir.py --path market-intel metrics/live-runs.jsonl
 For inventory, set `MARKET_INTEL_CONFIG` (alias `MARKET_INTEL_CONFIG_DIR`) to the PRIVATE
 companion and create its `data/` child during setup. `MARKET_INTEL_DATA_DIR`, if set,
 must select that same child. Missing data/ is NOT initialized; writers never use the companion
-root as a fallback. `console.py --refresh` validates the final canonical containing
-repository, existing history, every physical and effective fetch/push destination,
-fresh local PRIVATE visibility receipts and Git ignore status before collecting
-inventory or creating directories. It refuses public, unknown, unmanaged, missing
-and consumer-tree destinations.
-
-Visibility proof reads the installed guard's `~/.pii-guard/visibility.json` receipt;
-the console does not query GitHub or refresh that receipt. The shared guard requires
-a valid timestamp, age within its accepted window (currently 30 days), and PRIVATE
-entries for every destination. Use the installed guard's authenticated visibility
-refresh workflow before first use, after changing destinations or repository
-visibility, and whenever the receipt is missing, expired or invalid. Rerun the
-console only after that refresh succeeds; never create a PRIVATE receipt by hand.
+root as a fallback. `console.py --refresh` resolves the final canonical path and its
+containing Git worktree before collecting inventory or creating directories. It
+refuses unmanaged (no Git worktree), missing, Git-metadata and consumer-tree
+destinations. These are path checks only and start no process; repository
+visibility is not checked at runtime. Keep the companion PRIVATE: the commit and
+push hooks and CI enforce that, not the runtime.
 
 Inventory snapshots live at `inventory/availability-cache.json` below the resolved
 DATA directory. Atomic replacement preserves the earlier valid snapshot on failure;
-failed writes return nonzero. The console reports the verified companion identity
+failed writes return nonzero. The console reports the companion's directory name
 and never edits `.gitignore`. Commit the snapshot through the companion's existing
 versioning workflow; the console does not commit automatically.
 
-Incident writes use the same verifier for `metrics/live-runs.jsonl` below DATA.
-The helper verifies the final containing PRIVATE repository before reading or
-creating the ledger, and rechecks it before atomic replacement. It reports the
-verified repository identity on success and returns nonzero on persistence failure.
+Incident writes use the same path checks for `metrics/live-runs.jsonl` below DATA.
+The helper resolves the containing companion worktree before reading or creating
+the ledger, and rechecks the destination before atomic replacement. It names the
+companion on success and returns nonzero on persistence failure.
 
 Ordinary catalog reads need no DATA initialization and collect no inventory. For
 current operation evidence, set `MARKET_INTEL_HOST`, `MARKET_INTEL_SESSION_ID` and
@@ -89,7 +82,7 @@ missing or incompatible import reports `UNINITIALIZED` and exits 3; model draft
 commands also stop with that status before reading input or writing output.
 Provider execution failures remain separate failures with private diagnostics.
 The changelog helper prints its draft by default. Optional `--out` paths must be
-inside a verified PRIVATE versioned companion; destination or write failures exit
+inside the PRIVATE versioned companion; destination or write failures exit
 nonzero and preserve the previous file.
 
 ## Schema, `registry.json` (E1)
@@ -143,7 +136,7 @@ Apply/verify contracts: spec §6 / §7.
 ## Secrets and storage modes (E6)
 
 The companion is separate and PRIVATE. Its declared storage mode governs credentials:
-Mode A versions them in verified PRIVATE Git; Mode B ignores them and requires a
+Mode A versions them in PRIVATE Git; Mode B ignores them and requires a
 separate backup. Both keep secrets out of the public tool and command output.
 The reference deployment uses Mode B with a vault projection: each `secrets/<slug>.env`
 is a gitignored plaintext file generated per tool from an encrypted credential vault,

@@ -9,16 +9,16 @@ Current: **v0.30.0**
       responses separately. Required repository and star verification still blocks if unverified.
 - [x] **Current-session capability evidence.** Configuration, exposure, execution, authentication
       and content are distinct. Catalog browsing does not probe or write; explicit refresh writes
-      only to a verified PRIVATE companion. Offline checks do not prove live provider readiness.
+      only to the PRIVATE companion. Offline checks do not prove live provider readiness.
 - [x] **Version alignment.** Package metadata, both badges and this current release declaration
       use the already documented 0.30.0 release; subsequent contract repairs remain Unreleased.
 
-External tool recipes that have only a PRIVATE directory preflight remain setup
-only until an adapter declares and admits their child-file writes. The source's
-atomic inventory, cache, ledger and report writers already use artifact admission;
+External tool recipes that have only a companion directory preflight remain setup
+only until an adapter declares their child-file writes. The source's atomic
+inventory, cache, ledger and report writers already resolve declared paths;
 directory placement alone does not establish that coverage for a third-party SDK.
 
-Companion selection and write admission use the source contracts. Synthetic regressions cover conflicting roots, absent setup and undeclared or ignored writes. Current provider connectivity, delivery and restore success require separate operational evidence. The declared 64 MiB working-data budget remains enforced; any over-budget companion remains out of conformance until reviewed dependency and retention closure is completed. No empty template, static document check or path classification establishes readiness or authorizes deletion.
+Companion selection uses the source contracts; runtime writes check paths only. Synthetic regressions cover conflicting roots, absent setup and destinations outside the companion worktree. Current provider connectivity, delivery and restore success require separate operational evidence. The declared 64 MiB working-data budget remains enforced; any over-budget companion remains out of conformance until reviewed dependency and retention closure is completed. No empty template, static document check or path classification establishes readiness or authorizes deletion.
 
 ## Implemented foundations
 

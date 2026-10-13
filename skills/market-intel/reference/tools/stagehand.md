@@ -15,7 +15,7 @@ Adds three AI primitives, `act` (do this), `extract` (pull structured data with 
 ## Model integration status
 Stagehand's model-dependent act, extract and observe modes require setup. All model or external-agent work must use installed `llmcall`, inheriting its current routing, model, timeout and fallback policy. No supported adapter for this library is supplied or verified here. Before using these modes, verify an actual installed-version adapter and its tool-I/O contract; otherwise stop at setup. Do not instantiate a direct provider client or add a separate model/provider ladder.
 
-Plain deterministic browser scraping or local PDF text extraction remains usable through a current-session verified non-model route. Keep resulting content, indexes, cookies, profiles, traces and exports in verified PRIVATE versioned DATA. Any hosted browser or target-site credentials belong in the approved PRIVATE credential store and must stay out of transcripts.
+Plain deterministic browser scraping or local PDF text extraction remains usable through a current-session verified non-model route. Keep resulting content, indexes, cookies, profiles, traces and exports in PRIVATE versioned DATA. Any hosted browser or target-site credentials belong in the approved PRIVATE credential store and must stay out of transcripts.
 
 ## General experience & gotchas (踩坑)
 - **TypeScript-first.** The Python port lags the TS one, for Python pipelines prefer browser-use/crawl4ai rather than fighting the less-maintained Python path.

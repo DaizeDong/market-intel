@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Removed
+- Runtime PRIVATE proof. `tools/private_inventory.py` no longer loads Guards `prove_private_companion` / `read_private_companion_git` or `storage_contract.authorize_artifact_write`, and no writer reads visibility receipts or runs Git for HEAD, remote routes or ignore status. Destinations resolve to the nearest containing Git worktree outside the consumer tree and Git metadata; an unresolved companion still fails and there is no in-repo fallback. Commit-time hooks and CI keep enforcing PRIVATE publication. Proof-only tests and their generators were removed.
+
 ### Catalog corrections
 
 - Refresh all three omkarcloud/google-maps-scraper star annotations to 3.6k and its

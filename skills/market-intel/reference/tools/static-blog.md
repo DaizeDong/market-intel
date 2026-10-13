@@ -16,7 +16,7 @@ Install Hugo (`winget install Hugo.Hugo.Extended` on Windows, or `brew install h
 **None for the content itself**, there are no API keys; the blog is just files in a git repo. The only credential is your git/host login (GitHub + Vercel), which you authenticate once in the browser. Nothing secret enters the transcript, so the usual key-leak hazard does not apply here. (If you wire a deploy token for CI, treat it per `reference/install-guide.md` → Secret-handling hygiene.)
 
 ## Usage, call examples
-1. Prepare the post and front matter (`title`, `date`, draft status, `canonicalURL`, tags). Keep real research and unpublished drafts in verified PRIVATE versioned DATA; public examples and test content must be synthetic.
+1. Prepare the post and front matter (`title`, `date`, draft status, `canonicalURL`, tags). Keep real research and unpublished drafts in PRIVATE versioned DATA; public examples and test content must be synthetic.
 2. Preview: `hugo server -D` (or `npm run dev` for Astro).
 3. Build locally and review the exact publishable files. Obtain explicit publication authorization before pushing to an auto-deploy branch or invoking the verified deployment tool.
 4. After authorized deployment, inspect the live URL and content before reporting publication complete. That URL becomes the **canonical original** for any separately authorized syndication.

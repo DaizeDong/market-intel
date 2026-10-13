@@ -47,7 +47,7 @@ REPO = os.path.dirname(HERE)
 # checker whose red is known to be pre-existing and owned elsewhere, and say so in the description,
 # because a permanently-not-required checker is an orphan wearing a badge.
 MANIFEST = {
-    "test_artifact_write.py": ([], False, True, "source-owned artifact admission before atomic writes"),
+    "test_artifact_write.py": ([], False, True, "lock-path identity at the atomic write seam"),
     "test_config_selection.py": ([], False, True, "single companion selection and configured readiness"),
     "pii_guard.py":       (["--tree"], False, True,  "no real private data in tracked files"),
     "dash_guard.py":      (["--tree"], False, True,  "no en/em dashes in prose"),
@@ -63,7 +63,7 @@ MANIFEST = {
     "test_capability_contract.py": ([], False, True, "canonical current-session schema and operation identity"),
     "test_incident_boundary.py": ([], False, True, "PRIVATE incident persistence and model routing contract"),
     "test_fixture_generator.py": ([], False, True, "reproducible synthetic examples and manifest"),
-    "test_private_writers.py": ([], False, True, "PRIVATE publication destinations and locked writer updates"),
+    "test_private_writers.py": ([], False, True, "companion destination path checks and locked writer updates"),
     "test_catalog.py": ([], False, True, "actual canonical registry and alias operation readiness"),
     "test_git_baseline.py": ([], False, True, "checked baseline failures and private copied index"),
     "test_human_review.py": ([], False, True, "exact C7 review content and explicit rewritten baseline"),

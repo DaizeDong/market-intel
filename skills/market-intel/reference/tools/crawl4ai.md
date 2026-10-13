@@ -13,7 +13,7 @@ LLM-friendly crawler that renders pages and emits clean **Markdown / structured 
 `pip install crawl4ai` then `crawl4ai-setup` (installs Playwright browsers), **or** run the Docker image which exposes a **ready MCP**, preferred for a clean, reproducible server (see `install-guide.md` Docker prereq). L1 line: `reference/volatile/pricing-install.md#browser-automation`. Docker/HTTP route is the Windows-friendly path (avoids native Playwright path quirks).
 
 ## Auth / keys
-Crawl4AI's deterministic CSS/XPath/Markdown extraction needs no model key. Target cookies, headers, browser state, caches and extracted data still belong in a verified PRIVATE versioned runtime configured through the installed version's supported options. Any model-assisted extraction must use installed `llmcall` with its current routing and defaults. `LLMExtractionStrategy` remains setup-only until a compatible adapter and its extraction input/output contract have been verified; supplying a direct provider key does not satisfy this workflow.
+Crawl4AI's deterministic CSS/XPath/Markdown extraction needs no model key. Target cookies, headers, browser state, caches and extracted data still belong in the PRIVATE versioned runtime configured through the installed version's supported options. Any model-assisted extraction must use installed `llmcall` with its current routing and defaults. `LLMExtractionStrategy` remains setup-only until a compatible adapter and its extraction input/output contract have been verified; supplying a direct provider key does not satisfy this workflow.
 
 ## Usage, call examples
 ```python

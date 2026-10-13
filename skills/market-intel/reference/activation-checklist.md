@@ -15,11 +15,11 @@ catalog. It contains no saved account inventory or host readiness claims.
   observation method in [host-capabilities.md](host-capabilities.md).
 - Report `available-now`, `setup` with its missing prerequisite, or an evidenced
   `hard-gap`. CLI paths, installed libraries and companion inventory only guide setup.
-- Save real observations in the verified PRIVATE companion. Follow
+- Save real observations in the PRIVATE companion. Follow
   [activation-recipes.md](activation-recipes.md) for the output boundary and
   [install-guide.md](install-guide.md) for secret handling.
 
 Use the catalog console's `status`, `tool` and `connect` commands for navigation
 and setup guidance. They do not prove operation readiness or silently collect
-inventory. An explicit inventory refresh also requires a verified PRIVATE
+inventory. An explicit inventory refresh also requires the PRIVATE
 versioned destination.

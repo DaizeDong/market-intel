@@ -24,10 +24,9 @@ None. No account, no API key, no quota, it's a local OSS browser patch. The only
 Before any real run, resolve the full consumer checkout and use
 `tools/private_inventory.py`'s `resolve_destination(path=...)` for individual
 config/output files and `resolve_directory(path=...)` for existing runtime or
-browser-profile directories. Pass the final absolute path. Each check proves the
-containing repository, including a repository rooted at the directory itself,
-and PRIVATE visibility for every effective
-publication destination. Stop on missing, PUBLIC or unknown proof.
+browser-profile directories. Pass the final absolute path. Each check resolves the
+containing Git worktree, including a repository rooted at the directory itself,
+and refuses destinations outside it or inside this checkout. Stop when it fails.
 Keep runtime files versioned in that PRIVATE companion. An ignored directory in
 this public checkout is not a valid destination. A later real run must repeat the
 check; this recipe is not a live destination attestation.

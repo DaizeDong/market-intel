@@ -25,7 +25,7 @@ This division keeps the research engine small, but makes coverage depend on the 
 permissions and source behavior. Configuration, discovery, a successful call and usable content
 are separate evidence levels. A missing level stays visible as a setup need or coverage gap.
 Browsing the catalog needs no live probe; collecting current inventory is an explicit operation
-that writes only to a verified PRIVATE companion.
+that writes only to the PRIVATE companion.
 
 Matrix changes pass deterministic checks for declared invariants and retain source evidence.
 Those checks can reject known forms of regression; they do not prove every recommendation is
@@ -97,7 +97,7 @@ deep spec: [`companion-config-spec.md`](skills/market-intel/reference/companion-
 - **Switch configs (hot-swap):** point the env var at another config dir, configs are self-contained,
   clear or update the DATA override with it: `export MARKET_INTEL_CONFIG=~/configs/work` ↔ `~/configs/personal`.
 - **Secrets:** follow the companion's declared storage mode. Mode A versions credentials only in
-  verified PRIVATE Git; Mode B ignores them and requires a separate backup. The reference deployment
+  PRIVATE Git; Mode B ignores them and requires a separate backup. The reference deployment
   uses Mode B with a vault projection: `secrets/<slug>.env` are gitignored files generated from an
   encrypted credential vault, and new keys are captured into the vault. The bundled initializer
   supports Mode B only. Both modes keep secrets out of this public source; see [CONFIG.md](CONFIG.md#secrets-and-storage-modes-e6).
@@ -113,8 +113,8 @@ select an operation for the catalog's `source_id` (default: its `capability_id`)
 The [schema v1 guide](skills/market-intel/reference/host-capabilities.md) explains
 `available-now`, `setup` reasons and evidence-supported `hard-gap` results.
 
-Only explicit `--refresh` collects machine inventory and writes it to a verified
-PRIVATE versioned companion. Storage failures return nonzero and preserve the
+Only explicit `--refresh` collects machine inventory and writes it inside the
+PRIVATE companion's Git worktree (path checks only; commit-time hooks and CI enforce PRIVATE). Storage failures return nonzero and preserve the
 previous snapshot. Offline regression tests do not establish live research,
 installed-host acceptance or provider readiness.
 

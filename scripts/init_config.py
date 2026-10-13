@@ -32,7 +32,7 @@ claude.json
 SECRETS_README = """\
 # secrets/ — Mode B (gitignored)
 
-Real secret values live here and are **gitignored** (see ../.gitignore). Mode B ignores these values; a separately selected Mode A may use verified PRIVATE versioning.
+Real secret values live here and are **gitignored** (see ../.gitignore). Mode B ignores these values; a separately selected Mode A may use PRIVATE versioning.
 Back them up out-of-band (cloud sync / encrypted drive). Restore on a new machine by copying the
 `*.env` files back into this directory, then re-running the skill's verify script.
 

@@ -14,7 +14,7 @@ One MCP surface for the whole read-the-web loop: **search, fetch, crawl, extract
 ## Install
 First inspect the installed version's supported runtime, model, browser-profile and
 cache path settings. Redirect real query history, cached pages, profiles, traces and
-outputs into verified PRIVATE versioned DATA before initialization or collection.
+outputs into PRIVATE versioned DATA before initialization or collection.
 A loose home directory is not an approved persistence destination. No supported path
 adapter is supplied or verified by this card; if the required paths cannot be
 redirected, stop at setup. Do not treat an unattended initializer as harmless.

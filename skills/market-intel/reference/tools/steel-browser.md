@@ -15,7 +15,7 @@ Self-host via the selected version's Docker configuration. Before starting the c
 Needs the Docker prereq (`install-guide.md`). After the private runtime checks pass, drive it from Puppeteer/Playwright (connect over CDP) or its REST API; wrap as an MCP yourself if you want tool-call access. L1 line: `reference/volatile/pricing-install.md#browser-automation`. Docker/HTTP route is the Windows-friendly path.
 
 ## Auth / keys
-Self-host = no service key (you own the server). Target-site auth = sessions/cookies you create through Steel's session API; keep them in the verified PRIVATE runtime and its versioned backup. If you opt into the **managed cloud** tier instead, that needs a Steel API key, key-bearing: use the host's supported private secret configuration and backup, keep it out of the transcript (see `install-guide.md` secret hygiene). Proxy credentials are configured per session through the same private configuration boundary.
+Self-host = no service key (you own the server). Target-site auth = sessions/cookies you create through Steel's session API; keep them in the PRIVATE runtime and its versioned backup. If you opt into the **managed cloud** tier instead, that needs a Steel API key, key-bearing: use the host's supported private secret configuration and backup, keep it out of the transcript (see `install-guide.md` secret hygiene). Proxy credentials are configured per session through the same private configuration boundary.
 
 ## Usage, call examples
 Use the following call shape only after the private runtime, session storage and selected version's API have been verified:
@@ -29,7 +29,7 @@ s = requests.post("http://localhost:3000/v1/sessions",
                   json={"proxyUrl": "..."}).json()   # see repo for full param list
 # then connect Playwright/Puppeteer to the session's CDP/WS endpoint and drive normally
 ```
-Create a session → connect your existing Playwright/Puppeteer script to its WS endpoint → reuse the session across calls. Confirm cookie/state persistence and recovery from the verified PRIVATE stores before relying on session resumption; creating a session alone does not prove persistence.
+Create a session → connect your existing Playwright/Puppeteer script to its WS endpoint → reuse the session across calls. Confirm cookie/state persistence and recovery from the PRIVATE stores before relying on session resumption; creating a session alone does not prove persistence.
 
 ## General experience & gotchas (踩坑)
 - **It's infra, not an agent.** Steel runs/manages the browser; you still bring the driving logic (Playwright/Puppeteer or an agent like browser-use). It replaces "spawn a browser," not "decide what to click."
