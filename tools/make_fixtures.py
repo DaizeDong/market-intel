@@ -526,7 +526,7 @@ def test_runtime_leaf_nested_repository_is_the_storage_authority(companion):
     nested = companion / "runtime"
     (nested / ".git").mkdir(parents=True)
     result = storage.resolve_directory(path=nested)
-    assert result.repository == nested.resolve() and result.identity == nested.name
+    assert result.repository == nested.resolve()
     assert storage.resolve_directory(path=companion).repository == companion.resolve()
 
 
@@ -2073,7 +2073,7 @@ def test_successfully_empty_git_diff_can_be_drafted(monkeypatch, synthetic_draft
 @pytest.mark.parametrize("surface", ["E4", "E6"])
 def test_unconfigured_surface_is_not_counted_as_success(monkeypatch, tmp_path, surface, capsys):
     monkeypatch.setattr(poll.private_inventory, "resolve_destination",
-                        lambda *a, **k: SimpleNamespace(path=tmp_path / "synthetic-inbox", identity="example/private"))
+                        lambda *a, **k: SimpleNamespace(path=tmp_path / "synthetic-inbox", repository=tmp_path))
     monkeypatch.setattr(poll, "_http_json", lambda *a, **k: pytest.fail("unconfigured surface must not request data"))
     monkeypatch.setattr(poll, "_http_get", lambda *a, **k: pytest.fail("unconfigured surface must not request data"))
     monkeypatch.setattr(poll.sys, "argv", ["poll_surfaces", "--config", str(tmp_path / "absent.json"),
@@ -3463,7 +3463,7 @@ def test_native_nested_repository_is_authoritative(native_companion):
     assert storage.resolve_directory(path=repository).repository == repository
     nested = make_runtime_repository(repository / "runtime", native_companion["environment"], SAMPLE["other_identity"])
     selected = storage.resolve_directory(path=nested)
-    assert selected.repository == nested and selected.identity == nested.name
+    assert selected.repository == nested
     assert not (nested / "inventory").exists()
 
 
@@ -3477,38 +3477,15 @@ def test_native_path_checks_start_no_process(native_companion, monkeypatch):
     assert target.read_text(encoding="utf-8") == "{}\n"
 
 
-@pytest.mark.parametrize("change", ["stable", "lexical-target"])
-def test_native_publication_rechecked_before_replace(native_companion, monkeypatch, change):
+def test_native_publication_replaces_target(native_companion):
     repository = native_companion["repository"]
     target = repository / "data/deliverables/reports/synthetic.json"
     target.parent.mkdir(parents=True)
-    before, after = "Synthetic retained bytes\n", "Synthetic replacement bytes\n"
-    target.write_text(before, encoding="utf-8")
-    lexical = repository / "data/deliverables/reports/selected.json"
-    selected_path = [target]
-    if change == "lexical-target":
-        original_resolve = Path.resolve
-        monkeypatch.setattr(Path, "resolve", lambda path, *a, **k:
-                            selected_path[0] if path == lexical else original_resolve(path, *a, **k))
-    selected = storage.resolve_destination(path=lexical if change == "lexical-target" else target)
-    real_fsync = os.fsync
-    def change_after_flush(descriptor):
-        real_fsync(descriptor)
-        if change == "lexical-target":
-            selected_path[0] = repository / "data/deliverables/reports/other.json"
-    monkeypatch.setattr(os, "fsync", change_after_flush)
-    if change == "stable":
-        storage.write_text(after, "reports/synthetic.json", selected)
-        assert target.read_text(encoding="utf-8") == after
-    else:
-        with pytest.raises(storage.InventoryError):
-            storage.write_text(after, "reports/synthetic.json", selected)
-        assert target.read_text(encoding="utf-8") == before
-    pending = list((repository / ".staging").glob("inventory-*.tmp"))
-    assert len(pending) == (0 if change == "stable" else 1)
-    if pending:
-        assert pending[0].read_text(encoding="utf-8") == after
-    assert not (target.parent / "other.json").exists()
+    target.write_text("Synthetic retained bytes\n", encoding="utf-8")
+    selected = storage.resolve_destination(path=target)
+    storage.write_text("Synthetic replacement bytes\n", "reports/synthetic.json", selected)
+    assert target.read_text(encoding="utf-8") == "Synthetic replacement bytes\n"
+    assert not list((repository / ".staging").glob("inventory-*.tmp"))
 
 
 def test_native_explicit_target_retains_lexical_selection(native_companion, monkeypatch):
@@ -3610,7 +3587,7 @@ def test_writers_refuse_unproven_output_before_observation(name, tmp_path, monke
 
 
 @pytest.mark.parametrize("name", ["discover", "poll_surfaces", "feedback-bump"])
-def test_writers_persist_only_to_verified_private_override(name, companion, monkeypatch):
+def test_writers_persist_only_to_checked_companion_override(name, companion, monkeypatch):
     repository = companion
     writer = load_writer(name)
     target = repository / "data/deliverables/reports/result.json"
@@ -4358,87 +4335,17 @@ def test_incident_draft_reports_config_gaps_without_fallback(monkeypatch, tmp_pa
 '''
 
 
-def successor_private_test_source():
-    return r'''
-
-def test_temporary_cleanup_refuses_replaced_directory_junction(native_companion, monkeypatch, capsys):
-    repository = native_companion["repository"]
-    reports = repository / ".staging"
-    reports.mkdir(parents=True)
-    target = repository / "data/deliverables/result.json"
-    target.parent.mkdir(parents=True)
-    before = json.dumps(fixture()["inventory"], sort_keys=True).encode()
-    target.write_bytes(before)
-    other = make_runtime_repository(repository.parent / "other", native_companion["environment"], SAMPLE["other_identity"])
-    selected = storage.resolve_destination(path=target)
-    original = storage._revalidate
-    calls, observed = [], {}
-    def changed(relative, destination):
-        calls.append(relative)
-        if len(calls) == 2:
-            pending, = (repository / ".staging").glob("inventory-*.tmp")
-            held = repository / "held-reports"
-            assert reports.resolve().is_relative_to(repository.parent.resolve())
-            assert held.absolute().is_relative_to(repository.parent.resolve())
-            reports.rename(held)
-            sentinel = other / pending.name
-            sentinel.write_bytes(before)
-            if os.name == "nt":
-                import _winapi
-                _winapi.CreateJunction(str(other), str(reports))
-            else:
-                reports.symlink_to(other, target_is_directory=True)
-            observed.update(sentinel=sentinel, held=held, temporary=pending.name)
-        return original(relative, destination)
-    monkeypatch.setattr(storage, "_revalidate", changed)
-    with pytest.raises(storage.InventoryError):
-        storage.write_text("Synthetic replacement\n", "reports/result.json", selected)
-    assert observed["sentinel"].read_bytes() == before
-    assert target.read_bytes() == before
-    assert (observed["held"] / observed["temporary"]).is_file()
-    assert "cleanup refused" in capsys.readouterr().err
-
-
-def test_temporary_cleanup_refuses_replaced_file(native_companion, monkeypatch, capsys):
-    repository = native_companion["repository"]
-    target = repository / "data/deliverables/reports/result.json"
-    target.parent.mkdir(parents=True)
-    target.write_bytes(b"Synthetic original target\n")
-    selected = storage.resolve_destination(path=target)
-    original = storage._revalidate
-    calls, observed = [], {}
-    def changed(relative, destination):
-        calls.append(relative)
-        if len(calls) == 2:
-            pending, = (repository / ".staging").glob("inventory-*.tmp")
-            held = target.parent / "held-temporary"
-            pending.rename(held)
-            pending.write_bytes(b"Synthetic unrelated replacement\n")
-            observed.update(pending=pending, held=held)
-            # Publication must detect the substituted ordinary file itself.
-        return original(relative, destination)
-    monkeypatch.setattr(storage, "_revalidate", changed)
-    with pytest.raises(storage.InventoryError, match="temporary file changed identity"):
-        storage.write_text("Synthetic replacement\n", "reports/result.json", selected)
-    assert observed["pending"].read_bytes() == b"Synthetic unrelated replacement\n"
-    assert observed["held"].read_text() == "Synthetic replacement\n"
-    assert target.read_bytes() == b"Synthetic original target\n"
-    assert "cleanup refused" in capsys.readouterr().err
-'''
-
-
 def successor_lock_test_source():
     return r'''
 
 
 @pytest.mark.parametrize("failed", [False, True])
-def test_native_lock_cleanup_preserves_substituted_parent(tmp_path, monkeypatch, failed, companion):
-    tmp_path = companion
-    parent, held, other = (tmp_path / name for name in (".staging", "held", "other"))
+def test_native_lock_cleanup_preserves_substituted_parent(monkeypatch, failed, companion):
+    parent, held, other = (companion / name for name in (".staging", "held", "other"))
     parent.mkdir()
     other.mkdir()
     target = parent / "ledger.jsonl"
-    selected = storage.Destination(target, tmp_path, "example/companion")
+    selected = storage.Destination(target, companion)
     lock = storage._update_lock_path(selected)
     sentinel = other / lock.name
     sentinel.write_bytes(b"Synthetic unrelated lock\n")
@@ -4476,9 +4383,8 @@ def test_native_lock_cleanup_preserves_substituted_parent(tmp_path, monkeypatch,
 
 
 @pytest.mark.parametrize("case", ["ordinary", "handled-outer", "failed-current"])
-def test_native_lock_close_failure_tracks_current_transaction(tmp_path, monkeypatch, capsys, case, companion):
-    tmp_path = companion
-    selected = storage.Destination(tmp_path / "ledger.jsonl", tmp_path, "example/companion")
+def test_native_lock_close_failure_tracks_current_transaction(monkeypatch, capsys, case, companion):
+    selected = storage.Destination(companion / "ledger.jsonl", companion)
     lock = storage._update_lock_path(selected)
     real_open, real_close = storage.os.open, storage.os.close
     observed = {}
@@ -4518,9 +4424,8 @@ def test_native_lock_close_failure_tracks_current_transaction(tmp_path, monkeypa
     assert not lock.exists()
 
 
-def test_native_lock_repeated_acquisition_and_failure_recovery(tmp_path, companion):
-    tmp_path = companion
-    selected = storage.Destination(tmp_path / "ledger.jsonl", tmp_path, "example/companion")
+def test_native_lock_repeated_acquisition_and_failure_recovery(companion):
+    selected = storage.Destination(companion / "ledger.jsonl", companion)
     lock = storage._update_lock_path(selected)
     for unused in range(2):
         with storage._exclusive_update(selected):
@@ -4539,11 +4444,10 @@ def test_native_lock_repeated_acquisition_and_failure_recovery(tmp_path, compani
 
 @pytest.mark.skipif(os.name == "nt", reason="POSIX directory descriptor contract")
 @pytest.mark.parametrize("failed", [False, True])
-def test_native_lock_cleanup_anchors_parent_during_transaction(tmp_path, failed, companion):
-    tmp_path = companion
-    parent, held = (tmp_path / name for name in (".staging", "held"))
+def test_native_lock_cleanup_anchors_parent_during_transaction(failed, companion):
+    parent, held = (companion / name for name in (".staging", "held"))
     parent.mkdir()
-    selected = storage.Destination(parent / "ledger.jsonl", tmp_path, "example/companion")
+    selected = storage.Destination(parent / "ledger.jsonl", companion)
     lock = storage._update_lock_path(selected)
     def transaction():
         with storage._exclusive_update(selected):
@@ -4563,10 +4467,9 @@ def test_native_lock_cleanup_anchors_parent_during_transaction(tmp_path, failed,
 
 @pytest.mark.skipif(os.name == "nt", reason="POSIX directory descriptor contract")
 @pytest.mark.parametrize("failed", [False, True])
-def test_native_lock_cleanup_refuses_replaced_entry(tmp_path, capsys, failed, companion):
-    tmp_path = companion
-    selected = storage.Destination(tmp_path / "ledger.jsonl", tmp_path, "example/companion")
-    lock, held = storage._update_lock_path(selected), tmp_path / "held-lock"
+def test_native_lock_cleanup_refuses_replaced_entry(capsys, failed, companion):
+    selected = storage.Destination(companion / "ledger.jsonl", companion)
+    lock, held = storage._update_lock_path(selected), companion / "held-lock"
     message = "Synthetic transaction failure" if failed else "cleanup refused"
     with pytest.raises(storage.InventoryError, match=message):
         with storage._exclusive_update(selected):
@@ -4792,7 +4695,7 @@ def generate(out=None, *, check=False):
     payloads['tools/test_first_use_contract.py'] = first_use_test_source().encode("utf-8")
     payloads['tools/test_check_all.py'] = checker_test_source().encode("utf-8")
     payloads['tools/test_console.py'] = console_test_source().encode("utf-8")
-    payloads['tools/test_private_writers.py'] = (private_writer_test_source() + successor_private_test_source() + successor_lock_test_source()).encode("utf-8")
+    payloads['tools/test_private_writers.py'] = (private_writer_test_source() + successor_lock_test_source()).encode("utf-8")
     payloads['tools/test_incident_boundary.py'] = (incident_boundary_test_source() + successor_incident_test_source()).encode("utf-8")
     payloads['tools/test_human_review.py'] = human_review_test_source().encode("utf-8")
     manifest = {

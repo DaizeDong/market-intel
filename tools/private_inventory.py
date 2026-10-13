@@ -29,7 +29,6 @@ class InventoryError(RuntimeError):
 class Destination:
     path: Path
     repository: Path
-    identity: str
     requested_path: Path | None = None
 
 
@@ -76,7 +75,7 @@ def _resolve_destination(relative_path, path, directory):
         repository = repository.resolve()
         if repository.is_relative_to(ROOT.resolve()) or ROOT.resolve().is_relative_to(repository):
             raise InventoryError("inventory destination is not outside the consumer source tree")
-        return Destination(target, repository, repository.name, lexical if path is not None else None)
+        return Destination(target, repository, lexical if path is not None else None)
     except (OSError, ValueError) as exc:
         raise InventoryError("inventory destination is inaccessible or invalid") from exc
 
@@ -102,8 +101,11 @@ def write_snapshot(snapshot, destination=None):
 
 def write_text(payload, relative_path, destination=None):
     """Atomically publish UTF-8 text; retain unpublished temporaries after failure."""
-    current = _revalidate(relative_path, destination)
+    return _publish(payload, _revalidate(relative_path, destination))
 
+
+def _publish(payload, current):
+    """Replace ``current.path`` (already checked by the caller) through a staged file."""
     temporary = None
     try:
         current.path.parent.mkdir(parents=True, exist_ok=True)
@@ -111,22 +113,19 @@ def write_text(payload, relative_path, destination=None):
         temporary = current.repository / ".staging" / ("inventory-" + uuid.uuid4().hex + ".tmp")
         temporary.parent.mkdir(parents=True, exist_ok=True)
         with temporary.open("x", encoding="utf-8", newline="\n") as stream:
-            temporary_identity = os.fstat(stream.fileno())
+            opened = os.fstat(stream.fileno())
+            if not stat.S_ISREG(opened.st_mode) or opened.st_nlink != 1:
+                raise InventoryError("inventory temporary must be a single-link regular file")
             stream.write(payload)
             stream.flush()
             os.fsync(stream.fileno())
-        current = _revalidate(relative_path, current)
-        candidate = temporary.lstat()
-        if not stat.S_ISREG(candidate.st_mode) or candidate.st_nlink != 1 or not os.path.samestat(temporary_identity, candidate):
-            raise InventoryError("inventory temporary file changed identity before publication")
         os.replace(temporary, current.path)
         temporary = None
     except (OSError, UnicodeError) as exc:
         raise InventoryError("inventory persistence failed; previous snapshot was preserved") from exc
     finally:
         if temporary is not None:
-            # A failed revalidation may mean this pathname now traverses another directory.
-            # Retaining the file avoids a check-then-unlink race and keeps the original error.
+            # The unpublished candidate is kept for recovery review, not deleted.
             print(f"inventory temporary cleanup refused after publication failure; "
                   f"unpublished candidate retained (created at {temporary})", file=sys.stderr)
     return current
@@ -217,12 +216,11 @@ def _exclusive_update(destination, timeout=10):
 
 
 def update_text(transform, relative_path, destination=None):
-    """Lock the complete revalidate/read/transform/atomic-write transaction."""
-    selected = _revalidate(relative_path, destination)
-    with _exclusive_update(selected):
-        current = _revalidate(relative_path, selected)
+    """Check once, then lock the read/transform/atomic-write transaction."""
+    current = _revalidate(relative_path, destination)
+    with _exclusive_update(current):
         try:
             previous = current.path.read_text(encoding="utf-8-sig") if current.path.exists() else ""
         except (OSError, UnicodeError) as exc:
             raise InventoryError("private ledger is unreadable; previous ledger was preserved") from exc
-        return write_text(transform(previous), relative_path, current)
+        return _publish(transform(previous), current)

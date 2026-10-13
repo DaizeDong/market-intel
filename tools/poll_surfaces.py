@@ -437,7 +437,7 @@ def main() -> int:
             return 2
 
     # summary (stdout, machine-greppable last line for the wrapper)
-    print(f"# market-intel surface poll @ {stamp}  (PRIVATE companion {destination.identity})")
+    print(f"# market-intel surface poll @ {stamp}  (PRIVATE companion {destination.repository.name})")
     for name, status, detail in summary:
         print(f"  {name:3} {status:9} {detail}")
     degraded = [n for n, s, _ in summary if s != "OK"]

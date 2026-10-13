@@ -16,6 +16,6 @@ def generated():
 def test_lock_key_respects_platform_path_identity(tmp_path):
     import private_inventory as storage
     relative = generated()["allowed"]
-    first = storage.Destination(tmp_path / relative, tmp_path, "example/synthetic-config")
-    second = storage.Destination(tmp_path / relative.upper(), tmp_path, "example/synthetic-config")
+    first = storage.Destination(tmp_path / relative, tmp_path)
+    second = storage.Destination(tmp_path / relative.upper(), tmp_path)
     assert (storage._update_lock_path(first) == storage._update_lock_path(second)) == (os.name == "nt")

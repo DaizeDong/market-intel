@@ -388,7 +388,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         except private_inventory.InventoryError as exc:
             print(f"[error] draft persistence failed: {exc}", file=sys.stderr)
             return 2
-        print(f"\n[info] draft written; PRIVATE companion {saved.identity}", file=sys.stderr)
+        print(f"\n[info] draft written; PRIVATE companion {saved.repository.name}", file=sys.stderr)
 
     return 0
 

@@ -614,7 +614,7 @@ def main(argv: list[str] | None = None) -> int:
         except private_inventory.InventoryError as exc:
             print(f"ERROR: report persistence failed: {exc}", file=sys.stderr)
             return 2
-        print(f"\nReport written; PRIVATE companion {saved.identity}")
+        print(f"\nReport written; PRIVATE companion {saved.repository.name}")
 
     # exit-code policy:
     #   2 if P2 trigger fires (highest priority signal)

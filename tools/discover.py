@@ -598,7 +598,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # summary
     print("=" * 60)
-    print(f"Discovery sweep — since {since.isoformat()}, PRIVATE companion {destination.identity}")
+    print(f"Discovery sweep — since {since.isoformat()}, PRIVATE companion {destination.repository.name}")
     print("=" * 60)
     for ch in ("E1", "E2", "E3", "E4", "E5", "E6"):
         if ch in failures:
@@ -627,7 +627,7 @@ def main(argv: list[str] | None = None) -> int:
     except private_inventory.InventoryError as exc:
         print(f"Discovery persistence failed: {exc}", file=sys.stderr)
         return 2
-    print(f"\nAppended {total} candidates; PRIVATE companion {destination.identity}")
+    print(f"\nAppended {total} candidates; PRIVATE companion {destination.repository.name}")
     return 0
 
 

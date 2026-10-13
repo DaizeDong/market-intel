@@ -392,7 +392,7 @@ def test_runtime_leaf_nested_repository_is_the_storage_authority(companion):
     nested = companion / "runtime"
     (nested / ".git").mkdir(parents=True)
     result = storage.resolve_directory(path=nested)
-    assert result.repository == nested.resolve() and result.identity == nested.name
+    assert result.repository == nested.resolve()
     assert storage.resolve_directory(path=companion).repository == companion.resolve()
 
 
@@ -984,7 +984,7 @@ def test_successfully_empty_git_diff_can_be_drafted(monkeypatch, synthetic_draft
 @pytest.mark.parametrize("surface", ["E4", "E6"])
 def test_unconfigured_surface_is_not_counted_as_success(monkeypatch, tmp_path, surface, capsys):
     monkeypatch.setattr(poll.private_inventory, "resolve_destination",
-                        lambda *a, **k: SimpleNamespace(path=tmp_path / "synthetic-inbox", identity="example/private"))
+                        lambda *a, **k: SimpleNamespace(path=tmp_path / "synthetic-inbox", repository=tmp_path))
     monkeypatch.setattr(poll, "_http_json", lambda *a, **k: pytest.fail("unconfigured surface must not request data"))
     monkeypatch.setattr(poll, "_http_get", lambda *a, **k: pytest.fail("unconfigured surface must not request data"))
     monkeypatch.setattr(poll.sys, "argv", ["poll_surfaces", "--config", str(tmp_path / "absent.json"),

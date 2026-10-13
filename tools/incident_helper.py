@@ -319,12 +319,12 @@ def _prompt_yn(question: str) -> bool:
 
 
 def apply_live_runs_append(entry_line: str) -> None:
-    """Append through a rePRIVATE target and preserve it on write failure."""
+    """Append to the companion ledger and preserve it on write failure."""
     def append(existing):
         separator = "\n" if existing and not existing.endswith("\n") else ""
         return existing + separator + entry_line + "\n"
     saved = private_inventory.update_text(append, LIVE_RUNS_RELATIVE)
-    print(f"  ✓ appended incident ledger; PRIVATE companion {saved.identity}")
+    print(f"  ✓ appended incident ledger; PRIVATE companion {saved.repository.name}")
 
 
 def apply_shard_edit(domain: str, from_line: str, to_block: str) -> None:

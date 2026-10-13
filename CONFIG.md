@@ -43,7 +43,7 @@ versioning workflow; the console does not commit automatically.
 
 Incident writes use the same path checks for `metrics/live-runs.jsonl` below DATA.
 The helper resolves the containing companion worktree before reading or creating
-the ledger, and rechecks the destination before atomic replacement. It names the
+the ledger, checks it once, and replaces it atomically under a lock. It names the
 companion on success and returns nonzero on persistence failure.
 
 Ordinary catalog reads need no DATA initialization and collect no inventory. For

@@ -322,7 +322,7 @@ def load_snapshot(refresh: bool):
     destination = private_inventory.resolve_destination()
     snap = build_snapshot()
     saved = write_snapshot(snap, destination)
-    return snap, f"fresh inventory; PRIVATE companion {saved.identity}"
+    return snap, f"fresh inventory; PRIVATE companion {saved.repository.name}"
 
 
 def write_snapshot(snap, destination=None):
