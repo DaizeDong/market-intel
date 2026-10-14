@@ -49,6 +49,5 @@ automatic recovery. A blocked gate must be repaired and rerun, not bypassed.
 
 ## Validation boundary
 
-Pure contract tests exercise generated checker/ref evidence, and static tests
-check gate placement. They do not execute a release, contact a provider, prove
-remote permissions, or establish that a publication succeeded.
+The checkers do not execute a release, contact a provider, prove remote
+permissions, or establish that a publication succeeded.

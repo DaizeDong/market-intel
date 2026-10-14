@@ -69,7 +69,7 @@ git clone --recurse-submodules https://github.com/DaizeDong/market-intel.git ~/.
 ```
 
 For Python maintenance commands, run `python -m pip install -r requirements.txt`
-from the checkout. Use `requirements-dev.txt` for the offline test suite. Catalog,
+from the checkout. Catalog,
 source collection and deterministic checks need no model package. The optional
 incident and changelog draft helpers use the operator's configured `llmcall`
 interface; follow [model adapter setup](CONFIG.md#model-adapter) before using them.
@@ -115,8 +115,7 @@ The [schema v1 guide](skills/market-intel/reference/host-capabilities.md) explai
 
 Only explicit `--refresh` collects machine inventory and writes it inside the
 PRIVATE companion's Git worktree (path checks only; commit-time hooks and CI enforce PRIVATE). Storage failures return nonzero and preserve the
-previous snapshot. Offline regression tests do not establish live research,
-installed-host acceptance or provider readiness.
+previous snapshot.
 
 ## Quick start, install the free no-key bootstrap pack (3 minutes)
 

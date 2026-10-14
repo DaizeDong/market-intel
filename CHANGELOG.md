@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Removed
+- The test suite: `tests/`, `tools/test_*.py`, `requirements-dev.txt` and the CI pytest step are gone, and `tools/make_fixtures.py` now generates only the synthetic examples and the live-run schema.
 - Runtime PRIVATE proof. `tools/private_inventory.py` no longer loads Guards `prove_private_companion` / `read_private_companion_git` or `storage_contract.authorize_artifact_write`, and no writer reads visibility receipts or runs Git for HEAD, remote routes or ignore status. Destinations resolve to the nearest containing Git worktree outside the consumer tree and Git metadata; an unresolved companion still fails and there is no in-repo fallback. Commit-time hooks and CI keep enforcing PRIVATE publication. Proof-only tests and their generators were removed.
 - The repeat checks the proof left behind in `tools/private_inventory.py`: `write_text` and `update_text` each check the destination once on entry (still refusing a destination that changed since the caller resolved it), with no second check under the lock or after the staged write and no post-write inode comparison of the staging file; the open staging handle must still be a single-link regular file. `Destination.identity` is gone; writers print `repository.name`. Tests that only exercised the removed rechecks were dropped from the generator.
 

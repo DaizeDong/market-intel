@@ -58,7 +58,7 @@ git clone --recurse-submodules https://github.com/DaizeDong/market-intel.git ~/.
 ```
 
 在检出的工具仓中运行 `python -m pip install -r requirements.txt`，安装 Python 维护命令的依赖；
-离线测试依赖见 `requirements-dev.txt`。目录浏览、数据采集和确定性检查无需模型适配包。
+目录浏览、数据采集和确定性检查无需模型适配包。
 可选的事故说明和变更记录起草工具使用当前安装的 `llmcall`，配置步骤见[模型适配器说明](CONFIG.md#model-adapter)。
 
 ---

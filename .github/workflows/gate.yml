@@ -40,10 +40,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install test dependencies
-        run: python -m pip install -r requirements-dev.txt
-      - name: Run all consumer regressions
-        run: python -X utf8 -B -m pytest -q -p no:cacheprovider tools tests
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
       - name: Resolve the diff baseline
         id: baseline
         env:

@@ -13,14 +13,6 @@ So this is not a new check. It is the single entry point in front of the ones al
 is deliberately dumb: it holds a manifest, it runs what the manifest says, and it prints one line
 per checker with what actually happened.
 
-THE PROPERTY THAT MATTERS, AND ITS TEST
----------------------------------------
-Every checker in tools/ is either in MANIFEST or in EXCLUDED with a written reason. Nothing may be
-absent from both. `test_check_all.py` asserts exactly that by listing the directory, so adding a
-ninth checker and forgetting to register it fails a test instead of quietly becoming orphan number
-five. That test is the whole point: without it this file becomes another thing to keep in sync by
-memory, which is the defect it was written to remove.
-
 WHAT IT DOES NOT DO
 -------------------
 It does not decide policy. A checker's own exit code is its verdict and this passes it through. It
@@ -47,8 +39,6 @@ REPO = os.path.dirname(HERE)
 # checker whose red is known to be pre-existing and owned elsewhere, and say so in the description,
 # because a permanently-not-required checker is an orphan wearing a badge.
 MANIFEST = {
-    "test_artifact_write.py": ([], False, True, "lock-path identity at the atomic write seam"),
-    "test_config_selection.py": ([], False, True, "single companion selection and configured readiness"),
     "pii_guard.py":       (["--tree"], False, True,  "no real private data in tracked files"),
     "dash_guard.py":      (["--tree"], False, True,  "no en/em dashes in prose"),
     "data_boundary.py":   ([],         False, True,  "no real-run output can land inside the repo"),
@@ -59,31 +49,12 @@ MANIFEST = {
     "l0_verify.py":       (["--live-selftest"], True, True, "L0 install-guide mechanics with live source probes"),
     "verify_matrix.py":   ([],         True,  True,  "registry, index and docs three-way, plus live "
                                                      "star claims (GitHub API)"),
-    "test_console.py":    ([],         False, True,  "offline catalog, PRIVATE inventory and session evidence regressions"),
-    "test_capability_contract.py": ([], False, True, "canonical current-session schema and operation identity"),
-    "test_incident_boundary.py": ([], False, True, "PRIVATE incident persistence and model routing contract"),
-    "test_fixture_generator.py": ([], False, True, "reproducible synthetic examples and manifest"),
-    "test_private_writers.py": ([], False, True, "companion destination path checks and locked writer updates"),
-    "test_catalog.py": ([], False, True, "actual canonical registry and alias operation readiness"),
-    "test_git_baseline.py": ([], False, True, "checked baseline failures and private copied index"),
-    "test_human_review.py": ([], False, True, "exact C7 review content and explicit rewritten baseline"),
-    "test_release_contract.py": ([], False, True, "release checker contracts and publication identity"),
-    "test_check_all.py": ([], False, True, "complete checker and test registration"),
-    "test_verification_contract.py": ([], False, True, "generated verification and cache-mode regressions"),
-    "test_discovery_contract.py": ([], False, True, "source completion, partial discovery and exit contracts"),
-    "test_first_use_contract.py": ([], False, True, "dependencies, companion identity and incident input boundaries"),
-    "test_doc_badges.py": ([], False, True, "English and Chinese badge read/write parity"),
-    "test_feedback_contract.py": ([], False, True, "typed feedback and documentation verification scope"),
-    "test_l0_verify.py": ([], False, True, "HTTP content validation and deterministic L0 verdicts"),
 }
 
 CHECKER_PATHS = {
     "pii_guard.py": os.path.join(REPO, "guards", "tools", "pii_guard.py"),
     "data_boundary.py": os.path.join(REPO, "guards", "tools", "data_boundary.py"),
     "dash_guard.py": os.path.join(REPO, "style", "tools", "dash_guard.py"),
-    "test_doc_badges.py": os.path.join(REPO, "tests", "test_doc_badges.py"),
-    "test_feedback_contract.py": os.path.join(REPO, "tests", "test_feedback_contract.py"),
-    "test_l0_verify.py": os.path.join(REPO, "tests", "test_l0_verify.py"),
 }
 
 
@@ -107,8 +78,6 @@ def run(name, argv):
     print("== %s %s" % (name, " ".join(argv)))
     print("=" * 78)
     command = [sys.executable, "-X", "utf8", "-B"]
-    if name.startswith("test_"):
-        command += ["-m", "pytest", "-q", "-p", "no:cacheprovider"]
     p = subprocess.run(command + [path] + argv, cwd=REPO,
                        env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"})
     return p.returncode

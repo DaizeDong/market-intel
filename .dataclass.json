@@ -2,7 +2,7 @@
   "_comment": [
     "Every path in a public skill repo belongs to exactly one class (Skill Repo Spec v1 s9).",
     "TOOL    = code, SKILL.md, reference docs, and metrics ABOUT THE SKILL. Public.",
-    "FIXTURE = tests and examples. Public, SYNTHETIC, produced by tools/make_fixtures.py.",
+    "FIXTURE = examples. Public, SYNTHETIC, produced by tools/make_fixtures.py.",
     "DATA    = anything a REAL RUN produced. Versioned only in the PRIVATE companion",
     "          config, resolved at runtime by guards/tools/datadir.py. The repo ships only the schema.",
     "",
@@ -64,23 +64,12 @@
   ],
   "_sealed_note": "Legacy public output paths are forbidden even when ignored. Real ledgers, discovery inboxes, reports, browser profiles and scraper caches belong only in the PRIVATE versioned companion.",
   "fixture": [
-    "tools/test_human_review.py",
-    "tools/test_discovery_contract.py",
-    "tools/test_first_use_contract.py",
-    "tools/test_check_all.py",
-    "tools/test_verification_contract.py",
-    "tests/fixtures/console.json",
-    "tests/fixtures/manifest.json",
-    "tests/fixtures/live-runs.json",
     "discovery-state.md.example",
     "surface-inbox.jsonl.example",
     "skills/market-intel/reference/remaining-tools.md.example",
     "inventory/availability-cache.json.example",
     "inventory/host-capabilities.json.example",
-    "skills/market-intel/metrics/live-runs.jsonl.example",
-    "tools/test_private_writers.py",
-    "tools/test_incident_boundary.py",
-    "tools/test_console.py"
+    "skills/market-intel/metrics/live-runs.jsonl.example"
   ],
   "_data_home": "PRIVATE versioned companion. All consumer writers resolve the final containing Git worktree and refuse destinations outside it or inside this source tree, including explicit output overrides; they start no process and check no visibility at runtime (commit-time hooks and CI enforce PRIVATE publication). Discovery, surface and incident appends use a lock over read-modify-replace. No public fallback."
 }

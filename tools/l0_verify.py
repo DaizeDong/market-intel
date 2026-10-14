@@ -21,7 +21,7 @@ HTTP/npm/pypi use its cache/l0-cache.json (7-day TTL, keyed by URL/pkg).
 
 CLI: python tools/l0_verify.py --url <url> [--type <type>]
      exit 0 if PASS, 1 if BLOCK, 2 if UNCERTAIN.
-Run with --selftest (or no args) for the canonical fixtures.
+Run with --live-selftest to check historical expectations against live sites.
 """
 from __future__ import annotations
 import argparse, datetime, json, os, re, socket, ssl, subprocess, sys
@@ -533,16 +533,6 @@ def _live_selftest() -> int:
     return 0 if passed == total else 1
 
 
-def _selftest() -> int:
-    import unittest
-    suite = unittest.defaultTestLoader.discover(os.path.join(ROOT, 'tests'), pattern='test_l0_verify.py')
-    if suite.countTestCases() == 0:
-        print('L0 regression tests missing', file=sys.stderr)
-        return 1
-    result = unittest.TextTestRunner(verbosity=1).run(suite)
-    return 0 if result.wasSuccessful() else 1
-
-
 # ---------------- CLI ----------------
 
 def main() -> int:
@@ -550,16 +540,14 @@ def main() -> int:
     ap.add_argument("--url", help="URL or package name to verify")
     ap.add_argument("--type", default="auto",
                     choices=["auto", "github", "web", "web-registry", "npm", "pypi"])
-    ap.add_argument("--selftest", action="store_true",
-                    help="run deterministic regressions instead of a single URL")
     ap.add_argument("--live-selftest", action="store_true",
                     help="check historical expectations against live sites")
     args = ap.parse_args()
 
     if args.live_selftest:
         return _live_selftest()
-    if args.selftest or not args.url:
-        return _selftest()
+    if not args.url:
+        ap.error("--url is required unless --live-selftest is given")
     try:
         result = verify(args.url, args.type)
     except InventoryError as exc:

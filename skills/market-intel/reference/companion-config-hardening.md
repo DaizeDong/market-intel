@@ -110,7 +110,7 @@ python -B tools/make_fixtures.py --out <new-empty-export-directory>
 python -B tools/make_fixtures.py --out <new-empty-export-directory> --check
 ```
 
-The generator writes a flat set of synthetic examples, test sources and a manifest;
+The generator writes a flat set of synthetic examples;
 `--check` verifies those outputs against the generator. If the problem needs another
 example, add a synthetic recipe to the generator and regenerate it. Never construct the
 example by reading, masking or copying a real private record.

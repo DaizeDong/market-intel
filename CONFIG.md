@@ -57,7 +57,6 @@ Keep these real observations in the PRIVATE companion. Generated examples in
 ## Model adapter
 
 Core Python commands install with `python -m pip install -r requirements.txt`.
-The development requirements add pytest and run without a model adapter.
 `incident_helper.py` and `changelog_draft.py` require the operator's separately
 configured `llmcall` Python package. The public requirements intentionally do not
 depend on a private repository or select a provider.
