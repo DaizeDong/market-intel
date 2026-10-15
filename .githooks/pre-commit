@@ -15,8 +15,8 @@
 set -e
 _ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 _REAL="$_ROOT/guards/hooks/pre-commit"
-if [ ! -x "$_REAL" ] && [ ! -f "$_REAL" ]; then
-  echo "BLOCKED: guards/hooks/pre-commit is missing, so nothing checked this commit."
+if [ ! -f "$_REAL" ] || [ ! -s "$_REAL" ] || [ -L "$_REAL" ]; then
+  echo "BLOCKED: guards/hooks/pre-commit is missing, empty or unsafe, so nothing checked this commit."
   echo "  The guards submodule is not checked out. Fix it, do not bypass it:"
   echo "      git submodule update --init --recursive"
   echo "  An empty guards/ is an UNGUARDED repo, not a repo with nothing to check, and this"
