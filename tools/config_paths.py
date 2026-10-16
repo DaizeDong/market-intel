@@ -49,7 +49,7 @@ def data_directory(override=None):
     if DATA_CHILD:
         return root / DATA_CHILD
     if override is None:
-        return Path(resolver().resolve_data_dir(SKILL, create=False)).resolve()
+        return Path(resolver().resolve_data_dir(SKILL)).resolve()
     return root / "data" if (root / "data").is_dir() else root
 
 
