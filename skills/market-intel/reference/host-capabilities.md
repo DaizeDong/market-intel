@@ -118,7 +118,7 @@ are rejected before directory creation. Filesystem links are resolved first, and
 a nested repository is the worktree that owns its paths.
 
 These are path checks only: no Git or `gh` process runs and repository visibility
-is not checked at runtime. The commit and push hooks and CI enforce that the
+is not checked at runtime. The commit and push hooks enforce that the
 companion stays PRIVATE. See the
 [config contract](../../../CONFIG.md#where-real-run-output-goes-the-private-companion-repo-versioned)
 for initialization requirements.

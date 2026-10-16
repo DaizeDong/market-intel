@@ -156,7 +156,8 @@ keep all its content together. Keep essential failure-prevention invariants and
 troubleshooting branches beside the step where they are needed. Measure the text
 loaded per run before splitting or merging files.
 
-The pinned Style kit's `style/tools/load_budget.py` measures always-loaded lines
+The fleet-style kit's `tools/load_budget.py` (run by hand from the checkout named by
+`git config fleet.style`) measures always-loaded lines
 and cross-file prose overlap using word shingles. Code, tables and links are
 excluded from the overlap calculation. It blocks threshold violations, but compares
 SKILL against references only; reference-to-reference duplication needs human review.

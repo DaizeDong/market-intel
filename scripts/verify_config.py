@@ -2,7 +2,7 @@
 """Validate the selected companion configuration for market-intel.
 
 Selection and required fields are defined in CONFIG.md and config.contract.json.
-Explicit CLI paths isolate environment selection. Runtime uses the same pinned Guards
+Explicit CLI paths isolate environment selection. Runtime uses the same fleet_guards
 companion discovery; invalid selectors never fall through to another companion.
 """
 import argparse

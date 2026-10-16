@@ -146,7 +146,7 @@ in transcripts or public source; follow the private companion's credential polic
 Per-machine installation state, tool tiers, keys and rotation history belong in a
 separate PRIVATE companion. Use [CONFIG.md](../../CONFIG.md#discovery-convention-e2)
 for current selection: `MARKET_INTEL_CONFIG`, then the lower-priority
-`MARKET_INTEL_CONFIG_DIR`, then pinned Guards discovery. `MARKET_INTEL_DATA_DIR`
+`MARKET_INTEL_CONFIG_DIR`, then fleet_guards discovery. `MARKET_INTEL_DATA_DIR`
 must select the same companion's `data/` child. There is no required filesystem
 location or separate XDG search.
 
@@ -257,7 +257,7 @@ setup vs hard-gap), full source list.
 
 At the end of a research run, append one observation per source used to
 `metrics/live-runs.jsonl` below the PRIVATE DATA directory. The resolver is
-`guards/tools/datadir.py`; the incident helper uses `tools/private_inventory.py`
+`fleet_guards.runtime`; the incident helper uses `tools/private_inventory.py`
 to resolve the final canonical destination inside the companion worktree before writing.
 If storage is missing or unresolved, stop persistence, explain the required setup,
 and retain the observations in the reply until storage is ready. Never write this

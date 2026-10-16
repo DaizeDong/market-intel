@@ -3,7 +3,7 @@
 The checks are path-only and start no process: the destination must resolve outside
 this consumer source tree and Git metadata, inside an existing Git worktree (the
 PRIVATE companion). Repository visibility is not checked at runtime; commit-time
-hooks and CI enforce PRIVATE publication. An unresolved companion is an error; there
+hooks enforce PRIVATE publication. An unresolved companion is an error; there
 is no in-repo fallback.
 """
 from __future__ import annotations

@@ -54,7 +54,7 @@
 或手动克隆：
 
 ```bash
-git clone --recurse-submodules https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market-intel
+git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market-intel
 ```
 
 在检出的工具仓中运行 `python -m pip install -r requirements.txt`，安装 Python 维护命令的依赖；
@@ -98,7 +98,7 @@ DATA，不探测机器清单，也不写文件。`--capability` 为目录中的 
 列出了 `available-now`、带原因的 `setup` 和有证据支持的 `hard-gap` 的判定条件。
 
 只有显式 `--refresh` 才采集机器清单，并写入 PRIVATE 伴生仓的 Git 工作树
-（运行时只检查路径，PRIVATE 由提交期钩子和 CI 把关）。写入失败会返回非零状态，保留先前快照。离线回归测试不能证明真实调研、
+（运行时只检查路径，PRIVATE 由提交期钩子把关）。写入失败会返回非零状态，保留先前快照。离线回归测试不能证明真实调研、
 已安装宿主或服务商当前可用。
 
 ## 快速开始， 装免费无密钥三件套（3 分钟）

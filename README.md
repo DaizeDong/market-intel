@@ -65,7 +65,7 @@ workflow. Routing for general web and academic questions is listed under
 Or clone manually:
 
 ```bash
-git clone --recurse-submodules https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market-intel
+git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market-intel
 ```
 
 For Python maintenance commands, run `python -m pip install -r requirements.txt`
@@ -114,7 +114,7 @@ The [schema v1 guide](skills/market-intel/reference/host-capabilities.md) explai
 `available-now`, `setup` reasons and evidence-supported `hard-gap` results.
 
 Only explicit `--refresh` collects machine inventory and writes it inside the
-PRIVATE companion's Git worktree (path checks only; commit-time hooks and CI enforce PRIVATE). Storage failures return nonzero and preserve the
+PRIVATE companion's Git worktree (path checks only; commit-time hooks enforce PRIVATE). Storage failures return nonzero and preserve the
 previous snapshot.
 
 ## Quick start, install the free no-key bootstrap pack (3 minutes)

@@ -4,7 +4,7 @@
     "TOOL    = code, SKILL.md, reference docs, and metrics ABOUT THE SKILL. Public.",
     "FIXTURE = examples. Public, SYNTHETIC, produced by tools/make_fixtures.py.",
     "DATA    = anything a REAL RUN produced. Versioned only in the PRIVATE companion",
-    "          config, resolved at runtime by guards/tools/datadir.py. The repo ships only the schema.",
+    "          config, resolved at runtime by fleet_guards.runtime. The repo ships only the schema.",
     "",
     "The line here is subtle and worth stating: metrics/ holds BOTH classes.",
     "  history.jsonl / sweep-*.json / doc-drift-cache.json  -> TOOL. They measure the SKILL",
@@ -14,7 +14,7 @@
     "      actually investigating. Tool knowledge distilled FROM it (which source works, which",
     "      route falls back) is published -- that is what reference/tools/*.md already is. The",
     "      raw ledger is not.",
-    "Enforced by guards/tools/data_boundary.py, in .githooks and in CI.",
+    "Enforced by fleet-guards tools/data_boundary.py through the .githooks shims (git config fleet.guards).",
     "",
     "`tool` is not a fourth class. It is the per-path allowlist for check 4, which fails any tracked",
     "file that WEARS the shape of real-run output (a jsonl under metrics/, a runs/ tree, a dated file",
@@ -71,5 +71,5 @@
     "inventory/host-capabilities.json.example",
     "skills/market-intel/metrics/live-runs.jsonl.example"
   ],
-  "_data_home": "PRIVATE versioned companion. All consumer writers resolve the final containing Git worktree and refuse destinations outside it or inside this source tree, including explicit output overrides; they start no process and check no visibility at runtime (commit-time hooks and CI enforce PRIVATE publication). Discovery, surface and incident appends use a lock over read-modify-replace. No public fallback."
+  "_data_home": "PRIVATE versioned companion. All consumer writers resolve the final containing Git worktree and refuse destinations outside it or inside this source tree, including explicit output overrides; they start no process and check no visibility at runtime (commit-time hooks enforce PRIVATE publication). Discovery, surface and incident appends use a lock over read-modify-replace. No public fallback."
 }

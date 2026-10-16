@@ -42,7 +42,7 @@ that checklist **before** committing the first secret.
 
 ## 1. Discovery
 
-Settings, initialization, diagnostics and runtime DATA use the pinned Guards
+Settings, initialization, diagnostics and runtime DATA use the fleet_guards
 companion-root resolver through the source adapter. `MARKET_INTEL_CONFIG` wins over
 its alias `MARKET_INTEL_CONFIG_DIR`. An explicit empty or missing selector is an
 error. `MARKET_INTEL_DATA_DIR` must identify `<companion>/data`; when CONFIG is also

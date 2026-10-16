@@ -1,10 +1,8 @@
 """Bind shared companion discovery to this skill's supported runtime layout."""
 from contextlib import contextmanager
 from functools import lru_cache
-import importlib.util
 import os
 from pathlib import Path
-import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = "market-intel"
@@ -14,15 +12,13 @@ DATA_CHILD = "data"
 
 @lru_cache(maxsize=1)
 def resolver():
-    source = ROOT / "guards/tools/datadir.py"
-    spec = importlib.util.spec_from_file_location(PREFIX.lower() + "_config_datadir", source)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
     try:
-        spec.loader.exec_module(module)
-    except (OSError, ImportError) as exc:
-        raise RuntimeError("initialize the pinned guards submodule before selecting configuration") from exc
-    return module
+        from fleet_guards.runtime import companion_resolver
+    except ImportError as exc:
+        raise RuntimeError(
+            'fleet_guards is not installed; install it: pip install -e "$(git config --get fleet.guards)"'
+        ) from exc
+    return companion_resolver(source_root=ROOT)
 
 
 def _directory(value, label):
@@ -31,7 +27,7 @@ def _directory(value, label):
     path = Path(value).expanduser().resolve()
     if not path.is_dir():
         raise ValueError(label + " is not an existing config directory")
-    resolver().assert_outside_own_repo(path, SKILL, source_root=ROOT)
+    resolver().assert_outside_own_repo(path, SKILL)
     return path
 
 
@@ -53,7 +49,7 @@ def companion_root(override=None):
         data_root = data.parent if data.name == (DATA_CHILD or "data") else data
         if selected is not None and selected != data_root:
             raise ValueError("CONFIG and DATA_DIR conflict: settings and DATA must belong to the same companion")
-    discovered = resolver().resolve_companion_root(SKILL, source_root=ROOT)
+    discovered = resolver().resolve_companion_root(SKILL)
     # The shared resolver recognizes data/. Demand deliberately stores runtime state in pool/.
     if data_root is not None:
         return selected or data_root

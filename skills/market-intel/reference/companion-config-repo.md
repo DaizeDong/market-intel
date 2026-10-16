@@ -14,7 +14,7 @@ inventory do not establish current execution, authorization or useful response c
 
 Follow [CONFIG.md’s discovery order](../../../CONFIG.md#discovery-convention-e2):
 `MARKET_INTEL_CONFIG`, its lower-priority alias `MARKET_INTEL_CONFIG_DIR`, then the
-pinned Guards sibling convention. There is no home-directory location and no separate XDG search.
+fleet_guards sibling convention. There is no home-directory location and no separate XDG search.
 `MARKET_INTEL_DATA_DIR`, when set, must select the same companion’s existing `data/`
 child. Explicit invalid or conflicting selectors fail without choosing another root.
 A resolved path does not by itself prove configuration readiness or PRIVATE storage.
@@ -22,7 +22,7 @@ A resolved path does not by itself prove configuration readiness or PRIVATE stor
 Before storing real configuration or DATA, confirm once during setup that the
 repository is PRIVATE (see the hardening runbook). The runtime only checks that the
 resolved destination is inside a Git worktree outside this source tree; the commit
-and push hooks and CI enforce PRIVATE publication. A loose directory is not a companion. The
+and push hooks enforce PRIVATE publication. A loose directory is not a companion. The
 consumer DATA resolver and `CONFIG.md` define the current DATA location contract;
 never fall back to a path inside the public source checkout.
 

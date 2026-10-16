@@ -3,8 +3,8 @@
 
 WHY THIS EXISTS
 ---------------
-This repo ships eight checkers. Three of them run in the pre-commit hook, six run in CI, the two
-sets are different, and four have never been wired to anything at all. On 2026-08-29 a change
+This repo runs eight checkers. Three of them run in the commit hooks (from the local fleet-guards
+and fleet-style checkouts), verify_matrix runs in CI, and the rest are wired to nothing else. On 2026-08-29 a change
 landed that violated the three-way registry rule, and the check that catches it exists and works;
 it just was not the one that got run, because the person running it had to know which of eight
 names applied. A checker nobody can reliably select is not much better than a checker nobody wrote.
@@ -51,10 +51,17 @@ MANIFEST = {
                                                      "star claims (GitHub API)"),
 }
 
+def _kit_tool(key, name):
+    """A checker in the local kit checkout named by `git config <key>`; unset reads as MISSING."""
+    kit = subprocess.run(["git", "config", "--get", key], cwd=REPO, capture_output=True,
+                         text=True).stdout.strip()
+    return os.path.join(kit, "tools", name) if kit else "<git config %s is unset>" % key
+
+
 CHECKER_PATHS = {
-    "pii_guard.py": os.path.join(REPO, "guards", "tools", "pii_guard.py"),
-    "data_boundary.py": os.path.join(REPO, "guards", "tools", "data_boundary.py"),
-    "dash_guard.py": os.path.join(REPO, "style", "tools", "dash_guard.py"),
+    "pii_guard.py": _kit_tool("fleet.guards", "pii_guard.py"),
+    "data_boundary.py": _kit_tool("fleet.guards", "data_boundary.py"),
+    "dash_guard.py": _kit_tool("fleet.style", "dash_guard.py"),
 }
 
 

@@ -12,17 +12,17 @@ GitHub-side lockdown to run **before** the first secret: [`companion-config-hard
 
 ## Discovery convention (E2)
 
-`MARKET_INTEL_CONFIG` selects the companion root; `MARKET_INTEL_CONFIG_DIR` is its lower-priority alias. `MARKET_INTEL_DATA_DIR` may select the supported DATA directory in that same companion. Conflicting CONFIG and DATA selections, empty selectors and explicit missing paths fail before any write. With no explicit selector, the pinned Guards resolver checks a proven sibling companion; there is no home-directory location and no separate XDG search. Settings and DATA share this selection. `--config-dir` on the doctor selects one companion in isolation from inherited selectors; restore normal environment selection before running the product. Runtime writers require an existing `<companion>/data`; DATA_DIR must name it. Root-level inventory or live-ledger writes are unsupported.
+`MARKET_INTEL_CONFIG` selects the companion root; `MARKET_INTEL_CONFIG_DIR` is its lower-priority alias. `MARKET_INTEL_DATA_DIR` may select the supported DATA directory in that same companion. Conflicting CONFIG and DATA selections, empty selectors and explicit missing paths fail before any write. With no explicit selector, the fleet_guards resolver checks a proven sibling companion; there is no home-directory location and no separate XDG search. Settings and DATA share this selection. `--config-dir` on the doctor selects one companion in isolation from inherited selectors; restore normal environment selection before running the product. Runtime writers require an existing `<companion>/data`; DATA_DIR must name it. Root-level inventory or live-ledger writes are unsupported.
 
 ### Where real-run output goes: the private companion repo, versioned
 
-`guards/tools/datadir.py` provides the shared DATA path discovery. It is a path
+The installed `fleet_guards` package (fleet-guards `tools/datadir.py`) provides the shared DATA path discovery. It is a path
 resolver; writers then check that the final destination sits inside the companion's
 Git worktree and outside this source tree. An explicit missing destination is an
 error, not permission to create an unmanaged fallback.
 
 ```bash
-python guards/tools/datadir.py --path market-intel metrics/live-runs.jsonl
+python "$(git config --get fleet.guards)/tools/datadir.py" --source-root . --path market-intel metrics/live-runs.jsonl
 ```
 
 For inventory, set `MARKET_INTEL_CONFIG` (alias `MARKET_INTEL_CONFIG_DIR`) to the PRIVATE
@@ -33,7 +33,7 @@ containing Git worktree before collecting inventory or creating directories. It
 refuses unmanaged (no Git worktree), missing, Git-metadata and consumer-tree
 destinations. These are path checks only and start no process; repository
 visibility is not checked at runtime. Keep the companion PRIVATE: the commit and
-push hooks and CI enforce that, not the runtime.
+push hooks enforce that, not the runtime.
 
 Inventory snapshots live at `inventory/availability-cache.json` below the resolved
 DATA directory. Atomic replacement preserves the earlier valid snapshot on failure;

@@ -13,7 +13,7 @@ between monthly runs.
 DATA BOUNDARY (Skill Repo Spec s9): this file is TOOL (public code). Its OUTPUT is a record of what
 surfaced during a real run -> it is written to the PRIVATE data home, never into the public repo.
   inbox default: <PRIVATE companion>/surface-inbox.jsonl
-                 ($MARKET_INTEL_DATA_DIR -> $MARKET_INTEL_CONFIG/data -> guards companion discovery, proven sibling first)
+                 ($MARKET_INTEL_DATA_DIR -> $MARKET_INTEL_CONFIG/data -> fleet_guards companion discovery, proven sibling first)
   Both default and explicit paths are verified before polling; dry-run creates no storage.
 Reads may degrade (a surface down -> warn + continue); the inbox WRITE hard-fails (never a repo
 fallback). One candidate per JSONL line: {surface, key, title, url, signal, discovered_at, raw}.
