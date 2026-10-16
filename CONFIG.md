@@ -22,7 +22,7 @@ Git worktree and outside this source tree. An explicit missing destination is an
 error, not permission to create an unmanaged fallback.
 
 ```bash
-python -c "import os; from fleet_guards.runtime import companion_resolver; print(companion_resolver(source_root=os.path.abspath('.')).data_path('market-intel', 'metrics/live-runs.jsonl'))"
+python -c "import os; from fleet_guards.runtime import companion_resolver; print(os.path.join(companion_resolver(source_root=os.path.abspath('.')).resolve_data_dir('market-intel'), 'metrics', 'live-runs.jsonl'))"
 ```
 
 For inventory, set `MARKET_INTEL_CONFIG` to the PRIVATE
