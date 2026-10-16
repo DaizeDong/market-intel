@@ -129,9 +129,9 @@ recorded and the reported buckets are addressed. Keep any unresolved sync findin
 One commit per incident. Message format:
 
 ```
-incident: <slug> D-<code> — <≤60 char summary>
+incident: <slug> D-<code>: <short English summary, subject <= 72 chars>
 
-<2-4 line body: what broke, evidence URL, successor if any, downstream config touched yes/no>
+<optional, at most 2 short English lines on why, only if not obvious>
 ```
 
 The `incident:` prefix is load-bearing: `git log --grep="^incident:"` is the canonical

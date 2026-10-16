@@ -271,11 +271,9 @@ def suggest_commit_message(slug: str, d_code: str, domain: str, detail: str) -> 
         d_code_for_msg = d_code
     prompt = (
         "Draft a git commit message for a market-intel incident fix. Format strictly:\n\n"
-        "Line 1 (subject, <=72 chars): `incident: <slug> <D-code> — <short reason>`\n"
-        "Blank line\n"
-        "Body: 2-4 lines covering: what broke, evidence (URL/date), successor if any, "
-        "downstream config touched yes/no.\n"
-        "Footer line: `Per runbooks/fix-broken-tool.md.`\n\n"
+        "Line 1 (subject, English, imperative, <=72 chars): `incident: <slug> <D-code>: <what changed>`\n"
+        "Optional: a blank line, then at most 2 short English lines saying why, only if not obvious.\n"
+        "No Chinese, no narrative, no verification logs.\n\n"
         f"Inputs:\n  slug: {slug}\n  d_code: {d_code_for_msg}\n  domain: {domain}\n"
         f"  detail: {detail}\n\n"
         "Output ONLY the commit message text, no markdown fences, no preamble."
@@ -286,9 +284,7 @@ def suggest_commit_message(slug: str, d_code: str, domain: str, detail: str) -> 
         raise
     except RuntimeError as e:
         return f"(llmcall failed for commit message: {e})\nFallback skeleton:\n" + (
-            f"incident: {slug} {d_code_for_msg}\n\n"
-            f"{detail}\n\n"
-            "Per runbooks/fix-broken-tool.md."
+            f"incident: {slug} {d_code_for_msg}: <what changed>"
         )
 
 
