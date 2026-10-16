@@ -35,7 +35,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
           fetch-depth: 0          # COVER/CHURN/CONST need to diff against base main
       - uses: actions/setup-python@v5
         with:
