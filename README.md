@@ -87,7 +87,7 @@ not make these scripts relative to the current project.
 **separate, private** companion config repo. Repo-root contract: [CONFIG.md](CONFIG.md); authoritative
 deep spec: [`companion-config-spec.md`](skills/market-intel/reference/companion-config-spec.md) (v1.3, STABLE).
 
-- **Mount:** `MARKET_INTEL_CONFIG` → `MARKET_INTEL_CONFIG_DIR` → shared Guards discovery. `MARKET_INTEL_DATA_DIR` must belong to the same companion. See [CONFIG.md](CONFIG.md#discovery-convention-e2) for the exact layout and fallback order.
+- **Mount:** `MARKET_INTEL_DATA_DIR` → `MARKET_INTEL_CONFIG` → proven sibling, all through shared Guards discovery. See [CONFIG.md](CONFIG.md#discovery-convention-e2) for the exact layout and fallback order.
 - **First time:** Empty `tools: []` remains NOT READY. Fill installed tool identities and both templates before the doctor; initialize companion data/ before runtime writes.
   ```bash
   python "<absolute-market-intel-checkout>/scripts/init_config.py"        # stamp a conformant skeleton (deterministic)

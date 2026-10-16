@@ -73,7 +73,7 @@ git clone https://github.com/DaizeDong/market-intel.git ~/.claude/plugins/market
 注册表)。仓根契约见 [CONFIG.md](CONFIG.md);权威深规范见
 [`companion-config-spec.md`](skills/market-intel/reference/companion-config-spec.md)(v1.3, STABLE)。
 
-- **挂载：** `MARKET_INTEL_CONFIG` 优先，`MARKET_INTEL_CONFIG_DIR` 为别名，随后使用 Guards 的统一发现规则。`MARKET_INTEL_DATA_DIR` 必须属于同一个伴生仓。完整顺序与目录布局见 [CONFIG.md](CONFIG.md#discovery-convention-e2)。
+- **挂载：** 按 Guards 的统一发现规则依次查 `MARKET_INTEL_DATA_DIR`、`MARKET_INTEL_CONFIG`、已证明的同级伴生仓。完整顺序与目录布局见 [CONFIG.md](CONFIG.md#discovery-convention-e2)。
 - **首次配置：** 空的 `tools: []` 会报 NOT READY。先填写启用工具的标识和两份模板，再跑 doctor；运行写入前还需建立伴生仓的 data/。
   ```bash
   python "<absolute-market-intel-checkout>/scripts/init_config.py"        # 生成符合规范的 config 骨架(确定性)

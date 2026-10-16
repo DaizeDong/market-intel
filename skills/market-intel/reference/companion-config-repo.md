@@ -13,7 +13,7 @@ inventory do not establish current execution, authorization or useful response c
 ## Locate and validate the companion
 
 Follow [CONFIG.md’s discovery order](../../../CONFIG.md#discovery-convention-e2):
-`MARKET_INTEL_CONFIG`, its lower-priority alias `MARKET_INTEL_CONFIG_DIR`, then the
+`MARKET_INTEL_DATA_DIR`, `MARKET_INTEL_CONFIG`, then the
 fleet_guards sibling convention. There is no home-directory location and no separate XDG search.
 `MARKET_INTEL_DATA_DIR`, when set, must select the same companion’s existing `data/`
 child. Explicit invalid or conflicting selectors fail without choosing another root.

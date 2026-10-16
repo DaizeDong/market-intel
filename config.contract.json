@@ -14,14 +14,12 @@
     "discovery_document": "CONFIG.md",
     "environment": "MARKET_INTEL_CONFIG",
     "aliases": [
-      "MARKET_INTEL_CONFIG_DIR",
       "MARKET_INTEL_DATA_DIR"
     ],
     "precedence": [
       "explicit CLI companion",
+      "MARKET_INTEL_DATA_DIR",
       "MARKET_INTEL_CONFIG",
-      "MARKET_INTEL_CONFIG_DIR",
-      "MARKET_INTEL_DATA_DIR (same companion only)",
       "proven sibling companion"
     ],
     "required_fields": [

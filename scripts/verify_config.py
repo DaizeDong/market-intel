@@ -45,18 +45,15 @@ def discover(skill, override):
 
 
 def storage_mode(config):
-    """Read the declared policy, retaining Mode B for older undeclared configs."""
+    """Read the declared policy; a missing declaration is an error."""
     readme = os.path.join(config, "secrets", "README.md")
     if not os.path.isfile(readme):
-        return "B"
+        raise ValueError("declare Active storage mode: A or B in secrets/README.md")
     with open(readme, "r", encoding="utf-8-sig") as stream:
         text = stream.read()
     declarations = re.findall(r"^\s*Active storage mode:\s*(.*)$", text, re.I | re.M)
     if not declarations:
-        first_line = next((line for line in text.splitlines() if line.strip()), "")
-        declarations = re.findall(r"\bMode\s+([A-Z])\b", first_line, re.I)
-    if not declarations:
-        return "B"
+        raise ValueError("declare Active storage mode: A or B in secrets/README.md")
     modes = set()
     for declaration in declarations:
         match = re.match(r"(?:Mode\s+)?([AB])\b", declaration.strip(" *`"), re.I)

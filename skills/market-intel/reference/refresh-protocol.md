@@ -532,8 +532,7 @@ mechanical sequence. Skip any step and the matrix drifts:
    and operation metadata. Retain marked index rows and registry records for tombstoned tools.
 5. **Run `python tools/verify_matrix.py`**, including REGISTRY / TOOLS consistency. Any BLOCK
    must be resolved before continuing.
-6. **Resolve the optional companion** using `companion-config-spec.md` §1, including the
-   `MARKET_INTEL_CONFIG_DIR` alias. Report an explicitly selected invalid path. If a companion
+6. **Resolve the optional companion** using `companion-config-spec.md` §1. Report an explicitly selected invalid path. If a companion
    exists, run `python "<resolved-companion>/scripts/sync-check.py"` and address its reported
    buckets; missing checker or failed execution is an unresolved sync gap, never a clean check.
 7. **Prepare and review the release commit**, including the public changelog entry,

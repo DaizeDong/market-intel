@@ -12,7 +12,7 @@ GitHub-side lockdown to run **before** the first secret: [`companion-config-hard
 
 ## Discovery convention (E2)
 
-`MARKET_INTEL_CONFIG` selects the companion root; `MARKET_INTEL_CONFIG_DIR` is its lower-priority alias. `MARKET_INTEL_DATA_DIR` may select the supported DATA directory in that same companion. Conflicting CONFIG and DATA selections, empty selectors and explicit missing paths fail before any write. With no explicit selector, the fleet_guards resolver checks a proven sibling companion; there is no home-directory location and no separate XDG search. Settings and DATA share this selection. `--config-dir` on the doctor selects one companion in isolation from inherited selectors; restore normal environment selection before running the product. Runtime writers require an existing `<companion>/data`; DATA_DIR must name it. Root-level inventory or live-ledger writes are unsupported.
+`MARKET_INTEL_DATA_DIR` selects the supported DATA directory and `MARKET_INTEL_CONFIG` the companion root; the fleet_guards resolver checks them in that order. With no explicit selector, the fleet_guards resolver checks a proven sibling companion; there is no home-directory location and no separate XDG search. Settings and DATA share this selection. `--config-dir` on the doctor selects one companion in isolation from inherited selectors; restore normal environment selection before running the product. Runtime writers require an existing `<companion>/data`; DATA_DIR must name it. Root-level inventory or live-ledger writes are unsupported.
 
 ### Where real-run output goes: the private companion repo, versioned
 
@@ -25,7 +25,7 @@ error, not permission to create an unmanaged fallback.
 python "$(git config --get fleet.guards)/tools/datadir.py" --source-root . --path market-intel metrics/live-runs.jsonl
 ```
 
-For inventory, set `MARKET_INTEL_CONFIG` (alias `MARKET_INTEL_CONFIG_DIR`) to the PRIVATE
+For inventory, set `MARKET_INTEL_CONFIG` to the PRIVATE
 companion and create its `data/` child during setup. `MARKET_INTEL_DATA_DIR`, if set,
 must select that same child. Missing data/ is NOT initialized; writers never use the companion
 root as a fallback. `console.py --refresh` resolves the final canonical path and its

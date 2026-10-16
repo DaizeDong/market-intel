@@ -145,8 +145,8 @@ in transcripts or public source; follow the private companion's credential polic
 
 Per-machine installation state, tool tiers, keys and rotation history belong in a
 separate PRIVATE companion. Use [CONFIG.md](../../CONFIG.md#discovery-convention-e2)
-for current selection: `MARKET_INTEL_CONFIG`, then the lower-priority
-`MARKET_INTEL_CONFIG_DIR`, then fleet_guards discovery. `MARKET_INTEL_DATA_DIR`
+for current selection: `MARKET_INTEL_DATA_DIR`, `MARKET_INTEL_CONFIG`, then fleet_guards
+sibling discovery. `MARKET_INTEL_DATA_DIR`
 must select the same companion's `data/` child. There is no required filesystem
 location or separate XDG search.
 

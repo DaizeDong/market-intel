@@ -43,10 +43,9 @@ that checklist **before** committing the first secret.
 ## 1. Discovery
 
 Settings, initialization, diagnostics and runtime DATA use the fleet_guards
-companion-root resolver through the source adapter. `MARKET_INTEL_CONFIG` wins over
-its alias `MARKET_INTEL_CONFIG_DIR`. An explicit empty or missing selector is an
-error. `MARKET_INTEL_DATA_DIR` must identify `<companion>/data`; when CONFIG is also
-selected, both must identify the same companion.
+companion-root resolver through the source adapter, which checks `MARKET_INTEL_DATA_DIR`,
+then `MARKET_INTEL_CONFIG`, then the sibling. `MARKET_INTEL_DATA_DIR` must identify
+`<companion>/data`.
 
 Without explicit selectors, discovery checks a proven sibling companion only.
 There is no home-directory location and no independent XDG fallback. The doctor's `--config-dir` selects one
@@ -437,10 +436,8 @@ threat model.
 #### Declaring the mode
 
 Declare `Active storage mode: A` or `Active storage mode: B` near the top of
-`secrets/README.md`. The bundled doctor reads this marker first. Without the marker,
-it checks the first nonempty line for a legacy `Mode A` or `Mode B` declaration; if
-that line has no mode declaration, it defaults to Mode B. Missing `secrets/README.md`
-also defaults to Mode B. Invalid or conflicting declarations are errors.
+`secrets/README.md`. The bundled doctor reads only this marker; a missing marker, a
+missing `secrets/README.md`, or an invalid or conflicting declaration is an error.
 
 The reference companion deployment declares Mode B with a vault projection (since
 2026-10-12; it used Mode A from its v0.5.0 until then). Plaintext committed under
