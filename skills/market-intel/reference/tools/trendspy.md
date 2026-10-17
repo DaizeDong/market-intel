@@ -37,6 +37,6 @@ rising = tr.related_queries("patio heaters", geo="US")   # rising/top queries
 - Shard explicitly flags `pytrends` as **archived/avoid for prod**, these libs inherit the same shakiness; flag the reliability caveat in any report.
 
 ## Failure signals & fallback
-Empty DataFrame, HTTP 429, or a parse error = Google throttled the unofficial endpoint or the lib went stale against an endpoint change. Switch fork / `pip install -U` first, then add proxies/back-off. If still unreliable, fall back to **DataForSEO** Google Trends JSON (② paid but stable) or **SerpApi** Google Trends (free 250/mo). For trending-topic discovery beyond keywords, cross to the trends-discovery domain (GDELT ①, trend-pulse ①).
+Empty DataFrame, HTTP 429, or a parse error = Google throttled the unofficial endpoint or the lib went stale against an endpoint change. Switch fork / `pip install -U` first, then add proxies/back-off. If still unreliable, fall back to **DataForSEO** Google Trends JSON (② paid but stable) or **SerpApi** Google Trends (free 250/mo). For trending-topic discovery beyond keywords, cross to the trends-discovery domain (GDELT ①).
 
 ## Last verified: 2026-06

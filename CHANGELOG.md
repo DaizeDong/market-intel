@@ -3,6 +3,8 @@
 ## [Unreleased]
 
 ### Removed
+- The claude-world/trend-pulse catalog entry: its tool doc, registry row (178 entries, repo 106), index line, trends-discovery and pricing rows, the trendspy cross-reference and the console alias.
+- claude-world/trend-pulse: D-SUPERSEDED, the owner retired the self-hosted server on 2026-10-17 and Trends MCP covers the cross-platform acceleration lane.
 - `tools/config_paths.py` no longer re-implements the environment order: an explicit CLI path is used as given, otherwise the shared fleet_guards resolver answers (`MARKET_INTEL_DATA_DIR`, `MARKET_INTEL_CONFIG`, proven sibling). The `MARKET_INTEL_CONFIG_DIR` alias and the CONFIG/DATA conflict check are gone. The doctor's `storage_mode()` reads only the `Active storage mode` marker; the first-line legacy declaration and the Mode B default are removed.
 - The `guards/` and `style/` submodules and the pii-guard, dash-guard, doc-contract, load-budget and fleet-sync workflows. Privacy hooks run from the local fleet-guards checkout named by `git config fleet.guards`, the dash check from `fleet.style`; `tools/config_paths.py` loads the installed `fleet_guards` resolver and `tools/check_all.py` runs the kit checkers from those checkouts. The `gate.yml` verify_matrix workflow is unchanged.
 - The test suite: `tests/`, `tools/test_*.py`, `requirements-dev.txt` and the CI pytest step are gone, and `tools/make_fixtures.py` now generates only the synthetic examples and the live-run schema.

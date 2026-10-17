@@ -1,8 +1,8 @@
 {
   "note": "Authoritative machine-readable tool registry. Every market-intel tool (repo + SaaS + lib) appears here exactly once. The gate (REGISTRY check) enforces registry <-> tools/index.md <-> tools/*.md three-way consistency, so NO tool — including non-GitHub SaaS — can lose its doc or fall out of tracking. Adding/removing a tool is an atomic op across shard + index + doc + this registry (refresh-protocol R1). Regenerate via the snippet in CHANGELOG 0.10.2.",
-  "count": 179,
+  "count": 178,
   "by_kind": {
-    "repo": 107,
+    "repo": 106,
     "saas": 68,
     "lib": 4
   },
@@ -1526,17 +1526,6 @@
       "domain": "trends-discovery",
       "top_pick": false,
       "source_id": "sensor-tower-mcp",
-      "capability_id": "read",
-      "authentication_required": null
-    },
-    {
-      "slug": "trend-pulse",
-      "name": "claude-world/trend-pulse",
-      "kind": "repo",
-      "repo": "claude-world/trend-pulse",
-      "domain": "trends-discovery",
-      "top_pick": false,
-      "source_id": "trend-pulse",
       "capability_id": "read",
       "authentication_required": null
     },

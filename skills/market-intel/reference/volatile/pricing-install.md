@@ -163,7 +163,6 @@
   tier; forecasting gated Investor+).
 - App stores: `npm i google-play-scraper app-store-scraper` (free) or mobile-store-scraper-mcp (self-host).
 - Finnhub MCP: cfdude/mcp-finnhub (free 60/min key).
-- claude-world/trend-pulse (58★): self-host, free no-key (20-source aggregator + lifecycle).
 - jmanek/google-news-trends-mcp (81★): self-host, free no-key (Google News RSS + Trends).
 
 ## frontier-research `last_verified: 2026-06`

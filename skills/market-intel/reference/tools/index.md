@@ -156,7 +156,6 @@ directory**, that breaks progressive loading. Install mechanics overview: `refer
 - [mobile-store-scraper-mcp](mobile-store-scraper-mcp.md), ③ · free both-stores MCP
 - [Sensor Tower MCP](sensor-tower-mcp.md), ② · download/revenue estimates
 - [idea-reality-MCP](idea-reality-mcp.md), ① · scan GitHub/HN/npm → saturation signal
-- [trend-pulse](trend-pulse.md), ① · free no-key 20-source aggregator + lifecycle
 - [google-news-trends-mcp](google-news-trends-mcp.md), ③ L2 · self-host wrapper for News RSS + unofficial Trends endpoints; verify each operation
 
 ## frontier-research

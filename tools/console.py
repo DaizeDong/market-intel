@@ -140,7 +140,6 @@ MCP_NAME_HINTS = {
     "google-news-trends-mcp": ["googlenewstrends"],
     "funding-rates-mcp": ["fundingrates"],
     "idea-reality-mcp": ["idearealty", "ideareality"],
-    "trend-pulse": ["trendpulse"],
     "paper-search-mcp": ["papersearch"],
     "arxiv": ["arxiv"],
 }
