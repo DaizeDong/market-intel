@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+- The live-run ledger and the surface inbox are split into one lane per machine: `tools/incident_helper.py` appends to `metrics/live-runs.jsonl.d/<CLAUDE_MACHINE_ID>.jsonl` and `tools/poll_surfaces.py` to `surface-inbox.jsonl.d/<CLAUDE_MACHINE_ID>.jsonl` below DATA (for example `node-a.jsonl`), so two machines never append to the same file. An unset `CLAUDE_MACHINE_ID` fails the write; there is no default lane. `tools/feedback-bump.py` and the poller's dedup read every lane. `tools/machine_role.py` reads the id and role from the process environment and `HKCU\Environment`.
+- SKILL.md and research-flow.md now say to record observations with `tools/incident_helper.py --apply` instead of appending to the ledger by hand.
+
 ### Removed
 - The claude-world/trend-pulse catalog entry: its tool doc, registry row (178 entries, repo 106), index line, trends-discovery and pricing rows, the trendspy cross-reference and the console alias.
 - claude-world/trend-pulse: D-SUPERSEDED, the owner retired the self-hosted server on 2026-10-17 and Trends MCP covers the cross-platform acceleration lane.

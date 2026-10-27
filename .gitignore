@@ -58,3 +58,7 @@ metrics/live-runs.*.jsonl
 skills/market-intel/metrics/live-runs.jsonl
 skills/market-intel/metrics/live-runs.*.jsonl
 !skills/market-intel/metrics/live-runs.jsonl.example
+# Per-machine lanes (<ledger>.d/<CLAUDE_MACHINE_ID>.jsonl) live in the companion too.
+metrics/live-runs.jsonl.d/
+skills/market-intel/metrics/live-runs.jsonl.d/
+surface-inbox.jsonl.d/

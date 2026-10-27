@@ -12,7 +12,8 @@ between monthly runs.
 
 DATA BOUNDARY (Skill Repo Spec s9): this file is TOOL (public code). Its OUTPUT is a record of what
 surfaced during a real run -> it is written to the PRIVATE data home, never into the public repo.
-  inbox default: <PRIVATE companion>/surface-inbox.jsonl
+  inbox default: <PRIVATE companion>/surface-inbox.jsonl.d/<CLAUDE_MACHINE_ID>.jsonl, one lane per
+                 machine; dedup and consumers read every lane in surface-inbox.jsonl.d/
                  ($MARKET_INTEL_DATA_DIR -> $MARKET_INTEL_CONFIG/data -> fleet_guards companion discovery, proven sibling first)
   Both default and explicit paths are verified before polling; dry-run creates no storage.
 Reads may degrade (a surface down -> warn + continue); the inbox WRITE hard-fails (never a repo
@@ -46,7 +47,13 @@ SKILL = "market-intel"
 
 import private_inventory
 
-INBOX_RELATIVE = "surface-inbox.jsonl"
+INBOX_LANES = "surface-inbox.jsonl.d"
+
+
+def inbox_relative() -> str:
+    """This machine's inbox lane; an unset CLAUDE_MACHINE_ID raises (no default lane)."""
+    from machine_role import machine_id
+    return f"{INBOX_LANES}/{machine_id()}.jsonl"
 
 
 # ----------------------------------------------------------------------------- helpers
@@ -357,14 +364,21 @@ def main() -> int:
             cfg = json.load(f)
 
     try:
-        destination = private_inventory.resolve_destination(INBOX_RELATIVE, path=args.inbox)
-    except private_inventory.InventoryError as exc:
+        relative = inbox_relative()
+        destination = private_inventory.resolve_destination(relative, path=args.inbox)
+    except (private_inventory.InventoryError, RuntimeError) as exc:
         print(f"FATAL: inbox destination refused: {exc}", file=sys.stderr)
         return 2
     inbox = destination.path
+    if args.dry_run:
+        print(f"dry-run: inbox lane would be {inbox}")
+    # Dedup against every machine's lane, not only this one; an explicit --inbox is its own file.
+    lanes = [inbox] if args.inbox else sorted(inbox.parent.glob("*.jsonl"))
     seen_keys = set()
-    if not args.dry_run and os.path.exists(inbox):
-        with open(inbox, encoding="utf-8") as f:
+    for lane in [] if args.dry_run else lanes:
+        if not lane.is_file():
+            continue
+        with open(lane, encoding="utf-8") as f:
             for line in f:
                 try:
                     seen_keys.add(json.loads(line).get("key"))
@@ -431,7 +445,7 @@ def main() -> int:
                 prefix = body + ("\n" if body and not body.endswith("\n") else "")
                 return prefix + "".join(json.dumps(row, ensure_ascii=False) + "\n"
                                         for row in all_new if row["key"] not in existing)
-            private_inventory.update_text(append, INBOX_RELATIVE, destination)
+            private_inventory.update_text(append, relative, destination)
         except (private_inventory.InventoryError, ValueError) as e:
             print(f"FATAL: cannot persist private inbox: {e}", file=sys.stderr)
             return 2

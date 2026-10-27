@@ -29,10 +29,13 @@
   "_tool_note": "One row per REFRESH PERIOD, not per run: domain/source counts and the free-route share, keyed by period and git sha. It measures the catalog, it names no subject and no query, and reference/tools/*.md is generated from it. It matches the check-4 metrics-ledger shape only because it is a jsonl under metrics/, which is precisely the shape the sibling DATA ledger has -- so it is enumerated instead of exempted by category.",
   "data": [
     "skills/market-intel/metrics/live-runs.jsonl",
+    "skills/market-intel/metrics/live-runs.jsonl.d/",
+    "metrics/live-runs.jsonl.d/",
     "inventory/availability-cache.json",
     "inventory/host-capabilities.json",
     "discovery-state.md",
     "surface-inbox.jsonl",
+    "surface-inbox.jsonl.d/",
     "reports/",
     "runtime/",
     "profiles/",
@@ -71,5 +74,5 @@
     "inventory/host-capabilities.json.example",
     "skills/market-intel/metrics/live-runs.jsonl.example"
   ],
-  "_data_home": "PRIVATE versioned companion. All consumer writers resolve the final containing Git worktree and refuse destinations outside it or inside this source tree, including explicit output overrides; they start no process and check no visibility at runtime (commit-time hooks enforce PRIVATE publication). Discovery, surface and incident appends use a lock over read-modify-replace. No public fallback."
+  "_data_home": "PRIVATE versioned companion. All consumer writers resolve the final containing Git worktree and refuse destinations outside it or inside this source tree, including explicit output overrides; they start no process and check no visibility at runtime (commit-time hooks enforce PRIVATE publication). Discovery, surface and incident appends use a lock over read-modify-replace. Incident and surface rows go to one lane per machine, <ledger>.d/<CLAUDE_MACHINE_ID>.jsonl (for example surface-inbox.jsonl.d/node-a.jsonl), and readers merge every lane. No public fallback."
 }

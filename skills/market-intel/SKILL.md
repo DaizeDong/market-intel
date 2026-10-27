@@ -255,8 +255,11 @@ setup vs hard-gap), full source list.
 
 ## Close the feedback loop (Step 5, write what you observed)
 
-At the end of a research run, append one observation per source used to
-`metrics/live-runs.jsonl` below the PRIVATE DATA directory. The resolver is
+At the end of a research run, record one observation per source used with
+`python tools/incident_helper.py --slug <slug> --outcome <outcome> --detail "<what happened>" --domain <domain> --d-code none --apply`
+and answer `y` at step 1; never append to the ledger by hand. The helper writes this
+machine's lane, `metrics/live-runs.jsonl.d/<machine id>.jsonl` below the PRIVATE DATA directory (for
+example `node-a.jsonl`), and fails when `CLAUDE_MACHINE_ID` is unset. The resolver is
 `fleet_guards.runtime`; the incident helper uses `tools/private_inventory.py`
 to resolve the final canonical destination inside the companion worktree before writing.
 If storage is missing or unresolved, stop persistence, explain the required setup,

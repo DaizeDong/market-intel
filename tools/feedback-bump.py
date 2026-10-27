@@ -5,8 +5,8 @@ feedback-bump.py — Step -1 of refresh-protocol + cleanup auto-bump executor.
 This script implements two pieces of the refresh-protocol (skills/market-intel/
 reference/refresh-protocol.md):
 
-    1. Step -1 (Procedure full sweep): consume metrics/live-runs.jsonl since the
-       last refresh, bucket entries by `outcome`, and emit the structured
+    1. Step -1 (Procedure full sweep): consume every machine lane under
+       metrics/live-runs.jsonl.d/ since the last refresh, bucket entries by `outcome`, and emit the structured
        report that drives the rest of the sweep:
          - hot_domains (Discovery budget x2)
          - forced_recheck_slugs
@@ -81,9 +81,11 @@ def live_runs_path() -> Path | None:
     a sweep with no live-run feedback is simply a sweep with no live-run feedback. The WRITER
     (incident_helper.py) must NOT degrade -- silently dropping a real observation, or worse,
     falling back to a path inside the repo, is the whole bug this boundary exists to close.
+
+    The ledger is a directory of per-machine lanes (`<machine id>.jsonl`); the reader merges all.
     """
     d = data_directory()
-    return None if d is None or not d.is_dir() else d / "metrics" / "live-runs.jsonl"
+    return None if d is None or not d.is_dir() else d / "metrics" / "live-runs.jsonl.d"
 
 LAST_VERIFIED_RE = re.compile(r"^(## Last verified:\s*)(\d{4}-\d{2})\s*$", re.MULTILINE)
 
@@ -112,17 +114,25 @@ def timestamp_utc(value: str) -> datetime:
 
 
 def load_live_runs(path: Path, since: str) -> list[dict]:
-    """Read live-runs.jsonl, tolerate UTF-8 BOM, and filter by ts >= since.
+    """Read every lane in live-runs.jsonl.d/, tolerate UTF-8 BOM, and filter by ts >= since.
 
     Malformed lines become explicit unknown events. A damaged ledger must not
     produce an empty, clean report or expose raw values in an error message.
     """
-    if not path.exists():
-        print(f"WARN: live-runs.jsonl not found at {path}", file=sys.stderr)
+    lanes = sorted(path.glob("*.jsonl")) if path.is_dir() else []
+    if not lanes:
+        print(f"WARN: no live-run lanes found in {path}", file=sys.stderr)
         return []
 
     entries: list[dict] = []
     boundary = timestamp_utc(since)
+    for lane in lanes:
+        entries.extend(_load_lane(lane, since, boundary))
+    return entries
+
+
+def _load_lane(path: Path, since: str, boundary) -> list[dict]:
+    entries: list[dict] = []
     # utf-8-sig swallows a BOM if present; plain utf-8 lines pass through unchanged.
     with open(path, "r", encoding="utf-8-sig", errors="replace") as f:
         for lineno, raw in enumerate(f, start=1):
@@ -137,8 +147,9 @@ def load_live_runs(path: Path, since: str) -> list[dict]:
                 stamp = timestamp_utc(obj['ts'])
             except (ValueError, TypeError):
                 obj = {'ts': since, 'source': '', 'domain': '', 'outcome': 'invalid_record',
-                       'detail': f'Ledger line {lineno} needs review'}
-                print(f"WARN: ledger line {lineno} is invalid; recorded for review", file=sys.stderr)
+                       'detail': f'Ledger lane {path.stem} line {lineno} needs review'}
+                print(f"WARN: ledger lane {path.stem} line {lineno} is invalid; recorded for review",
+                      file=sys.stderr)
                 entries.append(obj)
                 continue
             if stamp >= boundary:

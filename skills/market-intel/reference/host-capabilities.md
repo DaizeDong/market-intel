@@ -137,7 +137,7 @@ The console is maintenance code. The research workflow uses the host's tools and
 the evidence rules above without importing or invoking refresh scripts.
 
 The incident helper uses the same canonical destination checks for
-`metrics/live-runs.jsonl` below DATA, before reading or replacing the ledger.
+`metrics/live-runs.jsonl.d/<machine id>.jsonl` below DATA, before reading or replacing the ledger.
 Missing, unmanaged and consumer-tree destinations fail without directory
 creation. Successful writes name the companion;
 failed replacement preserves the previous ledger and returns a nonzero status.

@@ -265,7 +265,7 @@
     },
     {
       "artifact_id": "live-ledger",
-      "path_pattern": "data/metrics/live-runs.jsonl",
+      "path_pattern": "data/metrics/live-runs.jsonl.d/*.jsonl",
       "purpose": "Source observations and corrections",
       "schema": "skills/market-intel/reference/live-run-contract.json and live-run-schema.json",
       "producer": "tools/incident_helper.py",
@@ -317,7 +317,7 @@
     },
     {
       "artifact_id": "surface-inbox",
-      "path_pattern": "data/surface-inbox.jsonl",
+      "path_pattern": "data/surface-inbox.jsonl.d/*.jsonl",
       "purpose": "Unprocessed discovery observations",
       "schema": "JSONL; tools/poll_surfaces.py",
       "producer": "tools/poll_surfaces.py",

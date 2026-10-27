@@ -6,8 +6,9 @@ producer, consumer and retention rule. Real observations and credentials live in
 the separate PRIVATE companion, never in this public source.
 
 Runtime producers require an existing companion `data/` directory. Inventory is
-`data/inventory/availability-cache.json`; feedback is `data/metrics/live-runs.jsonl`;
-surface polling writes `data/surface-inbox.jsonl`. The root `metrics/**` namespace
+`data/inventory/availability-cache.json`; feedback is `data/metrics/live-runs.jsonl.d/<machine id>.jsonl`;
+surface polling writes `data/surface-inbox.jsonl.d/<machine id>.jsonl`. Each machine appends only its
+own lane, named by `CLAUDE_MACHINE_ID` (unset fails the write); readers merge every lane. The root `metrics/**` namespace
 contains retired history and refuses new runtime writes.
 
 Runtime writers check paths only: the destination must resolve inside the

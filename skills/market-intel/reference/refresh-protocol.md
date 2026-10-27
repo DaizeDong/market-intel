@@ -22,7 +22,7 @@ months). Re-run this protocol periodically to keep `domains/`, `volatile/pricing
   new-research-angle discovery). Per-domain monthly already catches new tools in known
   domains; horizon-scan is the place to catch new *categories* of work.
 - **Opportunistic**: a dead/changed tool encountered in a real run → fix that shard
-  immediately, log to `live-runs.jsonl`, do not wait for the cadence.
+  immediately, log it with `tools/incident_helper.py`, do not wait for the cadence.
 
 If `live-runs.jsonl` flags a domain as `hot` in Step -1 of a sweep, that domain's
 Discovery budget for the sweep is **doubled** (more angles, more candidates) regardless
@@ -37,7 +37,7 @@ of its cadence tier.
 > 「候选池（candidate pool）」，核实/差分阶段只处理通过准入门槛的候选 + 旧条目复检。
 
 -1. **Step -1, 消费 live-run 账本（必跑，v0.17.0 起）。** 账本在**私有 store**（`<伴生仓>/
-    data/metrics/live-runs.jsonl`，由 `fleet_guards.runtime` 解析），**不在本仓**：它记录你真实在调研什么，是
+    data/metrics/live-runs.jsonl.d/` 下每台机器一条分道，由 `fleet_guards.runtime` 解析），**不在本仓**：它记录你真实在调研什么，是
     data 而非工具知识。在 Horizon scan 之前,先读账本自上次 refresh 以来的所有条目（按 `ts` 过滤;首次跑取最近 90 天）,按
     `outcome` 分桶:
 
@@ -445,10 +445,10 @@ get buried.
    merge candidates.
 6. **Per-tool docs with `## Last verified` >9mo old**, covered by the STALE gate, but
    the cleanup pass should triage: re-verify, deprecate, or tombstone (`⚠ Avoid (dead)`).
-7. **The live-run ledger** (`<data>/metrics/live-runs.jsonl` in the PRIVATE store, NOT this
-   repo), keep all entries in this active file; this is the feedback ledger and the refresh
+7. **The live-run ledger** (`<data>/metrics/live-runs.jsonl.d/`, one lane per machine, in the PRIVATE store, NOT this
+   repo), keep all entries in the active lanes; this is the feedback ledger and the refresh
    consumes it. Do not compress it or move older entries into annual files.
-   `feedback-bump.py` reads only the active `live-runs.jsonl`, including when `--since`
+   `feedback-bump.py` reads only the active lanes in `live-runs.jsonl.d/`, including when `--since`
    selects an earlier date. Annual archives are not searched, so moving rows out would
    silently remove their failures and recheck signals from feedback. Retain the complete
    active ledger until archive-aware reading is implemented and verified.

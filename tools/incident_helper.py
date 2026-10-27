@@ -51,12 +51,22 @@ from document_io import read_document, replace_document
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SKILL = "market-intel"
-LIVE_RUNS_RELATIVE = "metrics/live-runs.jsonl"
+LIVE_RUNS_LANES = "metrics/live-runs.jsonl.d"
+
+
+def live_runs_relative() -> str:
+    """This machine's lane of the live-run ledger: one file per CLAUDE_MACHINE_ID, so two machines
+    never append to the same file. Unset id raises; readers merge every lane."""
+    from machine_role import machine_id
+    try:
+        return f"{LIVE_RUNS_LANES}/{machine_id()}.jsonl"
+    except RuntimeError as exc:
+        raise private_inventory.InventoryError(str(exc)) from exc
 
 
 def live_runs_path() -> str:
     """Resolve a canonical, versionable PRIVATE destination without creating it."""
-    return str(private_inventory.resolve_destination(LIVE_RUNS_RELATIVE).path)
+    return str(private_inventory.resolve_destination(live_runs_relative()).path)
 
 
 DOMAINS_DIR = os.path.join(ROOT, "skills", "market-intel", "reference", "domains")
@@ -319,7 +329,7 @@ def apply_live_runs_append(entry_line: str) -> None:
     def append(existing):
         separator = "\n" if existing and not existing.endswith("\n") else ""
         return existing + separator + entry_line + "\n"
-    saved = private_inventory.update_text(append, LIVE_RUNS_RELATIVE)
+    saved = private_inventory.update_text(append, live_runs_relative())
     print(f"  ✓ appended incident ledger; PRIVATE companion {saved.repository.name}")
 
 

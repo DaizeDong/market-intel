@@ -22,7 +22,7 @@ Git worktree and outside this source tree. An explicit missing destination is an
 error, not permission to create an unmanaged fallback.
 
 ```bash
-python -c "import os; from fleet_guards.runtime import companion_resolver; print(os.path.join(companion_resolver(source_root=os.path.abspath('.')).resolve_data_dir('market-intel'), 'metrics', 'live-runs.jsonl'))"
+python -c "import os; from fleet_guards.runtime import companion_resolver; print(os.path.join(companion_resolver(source_root=os.path.abspath('.')).resolve_data_dir('market-intel'), 'metrics', 'live-runs.jsonl.d'))"
 ```
 
 For inventory, set `MARKET_INTEL_CONFIG` to the PRIVATE
@@ -41,7 +41,7 @@ failed writes return nonzero. The console reports the companion's directory name
 and never edits `.gitignore`. Commit the snapshot through the companion's existing
 versioning workflow; the console does not commit automatically.
 
-Incident writes use the same path checks for `metrics/live-runs.jsonl` below DATA.
+Incident writes use the same path checks for `metrics/live-runs.jsonl.d/<machine id>.jsonl` below DATA.
 The helper resolves the containing companion worktree before reading or creating
 the ledger, checks it once, and replaces it atomically under a lock. It names the
 companion on success and returns nonzero on persistence failure.

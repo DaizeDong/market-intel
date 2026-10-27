@@ -85,7 +85,7 @@ the gate catches semantic/fact degradation, not just format.*
 
 ### Stage B, Close the measurement loop (add the sensor)
 Three feedback signals → drive the next refresh's priorities (not its permissions):
-- **Live-run telemetry** (`<data>/metrics/live-runs.jsonl`, in the PRIVATE store, see .dataclass.json;
+- **Live-run telemetry** (`<data>/metrics/live-runs.jsonl.d/<machine id>.jsonl`, in the PRIVATE store, see .dataclass.json;
   it records your private research activity, so it never lives in this public repo): when market-intel is
   actually used, append the
   guardrail verdicts it already computes (source `verified/dead/price_mismatch/fallback`, user

@@ -140,11 +140,11 @@ matrix, risks & counter-evidence, then the **Coverage-gaps** ledger, which makes
 
 ## 9. Close the loop (optional, cheap)
 
-Append one line per source actually touched to the live-run ledger (reuses guardrail verdicts;
+Record one line per source actually touched in the live-run ledger with `tools/incident_helper.py` (reuses guardrail verdicts;
 near-zero extra cost). This is the highest-value error signal for the next refresh sweep, a source
 flagged `dead` in real use auto-nominates for the deletion path.
 
-The incident helper appends to `metrics/live-runs.jsonl` below PRIVATE
+The incident helper appends to this machine's lane `metrics/live-runs.jsonl.d/<machine id>.jsonl` below PRIVATE
 DATA. It holds a lock across the read/modify/replace transaction and returns a
 storage error if persistence cannot be verified. Keep observations in the reply
 until the companion is initialized; never fall back to a public source path.
